@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  * {@link Runnable} object, and this converter merely 'converts it back'.
  * Therefore the ignored result -in this particular usecase- actually is irrelevant indeed.
  *
- * @author <a href="mailto:talsma.s@tkppensioen.nl">Sjoerd Talsma</a>
+ * @author Sjoerd Talsma
  */
 class RunnableAdapter implements Runnable {
     private static final Logger LOGGER = Logger.getLogger(RunnableAdapter.class.getName());

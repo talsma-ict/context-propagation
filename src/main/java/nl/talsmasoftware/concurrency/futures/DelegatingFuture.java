@@ -29,7 +29,7 @@ import java.util.concurrent.TimeoutException;
  * Although this class implements all required methods of {@link Future} it is still declared as an
  * <em>abstract</em> class. This is because it does not provide any value in itself.
  *
- * @author <a href="mailto:info@talsma-software.nl">Sjoerd Talsma</a>
+ * @author Sjoerd Talsma
  */
 public abstract class DelegatingFuture<V> implements Future<V> {
 

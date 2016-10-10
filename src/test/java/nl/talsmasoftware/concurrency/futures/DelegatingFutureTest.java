@@ -36,7 +36,7 @@ import static org.mockito.Mockito.*;
 /**
  * Pretty silly test that verifies that all methods are actually passed on to a delegate.
  *
- * @author <a href="mailto:info@talsma-software.nl">Sjoerd Talsma</a>
+ * @author Sjoerd Talsma
  */
 public class DelegatingFutureTest {
 

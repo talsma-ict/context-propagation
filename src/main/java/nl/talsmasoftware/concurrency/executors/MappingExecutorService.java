@@ -27,7 +27,7 @@ import java.util.concurrent.*;
  * ({@link java.lang.Runnable Runnable} or {@link Callable} objects) using an existing {@link ExecutorService} while
  * providing a custom {@link #map(Callable) mapping} for all tasks <em>before</em> they get scheduled.
  *
- * @author <a href="mailto:talsma.s@tkppensioen.nl">Sjoerd Talsma</a>
+ * @author Sjoerd Talsma
  */
 public abstract class MappingExecutorService extends DelegatingExecutorService {
 

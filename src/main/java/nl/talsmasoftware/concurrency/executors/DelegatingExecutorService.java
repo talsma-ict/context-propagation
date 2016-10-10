@@ -28,7 +28,7 @@ import java.util.concurrent.*;
  * Although this class implements all required methods of {@link ExecutorService} it is still declared as an
  * <em>abstract</em> class. This is because it does not provide any value in itself.
  *
- * @author <a href="mailto:info@talsma-software.nl">Sjoerd Talsma</a>
+ * @author Sjoerd Talsma
  */
 public abstract class DelegatingExecutorService implements ExecutorService {
 

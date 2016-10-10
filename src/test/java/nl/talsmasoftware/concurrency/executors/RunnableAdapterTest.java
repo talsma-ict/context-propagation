@@ -31,7 +31,7 @@ import static org.mockito.Mockito.*;
 /**
  * Pretty silly test that verifies that run method actually delegates to delegate.call().
  *
- * @author <a href="mailto:info@talsma-software.nl">Sjoerd Talsma</a>
+ * @author Sjoerd Talsma
  */
 public class RunnableAdapterTest {
 

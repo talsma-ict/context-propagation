@@ -38,7 +38,7 @@ import static org.mockito.Mockito.*;
  * Simple unit test to verify the overridable mapping method does get called for all task-scheduling methods by the
  * superclass.
  *
- * @author <a href="mailto:info@talsma-software.nl">Sjoerd Talsma</a>
+ * @author Sjoerd Talsma
  */
 public class MappingExecutorServiceTest {
 
