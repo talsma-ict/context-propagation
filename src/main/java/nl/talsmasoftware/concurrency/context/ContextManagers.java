@@ -17,9 +17,6 @@
 
 package nl.talsmasoftware.concurrency.context;
 
-import javax.imageio.spi.ServiceRegistry;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,12 +38,8 @@ public final class ContextManagers {
     /**
      * Service locator for registered {@link ContextManager} implementations.
      */
-    private static final Iterable<ContextManager> LOCATOR = new Iterable<ContextManager>() {
-        public Iterator<ContextManager> iterator() {
-            // Although I'd love to use the ServiceLoader.load method here, this is 1.5 compatible and delegates nicely.
-            return ServiceRegistry.lookupProviders(ContextManager.class, ContextManagers.class.getClassLoader());
-        }
-    };
+    private static final ServiceLoader<ContextManager> LOCATOR =
+            ServiceLoader.load(ContextManager.class, ContextManagers.class.getClassLoader());
 
     /**
      * Private constructor to avoid instantiation of this class.
@@ -102,11 +95,7 @@ public final class ContextManagers {
                     if (reactivated != null) try {
                         reactivated.close();
                     } catch (RuntimeException rte) {
-                        if (!addSuppressed(errorWhileReactivating, rte)) {
-                            LOGGER.log(Level.SEVERE,
-                                    "Error while reactivating and could not close already reactivated context: {0}.",
-                                    new Object[]{reactivated, rte});
-                        }
+                        errorWhileReactivating.addSuppressed(rte);
                     }
                 }
                 throw errorWhileReactivating;
@@ -141,9 +130,7 @@ public final class ContextManagers {
                     reactivated.close();
                 } catch (RuntimeException rte) {
                     if (closeError == null) closeError = rte;
-                    else if (!addSuppressed(closeError, rte)) {
-                        LOGGER.log(Level.SEVERE, "Error while closing reactivated context: {0}.", new Object[]{reactivated, rte});
-                    }
+                    else closeError.addSuppressed(rte);
                 }
             }
             if (closeError != null) throw closeError;
@@ -153,40 +140,6 @@ public final class ContextManagers {
         public String toString() {
             return "ReactivatedContext{size=" + reactivated.size() + '}';
         }
-    }
-
-    /**
-     * To prevent multiple lookups of the <code>Throwable.addSuppressed</code> method, it will be kept as a singleton
-     * array or an empty array if it couldn't be found.
-     */
-    private static volatile Method[] addSuppressed = null;
-
-    /**
-     * Utility method to call the <code>Throwable.addSuppressed()</code> method on the <code>mainException</code>
-     * with the <code>secondaryException</code>.
-     * It the method got called, the result will be <code>true</code>.
-     * If the method did not get called (e.g. lacking support in older JVM's) the result will be <code>false</code>.
-     *
-     * @param mainException      The main exception to add a suppressed secondary exception to.
-     * @param secondaryException The secondary exception to add to the main exception.
-     * @return <code>true</code> if the secondary exception was added, otherwise <code>false</code>.
-     */
-    private static boolean addSuppressed(Throwable mainException, Throwable secondaryException) {
-        if (addSuppressed == null) try {
-            addSuppressed = new Method[]{Throwable.class.getMethod("addSuppressed", Throwable.class)};
-        } catch (NoSuchMethodException nsme) {
-            LOGGER.log(Level.FINE, "Throwable.addSuppressed() is not yet supported by this Java version.", nsme);
-            addSuppressed = new Method[0];
-        }
-        if (addSuppressed.length > 0) try {
-            addSuppressed[0].invoke(mainException, secondaryException);
-            return true;
-        } catch (InvocationTargetException ite) {
-            LOGGER.log(Level.FINEST, "Error during Throwable.addSuppressed() call.", ite);
-        } catch (IllegalAccessException iae) {
-            LOGGER.log(Level.FINEST, "Not allowed to call Throwable.addSuppressed().", iae);
-        }
-        return false;
     }
 
 }

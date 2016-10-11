@@ -17,8 +17,6 @@
 
 package nl.talsmasoftware.concurrency.context;
 
-import java.io.Closeable;
-
 /**
  * A context can be anything that needs to be maintained on the 'current thread' level.
  * <p>
@@ -29,7 +27,7 @@ import java.io.Closeable;
  *
  * @author Sjoerd Talsma
  */
-public interface Context<T> extends Closeable {
+public interface Context<T> extends AutoCloseable {
 
     T getValue();
 
