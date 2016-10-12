@@ -23,6 +23,8 @@ import nl.talsmasoftware.concurrency.context.ContextSnapshot;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * An instance of an executor service that delegates to another executor service that makes a new
@@ -31,6 +33,7 @@ import java.util.concurrent.ExecutorService;
  * @author Sjoerd Talsma
  */
 public class ContextAwareExecutorService extends CallMappingExecutorService {
+    private final Logger logger = Logger.getLogger(getClass().getName());
 
     public ContextAwareExecutorService(ExecutorService delegate) {
         super(delegate);
@@ -41,6 +44,7 @@ public class ContextAwareExecutorService extends CallMappingExecutorService {
         final ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
         return () -> {
             try (Context<Void> context = snapshot.reactivate()) {
+                logger.log(Level.FINEST, "Propagated {0} for call: {1}.", new Object[]{context, callable});
                 return callable.call();
             }
         };
