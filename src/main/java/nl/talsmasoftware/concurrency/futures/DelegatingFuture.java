@@ -22,6 +22,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Abstract baseclass that simplifies wrapping an existing {@link Future} by forwarding all required methods to a
  * delegate future object.
@@ -36,8 +38,7 @@ public abstract class DelegatingFuture<V> implements Future<V> {
     protected final Future<V> delegate;
 
     protected DelegatingFuture(Future<V> delegate) {
-        if (delegate == null) throw new IllegalArgumentException("No delegate future provided!");
-        this.delegate = delegate;
+        this.delegate = requireNonNull(delegate, "No delegate future provided!");
     }
 
     public boolean cancel(boolean mayInterruptIfRunning) {

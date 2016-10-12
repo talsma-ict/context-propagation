@@ -25,7 +25,7 @@ import java.util.logging.Logger;
  * Package protected adapter from {@link Callable} to {@link Runnable} ignoring any specified results.
  * <p>
  * Normally it is a bad idea to ignore results; therefore this adapter class is limited to package-protected visibility.
- * It is used by the {@link MappingExecutorService} to re-use the {@link Callable} mapping functionality for mapping
+ * It is used by the {@link CallMappingExecutorService} to re-use the {@link Callable} mapping functionality for mapping
  * {@link Runnable} objects as well. In that case, the {@Callable} being converted was already originally a
  * {@link Runnable} object, and this converter merely 'converts it back'.
  * Therefore the ignored result -in this particular usecase- actually is irrelevant indeed.

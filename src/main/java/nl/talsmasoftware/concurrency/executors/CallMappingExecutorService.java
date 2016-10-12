@@ -29,14 +29,14 @@ import java.util.concurrent.*;
  *
  * @author Sjoerd Talsma
  */
-public abstract class MappingExecutorService extends DelegatingExecutorService {
+public abstract class CallMappingExecutorService extends DelegatingExecutorService {
 
     /**
      * Constructor to create a new wrapper around the specified {@link ExecutorService service delegate}.
      *
      * @param delegate The delegate executor service that does the heavy lifting of executing all tasks once they are mapped.
      */
-    protected MappingExecutorService(ExecutorService delegate) {
+    protected CallMappingExecutorService(ExecutorService delegate) {
         super(delegate);
     }
 

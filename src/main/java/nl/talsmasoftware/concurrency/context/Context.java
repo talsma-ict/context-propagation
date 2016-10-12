@@ -29,6 +29,19 @@ package nl.talsmasoftware.concurrency.context;
  */
 public interface Context<T> extends AutoCloseable {
 
+    /**
+     * Returns the value associated with this context.
+     * <p>
+     * Implementors should explicitly document the behaviour of this method <em>after {@link #close()}</em> was called.
+     * For example, it may be useful to always return <code>null</code> after a {@link Context} has been
+     * {@link #close() closed}.
+     * Contrary, it may in some cases be useful to retain the existing <code>value</code> after the context is closed,
+     * so clients that have kept a reference can still have access to it.
+     * <p>
+     * Normally, for security-related contexts, it is wise to always return <code>null</code> from closed contexts.
+     *
+     * @return The value associated with this context.
+     */
     T getValue();
 
     /**
@@ -40,6 +53,7 @@ public interface Context<T> extends AutoCloseable {
      * has no unwanted side-effects.
      * A simple way to achieve this is by using an {@link java.util.concurrent.atomic.AtomicBoolean} to make sure the
      * 'closing' transition is executed only once.
+     * <p>
      *
      * @throws RuntimeException if an error occurs while restoring the context.
      */

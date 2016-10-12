@@ -60,9 +60,14 @@ public class DelegatingFutureTest {
         verifyNoMoreInteractions(delegate);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNullConstructor() {
-        new TestDelegatingFuture(null);
+        try {
+            new TestDelegatingFuture(null);
+            fail("Informative exception expected.");
+        } catch (RuntimeException expected) {
+            assertThat(expected, hasToString(containsString("No delegate future provided")));
+        }
     }
 
     @Test

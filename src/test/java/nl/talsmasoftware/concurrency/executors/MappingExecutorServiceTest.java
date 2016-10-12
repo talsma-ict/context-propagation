@@ -179,7 +179,7 @@ public class MappingExecutorServiceTest {
         verify(delegate).execute(any(Runnable.class));
     }
 
-    static class TestMappingExecutorService extends MappingExecutorService {
+    static class TestMappingExecutorService extends CallMappingExecutorService {
         final AtomicInteger mapCount = new AtomicInteger(0);
         final AtomicInteger callCount = new AtomicInteger(0);
 

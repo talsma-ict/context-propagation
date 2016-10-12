@@ -17,22 +17,20 @@
 
 package nl.talsmasoftware.concurrency.context;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import nl.talsmasoftware.concurrency.context.threadlocal.AbstractThreadLocalContext;
 
 /**
  * @author Sjoerd Talsma
  */
-public final class DummyContext implements Context<String> {
-    private static final ThreadLocal<DummyContext> INSTANCE = new InheritableThreadLocal<DummyContext>();
-
-    private final DummyContext previous;
-    private final String value;
-    private final AtomicBoolean closed = new AtomicBoolean(false);
+public final class DummyContext extends AbstractThreadLocalContext<String> {
+    private static final ThreadLocal<DummyContext> INSTANCE = threadLocalInstanceOf(DummyContext.class);
 
     public DummyContext(String newValue) {
-        this.previous = INSTANCE.get();
-        this.value = newValue;
-        INSTANCE.set(this);
+        super(newValue);
+    }
+
+    public boolean isClosed() {
+        return super.isClosed();
     }
 
     static void reset() {
@@ -48,27 +46,4 @@ public final class DummyContext implements Context<String> {
         return current != null ? current.getValue() : null;
     }
 
-    boolean isClosed() {
-        return closed.get();
-    }
-
-    public String getValue() {
-        return closed.get() ? null : value;
-    }
-
-    public void close() {
-        if (closed.compareAndSet(false, true)) {
-            DummyContext current = INSTANCE.get();
-            if (this == current) {
-                while (current.closed.get()) {
-                    current = current.previous;
-                    if (current == null) {
-                        INSTANCE.remove();
-                        return;
-                    }
-                }
-                INSTANCE.set(current);
-            }
-        }
-    }
 }
