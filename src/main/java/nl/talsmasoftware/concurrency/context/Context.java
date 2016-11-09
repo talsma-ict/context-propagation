@@ -20,10 +20,10 @@ package nl.talsmasoftware.concurrency.context;
 /**
  * A context can be anything that needs to be maintained on the 'current thread' level.
  * <p>
- * Implementations are typically maintained within a static {@link ThreadLocal} variable. A context has a very simple
- * life-cycle: they can be created and {@link #close() closed}.
- * A well-behaved <code>Context</code> implementation will make sure that things are restored the way they were when
- * the context gets {@link #close() closed}.
+ * Implementations are typically maintained within a static {@link ThreadLocal} variable.<br>
+ * A context has a very simple life-cycle: they can be created and {@link #close() closed}.
+ * A well-behaved <code>Context</code> implementation will make sure that thread-local state is restored
+ * to the way it was before when the context gets {@link #close() closed} again.
  *
  * @author Sjoerd Talsma
  */
