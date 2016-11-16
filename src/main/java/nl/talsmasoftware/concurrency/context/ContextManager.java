@@ -21,7 +21,7 @@ package nl.talsmasoftware.concurrency.context;
  * This interface defines the contract for a ContextManager Service.
  * <p>
  * Concrete implementations can be registered by providing an implementation class, along with a class declaration in
- * <code>META-INF/services/nl.talsmasoftware.concurrency.ContextManager</code>
+ * <code>META-INF/services/nl.talsmasoftware.concurrency.context.ContextManager</code>
  * <p>
  * That will take care of any active context being captured in {@link ContextSnapshot} instances managed by the
  * {@link ContextManagers} utility class.
@@ -39,7 +39,7 @@ public interface ContextManager<T> {
      *              (which should be closed by the caller at the end of its lifecycle).
      * @return The new context containing the specified value.
      */
-    Context initializeNewContext(T value);
+    Context<T> initializeNewContext(T value);
 
     /**
      * This method returns the current context, or <code>null</code> if no context is currently active.
