@@ -7,14 +7,14 @@
 
     <!-- Artifact identification -->
     <groupId>nl.talsmasoftware</groupId>
-    <artifactId>global-context</artifactId>
+    <artifactId>context-propagation</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <!-- Project information -->
     <name>Global context propagation library</name>
     <description>Library for standardized management of global context propagation in concurrent systems.</description>
-    <url>https://github.com/talsma-ict/global-context</url>
+    <url>https://github.com/talsma-ict/context-propagation</url>
     <inceptionYear>2016</inceptionYear>
 
     <licenses>
@@ -40,9 +40,9 @@
     </developers>
 
     <scm>
-        <url>https://github.com/talsma-ict/global-context.git</url>
-        <connection>scm:git:git://github.com/talsma-ict/global-context.git</connection>
-        <developerConnection>scm:git:git@github.com:talsma-ict/global-context.git</developerConnection>
+        <url>https://github.com/talsma-ict/context-propagation.git</url>
+        <connection>scm:git:git://github.com/talsma-ict/context-propagation.git</connection>
+        <developerConnection>scm:git:git@github.com:talsma-ict/context-propagation.git</developerConnection>
     </scm>
 
     <properties>
