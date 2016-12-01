@@ -37,7 +37,7 @@ class RunnableAdapter implements Runnable {
     private final Callable<?> callable;
 
     RunnableAdapter(Callable<?> callable) {
-        if (callable == null) throw new IllegalArgumentException("Callable to convert into runnable was null.");
+        if (callable == null) throw new IllegalArgumentException("Callable to convert into runnable was <null>.");
         this.callable = callable;
     }
 

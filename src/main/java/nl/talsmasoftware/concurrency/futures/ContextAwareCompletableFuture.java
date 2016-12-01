@@ -66,193 +66,204 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
         this.snapshot = snapshot != null ? snapshot : ContextManagers.createContextSnapshot();
     }
 
+    /**
+     * Wraps the resulting completable future from any folowup calls in this class.
+     *
+     * @param result   The original result after the contextualized followup call.
+     * @param <RESULT> The result type of the completable future.
+     * @return The wrapped completable future result.
+     */
+    protected <RESULT> CompletableFuture<RESULT> wrapResult(CompletableFuture<RESULT> result) {
+        return result;
+    }
+
     @Override
     public <U> CompletableFuture<U> thenApply(Function<? super T, ? extends U> fn) {
-        return super.thenApply(new FunctionWithContext<>(snapshot, fn));
+        return wrapResult(super.thenApply(new FunctionWithContext<>(snapshot, fn)));
     }
 
     @Override
     public <U> CompletableFuture<U> thenApplyAsync(Function<? super T, ? extends U> fn) {
-        return super.thenApplyAsync(new FunctionWithContext<>(snapshot, fn));
+        return wrapResult(super.thenApplyAsync(new FunctionWithContext<>(snapshot, fn)));
     }
 
     @Override
     public <U> CompletableFuture<U> thenApplyAsync(Function<? super T, ? extends U> fn, Executor executor) {
-        return super.thenApplyAsync(new FunctionWithContext<>(snapshot, fn), executor);
+        return wrapResult(super.thenApplyAsync(new FunctionWithContext<>(snapshot, fn), executor));
     }
 
     @Override
     public CompletableFuture<Void> thenAccept(Consumer<? super T> action) {
-        return super.thenAccept(new ConsumerWithContext<>(snapshot, action));
+        return wrapResult(super.thenAccept(new ConsumerWithContext<>(snapshot, action)));
     }
 
     @Override
     public CompletableFuture<Void> thenAcceptAsync(Consumer<? super T> action) {
-        return super.thenAcceptAsync(new ConsumerWithContext<>(snapshot, action));
+        return wrapResult(super.thenAcceptAsync(new ConsumerWithContext<>(snapshot, action)));
     }
 
     @Override
     public CompletableFuture<Void> thenAcceptAsync(Consumer<? super T> action, Executor executor) {
-        return super.thenAcceptAsync(new ConsumerWithContext<>(snapshot, action), executor);
+        return wrapResult(super.thenAcceptAsync(new ConsumerWithContext<>(snapshot, action), executor));
     }
 
     @Override
     public CompletableFuture<Void> thenRun(Runnable action) {
-        return super.thenRun(new RunnableWithContext(snapshot, action));
+        return wrapResult(super.thenRun(new RunnableWithContext(snapshot, action)));
     }
 
     @Override
     public CompletableFuture<Void> thenRunAsync(Runnable action) {
-        return super.thenRunAsync(new RunnableWithContext(snapshot, action));
+        return wrapResult(super.thenRunAsync(new RunnableWithContext(snapshot, action)));
     }
 
     @Override
     public CompletableFuture<Void> thenRunAsync(Runnable action, Executor executor) {
-        return super.thenRunAsync(new RunnableWithContext(snapshot, action), executor);
+        return wrapResult(super.thenRunAsync(new RunnableWithContext(snapshot, action), executor));
     }
 
     @Override
     public <U, V> CompletableFuture<V> thenCombine(CompletionStage<? extends U> other, BiFunction<? super T, ? super U, ? extends V> fn) {
-        return super.thenCombine(other, new BiFunctionWithContext<>(snapshot, fn));
+        return wrapResult(super.thenCombine(other, new BiFunctionWithContext<>(snapshot, fn)));
     }
 
     @Override
     public <U, V> CompletableFuture<V> thenCombineAsync(CompletionStage<? extends U> other, BiFunction<? super T, ? super U, ? extends V> fn) {
-        return super.thenCombineAsync(other, new BiFunctionWithContext<>(snapshot, fn));
+        return wrapResult(super.thenCombineAsync(other, new BiFunctionWithContext<>(snapshot, fn)));
     }
 
     @Override
     public <U, V> CompletableFuture<V> thenCombineAsync(
             CompletionStage<? extends U> other, BiFunction<? super T, ? super U, ? extends V> fn, Executor executor) {
-        return super.thenCombineAsync(other, new BiFunctionWithContext<>(snapshot, fn), executor);
+        return wrapResult(super.thenCombineAsync(other, new BiFunctionWithContext<>(snapshot, fn), executor));
     }
 
     @Override
     public <U> CompletableFuture<Void> thenAcceptBoth(CompletionStage<? extends U> other, BiConsumer<? super T, ? super U> action) {
-        return super.thenAcceptBoth(other, new BiConsumerWithContext<>(snapshot, action));
+        return wrapResult(super.thenAcceptBoth(other, new BiConsumerWithContext<>(snapshot, action)));
     }
 
     @Override
     public <U> CompletableFuture<Void> thenAcceptBothAsync(CompletionStage<? extends U> other, BiConsumer<? super T, ? super U> action) {
-        return super.thenAcceptBothAsync(other, new BiConsumerWithContext<>(snapshot, action));
+        return wrapResult(super.thenAcceptBothAsync(other, new BiConsumerWithContext<>(snapshot, action)));
     }
 
     @Override
     public <U> CompletableFuture<Void> thenAcceptBothAsync(
             CompletionStage<? extends U> other, BiConsumer<? super T, ? super U> action, Executor executor) {
-        return super.thenAcceptBothAsync(other, new BiConsumerWithContext<>(snapshot, action), executor);
+        return wrapResult(super.thenAcceptBothAsync(other, new BiConsumerWithContext<>(snapshot, action), executor));
     }
 
     @Override
     public CompletableFuture<Void> runAfterBoth(CompletionStage<?> other, Runnable action) {
-        return super.runAfterBoth(other, new RunnableWithContext(snapshot, action));
+        return wrapResult(super.runAfterBoth(other, new RunnableWithContext(snapshot, action)));
     }
 
     @Override
     public CompletableFuture<Void> runAfterBothAsync(CompletionStage<?> other, Runnable action) {
-        return super.runAfterBothAsync(other, new RunnableWithContext(snapshot, action));
+        return wrapResult(super.runAfterBothAsync(other, new RunnableWithContext(snapshot, action)));
     }
 
     @Override
     public CompletableFuture<Void> runAfterBothAsync(CompletionStage<?> other, Runnable action, Executor executor) {
-        return super.runAfterBothAsync(other, new RunnableWithContext(snapshot, action), executor);
+        return wrapResult(super.runAfterBothAsync(other, new RunnableWithContext(snapshot, action), executor));
     }
 
     @Override
     public <U> CompletableFuture<U> applyToEither(CompletionStage<? extends T> other, Function<? super T, U> fn) {
-        return super.applyToEither(other, new FunctionWithContext<>(snapshot, fn));
+        return wrapResult(super.applyToEither(other, new FunctionWithContext<>(snapshot, fn)));
     }
 
     @Override
     public <U> CompletableFuture<U> applyToEitherAsync(CompletionStage<? extends T> other, Function<? super T, U> fn) {
-        return super.applyToEitherAsync(other, new FunctionWithContext<>(snapshot, fn));
+        return wrapResult(super.applyToEitherAsync(other, new FunctionWithContext<>(snapshot, fn)));
     }
 
     @Override
     public <U> CompletableFuture<U> applyToEitherAsync(
             CompletionStage<? extends T> other, Function<? super T, U> fn, Executor executor) {
-        return super.applyToEitherAsync(other, new FunctionWithContext<>(snapshot, fn), executor);
+        return wrapResult(super.applyToEitherAsync(other, new FunctionWithContext<>(snapshot, fn), executor));
     }
 
     @Override
     public CompletableFuture<Void> acceptEither(CompletionStage<? extends T> other, Consumer<? super T> action) {
-        return super.acceptEither(other, new ConsumerWithContext<>(snapshot, action));
+        return wrapResult(super.acceptEither(other, new ConsumerWithContext<>(snapshot, action)));
     }
 
     @Override
     public CompletableFuture<Void> acceptEitherAsync(CompletionStage<? extends T> other, Consumer<? super T> action) {
-        return super.acceptEitherAsync(other, new ConsumerWithContext<>(snapshot, action));
+        return wrapResult(super.acceptEitherAsync(other, new ConsumerWithContext<>(snapshot, action)));
     }
 
     @Override
     public CompletableFuture<Void> acceptEitherAsync(
             CompletionStage<? extends T> other, Consumer<? super T> action, Executor executor) {
-        return super.acceptEitherAsync(other, new ConsumerWithContext<>(snapshot, action), executor);
+        return wrapResult(super.acceptEitherAsync(other, new ConsumerWithContext<>(snapshot, action), executor));
     }
 
     @Override
     public CompletableFuture<Void> runAfterEither(CompletionStage<?> other, Runnable action) {
-        return super.runAfterEither(other, new RunnableWithContext(snapshot, action));
+        return wrapResult(super.runAfterEither(other, new RunnableWithContext(snapshot, action)));
     }
 
     @Override
     public CompletableFuture<Void> runAfterEitherAsync(CompletionStage<?> other, Runnable action) {
-        return super.runAfterEitherAsync(other, new RunnableWithContext(snapshot, action));
+        return wrapResult(super.runAfterEitherAsync(other, new RunnableWithContext(snapshot, action)));
     }
 
     @Override
     public CompletableFuture<Void> runAfterEitherAsync(CompletionStage<?> other, Runnable action, Executor executor) {
-        return super.runAfterEitherAsync(other, new RunnableWithContext(snapshot, action), executor);
+        return wrapResult(super.runAfterEitherAsync(other, new RunnableWithContext(snapshot, action), executor));
     }
 
     @Override
     public <U> CompletableFuture<U> thenCompose(Function<? super T, ? extends CompletionStage<U>> fn) {
-        return super.thenCompose(new FunctionWithContext<>(snapshot, fn));
+        return wrapResult(super.thenCompose(new FunctionWithContext<>(snapshot, fn)));
     }
 
     @Override
     public <U> CompletableFuture<U> thenComposeAsync(Function<? super T, ? extends CompletionStage<U>> fn) {
-        return super.thenComposeAsync(new FunctionWithContext<>(snapshot, fn));
+        return wrapResult(super.thenComposeAsync(new FunctionWithContext<>(snapshot, fn)));
     }
 
     @Override
     public <U> CompletableFuture<U> thenComposeAsync(Function<? super T, ? extends CompletionStage<U>> fn, Executor executor) {
-        return super.thenComposeAsync(new FunctionWithContext<>(snapshot, fn), executor);
+        return wrapResult(super.thenComposeAsync(new FunctionWithContext<>(snapshot, fn), executor));
     }
 
     @Override
     public CompletableFuture<T> whenComplete(BiConsumer<? super T, ? super Throwable> action) {
-        return super.whenComplete(new BiConsumerWithContext<>(snapshot, action));
+        return wrapResult(super.whenComplete(new BiConsumerWithContext<>(snapshot, action)));
     }
 
     @Override
     public CompletableFuture<T> whenCompleteAsync(BiConsumer<? super T, ? super Throwable> action) {
-        return super.whenCompleteAsync(new BiConsumerWithContext<>(snapshot, action));
+        return wrapResult(super.whenCompleteAsync(new BiConsumerWithContext<>(snapshot, action)));
     }
 
     @Override
     public CompletableFuture<T> whenCompleteAsync(BiConsumer<? super T, ? super Throwable> action, Executor executor) {
-        return super.whenCompleteAsync(new BiConsumerWithContext<>(snapshot, action), executor);
+        return wrapResult(super.whenCompleteAsync(new BiConsumerWithContext<>(snapshot, action), executor));
     }
 
     @Override
     public <U> CompletableFuture<U> handle(BiFunction<? super T, Throwable, ? extends U> fn) {
-        return super.handle(new BiFunctionWithContext<>(snapshot, fn));
+        return wrapResult(super.handle(new BiFunctionWithContext<>(snapshot, fn)));
     }
 
     @Override
     public <U> CompletableFuture<U> handleAsync(BiFunction<? super T, Throwable, ? extends U> fn) {
-        return super.handleAsync(new BiFunctionWithContext<>(snapshot, fn));
+        return wrapResult(super.handleAsync(new BiFunctionWithContext<>(snapshot, fn)));
     }
 
     @Override
     public <U> CompletableFuture<U> handleAsync(BiFunction<? super T, Throwable, ? extends U> fn, Executor executor) {
-        return super.handleAsync(new BiFunctionWithContext<>(snapshot, fn), executor);
+        return wrapResult(super.handleAsync(new BiFunctionWithContext<>(snapshot, fn), executor));
     }
 
     @Override
     public CompletableFuture<T> exceptionally(Function<Throwable, ? extends T> fn) {
-        return super.exceptionally(new FunctionWithContext<>(snapshot, fn));
+        return wrapResult(super.exceptionally(new FunctionWithContext<>(snapshot, fn)));
     }
 
 }

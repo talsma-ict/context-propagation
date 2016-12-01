@@ -24,30 +24,24 @@ import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * A wrapper for {@link Supplier} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
  * calling a delegate.
  *
  * @author Sjoerd Talsma
  */
-public class SupplierWithContext<T> implements Supplier<T> {
+public class SupplierWithContext<T> extends WrapperWithContext<Supplier<T>> implements Supplier<T> {
     private static final Logger LOGGER = Logger.getLogger(SupplierWithContext.class.getName());
 
-    private final ContextSnapshot snapshot;
-    private final Supplier<T> delegate;
-
     public SupplierWithContext(ContextSnapshot snapshot, Supplier<T> delegate) {
-        this.snapshot = requireNonNull(snapshot, "No context snapshot provided to SupplierWithContext.");
-        this.delegate = requireNonNull(delegate, "No delegate provided to SupplierWithContext.");
+        super(snapshot, delegate);
     }
 
     @Override
     public T get() {
         try (Context<Void> context = snapshot.reactivate()) {
-            LOGGER.log(Level.FINEST, "Delegating get method with {0} to {1}.", new Object[]{context, delegate});
-            return delegate.get();
+            LOGGER.log(Level.FINEST, "Delegating get method with {0} to {1}.", new Object[]{context, delegate()});
+            return nonNullDelegate().get();
         }
     }
 }

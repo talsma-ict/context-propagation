@@ -32,22 +32,18 @@ import static java.util.Objects.requireNonNull;
  *
  * @author Sjoerd Talsma
  */
-public class PredicateWithContext<T> implements Predicate<T> {
+public class PredicateWithContext<T> extends WrapperWithContext<Predicate<T>> implements Predicate<T> {
     private static final Logger LOGGER = Logger.getLogger(PredicateWithContext.class.getName());
 
-    private final ContextSnapshot snapshot;
-    private final Predicate<T> delegate;
-
     public PredicateWithContext(ContextSnapshot snapshot, Predicate<T> delegate) {
-        this.snapshot = requireNonNull(snapshot, "No context snapshot provided to PredicateWithContext.");
-        this.delegate = requireNonNull(delegate, "No delegate provided to PredicateWithContext.");
+        super(snapshot, delegate);
     }
 
     @Override
     public boolean test(T t) {
         try (Context<Void> context = snapshot.reactivate()) {
-            LOGGER.log(Level.FINEST, "Delegating test method with {0} to {1}.", new Object[]{context, delegate});
-            return delegate.test(t);
+            LOGGER.log(Level.FINEST, "Delegating test method with {0} to {1}.", new Object[]{context, delegate()});
+            return nonNullDelegate().test(t);
         }
     }
 
@@ -56,8 +52,8 @@ public class PredicateWithContext<T> implements Predicate<T> {
         requireNonNull(other, "Cannot combine predicate with 'and' <null>.");
         return (t) -> {
             try (Context<Void> context = snapshot.reactivate()) {
-                LOGGER.log(Level.FINEST, "Delegating 'and' method with {0} to {1}.", new Object[]{context, delegate});
-                return delegate.test(t) && other.test(t);
+                LOGGER.log(Level.FINEST, "Delegating 'and' method with {0} to {1}.", new Object[]{context, delegate()});
+                return nonNullDelegate().test(t) && other.test(t);
             }
         };
     }
@@ -67,8 +63,8 @@ public class PredicateWithContext<T> implements Predicate<T> {
         requireNonNull(other, "Cannot combine predicate with 'or' <null>.");
         return (t) -> {
             try (Context<Void> context = snapshot.reactivate()) {
-                LOGGER.log(Level.FINEST, "Delegating 'or' method with {0} to {1}.", new Object[]{context, delegate});
-                return delegate.test(t) || other.test(t);
+                LOGGER.log(Level.FINEST, "Delegating 'or' method with {0} to {1}.", new Object[]{context, delegate()});
+                return nonNullDelegate().test(t) || other.test(t);
             }
         };
     }

@@ -46,7 +46,11 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
     private final Logger logger = Logger.getLogger(getClass().getName());
     private final AtomicBoolean closed = new AtomicBoolean(false);
     private final AbstractThreadLocalContext<T> previous;
-    private final T value;
+    /**
+     * The actual value, so subclasses can still access it after the context has been closed
+     * and {@link #getValue()} returns <code>null</code> as a result.
+     */
+    protected final T value;
 
     /**
      * Instantiates a new context with the specified value.

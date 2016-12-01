@@ -19,7 +19,9 @@ package nl.talsmasoftware.concurrency.context;
 
 /**
  * Interface for a 'snapshot' that can capture the (then-) 'active context' from all known registered
- * {@link ContextManager} implementations.
+ * {@link ContextManager} implementations.<br>
+ * Obtain a new snapshot by calling {@link ContextManagers#createContextSnapshot()} which will include a snapshot
+ * for all supported {@link Context} types through their respective {@link ContextManager managers}.
  * <p>
  * This allows for a generic method to:
  * <ol>

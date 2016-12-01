@@ -23,7 +23,10 @@ package nl.talsmasoftware.concurrency.context;
  * Implementations are typically maintained within a static {@link ThreadLocal} variable.<br>
  * A context has a very simple life-cycle: they can be created and {@link #close() closed}.
  * A well-behaved <code>Context</code> implementation will make sure that thread-local state is restored
- * to the way it was before when the context gets {@link #close() closed} again.
+ * to the way it was before when the context gets {@link #close() closed} again.<br>
+ * There is an {@link nl.talsmasoftware.concurrency.context.threadlocal.AbstractThreadLocalContext abstract implementation}
+ * available that can be extended, that takes care of random-depth nested contexts and restoring the 'previous'
+ * context state.
  *
  * @author Sjoerd Talsma
  */

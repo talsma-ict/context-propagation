@@ -61,12 +61,13 @@ public class DelegatingFutureTest {
     }
 
     @Test
-    public void testNullConstructor() {
+    public void testNullConstructor() throws ExecutionException, InterruptedException {
+        final TestDelegatingFuture tdf = new TestDelegatingFuture(null); // no exception yet!
         try {
-            new TestDelegatingFuture(null);
+            tdf.get();
             fail("Informative exception expected.");
         } catch (RuntimeException expected) {
-            assertThat(expected, hasToString(containsString("No delegate future provided")));
+            assertThat(expected, hasToString(containsString("No delegate available for TestDelegatingFuture")));
         }
     }
 
@@ -135,6 +136,6 @@ public class DelegatingFutureTest {
 
     @Test
     public void testToString() {
-        assertThat(subject, hasToString("TestDelegatingFuture{" + delegate + "}"));
+        assertThat(subject, hasToString("TestDelegatingFuture{delegate=" + delegate + "}"));
     }
 }

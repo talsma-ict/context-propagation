@@ -30,6 +30,7 @@ import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
@@ -61,9 +62,15 @@ public class DelegatingExecutorServiceTest {
         verifyNoMoreInteractions(delegate);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNullConstructor() {
-        new TestDelegatingExecutorService(null);
+        TestDelegatingExecutorService tdes = new TestDelegatingExecutorService(null); // No error at construction time.
+        try {
+            tdes.execute(() -> System.out.println("Whoops"));
+            fail("Informative exception expected.");
+        } catch (RuntimeException expected) {
+            assertThat(expected, hasToString(containsString("No delegate available for TestDelegatingExecutorService")));
+        }
     }
 
     @Test
@@ -112,7 +119,7 @@ public class DelegatingExecutorServiceTest {
     @Test
     public void testSubmitCallable() {
         Callable callable = mock(Callable.class);
-        Future<?> result = mock(Future.class);
+        Future<Object> result = mock(Future.class);
         when(delegate.submit(any(Callable.class))).thenReturn(result);
 
         assertThat(subject.submit(callable), is(sameInstance((Future) result)));
@@ -137,7 +144,7 @@ public class DelegatingExecutorServiceTest {
         List<Future<Object>> result = emptyList();
         when(delegate.invokeAll(any(Collection.class))).thenReturn(result);
 
-        assertThat(subject.invokeAll(calls), is(sameInstance(result)));
+        assertThat(subject.invokeAll(calls), is(equalTo(result)));
 
         verify(delegate).invokeAll(same(calls));
     }
@@ -148,7 +155,7 @@ public class DelegatingExecutorServiceTest {
         List<Future<Object>> result = emptyList();
         when(delegate.invokeAll(any(Collection.class), anyLong(), any(TimeUnit.class))).thenReturn(result);
 
-        assertThat(subject.invokeAll(calls, 2364L, MILLISECONDS), is(sameInstance(result)));
+        assertThat(subject.invokeAll(calls, 2364L, MILLISECONDS), is(equalTo(result)));
 
         verify(delegate).invokeAll(same(calls), eq(2364L), eq(MILLISECONDS));
     }
@@ -161,7 +168,7 @@ public class DelegatingExecutorServiceTest {
 
         assertThat(subject.invokeAny(calls), is(sameInstance(result)));
 
-        verify(delegate).invokeAny(same(calls));
+        verify(delegate).invokeAny(eq(calls));
     }
 
     @Test
@@ -172,7 +179,7 @@ public class DelegatingExecutorServiceTest {
 
         assertThat(subject.invokeAny(calls, 2873L, MILLISECONDS), is(sameInstance(result)));
 
-        verify(delegate).invokeAny(same(calls), eq(2873L), eq(MILLISECONDS));
+        verify(delegate).invokeAny(eq(calls), eq(2873L), eq(MILLISECONDS));
     }
 
     @Test

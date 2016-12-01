@@ -24,30 +24,24 @@ import java.util.function.BooleanSupplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * A wrapper for {@link BooleanSupplier} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
  * calling a delegate.
  *
  * @author Sjoerd Talsma
  */
-public class BooleanSupplierWithContext implements BooleanSupplier {
+public class BooleanSupplierWithContext extends WrapperWithContext<BooleanSupplier> implements BooleanSupplier {
     private static final Logger LOGGER = Logger.getLogger(BooleanSupplierWithContext.class.getName());
 
-    private final ContextSnapshot snapshot;
-    private final BooleanSupplier delegate;
-
     public BooleanSupplierWithContext(ContextSnapshot snapshot, BooleanSupplier delegate) {
-        this.snapshot = requireNonNull(snapshot, "No context snapshot provided to BooleanSupplierWithContext.");
-        this.delegate = requireNonNull(delegate, "No delegate provided to BooleanSupplierWithContext.");
+        super(snapshot, delegate);
     }
 
     @Override
     public boolean getAsBoolean() {
         try (Context<Void> context = snapshot.reactivate()) {
-            LOGGER.log(Level.FINEST, "Delegating getAsBoolean method with {0} to {1}.", new Object[]{context, delegate});
-            return delegate.getAsBoolean();
+            LOGGER.log(Level.FINEST, "Delegating getAsBoolean method with {0} to {1}.", new Object[]{context, delegate()});
+            return nonNullDelegate().getAsBoolean();
         }
     }
 

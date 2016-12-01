@@ -17,15 +17,14 @@
 
 package nl.talsmasoftware.concurrency.executors;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Abstract base-class that makes it a little easier to schedule tasks
  * ({@link java.lang.Runnable Runnable} or {@link Callable} objects) using an existing {@link ExecutorService} while
- * providing a custom {@link #map(Callable) mapping} for all tasks <em>before</em> they get scheduled.
+ * providing a custom {@link #wrap(Callable) mapping} for all tasks <em>before</em> they get scheduled.
  *
  * @author Sjoerd Talsma
  */
@@ -51,81 +50,35 @@ public abstract class CallMappingExecutorService extends DelegatingExecutorServi
     protected abstract <V> Callable<V> map(Callable<V> callable);
 
     /**
-     * Default implementation to map {@link Runnable} objects before scheduling: wrap it into a {@link Callable} object,
-     * {@link #map(Callable) map the callable} and return an unwrapped {@link Runnable} implementation that simply runs
-     * by calling the mapped {@link Callable} object.
+     * Wrapping a callable object is delegated to the abstract {@link #map(Callable)} method.
      *
-     * @param runnable The runnable object to be mapped.
-     * @return The mapped runnable (the default implementation re-uses the callable mapping).
+     * @param callable The callable to be mapped.
+     * @param <V>      The type of result being returned by the callable object.
+     * @return The mapped callable object.
      * @see #map(Callable)
      */
-    protected Runnable map(final Runnable runnable) {
-        if (runnable != null) {
-            final Callable<?> callable = Executors.callable(runnable);
-            final Callable<?> mapped = map(callable);
-            // Only return adapter if the mapping resulted in a different object:
-            if (!callable.equals(mapped)) return new RunnableAdapter(mapped);
-        }
-        return runnable;
+    protected final <V> Callable<V> wrap(Callable<V> callable) {
+        return map(callable);
     }
 
     /**
-     * Default way of mapping a {@link Collection} of {@link Callable} objects:
-     * Create a new collection and add each {@link #map(Callable) individually mapped} object into it.
+     * Default implementation to wrap {@link Runnable} objects before scheduling:
+     * {@link #wrap(Callable) wrap} it into a {@link Callable} object and return an
+     * unwrapped {@link Runnable} implementation that simply runs by calling the mapped {@link Callable} object.
      *
-     * @param tasks The tasks to be mapped.
-     * @param <T>   The common result type for the collection of tasks.
-     * @return A collection with each individual task mapped.
-     * @see #map(Callable)
+     * @param runnable The runnable object to be wrapped.
+     * @return The wrapped runnable (the default implementation re-uses the callable mapping).
+     * @see #wrap(Callable)
      */
-    protected <T> Collection<? extends Callable<T>> map(Collection<? extends Callable<T>> tasks) {
-        Collection<? extends Callable<T>> result = tasks;
-        if (tasks != null && !tasks.isEmpty()) {
-            final List<Callable<T>> copy = new ArrayList<Callable<T>>(tasks.size());
-            for (Callable<T> task : tasks) copy.add(map(task));
-            result = copy;
+    @Override
+    protected Runnable wrap(final Runnable runnable) {
+        if (runnable != null) {
+            final Callable<?> callable = Executors.callable(runnable);
+            final Callable<?> wrapped = wrap(callable);
+            // Only return adapter if the wrapping resulted in a different object:
+            if (!callable.equals(wrapped)) return new RunnableAdapter(wrapped);
         }
-        return result;
-    }
-
-    @Override
-    public <T> Future<T> submit(Callable<T> task) {
-        return super.submit(map(task));
-    }
-
-    @Override
-    public <T> Future<T> submit(Runnable task, T result) {
-        return super.submit(map(task), result);
-    }
-
-    @Override
-    public Future<?> submit(Runnable task) {
-        return super.submit(map(task));
-    }
-
-    @Override
-    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
-        return super.invokeAll(map(tasks));
-    }
-
-    @Override
-    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
-        return super.invokeAll(map(tasks), timeout, unit);
-    }
-
-    @Override
-    public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
-        return super.invokeAny(map(tasks));
-    }
-
-    @Override
-    public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        return super.invokeAny(map(tasks), timeout, unit);
-    }
-
-    @Override
-    public void execute(Runnable command) {
-        super.execute(map(command));
+        return runnable;
     }
 
 }

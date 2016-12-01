@@ -17,12 +17,12 @@
 
 package nl.talsmasoftware.concurrency.futures;
 
+import nl.talsmasoftware.concurrency.context.function.Wrapper;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * Abstract baseclass that simplifies wrapping an existing {@link Future} by forwarding all required methods to a
@@ -33,48 +33,58 @@ import static java.util.Objects.requireNonNull;
  *
  * @author Sjoerd Talsma
  */
-public abstract class DelegatingFuture<V> implements Future<V> {
-
-    protected final Future<V> delegate;
+public abstract class DelegatingFuture<V> extends Wrapper<Future<V>> implements Future<V> {
 
     protected DelegatingFuture(Future<V> delegate) {
-        this.delegate = requireNonNull(delegate, "No delegate future provided!");
+        super(delegate);
+    }
+
+    /**
+     * Overridable method to wrap the result after it has been obtained from the delegate future.
+     *
+     * @param result The original result from the delegate.
+     * @return The wrapped result.
+     */
+    protected V wrapResult(V result) {
+        return result;
+    }
+
+    /**
+     * Overridable method to wrap the {@link ExecutionException} after it has been thrown from the delegate future.
+     *
+     * @param exception The original execution exception from the delegate.
+     * @return The wrapped exception.
+     */
+    protected ExecutionException wrapException(ExecutionException exception) {
+        return exception;
     }
 
     public boolean cancel(boolean mayInterruptIfRunning) {
-        return delegate.cancel(mayInterruptIfRunning);
+        return nonNullDelegate().cancel(mayInterruptIfRunning);
     }
 
     public boolean isCancelled() {
-        return delegate.isCancelled();
+        return nonNullDelegate().isCancelled();
     }
 
     public boolean isDone() {
-        return delegate.isDone();
+        return nonNullDelegate().isDone();
     }
 
     public V get() throws InterruptedException, ExecutionException {
-        return delegate.get();
+        try {
+            return wrapResult(nonNullDelegate().get());
+        } catch (ExecutionException ee) {
+            throw wrapException(ee);
+        }
     }
 
     public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        return delegate.get(timeout, unit);
-    }
-
-    @Override
-    public int hashCode() {
-        return delegate.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        return this == other || (other != null && getClass().equals(other.getClass())
-                && delegate.equals(((DelegatingFuture) other).delegate));
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + '{' + delegate + '}';
+        try {
+            return wrapResult(nonNullDelegate().get(timeout, unit));
+        } catch (ExecutionException ee) {
+            throw wrapException(ee);
+        }
     }
 
 }

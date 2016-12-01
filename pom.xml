@@ -7,16 +7,14 @@
 
     <!-- Artifact identification -->
     <groupId>nl.talsmasoftware</groupId>
-    <artifactId>concurrency</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
+    <artifactId>global-context</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <!-- Project information -->
-    <name>Concurrency utility library</name>
-    <description>
-        Utility library for basic concurrency functionality.
-    </description>
-    <url>https://github.com/talsma-ict/concurrency</url>
+    <name>Global context propagation library</name>
+    <description>Library for standardized management of global context propagation in concurrent systems.</description>
+    <url>https://github.com/talsma-ict/global-context</url>
     <inceptionYear>2016</inceptionYear>
 
     <licenses>
@@ -42,9 +40,9 @@
     </developers>
 
     <scm>
-        <url>https://github.com/talsma-ict/concurrency.git</url>
-        <connection>scm:git:git://github.com/talsma-ict/concurrency.git</connection>
-        <developerConnection>scm:git:git@github.com:talsma-ict/concurrency.git</developerConnection>
+        <url>https://github.com/talsma-ict/global-context.git</url>
+        <connection>scm:git:git://github.com/talsma-ict/global-context.git</connection>
+        <developerConnection>scm:git:git@github.com:talsma-ict/global-context.git</developerConnection>
     </scm>
 
     <properties>
@@ -76,7 +74,7 @@
         <maven-scm-plugin.version>1.9</maven-scm-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.6</nexus-staging-maven-plugin.version>
         <buildnumber-maven-plugin.version>1.1</buildnumber-maven-plugin.version>
-        <umldoclet.version>1.0.6</umldoclet.version>
+        <umldoclet.version>1.0.7</umldoclet.version>
     </properties>
 
     <build>

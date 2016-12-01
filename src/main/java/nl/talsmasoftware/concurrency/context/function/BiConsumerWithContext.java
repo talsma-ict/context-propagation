@@ -32,22 +32,18 @@ import static java.util.Objects.requireNonNull;
  *
  * @author Sjoerd Talsma
  */
-public class BiConsumerWithContext<T, U> implements BiConsumer<T, U> {
+public class BiConsumerWithContext<T, U> extends WrapperWithContext<BiConsumer<T, U>> implements BiConsumer<T, U> {
     private static final Logger LOGGER = Logger.getLogger(BiConsumerWithContext.class.getName());
 
-    private final ContextSnapshot snapshot;
-    private final BiConsumer<T, U> delegate;
-
     public BiConsumerWithContext(ContextSnapshot snapshot, BiConsumer<T, U> delegate) {
-        this.snapshot = requireNonNull(snapshot, "No context snapshot provided to BiConstumerWithContext.");
-        this.delegate = requireNonNull(delegate, "No delegate provided to BiConstumerWithContext.");
+        super(snapshot, delegate);
     }
 
     @Override
     public void accept(T t, U u) {
         try (Context<Void> context = snapshot.reactivate()) {
-            LOGGER.log(Level.FINEST, "Delegating accept method with {0} to {1}.", new Object[]{context, delegate});
-            delegate.accept(t, u);
+            LOGGER.log(Level.FINEST, "Delegating accept method with {0} to {1}.", new Object[]{context, delegate()});
+            nonNullDelegate().accept(t, u);
         }
     }
 
@@ -56,10 +52,11 @@ public class BiConsumerWithContext<T, U> implements BiConsumer<T, U> {
         requireNonNull(after, "Cannot post-process with after bi-consumer <null>.");
         return (l, r) -> {
             try (Context<Void> context = snapshot.reactivate()) {
-                LOGGER.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate});
-                delegate.accept(l, r);
+                LOGGER.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});
+                nonNullDelegate().accept(l, r);
                 after.accept(l, r);
             }
         };
     }
+
 }

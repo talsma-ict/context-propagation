@@ -39,6 +39,14 @@ public class ContextAwareExecutorService extends CallMappingExecutorService {
         super(delegate);
     }
 
+    /**
+     * This method maps any callable (before scheduling it) by taking a snapshot of the context in the scheduling thread
+     * and propagating this context into the executed callable by snapshot reactivation.
+     *
+     * @param callable The callable to be mapped.
+     * @param <V>      the actual return type of the callable object being scheduled.
+     * @return A callable that will reactivate the scheduling thread context snapshot before executing.
+     */
     @Override
     protected <V> Callable<V> map(final Callable<V> callable) {
         final ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
