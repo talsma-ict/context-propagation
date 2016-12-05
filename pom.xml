@@ -158,7 +158,7 @@
                 <version>${maven-javadoc-plugin.version}</version>
                 <executions>
                     <execution>
-                        <id>generate-uml</id>
+                        <id>generate-javadoc</id>
                         <goals>
                             <goal>jar</goal>
                         </goals>
@@ -172,19 +172,12 @@
                             <docencoding>UTF-8</docencoding>
                             <useStandardDocletOptions>true</useStandardDocletOptions>
                             <additionalparam>
-                                -umlSkipStandardDoclet true
                                 -umlImageFormat SVG
                                 -umlImageDirectory images
                                 -umlCommand "hide empty fields"
                                 -umlCommand "hide empty methods"
                             </additionalparam>
                         </configuration>
-                    </execution>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -195,7 +188,7 @@
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
-                        <phase>verify</phase>
+                        <phase>deploy</phase>
                         <goals>
                             <goal>sign</goal>
                         </goals>
