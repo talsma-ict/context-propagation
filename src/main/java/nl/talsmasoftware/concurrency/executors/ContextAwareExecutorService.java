@@ -28,7 +28,8 @@ import java.util.logging.Logger;
 
 /**
  * An instance of an executor service that delegates to another executor service that makes a new
- * {@link ContextManagers#createContextSnapshot() context snapshot} whenever a task is scheduled (either a
+ * {@link ContextManagers#createContextSnapshot() context snapshot} whenever a task is scheduled
+ * (both {@link Callable} and {@link Runnable} tasks are mapped).
  *
  * @author Sjoerd Talsma
  */

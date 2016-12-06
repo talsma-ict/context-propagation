@@ -45,10 +45,18 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
     private final ThreadLocal<AbstractThreadLocalContext<T>> sharedThreadLocalContext = threadLocalInstanceOf((Class) getClass());
     private final Logger logger = Logger.getLogger(getClass().getName());
     private final AtomicBoolean closed = new AtomicBoolean(false);
-    private final AbstractThreadLocalContext<T> previous;
+
     /**
-     * The actual value, so subclasses can still access it after the context has been closed
-     * and {@link #getValue()} returns <code>null</code> as a result.
+     * The parent context that was active at the time this context was created (if any)
+     * or <code>null</code> in case there was no active context when this context was created.
+     */
+    protected final Context<T> parentContext;
+
+    /**
+     * The actual value, so subclasses can still access it after the context has been closed,
+     * because the default {@link #getValue()} implementation will return <code>null</code> in that case.<br>
+     * Please be careful accessing the value after the context was closed.
+     * There is no pre-defined meaning to handle this
      */
     protected final T value;
 
@@ -61,7 +69,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
      */
     @SuppressWarnings("unchecked")
     protected AbstractThreadLocalContext(T newValue) {
-        this.previous = sharedThreadLocalContext.get();
+        this.parentContext = sharedThreadLocalContext.get();
         this.value = newValue;
         this.sharedThreadLocalContext.set(this);
         logger.log(Level.FINEST, "Initialized new {0}.", this);
@@ -87,8 +95,8 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
 
     /**
      * Closes this context and in case this context is the active context,
-     * restores the active context to the previous (unclosed) context.<br>
-     * If no unclosed previous context exists, the 'active context' is cleared.
+     * restores the active context to the (unclosed) parent context.<br>
+     * If no unclosed parent context exists, the 'active context' is cleared.
      * <p>
      * This method has no side-effects if the context was already closed (it is safe to call multiple times).
      */
@@ -96,7 +104,9 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
         if (closed.compareAndSet(false, true)) {
             AbstractThreadLocalContext<T> current = sharedThreadLocalContext.get();
             if (this == current) {
-                while (current != null && current.closed.get()) current = current.previous;
+                while (current != null && current.closed.get()) {
+                    current = (AbstractThreadLocalContext<T>) current.parentContext;
+                }
                 if (current == null) sharedThreadLocalContext.remove();
                 else sharedThreadLocalContext.set(current);
                 logger.log(Level.FINER, "Closed {0} and restored the current context to {1}.", new Object[]{this, current});
@@ -111,7 +121,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
 
     /**
      * Returns the classname of this context followed by <code>"{closed}"</code> if it has been closed already;
-     * otherwise its value will be added.
+     * otherwise the contained {@link #getValue() value} by this context will be added.
      *
      * @return String representing this context class and either the current value or the fact that it was closed.
      */
