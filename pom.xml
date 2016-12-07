@@ -7,16 +7,14 @@
 
     <!-- Artifact identification -->
     <groupId>nl.talsmasoftware</groupId>
-    <artifactId>concurrency</artifactId>
-    <version>0.1.0</version>
+    <artifactId>context-propagation</artifactId>
+    <version>0.2.0</version>
     <packaging>jar</packaging>
 
     <!-- Project information -->
-    <name>Concurrency utility library</name>
-    <description>
-        Utility library for basic concurrency functionality.
-    </description>
-    <url>https://github.com/talsma-ict/concurrency</url>
+    <name>Global context propagation library</name>
+    <description>Library for standardized management of global context propagation in concurrent systems.</description>
+    <url>https://github.com/talsma-ict/context-propagation</url>
     <inceptionYear>2016</inceptionYear>
 
     <licenses>
@@ -42,9 +40,9 @@
     </developers>
 
     <scm>
-        <url>https://github.com/talsma-ict/concurrency.git</url>
-        <connection>scm:git:git://github.com/talsma-ict/concurrency.git</connection>
-        <developerConnection>scm:git:git@github.com:talsma-ict/concurrency.git</developerConnection>
+        <url>https://github.com/talsma-ict/context-propagation.git</url>
+        <connection>scm:git:git://github.com/talsma-ict/context-propagation.git</connection>
+        <developerConnection>scm:git:git@github.com:talsma-ict/context-propagation.git</developerConnection>
     </scm>
 
     <properties>
@@ -76,7 +74,7 @@
         <maven-scm-plugin.version>1.9</maven-scm-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.6</nexus-staging-maven-plugin.version>
         <buildnumber-maven-plugin.version>1.1</buildnumber-maven-plugin.version>
-        <umldoclet.version>1.0.2</umldoclet.version>
+        <umldoclet.version>1.0.7</umldoclet.version>
     </properties>
 
     <build>
@@ -111,7 +109,11 @@
                             <goal>create</goal>
                         </goals>
                         <configuration>
+                            <revisionOnScmFailure>UNKNOWN</revisionOnScmFailure>
+                            <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
                             <buildNumberPropertyName>git.revision</buildNumberPropertyName>
+                            <scmBranchPropertyName>git.branch</scmBranchPropertyName>
+                            <timestampFormat>{0,date,yyyy-MM-dd'T'HH:mm:ss.SSSZ}</timestampFormat>
                             <timestampPropertyName>build.timestamp</timestampPropertyName>
                         </configuration>
                     </execution>
@@ -160,7 +162,7 @@
                 <version>${maven-javadoc-plugin.version}</version>
                 <executions>
                     <execution>
-                        <id>generate-uml</id>
+                        <id>generate-javadoc</id>
                         <goals>
                             <goal>jar</goal>
                         </goals>
@@ -174,18 +176,11 @@
                             <docencoding>UTF-8</docencoding>
                             <useStandardDocletOptions>true</useStandardDocletOptions>
                             <additionalparam>
-                                -umlSkipStandardDoclet true
                                 -umlImageFormat SVG
                                 -umlCommand "hide empty fields"
                                 -umlCommand "hide empty methods"
                             </additionalparam>
                         </configuration>
-                    </execution>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -196,7 +191,7 @@
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
-                        <phase>verify</phase>
+                        <phase>deploy</phase>
                         <goals>
                             <goal>sign</goal>
                         </goals>
