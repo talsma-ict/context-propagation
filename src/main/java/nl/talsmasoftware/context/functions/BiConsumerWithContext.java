@@ -15,47 +15,47 @@
  *
  */
 
-package nl.talsmasoftware.context.function;
+package nl.talsmasoftware.context.functions;
 
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.delegation.WrapperWithContext;
 
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.function.BiConsumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static java.util.Objects.requireNonNull;
 
 /**
- * A wrapper for {@link BiFunction} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
+ * A wrapper for {@link BiConsumer} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
  * calling a delegate.
  *
  * @author Sjoerd Talsma
  */
-public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContext<BiFunction<IN1, IN2, OUT>> implements BiFunction<IN1, IN2, OUT> {
-    private static final Logger LOGGER = Logger.getLogger(BiFunctionWithContext.class.getName());
+public class BiConsumerWithContext<T, U> extends WrapperWithContext<BiConsumer<T, U>> implements BiConsumer<T, U> {
+    private static final Logger LOGGER = Logger.getLogger(BiConsumerWithContext.class.getName());
 
-    public BiFunctionWithContext(ContextSnapshot snapshot, BiFunction<IN1, IN2, OUT> delegate) {
+    public BiConsumerWithContext(ContextSnapshot snapshot, BiConsumer<T, U> delegate) {
         super(snapshot, delegate);
     }
 
     @Override
-    public OUT apply(IN1 in1, IN2 in2) {
+    public void accept(T t, U u) {
         try (Context<Void> context = snapshot.reactivate()) {
-            LOGGER.log(Level.FINEST, "Delegating apply method with {0} to {1}.", new Object[]{context, delegate()});
-            return nonNullDelegate().apply(in1, in2);
+            LOGGER.log(Level.FINEST, "Delegating accept method with {0} to {1}.", new Object[]{context, delegate()});
+            nonNullDelegate().accept(t, u);
         }
     }
 
     @Override
-    public <V> BiFunction<IN1, IN2, V> andThen(Function<? super OUT, ? extends V> after) {
-        requireNonNull(after, "Cannot post-process bi-function with after function <null>.");
-        return (IN1 in1, IN2 in2) -> {
+    public BiConsumer<T, U> andThen(BiConsumer<? super T, ? super U> after) {
+        requireNonNull(after, "Cannot post-process with after bi-consumer <null>.");
+        return (l, r) -> {
             try (Context<Void> context = snapshot.reactivate()) {
                 LOGGER.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});
-                return after.apply(nonNullDelegate().apply(in1, in2));
+                nonNullDelegate().accept(l, r);
+                after.accept(l, r);
             }
         };
     }

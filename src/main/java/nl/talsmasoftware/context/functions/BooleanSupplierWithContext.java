@@ -15,34 +15,35 @@
  *
  */
 
-package nl.talsmasoftware.context.function;
+package nl.talsmasoftware.context.functions;
 
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.delegation.WrapperWithContext;
 
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * A wrapper for {@link Supplier} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
+ * A wrapper for {@link BooleanSupplier} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
  * calling a delegate.
  *
  * @author Sjoerd Talsma
  */
-public class SupplierWithContext<T> extends WrapperWithContext<Supplier<T>> implements Supplier<T> {
-    private static final Logger LOGGER = Logger.getLogger(SupplierWithContext.class.getName());
+public class BooleanSupplierWithContext extends WrapperWithContext<BooleanSupplier> implements BooleanSupplier {
+    private static final Logger LOGGER = Logger.getLogger(BooleanSupplierWithContext.class.getName());
 
-    public SupplierWithContext(ContextSnapshot snapshot, Supplier<T> delegate) {
+    public BooleanSupplierWithContext(ContextSnapshot snapshot, BooleanSupplier delegate) {
         super(snapshot, delegate);
     }
 
     @Override
-    public T get() {
+    public boolean getAsBoolean() {
         try (Context<Void> context = snapshot.reactivate()) {
-            LOGGER.log(Level.FINEST, "Delegating get method with {0} to {1}.", new Object[]{context, delegate()});
-            return nonNullDelegate().get();
+            LOGGER.log(Level.FINEST, "Delegating getAsBoolean method with {0} to {1}.", new Object[]{context, delegate()});
+            return nonNullDelegate().getAsBoolean();
         }
     }
+
 }

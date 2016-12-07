@@ -19,7 +19,7 @@ package nl.talsmasoftware.context.futures;
 
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
-import nl.talsmasoftware.context.function.*;
+import nl.talsmasoftware.context.functions.*;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;

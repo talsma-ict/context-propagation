@@ -15,7 +15,7 @@
  *
  */
 
-package nl.talsmasoftware.context.function;
+package nl.talsmasoftware.context.functions;
 
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextSnapshot;
