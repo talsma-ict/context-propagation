@@ -109,7 +109,11 @@
                             <goal>create</goal>
                         </goals>
                         <configuration>
+                            <revisionOnScmFailure>UNKNOWN</revisionOnScmFailure>
+                            <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
                             <buildNumberPropertyName>git.revision</buildNumberPropertyName>
+                            <scmBranchPropertyName>git.branch</scmBranchPropertyName>
+                            <timestampFormat>{0,date,yyyy-MM-dd'T'HH:mm:ss.SSSZ}</timestampFormat>
                             <timestampPropertyName>build.timestamp</timestampPropertyName>
                         </configuration>
                     </execution>
