@@ -24,10 +24,13 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * Abstract baseclass that simplifies wrapping an existing {@link Future} by forwarding all required methods to a
- * delegate future object.
+ * {@link Wrapper#delegate() delegate future} object.<br>
+ * The class also provides overridable wrapper methods for {@link #wrapResult(Object) result}
+ * and {@link #wrapException(ExecutionException) exception} outcomes.
  * <p>
- * Although this class implements all required methods of {@link Future} it is still declared as an
- * <em>abstract</em> class. This is because it does not provide any value in itself.
+ * Although this class does implement <em>all</em> required methods of {@link Future} it is still declared as an
+ * <em>abstract</em> class.<br>
+ * This is because it does not provide any value in itself.
  *
  * @author Sjoerd Talsma
  */

@@ -19,6 +19,8 @@ package nl.talsmasoftware.context;
 
 import nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext;
 
+import java.util.Optional;
+
 /**
  * A context can be anything that needs to be maintained on the 'current thread' level.
  * <p>
@@ -40,7 +42,7 @@ public interface Context<T> extends AutoCloseable {
      * Returns the value associated with this context.
      * <p>
      * Implementors should explicitly document the behaviour of this method <em>after {@link #close()}</em> was called.
-     * For example, it may be useful to always return <code>null</code> after a {@link Context} has been
+     * For example, it may be useful to always return <code>empty</code> after a {@link Context} has been
      * {@link #close() closed}.
      * Contrary, it may in some cases be useful to retain the existing <code>value</code> after the context is closed,
      * so clients that have kept a reference can still have access to it.
@@ -49,7 +51,7 @@ public interface Context<T> extends AutoCloseable {
      *
      * @return The value associated with this context.
      */
-    T getValue();
+    Optional<T> getValue();
 
     /**
      * Closes this context and restores any context changes made by this object to the way things were before it

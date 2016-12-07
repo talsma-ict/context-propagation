@@ -20,6 +20,7 @@ package nl.talsmasoftware.context.threadlocal;
 import nl.talsmasoftware.context.Context;
 
 import java.lang.reflect.Modifier;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -55,8 +56,9 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
     /**
      * The actual value, so subclasses can still access it after the context has been closed,
      * because the default {@link #getValue()} implementation will return <code>null</code> in that case.<br>
-     * Please be careful accessing the value after the context was closed.
-     * There is no pre-defined meaning to handle this
+     * Please be careful accessing the value after the context was closed:
+     * There is no pre-defined meaningful way to handle this situation, as this depends heavily
+     * on the desired features of the particular implementation.
      */
     protected final T value;
 
@@ -85,12 +87,12 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
     }
 
     /**
-     * Returns the value of this context instance, or <code>null</code> if it was already closed.
+     * Returns the value of this context instance, or <code>empty</code> if it was already closed.
      *
      * @return The value of this context.
      */
-    public T getValue() {
-        return closed.get() ? null : value;
+    public Optional<T> getValue() {
+        return Optional.ofNullable(closed.get() ? null : value);
     }
 
     /**

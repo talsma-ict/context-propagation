@@ -17,6 +17,8 @@
 
 package nl.talsmasoftware.context;
 
+import java.util.Optional;
+
 /**
  * This interface defines the contract for a ContextManager Service.
  * <p>
@@ -40,15 +42,15 @@ public interface ContextManager<T> {
      *
      * @param value The value to initialize a new context for
      *              (which should be closed by the caller at the end of its lifecycle).
-     * @return The new context containing the specified value.
+     * @return The new <em>active</em> context containing the specified value.
      */
     Context<T> initializeNewContext(T value);
 
     /**
      * This method returns the current context, or <code>null</code> if no context is currently active.
      *
-     * @return The active context or <code>null</code> if there is no context currently active.
+     * @return The active context or <code>empty()</code> if there is no context currently active.
      */
-    Context<T> getActiveContext();
+    Optional<Context<T>> getActiveContext();
 
 }

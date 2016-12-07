@@ -17,7 +17,13 @@
 
 package nl.talsmasoftware.context;
 
+import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
 import org.junit.Test;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -62,6 +68,32 @@ public class ContextManagersTest {
         assertThat(ctx1.isClosed(), is(false));
         assertThat(ctx2.isClosed(), is(true));
         assertThat(ctx3.isClosed(), is(true));
+        ctx1.close();
+    }
+
+    @Test
+    public void testSnapshotThreadPropagation() throws ExecutionException, InterruptedException {
+        DummyContext.reset();
+        ExecutorService threadpool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
+        assertThat(DummyContext.currentValue(), is(nullValue()));
+
+        DummyContext ctx1 = new DummyContext("initial value");
+        assertThat(DummyContext.currentValue(), is("initial value"));
+        Future<String> threadResult = threadpool.submit(() -> DummyContext.currentValue());
+        assertThat(threadResult.get(), is("initial value"));
+
+        DummyContext ctx2 = new DummyContext("second value");
+        threadResult = threadpool.submit(() -> {
+            String res = DummyContext.currentValue();
+            try (DummyContext inThread = new DummyContext("in-thread value")) {
+                res += ", " + DummyContext.currentValue();
+            }
+            return res + ", " + DummyContext.currentValue();
+        });
+        assertThat(DummyContext.currentValue(), is("second value"));
+        assertThat(threadResult.get(), is("second value, in-thread value, second value"));
+
+        ctx2.close();
         ctx1.close();
     }
 

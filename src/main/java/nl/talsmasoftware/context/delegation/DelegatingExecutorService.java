@@ -25,10 +25,13 @@ import java.util.concurrent.*;
 
 /**
  * Abstract baseclass that makes it a little easier to wrap existing {@link ExecutorService} implementations by
- * forwarding all methods to a <code>delegate</code> executor service.
+ * forwarding all methods to a {@link Wrapper#delegate() delegate} executor service.<br>
+ * The class also provides overridable <code>wrapper</code> methods for all complex input (e.g. {@link Callable}, {@link Runnable})
+ * and result types (e.g. {@link Future}).
  * <p>
- * Although this class implements all required methods of {@link ExecutorService} it is still declared as an
- * <em>abstract</em> class. This is because it does not provide any value in itself.
+ * Although this class does implements <em>all</em> required methods of {@link ExecutorService} it is still declared
+ * as an <em>abstract</em> class.<br>
+ * This is because it does not provide any value in itself.
  *
  * @author Sjoerd Talsma
  */

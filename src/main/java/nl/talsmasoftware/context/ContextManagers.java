@@ -17,6 +17,7 @@
 
 package nl.talsmasoftware.context;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -59,49 +60,91 @@ public final class ContextManagers {
      * This snapshot is returned as a single object that can be temporarily
      * {@link ContextSnapshot#reactivate() reactivated}. Don't forget to {@link Context#close() close} the reactivated
      * context once you're done, preferably in a <code>try-with-resources</code> construct.
+     * <p>
+     * <strong>Note about propagation accross physical node boundaries:</strong>
+     * <em>ContextSnapshot instances can be serialized to and reactivated on another node under strict conditions:</em>
+     * <ol>
+     * <li><strong>All</strong> {@link Context#getValue() context values} <strong>must</strong> be serializable.</li>
+     * <li>All {@link ContextManager} implementations that contain
+     * {@link ContextManager#getActiveContext() active contexts} must be registered on the target node as well
+     * (but need not be serializable themselves).</li>
+     * </ol>
      *
-     * @return A new snapshot that can be reactivated in a background thread within a try-with-resources construct.
+     * @return A new snapshot that can be reactivated elsewhere (e.g. a background thread or even another node)
+     * within a try-with-resources construct.
      */
     public static ContextSnapshot createContextSnapshot() {
-        final Map<ContextManager, Object> snapshot = new IdentityHashMap<ContextManager, Object>();
-        boolean empty = true;
+        final Map<String, Object> snapshot = new LinkedHashMap<>();
+        boolean noManagers = true;
         for (ContextManager manager : LOCATOR) {
-            empty = false;
-            final Context activeContext = manager.getActiveContext();
-            if (activeContext != null) snapshot.put(manager, activeContext.getValue());
+            noManagers = false;
+            final Optional<Context> activeContext = manager.getActiveContext();
+            if (activeContext != null && activeContext.isPresent()) {
+                final String managerClassName = manager.getClass().getName();
+                final Optional<?> optional = activeContext.get().getValue();
+                snapshot.put(managerClassName, optional != null ? optional.orElseGet(null) : null);
+            }
         }
-        if (empty) LOGGER.log(Level.WARNING, "Context snapshot was created but no ContextManagers were found!");
+        if (noManagers) LOGGER.log(Level.WARNING, "Context snapshot was created but no ContextManagers were found!");
         return new ContextSnapshotImpl(snapshot);
     }
 
     /**
      * Implementation of the <code>createContextSnapshot</code> functionality that can reactivate all values from the
      * snapshot in each corresponding {@link ContextManager}.
+     * <p>
+     * This class is only really {@link Serializable} if all captured {@link Context#getValue() values} actually are
+     * serializable as well. The {@link ContextManager} implementations do not need to be {@link Serializable}.
      */
-    private static final class ContextSnapshotImpl implements ContextSnapshot {
-        private final Map<ContextManager, Object> snapshot;
+    private static final class ContextSnapshotImpl implements ContextSnapshot, Serializable {
+        private final Map<String, Object> snapshot;
 
-        ContextSnapshotImpl(Map<ContextManager, Object> snapshot) {
+        private ContextSnapshotImpl(Map<String, Object> snapshot) {
             this.snapshot = snapshot;
         }
 
-        @SuppressWarnings("unchecked") // We got the value from the context manager itself!
+        /**
+         * Tries to get the context manager instance by its classname.<br>
+         * This should obviously be available in the {@link #LOCATOR} instance, but if it's not
+         * (after deserialization on another malconfigured node?) we will print a warning
+         * (due to the potential performance penalty) and return a new instance of the manager.
+         *
+         * @param contextManagerClassName The class name of the context manager to be returned.
+         * @return The appropriate context manager from the locator (hopefully)
+         * or a new instance worst-case (warnings will be logged).
+         */
+        private static ContextManager<?> getContextManagerByName(String contextManagerClassName) {
+            for (ContextManager contextManager : LOCATOR) {
+                if (contextManagerClassName.equals(contextManager.getClass().getName())) return contextManager;
+            }
+            LOGGER.log(Level.WARNING, "Context manager \"{0}\" not found in service locator! " +
+                    "Attempting to create a new instance as last-resort.", contextManagerClassName);
+            try {
+                return (ContextManager) Class.forName(contextManagerClassName).getConstructor().newInstance();
+            } catch (ReflectiveOperationException | RuntimeException re) {
+                throw new IllegalStateException(String.format("Context manager \"%s\" is no longer available!",
+                        contextManagerClassName), re);
+            }
+        }
+
+        @SuppressWarnings("unchecked") // As we got the values from the managers themselves, they must also accept them!
         public Context<Void> reactivate() {
             final List<Context<?>> reactivatedContexts = new ArrayList<Context<?>>(snapshot.size());
             try {
-                for (Map.Entry<ContextManager, Object> entry : snapshot.entrySet()) {
-                    reactivatedContexts.add(entry.getKey().initializeNewContext(entry.getValue()));
+                for (Map.Entry<String, Object> entry : snapshot.entrySet()) {
+                    final ContextManager contextManager = getContextManagerByName(entry.getKey());
+                    reactivatedContexts.add(contextManager.initializeNewContext(entry.getValue()));
                 }
                 return new ReactivatedContext(reactivatedContexts);
-            } catch (RuntimeException errorWhileReactivating) {
-                for (Context reactivated : reactivatedContexts) {
-                    if (reactivated != null) try {
-                        reactivated.close();
+            } catch (RuntimeException reactivationException) {
+                for (Context alreadyReactivated : reactivatedContexts) {
+                    if (alreadyReactivated != null) try { // Undo already reactivated contexts.
+                        alreadyReactivated.close();
                     } catch (RuntimeException rte) {
-                        errorWhileReactivating.addSuppressed(rte);
+                        reactivationException.addSuppressed(rte);
                     }
                 }
-                throw errorWhileReactivating;
+                throw reactivationException;
             }
         }
 
@@ -112,8 +155,9 @@ public final class ContextManagers {
     }
 
     /**
-     * Implementation of the reactivated container context that closes all reactivated contexts when it is closed
-     * itself. This context contains no value of itself.
+     * Implementation of the reactivated 'container' context that closes all reactivated contexts
+     * when it is closed itself.<br>
+     * This context contains no meaningful value in itself and purely exists to close the reactivated contexts.
      */
     private static final class ReactivatedContext implements Context<Void> {
         private final List<Context<?>> reactivated;
@@ -122,21 +166,21 @@ public final class ContextManagers {
             this.reactivated = reactivated;
         }
 
-        public Void getValue() {
-            return null;
+        public Optional<Void> getValue() {
+            return Optional.empty();
         }
 
         public void close() {
-            RuntimeException closeError = null;
+            RuntimeException closeException = null;
             for (Context<?> reactivated : this.reactivated) {
                 if (reactivated != null) try {
                     reactivated.close();
                 } catch (RuntimeException rte) {
-                    if (closeError == null) closeError = rte;
-                    else closeError.addSuppressed(rte);
+                    if (closeException == null) closeException = rte;
+                    else closeException.addSuppressed(rte);
                 }
             }
-            if (closeError != null) throw closeError;
+            if (closeException != null) throw closeException;
         }
 
         @Override

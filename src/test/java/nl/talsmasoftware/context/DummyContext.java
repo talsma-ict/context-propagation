@@ -19,6 +19,8 @@ package nl.talsmasoftware.context;
 
 import nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext;
 
+import java.util.Optional;
+
 /**
  * @author Sjoerd Talsma
  */
@@ -37,13 +39,12 @@ public final class DummyContext extends AbstractThreadLocalContext<String> {
         INSTANCE.remove();
     }
 
-    static DummyContext current() {
-        return INSTANCE.get();
+    static Optional<Context<String>> current() {
+        return Optional.ofNullable(INSTANCE.get());
     }
 
     static String currentValue() {
-        final DummyContext current = current();
-        return current != null ? current.getValue() : null;
+        return current().flatMap(Context::getValue).orElse(null);
     }
 
 }
