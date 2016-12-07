@@ -17,8 +17,6 @@
 
 package nl.talsmasoftware.context;
 
-import nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext;
-
 import java.util.Optional;
 
 /**
@@ -28,7 +26,7 @@ import java.util.Optional;
  * A context has a very simple life-cycle: they can be created and {@link #close() closed}.
  * A well-behaved <code>Context</code> implementation will make sure that thread-local state is restored
  * to the way it was before when the context gets {@link #close() closed} again.<br>
- * There is an {@link AbstractThreadLocalContext abstract implementation}
+ * There is an {@link nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext abstract implementation}
  * available that can be extended, that takes care of random-depth nested contexts and restoring the 'previous'
  * context state.
  * <p>
@@ -47,7 +45,7 @@ public interface Context<T> extends AutoCloseable {
      * Contrary, it may in some cases be useful to retain the existing <code>value</code> after the context is closed,
      * so clients that have kept a reference can still have access to it.
      * <p>
-     * Normally, for security-related contexts, it is wise to always return <code>null</code> from closed contexts.
+     * Normally, for security-related contexts, it is wise to always return <code>empty</code> from closed contexts.
      *
      * @return The value associated with this context.
      */
