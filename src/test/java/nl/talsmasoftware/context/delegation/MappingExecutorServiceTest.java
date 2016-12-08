@@ -17,7 +17,6 @@
 
 package nl.talsmasoftware.context.delegation;
 
-import nl.talsmasoftware.context.delegation.CallMappingExecutorService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,7 +61,11 @@ public class MappingExecutorServiceTest {
     public void testNullConstructor() {
         TestMappingExecutorService mapped = new TestMappingExecutorService(null);// No error at construction time.
         try {
-            mapped.execute(() -> System.out.println("Whoops"));
+            mapped.execute(new Runnable() {
+                public void run() {
+                    System.out.println("Whoops");
+                }
+            });
             fail("Informative exception expected.");
         } catch (RuntimeException expected) {
             assertThat(expected, hasToString(containsString("No delegate available for TestMappingExecutorService")));
@@ -72,7 +75,11 @@ public class MappingExecutorServiceTest {
     @Test
     public void testMapRunnable() {
         final AtomicInteger runCounter = new AtomicInteger(0);
-        Runnable mapped = subject.wrap((Runnable) () -> runCounter.incrementAndGet());
+        Runnable mapped = subject.wrap(new Runnable() {
+            public void run() {
+                runCounter.incrementAndGet();
+            }
+        });
 
         assertThat(runCounter.get(), is(0));
         assertThat(subject.mapCount.get(), is(1));
@@ -193,9 +200,11 @@ public class MappingExecutorServiceTest {
 
         protected <V> Callable<V> map(final Callable<V> callable) {
             mapCount.incrementAndGet();
-            return () -> {
-                callCount.incrementAndGet();
-                return callable.call();
+            return new Callable<V>() {
+                public V call() throws Exception {
+                    callCount.incrementAndGet();
+                    return callable.call();
+                }
             };
         }
     }

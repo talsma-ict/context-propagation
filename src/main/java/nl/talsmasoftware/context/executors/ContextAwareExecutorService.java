@@ -17,10 +17,10 @@
 
 package nl.talsmasoftware.context.executors;
 
-import nl.talsmasoftware.context.delegation.CallMappingExecutorService;
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
+import nl.talsmasoftware.context.delegation.CallMappingExecutorService;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -52,12 +52,41 @@ public class ContextAwareExecutorService extends CallMappingExecutorService {
     @Override
     protected <V> Callable<V> map(final Callable<V> callable) {
         final ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
-        return () -> {
-            try (Context<Void> context = snapshot.reactivate()) {
-                logger.log(Level.FINEST, "Propagated {0} for call: {1}.", new Object[]{context, callable});
-                return callable.call();
+        return new Callable<V>() {
+            public V call() throws Exception {
+                final Context<Void> context = snapshot.reactivate();
+                boolean done = false;
+                try {
+
+                    final V result = callable.call();
+                    done = true;
+                    return result;
+
+                } finally {
+                    tryClose(context, done);
+                }
             }
         };
     }
 
+    /**
+     * tryClose method to be called from a finally() block that properly manages close exceptions.
+     *
+     * @param context     The context to be closed.
+     * @param callWasDone Whether or not the call was completed yet.
+     */
+    private void tryClose(Context<?> context, boolean callWasDone) {
+        if (context != null) try {
+            context.close();
+        } catch (Exception ex) {
+            IllegalStateException exception = new IllegalStateException(
+                    "Exception restoring context after applied snapshot: " + ex.getMessage(), ex);
+            if (callWasDone) { // Call was already done; we have to re-throw the close.
+                throw ex instanceof RuntimeException ? (RuntimeException) ex : exception;
+            } else { // Call was not yet done, i.e. an exception was thrown.
+                // Logging a warning is the best we can do; there is no SuppressedException in java 5.
+                logger.log(Level.WARNING, exception.getMessage(), exception);
+            }
+        }
+    }
 }

@@ -20,14 +20,11 @@ package nl.talsmasoftware.context.threadlocal;
 import nl.talsmasoftware.context.Context;
 
 import java.lang.reflect.Modifier;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * Abstract base class that will maintain a shared, static {@link ThreadLocal} instance for each concrete
@@ -40,7 +37,8 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
     /**
      * The constant of ThreadLocal context instances per subclass so different types don't get mixed.
      */
-    private static final ConcurrentMap<Class<?>, ThreadLocal<?>> INSTANCES = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Class<?>, ThreadLocal<?>> INSTANCES =
+            new ConcurrentHashMap<Class<?>, ThreadLocal<?>>();
 
     @SuppressWarnings("unchecked")
     private final ThreadLocal<AbstractThreadLocalContext<T>> sharedThreadLocalContext = threadLocalInstanceOf((Class) getClass());
@@ -91,8 +89,8 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
      *
      * @return The value of this context.
      */
-    public Optional<T> getValue() {
-        return Optional.ofNullable(closed.get() ? null : value);
+    public T getValue() {
+        return closed.get() ? null : value;
     }
 
     /**
@@ -144,8 +142,8 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
     @SuppressWarnings("unchecked")
     protected static <T, CTX extends AbstractThreadLocalContext<T>> ThreadLocal<CTX> threadLocalInstanceOf(
             final Class<? extends CTX> contextType) {
-        // Sanity checking.
-        Class<?> type = requireNonNull(contextType, "The context type was <null>.");
+        if (contextType == null) throw new NullPointerException("The context type was <null>.");
+        Class<?> type = contextType;
         if (!AbstractThreadLocalContext.class.isAssignableFrom(type)) {
             throw new IllegalArgumentException("Not a subclass of AbstractThreadLocalContext: " + type + '.');
         } else if (Modifier.isAbstract(contextType.getModifiers())) {
@@ -156,7 +154,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
             type = type.getSuperclass();
         }
         // Atomically get-or-create the appropriate ThreadLocal instance.
-        if (!INSTANCES.containsKey(contextType)) INSTANCES.putIfAbsent(type, new InheritableThreadLocal<>());
+        if (!INSTANCES.containsKey(type)) INSTANCES.putIfAbsent(type, new InheritableThreadLocal());
         return (ThreadLocal<CTX>) INSTANCES.get(type);
     }
 

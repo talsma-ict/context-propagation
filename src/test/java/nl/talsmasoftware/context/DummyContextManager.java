@@ -17,8 +17,6 @@
 
 package nl.talsmasoftware.context;
 
-import java.util.Optional;
-
 /**
  * Trivial manager around the {@link DummyContext} implementation to be registered as service provider.
  *
@@ -30,7 +28,7 @@ public class DummyContextManager implements ContextManager<String> {
         return new DummyContext(value);
     }
 
-    public Optional<Context<String>> getActiveContext() {
+    public Context<String> getActiveContext() {
         return DummyContext.current();
     }
 

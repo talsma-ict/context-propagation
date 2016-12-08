@@ -21,8 +21,6 @@ import nl.talsmasoftware.context.ContextSnapshot;
 
 import java.util.Objects;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * Wrapper that also contains a fixed context snapshot.
  *
@@ -34,7 +32,10 @@ public abstract class WrapperWithContext<T> extends Wrapper<T> {
 
     protected WrapperWithContext(ContextSnapshot snapshot, T delegate) {
         super(delegate);
-        this.snapshot = requireNonNull(snapshot, () -> String.format("No context snapshot provided to %s.", this));
+        this.snapshot = snapshot;
+        if (snapshot == null) {
+            throw new NullPointerException(String.format("No context snapshot provided to %s.", this));
+        }
     }
 
     @Override

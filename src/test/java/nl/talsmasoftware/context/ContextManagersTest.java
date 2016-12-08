@@ -20,10 +20,7 @@ package nl.talsmasoftware.context;
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
 import org.junit.Test;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -79,16 +76,25 @@ public class ContextManagersTest {
 
         DummyContext ctx1 = new DummyContext("initial value");
         assertThat(DummyContext.currentValue(), is("initial value"));
-        Future<String> threadResult = threadpool.submit(() -> DummyContext.currentValue());
+        Future<String> threadResult = threadpool.submit(new Callable<String>() {
+            public String call() throws Exception {
+                return DummyContext.currentValue();
+            }
+        });
         assertThat(threadResult.get(), is("initial value"));
 
         DummyContext ctx2 = new DummyContext("second value");
-        threadResult = threadpool.submit(() -> {
-            String res = DummyContext.currentValue();
-            try (DummyContext inThread = new DummyContext("in-thread value")) {
-                res += ", " + DummyContext.currentValue();
+        threadResult = threadpool.submit(new Callable<String>() {
+            public String call() throws Exception {
+                String res = DummyContext.currentValue();
+                DummyContext inThread = new DummyContext("in-thread value");
+                try {
+                    res += ", " + DummyContext.currentValue();
+                } finally {
+                    inThread.close();
+                }
+                return res + ", " + DummyContext.currentValue();
             }
-            return res + ", " + DummyContext.currentValue();
         });
         assertThat(DummyContext.currentValue(), is("second value"));
         assertThat(threadResult.get(), is("second value, in-thread value, second value"));

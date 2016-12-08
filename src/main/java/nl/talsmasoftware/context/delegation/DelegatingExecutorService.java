@@ -74,7 +74,7 @@ public abstract class DelegatingExecutorService extends Wrapper<ExecutorService>
         Collection<? extends Callable<T>> wrappedTasks = tasks;
         if (tasks != null && !tasks.isEmpty()) {
             boolean modification = false;
-            final List<Callable<T>> copy = new ArrayList<>(tasks.size());
+            final List<Callable<T>> copy = new ArrayList<Callable<T>>(tasks.size());
             for (Callable<T> task : tasks) {
                 final Callable<T> wrapped = wrap(task);
                 modification |= !Objects.equals(task, wrapped);
@@ -96,7 +96,7 @@ public abstract class DelegatingExecutorService extends Wrapper<ExecutorService>
      */
     protected <T> List<Future<T>> wrapFutures(Collection<? extends Future<T>> futures) {
         if (futures == null) return null;
-        final List<Future<T>> wrappedFutures = new ArrayList<>(futures.size());
+        final List<Future<T>> wrappedFutures = new ArrayList<Future<T>>(futures.size());
         for (Future<T> future : futures) wrappedFutures.add(wrap(future));
         return wrappedFutures;
     }

@@ -17,7 +17,10 @@
 
 package nl.talsmasoftware.context;
 
+import javax.imageio.spi.ServiceRegistry;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,14 +39,12 @@ import java.util.logging.Logger;
  * @navassoc - creates - ContextSnapshot
  */
 public final class ContextManagers {
-
     private static final Logger LOGGER = Logger.getLogger(ContextManagers.class.getName());
 
     /**
      * Service locator for registered {@link ContextManager} implementations.
      */
-    private static final ServiceLoader<ContextManager> LOCATOR =
-            ServiceLoader.load(ContextManager.class, ContextManagers.class.getClassLoader());
+    private static final Loader<ContextManager> LOCATOR = new Loader<ContextManager>(ContextManager.class);
 
     /**
      * Private constructor to avoid instantiation of this class.
@@ -74,15 +75,13 @@ public final class ContextManagers {
      * within a try-with-resources construct.
      */
     public static ContextSnapshot createContextSnapshot() {
-        final Map<String, Object> snapshot = new LinkedHashMap<>();
+        final Map<String, Object> snapshot = new LinkedHashMap<String, Object>();
         boolean noManagers = true;
         for (ContextManager manager : LOCATOR) {
             noManagers = false;
-            final Optional<Context> activeContext = manager.getActiveContext();
-            if (activeContext != null && activeContext.isPresent()) {
-                final String managerClassName = manager.getClass().getName();
-                final Optional<?> optional = activeContext.get().getValue();
-                snapshot.put(managerClassName, optional != null ? optional.orElseGet(null) : null);
+            final Context activeContext = manager.getActiveContext();
+            if (activeContext != null) {
+                snapshot.put(manager.getClass().getName(), activeContext.getValue());
             }
         }
         if (noManagers) LOGGER.log(Level.WARNING, "Context snapshot was created but no ContextManagers were found!");
@@ -120,10 +119,27 @@ public final class ContextManagers {
             LOGGER.log(Level.WARNING, "Context manager \"{0}\" not found in service locator! " +
                     "Attempting to create a new instance as last-resort.", contextManagerClassName);
             try {
+
                 return (ContextManager) Class.forName(contextManagerClassName).getConstructor().newInstance();
-            } catch (ReflectiveOperationException | RuntimeException re) {
-                throw new IllegalStateException(String.format("Context manager \"%s\" is no longer available!",
-                        contextManagerClassName), re);
+
+            } catch (ClassNotFoundException cnfe) {
+                throw new IllegalStateException(String.format(
+                        "Context manager \"%s\" is not available on this node!", contextManagerClassName), cnfe);
+            } catch (NoSuchMethodException nsme) {
+                throw new IllegalStateException(String.format(
+                        "Context manager \"%s\" no longer has a default constructor!", contextManagerClassName), nsme);
+            } catch (InvocationTargetException ite) {
+                throw new IllegalStateException(String.format(
+                        "Exception reconstructing ContextManager \"%s\"!", contextManagerClassName), ite.getCause());
+            } catch (InstantiationException ie) {
+                throw new IllegalStateException(String.format(
+                        "Context manager \"%s\" is no longer available!", contextManagerClassName), ie);
+            } catch (IllegalAccessException iae) {
+                throw new IllegalStateException(String.format(
+                        "Not allowed to reload ContextManager \"%s\" on this node!", contextManagerClassName), iae);
+            } catch (RuntimeException rte) {
+                throw new IllegalStateException(String.format(
+                        "Context manager \"%s\" is no longer available!", contextManagerClassName), rte);
             }
         }
 
@@ -141,7 +157,7 @@ public final class ContextManagers {
                     if (alreadyReactivated != null) try { // Undo already reactivated contexts.
                         alreadyReactivated.close();
                     } catch (RuntimeException rte) {
-                        reactivationException.addSuppressed(rte);
+                        addSuppressedOrWarn(reactivationException, rte, "Could not close already reactivated context.");
                     }
                 }
                 throw reactivationException;
@@ -166,8 +182,8 @@ public final class ContextManagers {
             this.reactivated = reactivated;
         }
 
-        public Optional<Void> getValue() {
-            return Optional.empty();
+        public Void getValue() {
+            return null;
         }
 
         public void close() {
@@ -177,7 +193,7 @@ public final class ContextManagers {
                     reactivated.close();
                 } catch (RuntimeException rte) {
                     if (closeException == null) closeException = rte;
-                    else closeException.addSuppressed(rte);
+                    else addSuppressedOrWarn(closeException, rte, "Exception closing the reactivated context.");
                 }
             }
             if (closeException != null) throw closeException;
@@ -189,4 +205,66 @@ public final class ContextManagers {
         }
     }
 
+    private static final Method ADD_SUPPRESSED;
+
+    static {
+        Method reflected = null;
+        try {
+            reflected = Throwable.class.getDeclaredMethod("addSuppressed", Throwable.class);
+        } catch (NoSuchMethodException nsme) {
+            LOGGER.log(Level.FINEST, "Older JDK detected; the Throwable.addSuppressed() method was not available.", nsme);
+        }
+        ADD_SUPPRESSED = reflected;
+    }
+
+    private static <EX extends Throwable> EX addSuppressedOrWarn(EX exception, Throwable toSuppress, String message) {
+        if (ADD_SUPPRESSED != null) try {
+            ADD_SUPPRESSED.invoke(exception, toSuppress);
+            return exception;
+        } catch (InvocationTargetException ite) {
+            LOGGER.log(Level.FINEST, "Unexpected exception calling addSuppressed.", ite.getCause());
+        } catch (IllegalAccessException iae) {
+            LOGGER.log(Level.FINEST, "Not allowed to call addSuppressed: {0}", new Object[]{iae.getMessage(), iae});
+        }
+        LOGGER.log(Level.WARNING, message, toSuppress);
+        return exception;
+    }
+
+    /**
+     * Loader class to delegate to JDK 6 ServiceLoader or fallback to the old {@link ServiceRegistry}.
+     *
+     * @param <SVC> The type of service to load.
+     */
+    private static final class Loader<SVC> implements Iterable<SVC> {
+        private final Class<SVC> serviceType;
+        private final Iterable<SVC> delegate;
+
+        @SuppressWarnings("unchecked") // Type is actually safe, although we use reflection.
+        private Loader(Class<SVC> serviceType) {
+            this.serviceType = serviceType;
+            Iterable<SVC> serviceLoader = null;
+            try { // Attempt to use Java 1.6 ServiceLoader:
+                // ServiceLoader.load(ContextManager.class, ContextManagers.class.getClassLoader());
+                serviceLoader = (Iterable<SVC>) Class.forName("java.util.ServiceLoader")
+                        .getDeclaredMethod("load", Class.class, ClassLoader.class)
+                        .invoke(null, serviceType, serviceType.getClassLoader());
+            } catch (ClassNotFoundException cnfe) {
+                LOGGER.log(Level.FINEST, "Java 6 ServiceLoader not found, falling back to the imageio ServiceRegistry.");
+            } catch (NoSuchMethodException nsme) {
+                LOGGER.log(Level.SEVERE, "Could not find the 'load' method in the JDK's ServiceLoader.", nsme);
+            } catch (IllegalAccessException iae) {
+                LOGGER.log(Level.SEVERE, "Not allowed to call the 'load' method in the JDK's ServiceLoader.", iae);
+            } catch (InvocationTargetException ite) {
+                throw new IllegalStateException(String.format(
+                        "Exception calling the 'load' method in the JDK's ServiceLoader for the %s service.",
+                        serviceType.getSimpleName()), ite.getCause());
+            }
+            this.delegate = serviceLoader;
+        }
+
+        public Iterator<SVC> iterator() {
+            return delegate != null ? delegate.iterator()
+                    : ServiceRegistry.lookupProviders(serviceType, serviceType.getClassLoader());
+        }
+    }
 }

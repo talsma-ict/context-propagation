@@ -17,7 +17,6 @@
 
 package nl.talsmasoftware.context.delegation;
 
-import nl.talsmasoftware.context.delegation.DelegatingExecutorService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,7 +66,11 @@ public class DelegatingExecutorServiceTest {
     public void testNullConstructor() {
         TestDelegatingExecutorService tdes = new TestDelegatingExecutorService(null); // No error at construction time.
         try {
-            tdes.execute(() -> System.out.println("Whoops"));
+            tdes.execute(new Runnable() {
+                public void run() {
+                    System.out.println("Whoops");
+                }
+            });
             fail("Informative exception expected.");
         } catch (RuntimeException expected) {
             assertThat(expected, hasToString(containsString("No delegate available for TestDelegatingExecutorService")));

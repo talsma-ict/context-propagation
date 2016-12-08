@@ -17,7 +17,7 @@
 
 package nl.talsmasoftware.context;
 
-import java.util.Optional;
+import java.io.Closeable;
 
 /**
  * A context can be anything that needs to be maintained on the 'current thread' level.
@@ -34,22 +34,22 @@ import java.util.Optional;
  *
  * @author Sjoerd Talsma
  */
-public interface Context<T> extends AutoCloseable {
+public interface Context<T> extends Closeable {
 
     /**
      * Returns the value associated with this context.
      * <p>
      * Implementors should explicitly document the behaviour of this method <em>after {@link #close()}</em> was called.
-     * For example, it may be useful to always return <code>empty</code> after a {@link Context} has been
+     * For example, it may be useful to always return <code>null</code> after a {@link Context} has been
      * {@link #close() closed}.
      * Contrary, it may in some cases be useful to retain the existing <code>value</code> after the context is closed,
      * so clients that have kept a reference can still have access to it.
      * <p>
-     * Normally, for security-related contexts, it is wise to always return <code>empty</code> from closed contexts.
+     * Normally, for security-related contexts, it is wise to always return <code>null</code> from closed contexts.
      *
      * @return The value associated with this context.
      */
-    Optional<T> getValue();
+    T getValue();
 
     /**
      * Closes this context and restores any context changes made by this object to the way things were before it
