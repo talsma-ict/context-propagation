@@ -12,7 +12,7 @@
     <packaging>pom</packaging>
 
     <!-- Project information -->
-    <name>Global context propagation library</name>
+    <name>Context propagation library</name>
     <description>Library for standardized management of global context propagation in concurrent systems.</description>
     <url>https://github.com/talsma-ict/context-propagation</url>
     <inceptionYear>2016</inceptionYear>
@@ -336,6 +336,7 @@
 
     <modules>
         <module>context-propagation-java5</module>
+        <module>context-propagation-java8</module>
     </modules>
 
 </project>

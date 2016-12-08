@@ -13,11 +13,8 @@
     <!-- Artifact identification -->
     <groupId>nl.talsmasoftware</groupId>
     <artifactId>context-propagation</artifactId>
+    <name>Context propagation (core, java-5)</name>
     <packaging>jar</packaging>
-
-    <!-- Project information -->
-    <name>Global context propagation library (core, java-5)</name>
-    <description>Library for standardized management of global context propagation in concurrent systems.</description>
 
     <build>
         <plugins>
