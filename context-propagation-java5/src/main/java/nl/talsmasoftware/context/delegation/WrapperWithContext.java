@@ -19,8 +19,6 @@ package nl.talsmasoftware.context.delegation;
 
 import nl.talsmasoftware.context.ContextSnapshot;
 
-import java.util.Objects;
-
 /**
  * Wrapper that also contains a fixed context snapshot.
  *
@@ -40,20 +38,18 @@ public abstract class WrapperWithContext<T> extends Wrapper<T> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), snapshot);
+        return 31 * super.hashCode() + snapshot.hashCode();
     }
 
     @Override
     public boolean equals(Object other) {
         return this == other
-                || (super.equals(other) && Objects.equals(snapshot, ((WrapperWithContext<?>) other).snapshot));
+                || (super.equals(other) && snapshot.equals(((WrapperWithContext<?>) other).snapshot));
     }
 
     @Override
     public String toString() {
-        return getClass().getSimpleName()
-                + "{delegate=" + Objects.toString(delegate(), "<null>")
-                + ", snapshot=" + snapshot + '}';
+        return getClass().getSimpleName() + "{delegate=" + delegate() + ", snapshot=" + snapshot + '}';
     }
 
 }

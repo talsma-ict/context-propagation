@@ -17,8 +17,6 @@
 
 package nl.talsmasoftware.context.delegation;
 
-import java.util.Objects;
-
 /**
  * Base wrapper class offering a {@link #nonNullDelegate() non-null delegate} method.
  *
@@ -82,12 +80,16 @@ public abstract class Wrapper<T> {
                         && delegate.equals(((Wrapper) other).delegate));
     }
 
+    static boolean equals(Object obj1, Object obj2) {
+        return obj1 == obj2 || (obj1 != null && obj2 != null && obj1.equals(obj2));
+    }
+
     /**
      * @return The class name and the delegate string representation.
      */
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{delegate=" + Objects.toString(delegate(), "<null>") + '}';
+        return getClass().getSimpleName() + "{delegate=" + delegate() + '}';
     }
 
 }
