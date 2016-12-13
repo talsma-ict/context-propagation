@@ -27,7 +27,7 @@ import nl.talsmasoftware.concurrency.context.Context;
  * @author Sjoerd Talsma
  * @see nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext
  * @deprecated This is the old implementation.
- * Please swith to <code>nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext</code>
+ * Please switch to <code>nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext</code>
  */
 public abstract class AbstractThreadLocalContext<T>
         extends nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext<T>
