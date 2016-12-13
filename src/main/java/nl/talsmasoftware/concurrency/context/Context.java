@@ -26,8 +26,9 @@ package nl.talsmasoftware.concurrency.context;
  * the context gets {@link #close() closed}.
  *
  * @author Sjoerd Talsma
+ * @deprecated This is the old implementation. Please swith to <code>nl.talsmasoftware.context.Context</code>
  */
-public interface Context<T> extends AutoCloseable {
+public interface Context<T> extends nl.talsmasoftware.context.Context<T> {
 
     /**
      * Returns the value associated with this context.

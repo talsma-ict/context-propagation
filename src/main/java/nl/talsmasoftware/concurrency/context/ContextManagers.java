@@ -30,16 +30,9 @@ import java.util.logging.Logger;
  * {@link Context#close() closed} again (preferably in a <code>try-with-resources</code> construct).
  *
  * @author Sjoerd Talsma
+ * @deprecated This is the old implementation. Please swith to <code>nl.talsmasoftware.context.ContextManagers</code>
  */
 public final class ContextManagers {
-
-    private static final Logger LOGGER = Logger.getLogger(ContextManagers.class.getName());
-
-    /**
-     * Service locator for registered {@link ContextManager} implementations.
-     */
-    private static final ServiceLoader<ContextManager> LOCATOR =
-            ServiceLoader.load(ContextManager.class, ContextManagers.class.getClassLoader());
 
     /**
      * Private constructor to avoid instantiation of this class.
@@ -58,88 +51,32 @@ public final class ContextManagers {
      * context once you're done, preferably in a <code>try-with-resources</code> construct.
      *
      * @return A new snapshot that can be reactivated in a background thread within a try-with-resources construct.
+     * @see nl.talsmasoftware.context.ContextManagers#createContextSnapshot()
+     * @see LegacyContextManagerBridge
+     * @deprecated This is the old implementation. Please swith to <code>nl.talsmasoftware.context.ContextManagers</code>
      */
     public static ContextSnapshot createContextSnapshot() {
-        final Map<ContextManager, Object> snapshot = new IdentityHashMap<ContextManager, Object>();
-        boolean empty = true;
-        for (ContextManager manager : LOCATOR) {
-            empty = false;
-            final Context activeContext = manager.getActiveContext();
-            if (activeContext != null) snapshot.put(manager, activeContext.getValue());
-        }
-        if (empty) LOGGER.log(Level.WARNING, "Context snapshot was created but no ContextManagers were found!");
-        return new ContextSnapshotImpl(snapshot);
-    }
-
-    /**
-     * Implementation of the <code>createContextSnapshot</code> functionality that can reactivate all values from the
-     * snapshot in each corresponding {@link ContextManager}.
-     */
-    private static final class ContextSnapshotImpl implements ContextSnapshot {
-        private final Map<ContextManager, Object> snapshot;
-
-        ContextSnapshotImpl(Map<ContextManager, Object> snapshot) {
-            this.snapshot = snapshot;
-        }
-
-        @SuppressWarnings("unchecked") // We got the value from the context manager itself!
-        public Context<Void> reactivate() {
-            final List<Context<?>> reactivatedContexts = new ArrayList<Context<?>>(snapshot.size());
-            try {
-                for (Map.Entry<ContextManager, Object> entry : snapshot.entrySet()) {
-                    reactivatedContexts.add(entry.getKey().initializeNewContext(entry.getValue()));
-                }
-                return new ReactivatedContext(reactivatedContexts);
-            } catch (RuntimeException errorWhileReactivating) {
-                for (Context reactivated : reactivatedContexts) {
-                    if (reactivated != null) try {
-                        reactivated.close();
-                    } catch (RuntimeException rte) {
-                        errorWhileReactivating.addSuppressed(rte);
+        // Delegate to the new context manager implementation.
+        // Depend on our LegacyContextManager to propagate old contexts.
+        final nl.talsmasoftware.context.ContextSnapshot newSnapshot =
+                nl.talsmasoftware.context.ContextManagers.createContextSnapshot();
+        return new ContextSnapshot() {
+            @Override
+            public Context<Void> reactivate() {
+                final nl.talsmasoftware.context.Context<Void> newReactivation = newSnapshot.reactivate();
+                return new Context<Void>() {
+                    @Override
+                    public Void getValue() {
+                        return null;
                     }
-                }
-                throw errorWhileReactivating;
+
+                    @Override
+                    public void close() {
+                        newReactivation.close();
+                    }
+                };
             }
-        }
-
-        @Override
-        public String toString() {
-            return "ContextSnapshot{size=" + snapshot.size() + '}';
-        }
-    }
-
-    /**
-     * Implementation of the reactivated container context that closes all reactivated contexts when it is closed
-     * itself. This context contains no value of itself.
-     */
-    private static final class ReactivatedContext implements Context<Void> {
-        private final List<Context<?>> reactivated;
-
-        private ReactivatedContext(List<Context<?>> reactivated) {
-            this.reactivated = reactivated;
-        }
-
-        public Void getValue() {
-            return null;
-        }
-
-        public void close() {
-            RuntimeException closeError = null;
-            for (Context<?> reactivated : this.reactivated) {
-                if (reactivated != null) try {
-                    reactivated.close();
-                } catch (RuntimeException rte) {
-                    if (closeError == null) closeError = rte;
-                    else closeError.addSuppressed(rte);
-                }
-            }
-            if (closeError != null) throw closeError;
-        }
-
-        @Override
-        public String toString() {
-            return "ReactivatedContext{size=" + reactivated.size() + '}';
-        }
+        };
     }
 
 }

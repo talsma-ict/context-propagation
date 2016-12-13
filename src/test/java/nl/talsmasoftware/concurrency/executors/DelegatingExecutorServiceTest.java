@@ -30,6 +30,7 @@ import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
@@ -61,9 +62,14 @@ public class DelegatingExecutorServiceTest {
         verifyNoMoreInteractions(delegate);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNullConstructor() {
-        new TestDelegatingExecutorService(null);
+        try {
+            new TestDelegatingExecutorService(null);
+            fail("exception expected");
+        } catch (RuntimeException expected) {
+            assertThat(expected, hasToString(containsString("No delegate available")));
+        }
     }
 
     @Test
@@ -113,7 +119,7 @@ public class DelegatingExecutorServiceTest {
     public void testSubmitCallable() {
         Callable callable = mock(Callable.class);
         Future<?> result = mock(Future.class);
-        when(delegate.submit(any(Callable.class))).thenReturn(result);
+        when(delegate.submit(any(Callable.class))).thenReturn((Future) result);
 
         assertThat(subject.submit(callable), is(sameInstance((Future) result)));
 
@@ -137,7 +143,7 @@ public class DelegatingExecutorServiceTest {
         List<Future<Object>> result = emptyList();
         when(delegate.invokeAll(any(Collection.class))).thenReturn(result);
 
-        assertThat(subject.invokeAll(calls), is(sameInstance(result)));
+        assertThat(subject.invokeAll(calls), is(equalTo(result)));
 
         verify(delegate).invokeAll(same(calls));
     }
@@ -148,7 +154,7 @@ public class DelegatingExecutorServiceTest {
         List<Future<Object>> result = emptyList();
         when(delegate.invokeAll(any(Collection.class), anyLong(), any(TimeUnit.class))).thenReturn(result);
 
-        assertThat(subject.invokeAll(calls, 2364L, MILLISECONDS), is(sameInstance(result)));
+        assertThat(subject.invokeAll(calls, 2364L, MILLISECONDS), is(equalTo(result)));
 
         verify(delegate).invokeAll(same(calls), eq(2364L), eq(MILLISECONDS));
     }

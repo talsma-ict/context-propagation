@@ -27,8 +27,9 @@ package nl.talsmasoftware.concurrency.context;
  * {@link ContextManagers} utility class.
  *
  * @author Sjoerd Talsma
+ * @deprecated This is the old implementation. Please swith to <code>nl.talsmasoftware.context.ContextManager</code>
  */
-public interface ContextManager<T> {
+public interface ContextManager<T> extends nl.talsmasoftware.context.ContextManager<T> {
 
     /**
      * This method initializes a new context containing the specified <code>value</code>.
@@ -39,7 +40,7 @@ public interface ContextManager<T> {
      *              (which should be closed by the caller at the end of its lifecycle).
      * @return The new context containing the specified value.
      */
-    Context initializeNewContext(T value);
+    Context<T> initializeNewContext(T value);
 
     /**
      * This method returns the current context, or <code>null</code> if no context is currently active.

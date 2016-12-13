@@ -8,14 +8,12 @@
     <!-- Artifact identification -->
     <groupId>nl.talsmasoftware</groupId>
     <artifactId>concurrency</artifactId>
-    <version>0.1.0</version>
+    <version>0.1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <!-- Project information -->
     <name>Concurrency utility library</name>
-    <description>
-        Utility library for basic concurrency functionality.
-    </description>
+    <description>Replaced by context-propagation 0.3.0!</description>
     <url>https://github.com/talsma-ict/concurrency</url>
     <inceptionYear>2016</inceptionYear>
 
@@ -196,7 +194,7 @@
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
-                        <phase>verify</phase>
+                        <phase>deploy</phase>
                         <goals>
                             <goal>sign</goal>
                         </goals>
@@ -231,6 +229,11 @@
 
     <dependencies>
         <!-- Runtime dependencies: -->
+        <dependency>
+            <groupId>nl.talsmasoftware</groupId>
+            <artifactId>context-propagation-java8</artifactId>
+            <version>0.3.0</version>
+        </dependency>
 
         <!-- Optionally provided dependencies: -->
 

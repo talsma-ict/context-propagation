@@ -17,59 +17,22 @@
 
 package nl.talsmasoftware.concurrency.context.function;
 
-import nl.talsmasoftware.concurrency.context.Context;
 import nl.talsmasoftware.concurrency.context.ContextSnapshot;
 
 import java.util.function.BiPredicate;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * A wrapper for {@link BiPredicate} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
  * calling a delegate.
  *
  * @author Sjoerd Talsma
+ * @see nl.talsmasoftware.context.functions.BiPredicateWithContext
+ * @deprecated Please switch to <code>nl.talsmasoftware.context.functions.BiPredicateWithContext</code>
  */
-public class BiPredicateWithContext<IN1, IN2> implements BiPredicate<IN1, IN2> {
-    private static final Logger LOGGER = Logger.getLogger(BiPredicateWithContext.class.getName());
-
-    private final ContextSnapshot snapshot;
-    private final BiPredicate<IN1, IN2> delegate;
+public class BiPredicateWithContext<IN1, IN2> extends nl.talsmasoftware.context.functions.BiPredicateWithContext<IN1, IN2> {
 
     public BiPredicateWithContext(ContextSnapshot snapshot, BiPredicate<IN1, IN2> delegate) {
-        this.snapshot = requireNonNull(snapshot, "No context snapshot provided to BiPredicateWithContext.");
-        this.delegate = requireNonNull(delegate, "No delegate provided to BiPredicateWithContext.");
+        super(snapshot, delegate);
     }
 
-    @Override
-    public boolean test(IN1 in1, IN2 in2) {
-        try (Context<Void> context = snapshot.reactivate()) {
-            LOGGER.log(Level.FINEST, "Delegating test method with {0} to {1}.", new Object[]{context, delegate});
-            return delegate.test(in1, in2);
-        }
-    }
-
-    @Override
-    public BiPredicate<IN1, IN2> and(BiPredicate<? super IN1, ? super IN2> other) {
-        requireNonNull(other, "Cannot combine bi-predicate with 'and' <null>.");
-        return (IN1 in1, IN2 in2) -> {
-            try (Context<Void> context = snapshot.reactivate()) {
-                LOGGER.log(Level.FINEST, "Delegating 'and' method with {0} to {1}.", new Object[]{context, delegate});
-                return delegate.test(in1, in2) && other.test(in1, in2);
-            }
-        };
-    }
-
-    @Override
-    public BiPredicate<IN1, IN2> or(BiPredicate<? super IN1, ? super IN2> other) {
-        requireNonNull(other, "Cannot combine bi-predicate with 'or' <null>.");
-        return (IN1 in1, IN2 in2) -> {
-            try (Context<Void> context = snapshot.reactivate()) {
-                LOGGER.log(Level.FINEST, "Delegating 'or' method with {0} to {1}.", new Object[]{context, delegate});
-                return delegate.test(in1, in2) || other.test(in1, in2);
-            }
-        };
-    }
 }

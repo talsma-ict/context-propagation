@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.*;
@@ -56,9 +57,15 @@ public class MappingExecutorServiceTest {
         verifyNoMoreInteractions(delegate);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNullConstructor() {
-        new TestMappingExecutorService(null);
+        TestMappingExecutorService mapped = new TestMappingExecutorService(null);
+        try {
+            mapped.isShutdown();
+            fail("Exception expected");
+        } catch (RuntimeException expected) {
+            assertThat(expected, hasToString(containsString("No delegate available")));
+        }
     }
 
     @Test
@@ -133,7 +140,7 @@ public class MappingExecutorServiceTest {
         List<Future<Object>> result = futures(3);
         when(delegate.invokeAll(anyCollection())).thenReturn(result);
 
-        assertThat(subject.invokeAll(calls(3)), is(sameInstance(result)));
+        assertThat(subject.invokeAll(calls(3)), is(equalTo(result)));
         assertThat(subject.mapCount.get(), is(3));
 
         verify(delegate).invokeAll((Collection<Callable<Object>>) argThat(hasSize(3)));
@@ -144,7 +151,7 @@ public class MappingExecutorServiceTest {
         List<Future<Object>> result = futures(5);
         when(delegate.invokeAll(anyCollection(), anyLong(), any(TimeUnit.class))).thenReturn(result);
 
-        assertThat(subject.invokeAll(calls(5), 1274L, MILLISECONDS), is(sameInstance(result)));
+        assertThat(subject.invokeAll(calls(5), 1274L, MILLISECONDS), is(equalTo(result)));
         assertThat(subject.mapCount.get(), is(5));
 
         verify(delegate).invokeAll((Collection<Callable<Object>>) argThat(hasSize(5)), eq(1274L), eq(MILLISECONDS));

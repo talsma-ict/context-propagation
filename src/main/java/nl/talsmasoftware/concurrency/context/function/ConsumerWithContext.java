@@ -17,50 +17,22 @@
 
 package nl.talsmasoftware.concurrency.context.function;
 
-import nl.talsmasoftware.concurrency.context.Context;
 import nl.talsmasoftware.concurrency.context.ContextSnapshot;
 
 import java.util.function.Consumer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * A wrapper for {@link Consumer} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
  * calling a delegate.
  *
  * @author Sjoerd Talsma
+ * @see nl.talsmasoftware.context.functions.ConsumerWithContext
+ * @deprecated Please switch to <code>nl.talsmasoftware.context.functions.ConsumerWithContext</code>
  */
-public class ConsumerWithContext<T> implements Consumer<T> {
-    private static final Logger LOGGER = Logger.getLogger(ConsumerWithContext.class.getName());
-
-    private final ContextSnapshot snapshot;
-    private final Consumer<T> delegate;
+public class ConsumerWithContext<T> extends nl.talsmasoftware.context.functions.ConsumerWithContext<T> {
 
     public ConsumerWithContext(ContextSnapshot snapshot, Consumer<T> delegate) {
-        this.snapshot = requireNonNull(snapshot, "No context snapshot provided to ConsumerWithContext.");
-        this.delegate = requireNonNull(delegate, "No delegate provided to ConsumerWithContext.");
+        super(snapshot, delegate);
     }
 
-
-    @Override
-    public void accept(T t) {
-        try (Context<Void> context = snapshot.reactivate()) {
-            LOGGER.log(Level.FINEST, "Delegating accept method with {0} to {1}.", new Object[]{context, delegate});
-            delegate.accept(t);
-        }
-    }
-
-    @Override
-    public Consumer<T> andThen(Consumer<? super T> after) {
-        requireNonNull(after, "Cannot follow consumer with after consumer <null>.");
-        return (T t) -> {
-            try (Context<Void> context = snapshot.reactivate()) {
-                LOGGER.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate});
-                delegate.accept(t);
-                after.accept(t);
-            }
-        };
-    }
 }

@@ -17,10 +17,7 @@
 
 package nl.talsmasoftware.concurrency.futures;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import static java.util.Objects.requireNonNull;
 
@@ -32,49 +29,20 @@ import static java.util.Objects.requireNonNull;
  * <em>abstract</em> class. This is because it does not provide any value in itself.
  *
  * @author Sjoerd Talsma
+ * @see nl.talsmasoftware.context.delegation.DelegatingFuture
+ * @deprecated Please switch to <code>nl.talsmasoftware.context.delegation.DelegatingFuture</code>
  */
-public abstract class DelegatingFuture<V> implements Future<V> {
+public abstract class DelegatingFuture<V> extends nl.talsmasoftware.context.delegation.DelegatingFuture<V> {
 
+    /**
+     * @see #nonNullDelegate()
+     * @deprecated Please use {@link #nonNullDelegate()}.
+     */
     protected final Future<V> delegate;
 
     protected DelegatingFuture(Future<V> delegate) {
-        this.delegate = requireNonNull(delegate, "No delegate future provided!");
-    }
-
-    public boolean cancel(boolean mayInterruptIfRunning) {
-        return delegate.cancel(mayInterruptIfRunning);
-    }
-
-    public boolean isCancelled() {
-        return delegate.isCancelled();
-    }
-
-    public boolean isDone() {
-        return delegate.isDone();
-    }
-
-    public V get() throws InterruptedException, ExecutionException {
-        return delegate.get();
-    }
-
-    public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        return delegate.get(timeout, unit);
-    }
-
-    @Override
-    public int hashCode() {
-        return delegate.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        return this == other || (other != null && getClass().equals(other.getClass())
-                && delegate.equals(((DelegatingFuture) other).delegate));
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + '{' + delegate + '}';
+        super(requireNonNull(delegate, "No delegate future provided!"));
+        this.delegate = nonNullDelegate();
     }
 
 }

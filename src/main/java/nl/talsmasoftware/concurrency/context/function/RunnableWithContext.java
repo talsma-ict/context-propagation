@@ -17,37 +17,20 @@
 
 package nl.talsmasoftware.concurrency.context.function;
 
-import nl.talsmasoftware.concurrency.context.Context;
 import nl.talsmasoftware.concurrency.context.ContextSnapshot;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * A wrapper for {@link Runnable} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
  * calling a delegate.
  *
  * @author Sjoerd Talsma
+ * @see nl.talsmasoftware.context.functions.RunnableWithContext
+ * @deprecated Please switch to <code>nl.talsmasoftware.context.functions.RunnableWithContext</code>
  */
-public class RunnableWithContext implements Runnable {
-    private static final Logger LOGGER = Logger.getLogger(RunnableWithContext.class.getName());
-
-    private final ContextSnapshot snapshot;
-    private final Runnable delegate;
+public class RunnableWithContext extends nl.talsmasoftware.context.functions.RunnableWithContext {
 
     public RunnableWithContext(ContextSnapshot snapshot, Runnable delegate) {
-        this.snapshot = requireNonNull(snapshot, "No context snapshot provided to RunnableWithContext.");
-        this.delegate = requireNonNull(delegate, "No delegate provided to RunnableWithContext.");
-    }
-
-    @Override
-    public void run() {
-        try (Context<Void> context = snapshot.reactivate()) {
-            LOGGER.log(Level.FINEST, "Delegating run method with {0} to {1}.", new Object[]{context, delegate});
-            delegate.run();
-        }
+        super(snapshot, delegate);
     }
 
 }

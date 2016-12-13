@@ -17,60 +17,22 @@
 
 package nl.talsmasoftware.concurrency.context.function;
 
-import nl.talsmasoftware.concurrency.context.Context;
 import nl.talsmasoftware.concurrency.context.ContextSnapshot;
 
 import java.util.function.Predicate;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * A wrapper for {@link Predicate} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
  * calling a delegate.
  *
  * @author Sjoerd Talsma
+ * @see nl.talsmasoftware.context.functions.PredicateWithContext
+ * @deprecated Please switch to <code>nl.talsmasoftware.context.functions.PredicateWithContext</code>
  */
-public class PredicateWithContext<T> implements Predicate<T> {
-    private static final Logger LOGGER = Logger.getLogger(PredicateWithContext.class.getName());
-
-    private final ContextSnapshot snapshot;
-    private final Predicate<T> delegate;
+public class PredicateWithContext<T> extends nl.talsmasoftware.context.functions.PredicateWithContext<T> {
 
     public PredicateWithContext(ContextSnapshot snapshot, Predicate<T> delegate) {
-        this.snapshot = requireNonNull(snapshot, "No context snapshot provided to PredicateWithContext.");
-        this.delegate = requireNonNull(delegate, "No delegate provided to PredicateWithContext.");
-    }
-
-    @Override
-    public boolean test(T t) {
-        try (Context<Void> context = snapshot.reactivate()) {
-            LOGGER.log(Level.FINEST, "Delegating test method with {0} to {1}.", new Object[]{context, delegate});
-            return delegate.test(t);
-        }
-    }
-
-    @Override
-    public Predicate<T> and(Predicate<? super T> other) {
-        requireNonNull(other, "Cannot combine predicate with 'and' <null>.");
-        return (t) -> {
-            try (Context<Void> context = snapshot.reactivate()) {
-                LOGGER.log(Level.FINEST, "Delegating 'and' method with {0} to {1}.", new Object[]{context, delegate});
-                return delegate.test(t) && other.test(t);
-            }
-        };
-    }
-
-    @Override
-    public Predicate<T> or(Predicate<? super T> other) {
-        requireNonNull(other, "Cannot combine predicate with 'or' <null>.");
-        return (t) -> {
-            try (Context<Void> context = snapshot.reactivate()) {
-                LOGGER.log(Level.FINEST, "Delegating 'or' method with {0} to {1}.", new Object[]{context, delegate});
-                return delegate.test(t) || other.test(t);
-            }
-        };
+        super(snapshot, delegate);
     }
 
 }

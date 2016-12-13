@@ -26,8 +26,10 @@ import java.util.function.UnaryOperator;
  * calling a delegate.
  *
  * @author Sjoerd Talsma
+ * @see nl.talsmasoftware.context.functions.UnaryOperatorWithContext
+ * @deprecated Please switch to <code>nl.talsmasoftware.context.functions.UnaryOperatorWithContext</code>
  */
-public class UnaryOperatorWithContext<T> extends FunctionWithContext<T, T> implements UnaryOperator<T> {
+public class UnaryOperatorWithContext<T> extends nl.talsmasoftware.context.functions.UnaryOperatorWithContext<T> {
 
     public UnaryOperatorWithContext(ContextSnapshot snapshot, UnaryOperator<T> delegate) {
         super(snapshot, delegate);

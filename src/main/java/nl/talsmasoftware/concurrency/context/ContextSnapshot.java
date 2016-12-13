@@ -33,8 +33,9 @@ package nl.talsmasoftware.concurrency.context;
  * </ol>
  *
  * @author Sjoerd Talsma
+ * @deprecated This is the old implementation. Please swith to <code>nl.talsmasoftware.context.ContextSnapshot</code>
  */
-public interface ContextSnapshot {
+public interface ContextSnapshot extends nl.talsmasoftware.context.ContextSnapshot {
 
     /**
      * This method activates all contained values by the snapshot in their respective {@link Context} implementations.

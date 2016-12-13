@@ -17,49 +17,22 @@
 
 package nl.talsmasoftware.concurrency.context.function;
 
-import nl.talsmasoftware.concurrency.context.Context;
 import nl.talsmasoftware.concurrency.context.ContextSnapshot;
 
 import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * A wrapper for {@link BiFunction} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
  * calling a delegate.
  *
  * @author Sjoerd Talsma
+ * @see nl.talsmasoftware.context.functions.BiFunctionWithContext
+ * @deprecated Please swith to <code>nl.talsmasoftware.context.functions.BiFunctionWithContext</code>
  */
-public class BiFunctionWithContext<IN1, IN2, OUT> implements BiFunction<IN1, IN2, OUT> {
-    private static final Logger LOGGER = Logger.getLogger(BiFunctionWithContext.class.getName());
-
-    private final ContextSnapshot snapshot;
-    private final BiFunction<IN1, IN2, OUT> delegate;
+public class BiFunctionWithContext<IN1, IN2, OUT> extends nl.talsmasoftware.context.functions.BiFunctionWithContext<IN1, IN2, OUT> {
 
     public BiFunctionWithContext(ContextSnapshot snapshot, BiFunction<IN1, IN2, OUT> delegate) {
-        this.snapshot = requireNonNull(snapshot, "No context snapshot provided to BiFunctionWithContext.");
-        this.delegate = requireNonNull(delegate, "No delegate provided to BiFunctionWithContext.");
+        super(snapshot, delegate);
     }
 
-    @Override
-    public OUT apply(IN1 in1, IN2 in2) {
-        try (Context<Void> context = snapshot.reactivate()) {
-            LOGGER.log(Level.FINEST, "Delegating apply method with {0} to {1}.", new Object[]{context, delegate});
-            return delegate.apply(in1, in2);
-        }
-    }
-
-    @Override
-    public <V> BiFunction<IN1, IN2, V> andThen(Function<? super OUT, ? extends V> after) {
-        requireNonNull(after, "Cannot post-process bi-function with after function <null>.");
-        return (IN1 in1, IN2 in2) -> {
-            try (Context<Void> context = snapshot.reactivate()) {
-                LOGGER.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate});
-                return after.apply(delegate.apply(in1, in2));
-            }
-        };
-    }
 }

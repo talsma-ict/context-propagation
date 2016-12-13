@@ -26,8 +26,10 @@ import java.util.function.BinaryOperator;
  * calling a delegate.
  *
  * @author Sjoerd Talsma
+ * @see nl.talsmasoftware.context.functions.BinaryOperatorWithContext
+ * @deprecated Please swith to <code>nl.talsmasoftware.context.functions.BinaryOperatorWithContext</code>
  */
-public class BinaryOperatorWithContext<T> extends BiFunctionWithContext<T, T, T> implements BinaryOperator<T> {
+public class BinaryOperatorWithContext<T> extends nl.talsmasoftware.context.functions.BinaryOperatorWithContext<T> {
 
     public BinaryOperatorWithContext(ContextSnapshot snapshot, BinaryOperator<T> delegate) {
         super(snapshot, delegate);
