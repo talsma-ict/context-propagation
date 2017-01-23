@@ -13,7 +13,7 @@
 
     <!-- Project information -->
     <name>Concurrency utility library</name>
-    <description>Replaced by context-propagation 0.3.0!</description>
+    <description>Replaced by context-propagation!</description>
     <url>https://github.com/talsma-ict/concurrency</url>
     <inceptionYear>2016</inceptionYear>
 
@@ -50,12 +50,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <build.java.version>1.8</build.java.version>
 
-        <!-- runtime -->
-        <new-library.version>0.3.1</new-library.version>
+        <new-library.version>0.4.0</new-library.version>
 
-        <!-- optional provided -->
-
-        <!-- test -->
         <junit.version>4.12</junit.version>
         <hamcrest.version>1.3</hamcrest.version>
         <slf4j.version>1.7.21</slf4j.version>
@@ -65,7 +61,6 @@
         <hibernate-validator.version>5.2.4.Final</hibernate-validator.version>
         <javax-el.version>2.2.4</javax-el.version>
 
-        <!-- build -->
         <maven-compiler-plugin.version>2.5.1</maven-compiler-plugin.version>
         <maven-failsafe-plugin.version>2.19.1</maven-failsafe-plugin.version>
         <maven-source-plugin.version>2.4</maven-source-plugin.version>
