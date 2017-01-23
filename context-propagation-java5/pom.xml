@@ -5,13 +5,13 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>nl.talsmasoftware</groupId>
+        <groupId>nl.talsmasoftware.context</groupId>
         <artifactId>context-propagation-root</artifactId>
         <version>0.3.1-SNAPSHOT</version>
     </parent>
 
     <!-- Artifact identification -->
-    <groupId>nl.talsmasoftware</groupId>
+    <groupId>nl.talsmasoftware.context</groupId>
     <artifactId>context-propagation</artifactId>
     <name>Context propagation (core, java-5)</name>
     <packaging>jar</packaging>

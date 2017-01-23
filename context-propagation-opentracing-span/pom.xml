@@ -5,13 +5,13 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>nl.talsmasoftware</groupId>
+        <groupId>nl.talsmasoftware.context</groupId>
         <artifactId>context-propagation-root</artifactId>
         <version>0.3.1-SNAPSHOT</version>
     </parent>
 
     <!-- Artifact identification -->
-    <groupId>nl.talsmasoftware</groupId>
+    <groupId>nl.talsmasoftware.context</groupId>
     <artifactId>context-propagation-opentracing-span</artifactId>
     <name>Context propagation (OpenTracing Span)</name>
     <packaging>jar</packaging>
@@ -23,7 +23,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>nl.talsmasoftware</groupId>
+            <groupId>nl.talsmasoftware.context</groupId>
             <artifactId>context-propagation</artifactId>
             <version>${project.version}</version>
         </dependency>
