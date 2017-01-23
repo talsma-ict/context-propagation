@@ -10,7 +10,7 @@ import javax.servlet.ServletRequest;
  *
  * @author Sjoerd Talsma
  */
-public class ServletRequestContextManager implements ContextManager<ServletRequest> {
+public final class ServletRequestContextManager implements ContextManager<ServletRequest> {
 
     public Context<ServletRequest> initializeNewContext(ServletRequest value) {
         return new ServletRequestContext(value);
@@ -18,6 +18,19 @@ public class ServletRequestContextManager implements ContextManager<ServletReque
 
     public Context<ServletRequest> getActiveContext() {
         return ServletRequestContext.current();
+    }
+
+    /**
+     * Unconditionally removes the active context (and any parents).
+     * <p>
+     * This is useful for boundary filters, whose Threads may be returned to some threadpool.
+     */
+    public static void clear() {
+        ServletRequestContext.clear();
+    }
+
+    public String toString() {
+        return "ServletRequestContextManager";
     }
 
 }

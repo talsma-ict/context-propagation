@@ -1,5 +1,6 @@
 package nl.talsmasoftware.context.servletrequest;
 
+import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext;
 
 import javax.servlet.ServletRequest;
@@ -9,13 +10,7 @@ import javax.servlet.ServletRequest;
  *
  * @author Sjoerd Talsma
  */
-public class ServletRequestContext extends AbstractThreadLocalContext<ServletRequest> {
-    /**
-     * Constant for a dummy context that is already closed.
-     */
-    private static final ServletRequestContext DUMMY = new ServletRequestContext(null) {{
-        super.close(); // Direct clean-up in static initialization-thread.
-    }};
+final class ServletRequestContext extends AbstractThreadLocalContext<ServletRequest> {
 
     /**
      * The ThreadLocal context containing the {@link ServletRequest}.
@@ -43,9 +38,9 @@ public class ServletRequestContext extends AbstractThreadLocalContext<ServletReq
      * The context itself is non-<code>null</code>, but may contain a <code>null</code> value.
      * @see #getValue()
      */
-    public static ServletRequestContext current() {
+    static Context<ServletRequest> current() {
         final ServletRequestContext current = CONTEXT.get();
-        return current != null ? current : DUMMY;
+        return current != null ? current : DummyContext.INSTANCE;
     }
 
     /**
@@ -53,8 +48,26 @@ public class ServletRequestContext extends AbstractThreadLocalContext<ServletReq
      * <p>
      * This is useful for boundary filters, whose Threads may be returned to some threadpool.
      */
-    public static void clear() {
+    static void clear() {
         CONTEXT.remove();
     }
 
+    /**
+     * Dummy context containing.
+     */
+    private static final class DummyContext implements Context<ServletRequest> {
+        private static final DummyContext INSTANCE = new DummyContext();
+
+        public ServletRequest getValue() {
+            return null;
+        }
+
+        public void close() {
+        }
+
+        @Override
+        public String toString() {
+            return "DummyContext";
+        }
+    }
 }

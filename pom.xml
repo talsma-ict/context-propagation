@@ -21,6 +21,7 @@
         <module>context-propagation-java5</module>
         <module>context-propagation-java8</module>
         <module>context-propagation-servletrequest</module>
+        <module>context-propagation-opentracing-span</module>
     </modules>
 
     <licenses>
