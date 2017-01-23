@@ -12,15 +12,25 @@
 
     <!-- Artifact identification -->
     <groupId>nl.talsmasoftware.context</groupId>
-    <artifactId>context-propagation-java8</artifactId>
-    <name>Context propagation (java-8)</name>
+    <artifactId>context-propagation-opentracing-span</artifactId>
+    <name>Context propagation (OpenTracing Span)</name>
     <packaging>jar</packaging>
+
+    <properties>
+        <project.build.java.version>1.6</project.build.java.version>
+        <opentracing-spanmanager.version>0.0.1</opentracing-spanmanager.version>
+    </properties>
 
     <dependencies>
         <dependency>
             <groupId>nl.talsmasoftware.context</groupId>
             <artifactId>context-propagation</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.opentracing.contrib</groupId>
+            <artifactId>opentracing-spanmanager</artifactId>
+            <version>${opentracing-spanmanager.version}</version>
         </dependency>
     </dependencies>
 

@@ -69,10 +69,29 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
      */
     @SuppressWarnings("unchecked")
     protected AbstractThreadLocalContext(T newValue) {
+        unwindIfNecessary(sharedThreadLocalContext);
         this.parentContext = sharedThreadLocalContext.get();
         this.value = newValue;
         this.sharedThreadLocalContext.set(this);
         logger.log(Level.FINEST, "Initialized new {0}.", this);
+    }
+
+    /**
+     * Unwinds the stack of {@link AbstractThreadLocalContext} contexts for the given ThreadLocal.
+     *
+     * @param stack The stack to unwind (if necessary).
+     */
+    @SuppressWarnings("unchecked")
+    protected static void unwindIfNecessary(ThreadLocal<? extends AbstractThreadLocalContext<?>> stack) {
+        AbstractThreadLocalContext<?> head = stack.get();
+        AbstractThreadLocalContext<?> current = head;
+        while (current != null && current.closed.get()) { // Current is closed: unwind!
+            current = (AbstractThreadLocalContext<?>) current.parentContext;
+        }
+        if (current != head) { // refresh head if necessary.
+            if (current == null) stack.remove();
+            else ((ThreadLocal) stack).set(current);
+        }
     }
 
     /**
@@ -85,7 +104,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
     }
 
     /**
-     * Returns the value of this context instance, or <code>empty</code> if it was already closed.
+     * Returns the value of this context instance, or <code>null</code> if it was already closed.
      *
      * @return The value of this context.
      */
@@ -101,22 +120,9 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
      * This method has no side-effects if the context was already closed (it is safe to call multiple times).
      */
     public void close() {
-        if (closed.compareAndSet(false, true)) {
-            AbstractThreadLocalContext<T> current = sharedThreadLocalContext.get();
-            if (this == current) {
-                while (current != null && current.closed.get()) {
-                    current = (AbstractThreadLocalContext<T>) current.parentContext;
-                }
-                if (current == null) sharedThreadLocalContext.remove();
-                else sharedThreadLocalContext.set(current);
-                logger.log(Level.FINER, "Closed {0} and restored the current context to {1}.", new Object[]{this, current});
-            } else {
-                logger.log(Level.FINE, "Closed {0} without affecting the current context which was {1}.",
-                        new Object[]{this, current});
-            }
-        } else {
-            logger.log(Level.FINEST, "No action needed, {0} was already closed.", this);
-        }
+        closed.set(true);
+        unwindIfNecessary(sharedThreadLocalContext);
+        logger.log(Level.FINEST, "Closed {0}.", this);
     }
 
     /**
@@ -154,7 +160,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
             type = type.getSuperclass();
         }
         // Atomically get-or-create the appropriate ThreadLocal instance.
-        if (!INSTANCES.containsKey(type)) INSTANCES.putIfAbsent(type, new InheritableThreadLocal());
+        if (!INSTANCES.containsKey(type)) INSTANCES.putIfAbsent(type, new ThreadLocal());
         return (ThreadLocal<CTX>) INSTANCES.get(type);
     }
 

@@ -12,12 +12,26 @@
 
     <!-- Artifact identification -->
     <groupId>nl.talsmasoftware.context</groupId>
-    <artifactId>context-propagation</artifactId>
-    <name>Context propagation (core, java-5)</name>
+    <artifactId>context-propagation-servletrequest</artifactId>
+    <name>Context propagation (ServletRequest)</name>
     <packaging>jar</packaging>
 
     <properties>
         <project.build.java.version>1.5</project.build.java.version>
+        <servlet-api.version>2.5</servlet-api.version>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.talsmasoftware.context</groupId>
+            <artifactId>context-propagation</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>${servlet-api.version}</version>
+        </dependency>
+    </dependencies>
 
 </project>
