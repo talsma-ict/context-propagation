@@ -29,21 +29,23 @@ public final class DummyContext extends AbstractThreadLocalContext<String> {
         super(newValue);
     }
 
+    // Public for testing!
     public boolean isClosed() {
         return super.isClosed();
     }
 
-    static void reset() {
-        INSTANCE.remove();
-    }
-
     static Context<String> current() {
+        unwindIfNecessary(INSTANCE);
         return INSTANCE.get();
     }
 
     static String currentValue() {
         final Context<String> currentContext = current();
         return currentContext != null ? currentContext.getValue() : null;
+    }
+
+    static void reset() {
+        INSTANCE.remove();
     }
 
 }
