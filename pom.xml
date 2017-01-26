@@ -22,8 +22,6 @@
         <module>context-propagation-java8</module>
         <module>servletrequest-propagation</module>
         <module>opentracing-span-propagation</module>
-
-        <module>relocated-artifacts</module>
     </modules>
 
     <licenses>
