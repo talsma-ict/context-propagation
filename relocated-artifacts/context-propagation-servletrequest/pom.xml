@@ -5,21 +5,27 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>nl.talsmasoftware.context</groupId>
+        <groupId>nl.talsmasoftware</groupId>
         <artifactId>context-propagation-root</artifactId>
         <version>0.4.1-SNAPSHOT</version>
     </parent>
 
     <!-- Artifact identification -->
-    <groupId>nl.talsmasoftware.context</groupId>
-    <artifactId>context-propagation-java8</artifactId>
-    <name>Context propagation (java-8)</name>
+    <groupId>nl.talsmasoftware</groupId>
+    <artifactId>context-propagation-servletrequest</artifactId>
     <packaging>jar</packaging>
+
+    <!-- Project information -->
+    <name>Relocated Context propagation (ServletRequest)</name>
+
+    <properties>
+        <project.build.java.version>1.5</project.build.java.version>
+    </properties>
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>context-propagation</artifactId>
+            <groupId>${new.groupId}</groupId>
+            <artifactId>opentracing-span-propagation</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

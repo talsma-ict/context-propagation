@@ -12,8 +12,8 @@
 
     <!-- Artifact identification -->
     <groupId>nl.talsmasoftware.context</groupId>
-    <artifactId>context-propagation-servletrequest</artifactId>
-    <name>Context propagation (ServletRequest)</name>
+    <artifactId>servletrequest-propagation</artifactId>
+    <name>Propagation of ServletRequests</name>
     <packaging>jar</packaging>
 
     <properties>
