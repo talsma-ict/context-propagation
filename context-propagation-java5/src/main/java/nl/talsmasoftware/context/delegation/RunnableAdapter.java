@@ -32,7 +32,7 @@ import java.util.logging.Logger;
  *
  * @author Sjoerd Talsma
  */
-class RunnableAdapter implements Runnable {
+final class RunnableAdapter implements Runnable {
     private static final Logger LOGGER = Logger.getLogger(RunnableAdapter.class.getName());
     private final Callable<?> callable;
 

@@ -5,21 +5,23 @@
 
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>nl.talsmasoftware.context</groupId>
+        <groupId>nl.talsmasoftware</groupId>
         <artifactId>context-propagation-root</artifactId>
         <version>0.4.1</version>
     </parent>
 
     <!-- Artifact identification -->
-    <groupId>nl.talsmasoftware.context</groupId>
+    <groupId>nl.talsmasoftware</groupId>
     <artifactId>context-propagation-java8</artifactId>
-    <name>Context propagation (java-8)</name>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
+
+    <!-- Project information -->
+    <name>Relocated Context propagation (java-8)</name>
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>context-propagation</artifactId>
+            <groupId>${new.groupId}</groupId>
+            <artifactId>${project.artifactId}</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
