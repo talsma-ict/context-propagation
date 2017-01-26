@@ -8,7 +8,7 @@
     <!-- Artifact identification -->
     <groupId>nl.talsmasoftware.context</groupId>
     <artifactId>context-propagation-root</artifactId>
-    <version>0.4.1</version>
+    <version>0.4.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <!-- Project information -->
@@ -22,8 +22,6 @@
         <module>context-propagation-java8</module>
         <module>servletrequest-propagation</module>
         <module>opentracing-span-propagation</module>
-
-        <module>relocated-artifacts</module>
     </modules>
 
     <licenses>
