@@ -55,7 +55,6 @@ final class DummyContext extends AbstractThreadLocalContext<String> {
 }
 
 public class DummyContextManager implements ContextManager<String> {
-
     public Context<String> initializeNewContext(String value) {
         return new DummyContext(value);
     }
