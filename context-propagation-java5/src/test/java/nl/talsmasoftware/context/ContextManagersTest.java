@@ -20,10 +20,13 @@ package nl.talsmasoftware.context;
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
 /**
@@ -101,6 +104,28 @@ public class ContextManagersTest {
 
         ctx2.close();
         ctx1.close();
+    }
+
+    @Test
+    public void testConcurrentSnapshots() throws ExecutionException, InterruptedException {
+        int threadcount = 25;
+        ExecutorService threadpool = Executors.newFixedThreadPool(threadcount);
+        try {
+            List<Future<ContextSnapshot>> snapshots = new ArrayList<Future<ContextSnapshot>>(threadcount);
+            for (int i = 0; i < threadcount; i++) {
+                snapshots.add(threadpool.submit(new Callable<ContextSnapshot>() {
+                    public ContextSnapshot call() throws Exception {
+                        return ContextManagers.createContextSnapshot();
+                    }
+                }));
+            }
+
+            for (int i = 0; i < threadcount; i++) {
+                assertThat(snapshots.get(i).get(), is(notNullValue()));
+            }
+        } finally {
+            threadpool.shutdown();
+        }
     }
 
 }

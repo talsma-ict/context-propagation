@@ -237,34 +237,52 @@ public final class ContextManagers {
      */
     private static final class Loader<SVC> implements Iterable<SVC> {
         private final Class<SVC> serviceType;
-        private final Iterable<SVC> delegate;
+        private volatile Iterable<SVC> delegate;
 
-        @SuppressWarnings("unchecked") // Type is actually safe, although we use reflection.
         private Loader(Class<SVC> serviceType) {
             this.serviceType = serviceType;
-            Iterable<SVC> serviceLoader = null;
+        }
+
+        private synchronized Iterable<SVC> delegate() {
+            if (delegate == null) {
+                ArrayList<SVC> services = new ArrayList<SVC>();
+                Iterator<SVC> iterator = loadServices(serviceType);
+                while (iterator.hasNext()) try {
+                    SVC service = iterator.next();
+                    if (service != null) services.add(service);
+                } catch (NoSuchElementException nse) {
+                    LOGGER.log(Level.SEVERE, "Exception iterating service " + serviceType + ": " + nse.getMessage(), nse);
+                }
+                services.trimToSize();
+                this.delegate = Collections.unmodifiableList(services);
+            }
+            return delegate;
+        }
+
+        @SuppressWarnings("unchecked") // Type is actually safe, although we use reflection.
+        private static <SVC> Iterator<SVC> loadServices(Class<SVC> serviceType) {
             try { // Attempt to use Java 1.6 ServiceLoader:
                 // ServiceLoader.load(ContextManager.class, ContextManagers.class.getClassLoader());
-                serviceLoader = (Iterable<SVC>) Class.forName("java.util.ServiceLoader")
+                return ((Iterable<SVC>) Class.forName("java.util.ServiceLoader")
                         .getDeclaredMethod("load", Class.class, ClassLoader.class)
-                        .invoke(null, serviceType, serviceType.getClassLoader());
+                        .invoke(null, serviceType, serviceType.getClassLoader())).iterator();
             } catch (ClassNotFoundException cnfe) {
                 LOGGER.log(Level.FINEST, "Java 6 ServiceLoader not found, falling back to the imageio ServiceRegistry.");
             } catch (NoSuchMethodException nsme) {
-                LOGGER.log(Level.SEVERE, "Could not find the 'load' method in the JDK's ServiceLoader.", nsme);
+                LOGGER.log(Level.SEVERE, "Could not find the 'load' method in JDK's ServiceLoader.", nsme);
             } catch (IllegalAccessException iae) {
-                LOGGER.log(Level.SEVERE, "Not allowed to call the 'load' method in the JDK's ServiceLoader.", iae);
+                LOGGER.log(Level.SEVERE, "Not allowed to call the 'load' method in JDK's ServiceLoader.", iae);
             } catch (InvocationTargetException ite) {
                 throw new IllegalStateException(String.format(
-                        "Exception calling the 'load' method in the JDK's ServiceLoader for the %s service.",
+                        "Exception calling the 'load' method in JDK's ServiceLoader for the %s service.",
                         serviceType.getSimpleName()), ite.getCause());
             }
-            this.delegate = serviceLoader;
+            return ServiceRegistry.lookupProviders(serviceType, serviceType.getClassLoader());
         }
 
         public Iterator<SVC> iterator() {
-            return delegate != null ? delegate.iterator()
-                    : ServiceRegistry.lookupProviders(serviceType, serviceType.getClassLoader());
+            return delegate().iterator();
         }
     }
+
 }
