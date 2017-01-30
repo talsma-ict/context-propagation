@@ -22,10 +22,11 @@ import nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext;
 /**
  * @author Sjoerd Talsma
  */
-public final class DummyContext extends AbstractThreadLocalContext<String> {
-    private static final ThreadLocal<DummyContext> INSTANCE = threadLocalInstanceOf(DummyContext.class);
+final class DummyContext extends AbstractThreadLocalContext<String> {
+    private static final ThreadLocal<DummyContext> INSTANCE =
+            AbstractThreadLocalContext.threadLocalInstanceOf(DummyContext.class);
 
-    public DummyContext(String newValue) {
+    DummyContext(String newValue) {
         super(newValue);
     }
 
@@ -35,8 +36,7 @@ public final class DummyContext extends AbstractThreadLocalContext<String> {
     }
 
     static Context<String> current() {
-        unwindIfNecessary(INSTANCE);
-        return INSTANCE.get();
+        return AbstractThreadLocalContext.current(DummyContext.class);
     }
 
     static String currentValue() {

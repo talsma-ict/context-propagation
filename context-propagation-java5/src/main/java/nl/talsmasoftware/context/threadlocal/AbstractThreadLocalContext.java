@@ -150,18 +150,23 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
             final Class<? extends CTX> contextType) {
         if (contextType == null) throw new NullPointerException("The context type was <null>.");
         Class<?> type = contextType;
-        if (!AbstractThreadLocalContext.class.isAssignableFrom(type)) {
-            throw new IllegalArgumentException("Not a subclass of AbstractThreadLocalContext: " + type + '.');
-        } else if (Modifier.isAbstract(contextType.getModifiers())) {
-            throw new IllegalArgumentException("Context type was abstract: " + type + '.');
+        if (!INSTANCES.containsKey(type)) {
+            if (!AbstractThreadLocalContext.class.isAssignableFrom(type)) {
+                throw new IllegalArgumentException("Not a subclass of AbstractThreadLocalContext: " + type + '.');
+            } else if (Modifier.isAbstract(contextType.getModifiers())) {
+                throw new IllegalArgumentException("Context type was abstract: " + type + '.');
+            }
+            // Find the first non-abstract subclass of AbstractThreadLocalContext.
+            while (!Modifier.isAbstract(type.getSuperclass().getModifiers())) {
+                type = type.getSuperclass();
+            }
+            // Atomically get-or-create the appropriate ThreadLocal instance.
+            if (!INSTANCES.containsKey(type)) INSTANCES.putIfAbsent(type, new ThreadLocal());
         }
-        // Find the first non-abstract subclass of AbstractThreadLocalContext.
-        while (!Modifier.isAbstract(type.getSuperclass().getModifiers())) {
-            type = type.getSuperclass();
-        }
-        // Atomically get-or-create the appropriate ThreadLocal instance.
-        if (!INSTANCES.containsKey(type)) INSTANCES.putIfAbsent(type, new ThreadLocal());
         return (ThreadLocal<CTX>) INSTANCES.get(type);
     }
 
+    protected static <T, CTX extends AbstractThreadLocalContext<T>> CTX current(Class<? extends CTX> contextType) {
+        return threadLocalInstanceOf(contextType).get();
+    }
 }
