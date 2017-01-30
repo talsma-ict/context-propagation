@@ -24,12 +24,15 @@ out of the box by this context-propagation library:
 
 - `ServletRequest` contexts (see [servletrequest-propagation])
 - OpenTracing Span contexts (using the [opentracing-spanmanager] library)
+- _yours?_ Feel free to create an issue or pull-request
+  if you believe there's a general context that was forgotten. 
 
 Adding your own `Context` type is not difficult.
 
 ## Custom contexts
 
 It is easy to add a custom `Context` type to be propagated:
+
 1. Implement the `ContextManager` interface.  
    Create a class with a [default constructor]
    that implements _initializeNewContext_ and _getActiveContext_ methods.
