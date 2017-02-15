@@ -13,6 +13,7 @@
  */
 package nl.talsmasoftware.context.opentracing;
 
+import io.opentracing.NoopSpan;
 import io.opentracing.Span;
 import io.opentracing.contrib.spanmanager.DefaultSpanManager;
 import io.opentracing.contrib.spanmanager.SpanManager;
@@ -68,10 +69,20 @@ final class GlobalSpanManager implements SpanManager {
         if (!DELEGATES.contains(spanManager)) DELEGATES.add(0, spanManager);
     }
 
-    @Override
-    public Span currentSpan() {
+    public ManagedSpan current() {
+        // Don't like the replication of 'multi-management' between current() and manage().
         init();
-        return DELEGATES.get(0).currentSpan();
+        final int delegateCount = DELEGATES.size();
+        if (delegateCount == 1) return DELEGATES.get(0).current();
+        List<ManagedSpan> managedSpans = new ArrayList<ManagedSpan>(delegateCount);
+        for (SpanManager delegate : DELEGATES) {
+            try {
+                managedSpans.add(delegate.current());
+            } catch (RuntimeException manageEx) {
+                LOGGER.log(Level.SEVERE, "Error obtaining current span: " + manageEx.getMessage(), manageEx);
+            }
+        }
+        return new MultiManagedSpan(managedSpans);
     }
 
     @Override
@@ -100,6 +111,13 @@ final class GlobalSpanManager implements SpanManager {
                 LOGGER.log(Level.SEVERE, "Error clearing " + delegate + ": " + clearEx.getMessage(), clearEx);
             }
         }
+    }
+
+    @Override
+    @Deprecated
+    public Span currentSpan() {
+        ManagedSpan current = current();
+        return current.getSpan() != null ? current.getSpan() : NoopSpan.INSTANCE;
     }
 
     private static final class MultiManagedSpan implements ManagedSpan {
