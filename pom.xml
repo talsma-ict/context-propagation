@@ -64,7 +64,8 @@
     <scm>
         <url>https://github.com/talsma-ict/context-propagation.git</url>
         <connection>scm:git:git://github.com/talsma-ict/context-propagation.git</connection>
-        <developerConnection>scm:git:git@github.com:talsma-ict/context-propagation.git</developerConnection>
+        <developerConnection>scm:git:https://github.com/talsma-ict/context-propagation.git</developerConnection>
+        <tag>HEAD</tag>
     </scm>
 
     <properties>
