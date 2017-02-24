@@ -86,14 +86,14 @@ final class GlobalSpanManager implements SpanManager {
     }
 
     @Override
-    public ManagedSpan manage(Span span) {
+    public ManagedSpan activate(Span span) {
         init();
         final int delegateCount = DELEGATES.size();
-        if (delegateCount == 1) return DELEGATES.get(0).manage(span);
+        if (delegateCount == 1) return DELEGATES.get(0).activate(span);
         List<ManagedSpan> managedSpans = new ArrayList<ManagedSpan>(delegateCount);
         for (SpanManager delegate : DELEGATES) {
             try {
-                managedSpans.add(delegate.manage(span));
+                managedSpans.add(delegate.activate(span));
             } catch (RuntimeException manageEx) {
                 LOGGER.log(Level.SEVERE, "Error managing " + span + ": " + manageEx.getMessage(), manageEx);
             }
@@ -133,10 +133,10 @@ final class GlobalSpanManager implements SpanManager {
         }
 
         @Override
-        public void release() {
+        public void deactivate() {
             for (ManagedSpan delegate : delegates) {
                 try {
-                    delegate.release();
+                    delegate.deactivate();
                 } catch (RuntimeException releaseEx) {
                     LOGGER.log(Level.SEVERE, "Error releasing " + delegate + ": " + releaseEx.getMessage(), releaseEx);
                 }

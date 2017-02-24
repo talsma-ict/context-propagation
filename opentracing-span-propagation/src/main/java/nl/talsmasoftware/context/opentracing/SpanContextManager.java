@@ -33,15 +33,15 @@ import nl.talsmasoftware.context.ContextManager;
 public final class SpanContextManager implements ContextManager<Span> {
 
     @Override
-    @SuppressWarnings("deprecation") // Intentional deprecation
+    @SuppressWarnings("deprecation") // Intentional deprecation of GlobalSpanManager
     public Context<Span> initializeNewContext(Span value) {
-        return new ManagedSpanContext(GlobalSpanManager.get().manage(value));
+        return new ManagedSpanContext(GlobalSpanManager.get().activate(value));
     }
 
     @Override
-    @SuppressWarnings("deprecation") // Intentional deprecation
+    @SuppressWarnings("deprecation") // Intentional deprecation of GlobalSpanManager
     public Context<Span> getActiveContext() {
-        return new ManagedSpanContext(GlobalSpanManager.get().currentSpan());
+        return new ManagedSpanContext(GlobalSpanManager.get().current().getSpan());
     }
 
     @Override
