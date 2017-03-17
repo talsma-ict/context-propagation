@@ -65,7 +65,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
      */
     @SuppressWarnings("unchecked")
     protected AbstractThreadLocalContext(T newValue) {
-        unwindIfNecessary(sharedThreadLocalContext);
+        this.unwindIfNecessary(); // avoid unnecessary parentContexts
         this.parentContext = sharedThreadLocalContext.get();
         this.value = newValue;
         this.sharedThreadLocalContext.set(this);
@@ -73,21 +73,22 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
     }
 
     /**
-     * Unwinds the stack of {@link AbstractThreadLocalContext} contexts for the given ThreadLocal.
+     * Unwinds the sharedThreadLocalContext.
      *
-     * @param stack The stack to unwind (if necessary).
+     * @return The new 'current' context (not necessarily related to 'this' object).
      */
     @SuppressWarnings("unchecked")
-    protected static void unwindIfNecessary(ThreadLocal<? extends AbstractThreadLocalContext<?>> stack) {
-        AbstractThreadLocalContext<?> head = stack.get();
+    private AbstractThreadLocalContext<T> unwindIfNecessary() {
+        AbstractThreadLocalContext<?> head = sharedThreadLocalContext.get();
         AbstractThreadLocalContext<?> current = head;
         while (current != null && current.closed.get()) { // Current is closed: unwind!
             current = (AbstractThreadLocalContext<?>) current.parentContext;
         }
         if (current != head) { // refresh head if necessary.
-            if (current == null) stack.remove();
-            else ((ThreadLocal) stack).set(current);
+            if (current == null) sharedThreadLocalContext.remove();
+            else ((ThreadLocal) sharedThreadLocalContext).set(current);
         }
+        return (AbstractThreadLocalContext<T>) current;
     }
 
     /**
@@ -117,7 +118,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
      */
     public void close() {
         closed.set(true);
-        unwindIfNecessary(sharedThreadLocalContext);
+        this.unwindIfNecessary(); // Remove this context created in the same thread.
         logger.log(Level.FINEST, "Closed {0}.", this);
     }
 
@@ -128,8 +129,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
      * @return String representing this context class and either the current value or the fact that it was closed.
      */
     public String toString() {
-        return closed.get() ? getClass().getSimpleName() + "{closed}"
-                : getClass().getSimpleName() + "{value=" + value + '}';
+        return getClass().getSimpleName() + (isClosed() ? "{closed}" : "{value=" + value + '}');
     }
 
     /**
@@ -162,7 +162,11 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
         return (ThreadLocal<CTX>) INSTANCES.get(type);
     }
 
+    @SuppressWarnings("unchecked")
     protected static <T, CTX extends AbstractThreadLocalContext<T>> CTX current(Class<? extends CTX> contextType) {
-        return threadLocalInstanceOf(contextType).get();
+        final CTX current = threadLocalInstanceOf(contextType).get();
+        if (current == null || !current.isClosed()) return current;
+        return (CTX) ((AbstractThreadLocalContext) current).unwindIfNecessary();
     }
+
 }
