@@ -164,9 +164,8 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
 
     @SuppressWarnings("unchecked")
     protected static <T, CTX extends AbstractThreadLocalContext<T>> CTX current(Class<? extends CTX> contextType) {
-        final CTX current = threadLocalInstanceOf(contextType).get();
-        if (current == null || !current.isClosed()) return current;
-        return (CTX) ((AbstractThreadLocalContext) current).unwindIfNecessary();
+        final AbstractThreadLocalContext current = threadLocalInstanceOf(contextType).get();
+        return (CTX) (current == null || !current.isClosed() ? current : current.unwindIfNecessary());
     }
 
 }
