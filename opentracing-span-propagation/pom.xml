@@ -24,7 +24,6 @@
     </parent>
 
     <!-- Artifact identification -->
-    <groupId>nl.talsmasoftware.context</groupId>
     <artifactId>opentracing-span-propagation</artifactId>
     <name>Propagation of OpenTracing Spans</name>
     <packaging>jar</packaging>

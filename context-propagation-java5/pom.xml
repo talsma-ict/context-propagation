@@ -24,7 +24,6 @@
     </parent>
 
     <!-- Artifact identification -->
-    <groupId>nl.talsmasoftware.context</groupId>
     <artifactId>context-propagation</artifactId>
     <name>Context propagation (core, java-5)</name>
     <packaging>jar</packaging>
