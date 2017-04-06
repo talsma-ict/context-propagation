@@ -33,10 +33,10 @@ import java.util.logging.Logger;
  */
 public abstract class AbstractThreadLocalContext<T> implements Context<T> {
     /**
-     * The constant of ThreadLocal context instances per subclass so different types don't get mixed.
+     * The constant of ThreadLocal context instances per subclass name so different types don't get mixed.
      */
-    private static final ConcurrentMap<Class<?>, ThreadLocal<?>> INSTANCES =
-            new ConcurrentHashMap<Class<?>, ThreadLocal<?>>();
+    private static final ConcurrentMap<String, ThreadLocal<?>> INSTANCES =
+            new ConcurrentHashMap<String, ThreadLocal<?>>();
 
     @SuppressWarnings("unchecked")
     private final ThreadLocal<AbstractThreadLocalContext<T>> sharedThreadLocalContext = threadLocalInstanceOf((Class) getClass());
@@ -148,7 +148,8 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
             final Class<? extends CTX> contextType) {
         if (contextType == null) throw new NullPointerException("The context type was <null>.");
         Class<?> type = contextType;
-        if (!INSTANCES.containsKey(type)) {
+        String typeName = type.getName();
+        if (!INSTANCES.containsKey(typeName)) {
             if (!AbstractThreadLocalContext.class.isAssignableFrom(type)) {
                 throw new IllegalArgumentException("Not a subclass of AbstractThreadLocalContext: " + type + '.');
             } else if (Modifier.isAbstract(contextType.getModifiers())) {
@@ -157,11 +158,12 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
             // Find the first non-abstract subclass of AbstractThreadLocalContext.
             while (!Modifier.isAbstract(type.getSuperclass().getModifiers())) {
                 type = type.getSuperclass();
+                typeName = type.getName();
             }
             // Atomically get-or-create the appropriate ThreadLocal instance.
-            if (!INSTANCES.containsKey(type)) INSTANCES.putIfAbsent(type, new ThreadLocal());
+            if (!INSTANCES.containsKey(type.getName())) INSTANCES.putIfAbsent(typeName, new ThreadLocal());
         }
-        return (ThreadLocal<CTX>) INSTANCES.get(type);
+        return (ThreadLocal<CTX>) INSTANCES.get(typeName);
     }
 
     @SuppressWarnings("unchecked")
