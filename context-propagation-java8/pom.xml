@@ -24,7 +24,6 @@
     </parent>
 
     <!-- Artifact identification -->
-    <groupId>nl.talsmasoftware.context</groupId>
     <artifactId>context-propagation-java8</artifactId>
     <name>Context propagation (java-8)</name>
     <packaging>jar</packaging>
@@ -37,7 +36,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>context-propagation</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

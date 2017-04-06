@@ -24,7 +24,6 @@
     </parent>
 
     <!-- Artifact identification -->
-    <groupId>nl.talsmasoftware.context</groupId>
     <artifactId>servletrequest-propagation</artifactId>
     <name>Propagation of ServletRequests</name>
     <packaging>jar</packaging>
@@ -39,7 +38,6 @@
         <dependency>
             <groupId>nl.talsmasoftware.context</groupId>
             <artifactId>context-propagation</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
