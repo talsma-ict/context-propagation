@@ -35,7 +35,6 @@
     <modules>
         <module>context-propagation-java5</module>
         <module>context-propagation-java8</module>
-        <module>mdc-propagation</module>
         <module>servletrequest-propagation</module>
         <module>opentracing-span-propagation</module>
     </modules>
@@ -285,11 +284,6 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>context-propagation-java8</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>mdc-propagation</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
