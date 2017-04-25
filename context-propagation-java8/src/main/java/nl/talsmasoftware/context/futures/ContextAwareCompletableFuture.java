@@ -22,10 +22,7 @@ import nl.talsmasoftware.context.functions.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.*;
 
 /**
  * This class extends the standard {@link CompletableFuture} that was introduced in java version 8.
@@ -62,6 +59,54 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      */
     public ContextAwareCompletableFuture(ContextSnapshot snapshot) {
         this.snapshot = snapshot != null ? snapshot : ContextManagers.createContextSnapshot();
+    }
+
+    public static <U> ContextAwareCompletableFuture<U> supplyAsync(Supplier<U> supplier) {
+        return supplyAsync(supplier, null, null);
+    }
+
+    public static <U> ContextAwareCompletableFuture<U> supplyAsync(Supplier<U> supplier, Executor executor) {
+        return supplyAsync(supplier, executor, null);
+    }
+
+    public static <U> ContextAwareCompletableFuture<U> supplyAsync(Supplier<U> supplier, Executor executor, ContextSnapshot snapshot) {
+        if (!(supplier instanceof SupplierWithContext)) {
+            if (snapshot == null) snapshot = ContextManagers.createContextSnapshot();
+            supplier = new SupplierWithContext<>(snapshot, supplier);
+        }
+        return executor == null
+                ? wrap(CompletableFuture.supplyAsync(supplier), snapshot)
+                : wrap(CompletableFuture.supplyAsync(supplier, executor), snapshot);
+    }
+
+    public static ContextAwareCompletableFuture<Void> runAsync(Runnable runnable) {
+        return runAsync(runnable, null, null);
+    }
+
+    public static ContextAwareCompletableFuture<Void> runAsync(Runnable runnable, Executor executor) {
+        return runAsync(runnable, executor, null);
+    }
+
+    public static ContextAwareCompletableFuture<Void> runAsync(Runnable runnable, Executor executor, ContextSnapshot snapshot) {
+        if (!(runnable instanceof RunnableWithContext)) {
+            if (snapshot == null) snapshot = ContextManagers.createContextSnapshot();
+            runnable = new RunnableWithContext(snapshot, runnable);
+        }
+        return executor == null
+                ? wrap(CompletableFuture.runAsync(runnable), snapshot)
+                : wrap(CompletableFuture.runAsync(runnable, executor), snapshot);
+    }
+
+    private static <U> ContextAwareCompletableFuture<U> wrap(CompletableFuture<U> completableFuture, ContextSnapshot snapshot) {
+        if (completableFuture == null || completableFuture instanceof ContextAwareCompletableFuture) {
+            return (ContextAwareCompletableFuture<U>) completableFuture;
+        }
+        ContextAwareCompletableFuture<U> contextAwareCompletableFuture = new ContextAwareCompletableFuture<>(snapshot);
+        completableFuture.whenComplete((result, throwable) -> {
+            if (throwable != null) contextAwareCompletableFuture.completeExceptionally(throwable);
+            else contextAwareCompletableFuture.complete(result);
+        });
+        return contextAwareCompletableFuture;
     }
 
     /**
