@@ -33,7 +33,7 @@
     <properties>
         <root.basedir>${project.parent.basedir}</root.basedir>
         <project.build.java.version>1.6</project.build.java.version>
-        <opentracing-spanmanager.version>0.0.4</opentracing-spanmanager.version>
+        <opentracing-spanmanager.version>0.0.5</opentracing-spanmanager.version>
     </properties>
 
     <dependencies>
