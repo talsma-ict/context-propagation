@@ -72,7 +72,6 @@ public class ActiveSpanManagerTest {
             ActiveSpan activeSpan = GlobalTracer.get().activeSpan();
             return activeSpan == null ? "no-active-span" : activeSpan.getBaggageItem("baggage-item");
         }
-
     };
 
     @Test

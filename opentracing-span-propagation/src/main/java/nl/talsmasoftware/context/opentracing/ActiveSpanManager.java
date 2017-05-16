@@ -43,7 +43,6 @@ public class ActiveSpanManager implements ContextManager<ActiveSpan.Continuation
 
     @Override
     public Context<ActiveSpan.Continuation> initializeNewContext(final ActiveSpan.Continuation continuation) {
-        final ActiveSpan currentActiveSpan = GlobalTracer.get().activeSpan();
         final ActiveSpan activated = continuation.activate();
 
         return new Context<ActiveSpan.Continuation>() {
