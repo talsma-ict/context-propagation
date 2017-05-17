@@ -35,6 +35,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 /**
+ * Unit-test for the {@link ActiveSpanManager}.
+ *
  * @author Sjoerd Talsma
  */
 public class ActiveSpanManagerTest {
@@ -90,7 +92,7 @@ public class ActiveSpanManagerTest {
     }
 
     @Test
-    public void testSpanFinishedByBackgroundThread() throws Exception {
+    public void testFinishSpanFromBlockingBackgroundThread() throws Exception {
         ActiveSpan outerSpan = mockTracer.buildSpan("first-op").startActive();
         outerSpan.setBaggageItem("baggage-item", "in-outer-span");
 
@@ -121,7 +123,7 @@ public class ActiveSpanManagerTest {
 
         // Let the blocking thread finish and check that the span gets closed.
         lock.unlock();
-        assertThat("background baggage", blockingBackgroundBaggage.get(), equalTo("in-outer-span"));
+        assertThat("unblocked baggage", blockingBackgroundBaggage.get(), equalTo("in-outer-span"));
         assertThat("span finished?", mockTracer.finishedSpans(), hasSize(1));
     }
 

@@ -21,14 +21,31 @@ import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManager;
 
 /**
+ * {@link ContextManager} implementation that manages OpenTracing {@link ActiveSpan} continuations.
+ * <p>
+ * It delegates management of the {@link ActiveSpan} to the {@link GlobalTracer} and
+ * {@link ActiveSpan.Continuation#activate() activates} the specified {@link ActiveSpan.Continuation}
+ * when a {@link #initializeNewContext(ActiveSpan.Continuation) new context must be initialized}.
+ * The most common case where this happens is
+ * at {@link nl.talsmasoftware.context.ContextSnapshot#reactivate() snapshot reactivation}.
+ * <p>
+ * To comply with the {@link ActiveSpan#capture()} contract, each {@link Context#getValue()} result
+ * <strong>must</strong> be {@link ActiveSpan.Continuation#activate() activated} and
+ * {@link ActiveSpan#deactivate() deactivated}to prevent leaving the
+ * active {@link io.opentracing.Span Span} un-finished.<br>
+ * Using a {@link nl.talsmasoftware.context.executors.ContextAwareExecutorService ContextAwareExecutorService}
+ * will make sure each created {@link nl.talsmasoftware.context.ContextSnapshot context snapshot}
+ * gets reactivated and closed properly.
+ *
  * @author Sjoerd Talsma
  */
 public class ActiveSpanManager implements ContextManager<ActiveSpan.Continuation> {
 
     @Override
     public Context<ActiveSpan.Continuation> getActiveContext() {
-        final ActiveSpan activeSpan = GlobalTracer.get().activeSpan();
         return new Context<ActiveSpan.Continuation>() {
+            final ActiveSpan activeSpan = GlobalTracer.get().activeSpan();
+
             @Override
             public ActiveSpan.Continuation getValue() {
                 return activeSpan == null ? null : activeSpan.capture();
@@ -43,12 +60,12 @@ public class ActiveSpanManager implements ContextManager<ActiveSpan.Continuation
 
     @Override
     public Context<ActiveSpan.Continuation> initializeNewContext(final ActiveSpan.Continuation continuation) {
-        final ActiveSpan activated = continuation.activate();
-
         return new Context<ActiveSpan.Continuation>() {
+            final ActiveSpan activated = continuation == null ? null : continuation.activate();
+
             @Override
             public ActiveSpan.Continuation getValue() {
-                return activated != null ? activated.capture() : null;
+                return continuation;
             }
 
             @Override
