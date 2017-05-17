@@ -16,6 +16,7 @@
 package nl.talsmasoftware.context.opentracing;
 
 import io.opentracing.ActiveSpan;
+import io.opentracing.NoopTracerFactory;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
 import io.opentracing.util.GlobalTracer;
@@ -26,16 +27,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.emptyCollectionOf;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 
 /**
  * @author Sjoerd Talsma
@@ -59,10 +56,10 @@ public class ActiveSpanManagerTest {
     }
 
     @After
-    public void clearGlobalTracer() throws NoSuchFieldException, IllegalAccessException {
+    public void resetGlobalTracer() throws NoSuchFieldException, IllegalAccessException {
         Field tracer = GlobalTracer.class.getDeclaredField("tracer");
         tracer.setAccessible(true);
-        tracer.set(null, null);
+        tracer.set(null, NoopTracerFactory.create());
         tracer.setAccessible(false);
     }
 
@@ -90,6 +87,42 @@ public class ActiveSpanManagerTest {
         outerSpan.close();
         assertThat("span finished?", mockTracer.finishedSpans(), hasSize(1));
         assertThat("baggage of active span", GET_BAGGAGE_ITEM.call(), equalTo("no-active-span"));
+    }
+
+    @Test
+    public void testSpanFinishedByBackgroundThread() throws Exception {
+        ActiveSpan outerSpan = mockTracer.buildSpan("first-op").startActive();
+        outerSpan.setBaggageItem("baggage-item", "in-outer-span");
+
+        // sanity-check: outerSpan should be the active span..
+        assertThat("sanity-check", GET_BAGGAGE_ITEM.call(), equalTo("in-outer-span"));
+
+        // Start a blocking background thread.
+        final Lock lock = new ReentrantLock();
+        lock.lock();
+        Future<String> blockingBackgroundBaggage = threadpool.submit(new Callable<String>() {
+            public String call() throws Exception {
+                if (!lock.tryLock(5, TimeUnit.MINUTES)) throw new IllegalStateException("Couldn't obtain lock!");
+                try {
+                    return GET_BAGGAGE_ITEM.call();
+                } finally {
+                    lock.unlock();
+                }
+            }
+        });
+
+        assertThat("background thread blocked", blockingBackgroundBaggage.isDone(), is(false));
+        assertThat("span finished?", mockTracer.finishedSpans(), is(emptyCollectionOf(MockSpan.class)));
+
+        // Close outer span (it shouldn't finish until the background thread finishes).
+        outerSpan.close();
+
+        assertThat("span finished?", mockTracer.finishedSpans(), is(emptyCollectionOf(MockSpan.class)));
+
+        // Let the blocking thread finish and check that the span gets closed.
+        lock.unlock();
+        assertThat("background baggage", blockingBackgroundBaggage.get(), equalTo("in-outer-span"));
+        assertThat("span finished?", mockTracer.finishedSpans(), hasSize(1));
     }
 
 }
