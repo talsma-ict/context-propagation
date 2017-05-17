@@ -31,7 +31,7 @@ import nl.talsmasoftware.context.ContextManager;
  * <p>
  * To comply with the {@link ActiveSpan#capture()} contract, each {@link Context#getValue()} result
  * <strong>must</strong> be {@link ActiveSpan.Continuation#activate() activated} and
- * {@link ActiveSpan#deactivate() deactivated}to prevent leaving the
+ * {@link ActiveSpan#deactivate() deactivated} to prevent leaving the
  * active {@link io.opentracing.Span Span} un-finished.<br>
  * Using a {@link nl.talsmasoftware.context.executors.ContextAwareExecutorService ContextAwareExecutorService}
  * will make sure each created {@link nl.talsmasoftware.context.ContextSnapshot context snapshot}
