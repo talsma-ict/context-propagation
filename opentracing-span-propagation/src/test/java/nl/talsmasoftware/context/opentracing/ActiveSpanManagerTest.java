@@ -27,12 +27,19 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.emptyCollectionOf;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 
 /**
  * Unit-test for the {@link ActiveSpanManager}.
@@ -74,7 +81,7 @@ public class ActiveSpanManagerTest {
     };
 
     @Test
-    public void testSingleSnapshotInCurrentThread() throws Exception {
+    public void testSingleSnapshotInBackgroundThread() throws Exception {
         ActiveSpan outerSpan = mockTracer.buildSpan("first-op").startActive();
         outerSpan.setBaggageItem("baggage-item", "in-outer-span");
 
@@ -125,6 +132,56 @@ public class ActiveSpanManagerTest {
         lock.unlock();
         assertThat("unblocked baggage", blockingBackgroundBaggage.get(), equalTo("in-outer-span"));
         assertThat("span finished?", mockTracer.finishedSpans(), hasSize(1));
+    }
+
+    @Test
+    public void testFinishChildSpanFromBlockingBackgroundThread() throws Exception {
+        ActiveSpan outerSpan = mockTracer.buildSpan("first-op").startActive();
+        outerSpan.setBaggageItem("baggage-item", "in-outer-span");
+
+        // sanity-check: outerSpan should be the active span..
+        assertThat("sanity-check", GET_BAGGAGE_ITEM.call(), equalTo("in-outer-span"));
+
+        ActiveSpan childSpan = mockTracer.buildSpan("child-op").startActive();
+        childSpan.setBaggageItem("baggage-item", "in-child-span");
+
+        // sanity-check: childSpan should be the active span..
+        assertThat("sanity-check", GET_BAGGAGE_ITEM.call(), equalTo("in-child-span"));
+
+        // Start a blocking background thread.
+        final Lock lock = new ReentrantLock();
+        lock.lock();
+        Future<String> blockingBackgroundBaggage = threadpool.submit(new Callable<String>() {
+            public String call() throws Exception {
+                if (!lock.tryLock(5, TimeUnit.MINUTES)) throw new IllegalStateException("Couldn't obtain lock!");
+                try {
+                    return GET_BAGGAGE_ITEM.call();
+                } finally {
+                    lock.unlock();
+                }
+            }
+        });
+
+        assertThat("background thread blocked", blockingBackgroundBaggage.isDone(), is(false));
+        assertThat("no span finished?", mockTracer.finishedSpans(), is(emptyCollectionOf(MockSpan.class)));
+        assertThat(GET_BAGGAGE_ITEM.call(), is("in-child-span"));
+
+        // Close child + outer span (child shouldn't finish until the background thread finishes, the outer span may).
+        childSpan.close();
+        assertThat(GET_BAGGAGE_ITEM.call(), is("in-outer-span"));
+        outerSpan.close();
+        assertThat(GET_BAGGAGE_ITEM.call(), is("no-active-span"));
+
+        assertThat("outer span finished?", mockTracer.finishedSpans(), hasSize(1));
+        assertThat(mockTracer.finishedSpans().get(0).getBaggageItem("baggage-item"), is("in-outer-span"));
+        // So the outer span actually closed sooner than its child, because that got propagated to the (blocked)
+        // background thread.
+
+        // Let the blocking thread finish and check that the span gets closed.
+        lock.unlock();
+        assertThat("unblocked baggage", blockingBackgroundBaggage.get(), equalTo("in-child-span"));
+        assertThat("span finished?", mockTracer.finishedSpans(), hasSize(2));
+        assertThat(mockTracer.finishedSpans().get(1).getBaggageItem("baggage-item"), is("in-child-span"));
     }
 
 }
