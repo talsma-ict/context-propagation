@@ -20,49 +20,52 @@ import nl.talsmasoftware.context.ContextManager;
 import org.slf4j.MDC;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
+ * Manager to propagate MDC content from one thread to another.
+ *
  * @author Sjoerd Talsma
  */
 public class MdcManager implements ContextManager<Map<String, String>> {
 
     public Context<Map<String, String>> initializeNewContext(final Map<String, String> value) {
+        // Capture current MDC as 'previous' and make value the new current MCC.
         final Map<String, String> previous = MDC.getCopyOfContextMap();
-        setMdc(value);
-        return new Context<Map<String, String>>() {
-            public Map<String, String> getValue() {
-                return value;
-            }
-
-            public void close() {
-                setMdc(previous);
-            }
-        };
+        if (value == null) MDC.clear();
+        else MDC.setContextMap(value);
+        return new MdcContext(previous, value, false);
     }
 
     public Context<Map<String, String>> getActiveContext() {
-        return new MdcSnapshot(MDC.getCopyOfContextMap());
+        // Return fresh context that is 'already-closed' without a previous mdc.
+        return new MdcContext(null, MDC.getCopyOfContextMap(), true);
     }
 
-    private static void setMdc(Map<String, String> contextMap) {
-        if (contextMap == null) MDC.clear();
-        else MDC.setContextMap(contextMap);
-    }
+    private static final class MdcContext implements Context<Map<String, String>> {
+        private final Map<String, String> previous, value;
+        private final AtomicBoolean closed;
 
-    private static class MdcSnapshot implements Context<Map<String, String>> {
-        private final Map<String, String> snapshot;
-
-        private MdcSnapshot(Map<String, String> snapshot) {
-            this.snapshot = snapshot;
+        private MdcContext(Map<String, String> previous, Map<String, String> value, boolean closed) {
+            this.previous = previous;
+            this.value = value;
+            this.closed = new AtomicBoolean(closed);
         }
 
         public Map<String, String> getValue() {
-            return snapshot;
+            return value;
         }
 
         public void close() {
-            // no-op for now
+            if (closed.compareAndSet(false, true)) {
+                if (previous == null) MDC.clear();
+                else MDC.setContextMap(previous);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return closed.get() ? "MdcContext{closed}" : "MdcContext" + (value == null ? "{}" : value);
         }
     }
-
 }
