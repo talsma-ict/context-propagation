@@ -35,7 +35,7 @@ import nl.talsmasoftware.context.ContextManager;
  * active {@link io.opentracing.Span Span} un-finished.<br>
  * Using a {@link nl.talsmasoftware.context.executors.ContextAwareExecutorService ContextAwareExecutorService}
  * will make sure each created {@link nl.talsmasoftware.context.ContextSnapshot context snapshot}
- * gets reactivated and closed properly.
+ * is reactivated and closed properly exactly once.
  *
  * @author Sjoerd Talsma
  */
