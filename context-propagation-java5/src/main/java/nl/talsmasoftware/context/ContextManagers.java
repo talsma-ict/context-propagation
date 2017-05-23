@@ -15,11 +15,12 @@
  */
 package nl.talsmasoftware.context;
 
-import javax.imageio.spi.ServiceRegistry;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,9 +41,10 @@ public final class ContextManagers {
     private static final Logger LOGGER = Logger.getLogger(ContextManagers.class.getName());
 
     /**
-     * Service locator for registered {@link ContextManager} implementations.
+     * Service loader for registered {@link ContextManager} implementations.
      */
-    private static final Loader<ContextManager> LOCATOR = new Loader<ContextManager>(ContextManager.class);
+    private static final PriorityServiceLoader<ContextManager> SERVICE_LOADER =
+            new PriorityServiceLoader<ContextManager>(ContextManager.class);
 
     /**
      * Private constructor to avoid instantiation of this class.
@@ -75,11 +77,17 @@ public final class ContextManagers {
     public static ContextSnapshot createContextSnapshot() {
         final Map<String, Object> snapshot = new LinkedHashMap<String, Object>();
         boolean noManagers = true;
-        for (ContextManager manager : LOCATOR) {
+        for (ContextManager manager : SERVICE_LOADER) {
             noManagers = false;
-            final Context activeContext = manager.getActiveContext();
-            if (activeContext != null) {
-                snapshot.put(manager.getClass().getName(), activeContext.getValue());
+            try {
+                final Context activeContext = manager.getActiveContext();
+                if (activeContext == null) {
+                    LOGGER.log(Level.FINEST, "There is no active context for {0} in this snapshot.", manager);
+                } else {
+                    snapshot.put(manager.getClass().getName(), activeContext.getValue());
+                }
+            } catch (RuntimeException rte) {
+                LOGGER.log(Level.WARNING, "Exception obtaining active context from " + manager + " for snapshot.", rte);
             }
         }
         if (noManagers) LOGGER.log(Level.WARNING, "Context snapshot was created but no ContextManagers were found!");
@@ -102,7 +110,7 @@ public final class ContextManagers {
 
         /**
          * Tries to get the context manager instance by its classname.<br>
-         * This should obviously be available in the {@link #LOCATOR} instance, but if it's not
+         * This should obviously be available in the {@link #SERVICE_LOADER} instance, but if it's not
          * (after deserialization on another malconfigured node?) we will print a warning
          * (due to the potential performance penalty) and return a new instance of the manager.
          *
@@ -111,7 +119,7 @@ public final class ContextManagers {
          * or a new instance worst-case (warnings will be logged).
          */
         private static ContextManager<?> getContextManagerByName(String contextManagerClassName) {
-            for (ContextManager contextManager : LOCATOR) {
+            for (ContextManager contextManager : SERVICE_LOADER) {
                 if (contextManagerClassName.equals(contextManager.getClass().getName())) return contextManager;
             }
             LOGGER.log(Level.WARNING, "Context manager \"{0}\" not found in service locator! " +
@@ -203,83 +211,12 @@ public final class ContextManagers {
         }
     }
 
-    private static final Method ADD_SUPPRESSED;
-
-    static {
-        Method reflected = null;
-        try {
-            reflected = Throwable.class.getDeclaredMethod("addSuppressed", Throwable.class);
-        } catch (NoSuchMethodException nsme) {
-            LOGGER.log(Level.FINEST, "Older JDK detected; the Throwable.addSuppressed() method was not available.", nsme);
-        }
-        ADD_SUPPRESSED = reflected;
-    }
-
-    private static <EX extends Throwable> EX addSuppressedOrWarn(EX exception, Throwable toSuppress, String message) {
-        if (ADD_SUPPRESSED != null) try {
-            ADD_SUPPRESSED.invoke(exception, toSuppress);
-            return exception;
-        } catch (InvocationTargetException ite) {
-            LOGGER.log(Level.FINEST, "Unexpected exception calling addSuppressed.", ite.getCause());
-        } catch (IllegalAccessException iae) {
-            LOGGER.log(Level.FINEST, "Not allowed to call addSuppressed: {0}", new Object[]{iae.getMessage(), iae});
-        }
-        LOGGER.log(Level.WARNING, message, toSuppress);
-        return exception;
-    }
-
-    /**
-     * Loader class to delegate to JDK 6 ServiceLoader or fallback to the old {@link ServiceRegistry}.
-     *
-     * @param <SVC> The type of service to load.
-     */
-    private static final class Loader<SVC> implements Iterable<SVC> {
-        private final Class<SVC> serviceType;
-        private volatile Iterable<SVC> delegate;
-
-        private Loader(Class<SVC> serviceType) {
-            this.serviceType = serviceType;
-        }
-
-        private synchronized Iterable<SVC> delegate() {
-            if (delegate == null) {
-                ArrayList<SVC> services = new ArrayList<SVC>();
-                Iterator<SVC> iterator = loadServices(serviceType);
-                while (iterator.hasNext()) try {
-                    SVC service = iterator.next();
-                    if (service != null) services.add(service);
-                } catch (NoSuchElementException nse) {
-                    LOGGER.log(Level.SEVERE, "Exception iterating service " + serviceType + ": " + nse.getMessage(), nse);
-                }
-                services.trimToSize();
-                this.delegate = Collections.unmodifiableList(services);
-            }
-            return delegate;
-        }
-
-        @SuppressWarnings("unchecked") // Type is actually safe, although we use reflection.
-        private static <SVC> Iterator<SVC> loadServices(Class<SVC> serviceType) {
-            try { // Attempt to use Java 1.6 ServiceLoader:
-                // ServiceLoader.load(ContextManager.class, ContextManagers.class.getClassLoader());
-                return ((Iterable<SVC>) Class.forName("java.util.ServiceLoader")
-                        .getDeclaredMethod("load", Class.class, ClassLoader.class)
-                        .invoke(null, serviceType, serviceType.getClassLoader())).iterator();
-            } catch (ClassNotFoundException cnfe) {
-                LOGGER.log(Level.FINEST, "Java 6 ServiceLoader not found, falling back to the imageio ServiceRegistry.");
-            } catch (NoSuchMethodException nsme) {
-                LOGGER.log(Level.SEVERE, "Could not find the 'load' method in JDK's ServiceLoader.", nsme);
-            } catch (IllegalAccessException iae) {
-                LOGGER.log(Level.SEVERE, "Not allowed to call the 'load' method in JDK's ServiceLoader.", iae);
-            } catch (InvocationTargetException ite) {
-                throw new IllegalStateException(String.format(
-                        "Exception calling the 'load' method in JDK's ServiceLoader for the %s service.",
-                        serviceType.getSimpleName()), ite.getCause());
-            }
-            return ServiceRegistry.lookupProviders(serviceType, serviceType.getClassLoader());
-        }
-
-        public Iterator<SVC> iterator() {
-            return delegate().iterator();
+    @SuppressWarnings("Since15")
+    private static void addSuppressedOrWarn(Throwable exception, Throwable toSuppress, String message) {
+        if (exception != null && toSuppress != null) try {
+            exception.addSuppressed(toSuppress);
+        } catch (LinkageError le) {
+            LOGGER.log(Level.WARNING, message, toSuppress);
         }
     }
 

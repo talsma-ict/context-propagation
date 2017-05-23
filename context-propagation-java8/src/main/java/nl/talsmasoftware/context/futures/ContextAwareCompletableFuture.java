@@ -22,10 +22,7 @@ import nl.talsmasoftware.context.functions.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.*;
 
 /**
  * This class extends the standard {@link CompletableFuture} that was introduced in java version 8.
@@ -62,6 +59,135 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      */
     public ContextAwareCompletableFuture(ContextSnapshot snapshot) {
         this.snapshot = snapshot != null ? snapshot : ContextManagers.createContextSnapshot();
+    }
+
+    /**
+     * Runs the {@code supplier} task in the common {@link java.util.concurrent.ForkJoinPool ForkJoinPool}
+     * <em>within the current context</em> and also applies that context to all successive
+     * calls to the {@code CompletableFuture}.
+     *
+     * @param supplier a function returning the value to be used to complete the returned CompletableFuture
+     * @param <U>      the function's return type
+     * @return the new CompletableFuture that propagates a snapshot of the current context
+     * @see CompletableFuture#supplyAsync(Supplier)
+     * @see ContextAwareCompletableFuture#supplyAsync(Supplier, Executor, ContextSnapshot)
+     */
+    public static <U> ContextAwareCompletableFuture<U> supplyAsync(Supplier<U> supplier) {
+        return supplyAsync(supplier, null, null);
+    }
+
+    /**
+     * Runs the {@code supplier} task in the specified {@link Executor executor}
+     * <em>within the current context</em> and also applies that context to all successive
+     * calls to the {@code CompletableFuture}.
+     *
+     * @param supplier a function returning the value to be used to complete the returned CompletableFuture
+     * @param executor the executor to use for asynchronous execution
+     * @param <U>      the function's return type
+     * @return the new CompletableFuture that propagates a snapshot of the current context
+     * @see CompletableFuture#supplyAsync(Supplier, Executor)
+     * @see ContextAwareCompletableFuture#supplyAsync(Supplier, Executor, ContextSnapshot)
+     */
+    public static <U> ContextAwareCompletableFuture<U> supplyAsync(Supplier<U> supplier, Executor executor) {
+        return supplyAsync(supplier, executor, null);
+    }
+
+    /**
+     * Runs the {@code supplier} task in the specified {@link Executor executor}
+     * <em>within the specified {@link ContextSnapshot context snapshot}</em> and also applies that context
+     * to all successive calls to the {@code CompletableFuture}.
+     * <p>
+     * This method is lenient to {@code null} values for {@code executor} and {@code snapshot}:<br>
+     * If {@code executor == null} the common {@link java.util.concurrent.ForkJoinPool ForkJoinPool} is used as
+     * specified by {@link CompletableFuture#supplyAsync(Supplier)}.<br>
+     * If {@code snapshot == null} a {@link ContextManagers#createContextSnapshot() new context snapshot} is
+     * created for all successive calls to the {@code CompletableFuture} and the {@link Supplier}
+     * (if not already a {@link SupplierWithContext}).
+     *
+     * @param supplier a function returning the value to be used to complete the returned CompletableFuture
+     * @param executor the executor to use for asynchronous execution
+     * @param snapshot a snapshot of the context to be propagated in the supplier function
+     *                 and all successive calls of this completable future
+     * @param <U>      the function's return type
+     * @return the new CompletableFuture that propagates the specified context snapshot
+     * @see CompletableFuture#supplyAsync(Supplier, Executor)
+     */
+    public static <U> ContextAwareCompletableFuture<U> supplyAsync(Supplier<U> supplier, Executor executor, ContextSnapshot snapshot) {
+        if (!(supplier instanceof SupplierWithContext)) {
+            if (snapshot == null) snapshot = ContextManagers.createContextSnapshot();
+            supplier = new SupplierWithContext<>(snapshot, supplier);
+        }
+        return executor == null
+                ? wrap(CompletableFuture.supplyAsync(supplier), snapshot)
+                : wrap(CompletableFuture.supplyAsync(supplier, executor), snapshot);
+    }
+
+    /**
+     * Runs the {@code runnable} task in the common {@link java.util.concurrent.ForkJoinPool ForkJoinPool}
+     * <em>within the current context</em> and also applies that context to all successive
+     * calls to the {@code CompletableFuture}.
+     *
+     * @param runnable the action to run before completing the returned CompletableFuture
+     * @return the new CompletableFuture that propagates a snapshot of the current context
+     * @see CompletableFuture#runAsync(Runnable)
+     * @see ContextAwareCompletableFuture#runAsync(Runnable, Executor, ContextSnapshot)
+     */
+    public static ContextAwareCompletableFuture<Void> runAsync(Runnable runnable) {
+        return runAsync(runnable, null, null);
+    }
+
+    /**
+     * Runs the {@code runnable} task in the specified {@link Executor executor}
+     * <em>within the current context</em> and also applies that context to all successive
+     * calls to the {@code CompletableFuture}.
+     *
+     * @param runnable the action to run before completing the returned CompletableFuture
+     * @param executor the executor to use for asynchronous execution
+     * @return the new CompletableFuture that propagates a snapshot of the current context
+     * @see CompletableFuture#runAsync(Runnable, Executor)
+     * @see ContextAwareCompletableFuture#runAsync(Runnable, Executor, ContextSnapshot)
+     */
+    public static ContextAwareCompletableFuture<Void> runAsync(Runnable runnable, Executor executor) {
+        return runAsync(runnable, executor, null);
+    }
+
+    /**
+     * Runs the {@code runnable} task in the specified {@link Executor executor}
+     * <em>within the specified {@link ContextSnapshot context snapshot}</em> and also applies that context
+     * to all successive calls to the {@code CompletableFuture}.
+     * <p>
+     * This method is lenient to {@code null} values for {@code executor} and {@code snapshot}:<br>
+     * If {@code executor == null} the common {@link java.util.concurrent.ForkJoinPool ForkJoinPool} is used as
+     * specified by {@link CompletableFuture#supplyAsync(Supplier)}.<br>
+     * If {@code snapshot == null} a {@link ContextManagers#createContextSnapshot() new context snapshot} is
+     * created for all successive calls to the {@code CompletableFuture} and the {@link Supplier}
+     * (if not already a {@link SupplierWithContext}).
+     *
+     * @param runnable the action to run before completing the returned CompletableFuture
+     * @param executor the executor to use for asynchronous execution
+     * @return the new CompletableFuture that propagates a snapshot of the current context
+     * @see CompletableFuture#runAsync(Runnable, Executor)
+     */
+    public static ContextAwareCompletableFuture<Void> runAsync(Runnable runnable, Executor executor, ContextSnapshot snapshot) {
+        if (!(runnable instanceof RunnableWithContext)) {
+            if (snapshot == null) snapshot = ContextManagers.createContextSnapshot();
+            runnable = new RunnableWithContext(snapshot, runnable);
+        }
+        return executor == null
+                ? wrap(CompletableFuture.runAsync(runnable), snapshot)
+                : wrap(CompletableFuture.runAsync(runnable, executor), snapshot);
+    }
+
+    private static <U> ContextAwareCompletableFuture<U> wrap(CompletableFuture<U> completableFuture, ContextSnapshot snapshot) {
+        if (completableFuture == null || completableFuture instanceof ContextAwareCompletableFuture) {
+            return (ContextAwareCompletableFuture<U>) completableFuture;
+        }
+        ContextAwareCompletableFuture<U> contextAwareCompletableFuture = new ContextAwareCompletableFuture<>(snapshot);
+        completableFuture.whenComplete((result, throwable) -> {
+            if (throwable != null) contextAwareCompletableFuture.completeExceptionally(throwable);
+            else contextAwareCompletableFuture.complete(result);
+        });
+        return contextAwareCompletableFuture;
     }
 
     /**

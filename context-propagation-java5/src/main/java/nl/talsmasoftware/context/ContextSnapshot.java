@@ -28,8 +28,9 @@ package nl.talsmasoftware.context;
  * <li>Allow the background job to (temporary) {@link #reactivate() reactivate} the snapshot
  * for some required code path.</li>
  * <li>The reactivation is also a {@link Context} of its own. Although it does not return any specific
- * {@link Context#getValue() value}, it <em>can</em> be {@link Context#close() closed}, which is very useful
- * to prevent context values leaking in case the used threads will be returned to some pool.</li>
+ * {@link Context#getValue() value}, it must be {@link Context#close() closed} when the work requiring
+ * the context snapshot is done. This prevents context values leaking in case the used threads
+ * are returned to some pool.</li>
  * </ol>
  * <p>
  * <center><img src="ContextSnapshot.svg" alt="Context snapshot interface"></center>
