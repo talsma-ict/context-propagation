@@ -4,7 +4,8 @@
 # OpenTracing Span propagation library
 
 Adding the `opentracing-span-propagation` jar to your classpath
-is all that is needed ... _(todo)_
+is all that is needed to automatically let the _active span_ 
+from the _global tracer_ become part of the `ContextSnapshot`.
 
 ## How to use this library
 
@@ -20,7 +21,7 @@ Add it to your classpath.
 Done!
 
 Now the `GlobalTracer.getActiveSpan()` is propagated into each
-background thread you start with our `ContextAwareExecutorService`.
+background thread you start with the `ContextAwareExecutorService`.
 
 
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/opentracing-span-propagation.svg
