@@ -21,8 +21,8 @@ will automatically be propagated into the background thread as well.
 The following `ThreadLocal`-based contexts are currently supported 
 out of the box by this context-propagation library:
 
-- `ServletRequest` contexts (see [servletrequest-propagation])
-- OpenTracing Span contexts (using the [opentracing-spanmanager] library)
+- `ServletRequest` contexts (see [servletrequest propagation])
+- OpenTracing Span contexts (see [opentracing span propagation])
 - _yours?_ Feel free to create an issue or pull-request
   if you believe there's a general context that was forgotten. 
 
@@ -69,6 +69,6 @@ public class DummyContextManager implements ContextManager<String> {
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation.svg
   [maven]: http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22nl.talsmasoftware.context%22%20AND%20a%3A%22context-propagation%22
 
-  [servletrequest-propagation]: servletrequest-propagation
-  [opentracing-spanmanager]: https://github.com/opentracing-contrib/java-spanmanager
+  [servletrequest propagation]: servletrequest-propagation
+  [opentracing span propagation]: opentracing-span-propagation
   [default constructor]: https://en.wikipedia.org/wiki/Nullary_constructor
