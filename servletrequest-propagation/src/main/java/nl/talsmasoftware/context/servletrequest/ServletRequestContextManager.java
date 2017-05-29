@@ -27,6 +27,16 @@ import javax.servlet.ServletRequest;
  */
 public final class ServletRequestContextManager implements ContextManager<ServletRequest> {
 
+    /**
+     * Static utility method to obtain the current {@link ServletRequest} (if available).
+     *
+     * @return The current ServletRequest if available, or <code>null</code> otherwise.
+     */
+    public static ServletRequest currentServletRequest() {
+        Context<ServletRequest> current = ServletRequestContext.current();
+        return current == null ? null : current.getValue();
+    }
+
     public Context<ServletRequest> initializeNewContext(ServletRequest value) {
         return new ServletRequestContext(value);
     }
