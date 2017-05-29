@@ -15,6 +15,9 @@
  */
 package nl.talsmasoftware.context.mdc;
 
+import nl.talsmasoftware.context.Context;
+import nl.talsmasoftware.context.ContextManagers;
+import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
 import org.junit.After;
 import org.junit.Before;
@@ -46,6 +49,12 @@ public class MdcManagerTest {
         threadpool = null;
     }
 
+    @Before
+    @After
+    public void clearMDC() {
+        MDC.clear();
+    }
+
     private static final Callable<String> GET_MDC_ITEM = new Callable<String>() {
         public String call() {
             return MDC.get("mdc-item");
@@ -57,6 +66,23 @@ public class MdcManagerTest {
         MDC.put("mdc-item", "Item value");
         Future<String> itemValue = threadpool.submit(GET_MDC_ITEM);
         assertThat(itemValue.get(), is("Item value"));
+    }
+
+    @Test
+    public void testMdcItemRestoration() throws Exception {
+        MDC.put("mdc-item", "Value 1");
+
+        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        assertThat("New snapshot shouldn't manipulate MDC.", GET_MDC_ITEM.call(), is("Value 1"));
+
+        MDC.put("mdc-item", "Value 2");
+        assertThat("Sanity check: MDC changed?", GET_MDC_ITEM.call(), is("Value 2"));
+
+        Context<Void> reactivation = snapshot.reactivate();
+        assertThat("MDC changed by reactivation", GET_MDC_ITEM.call(), is("Value 1"));
+
+        reactivation.close();
+        assertThat("MDC restored?", GET_MDC_ITEM.call(), is("Value 2"));
     }
 
 }
