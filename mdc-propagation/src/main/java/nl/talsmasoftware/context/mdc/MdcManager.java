@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Manager to propagate MDC content from one thread to another.
+ * Manager to propagate the {@link MDC} content from one thread to another.
  *
  * @author Sjoerd Talsma
  */
