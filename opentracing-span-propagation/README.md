@@ -14,7 +14,7 @@ Add it to your classpath.
 <dependency>
     <groupId>nl.talsmasoftware.context</groupId>
     <artifactId>opentracing-span-propagation</artifactId>
-    <version>[see above]</version>
+    <version>[see maven-central version above]</version>
 </dependency>
 ```
 
@@ -28,7 +28,3 @@ background thread you start with the `ContextAwareExecutorService`.
   [maven]: http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22nl.talsmasoftware.context%22%20AND%20a%3A%22opentracing-span-propagation%22
   [opentracing-img]: https://img.shields.io/badge/OpenTracing-enabled-blue.svg
   [opentracing]: http://opentracing.io
-
-  [servletrequest-propagation]: servletrequest-propagation
-  [opentracing-spanmanager]: https://github.com/opentracing-contrib/java-spanmanager
-  [default constructor]: https://en.wikipedia.org/wiki/Nullary_constructor
