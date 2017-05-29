@@ -21,8 +21,8 @@ will automatically be propagated into the background thread as well.
 The following `ThreadLocal`-based contexts are currently supported 
 out of the box by this context-propagation library:
 
-- `ServletRequest` contexts (see [servletrequest propagation])
-- OpenTracing Span contexts (see [opentracing span propagation])
+- [ServletRequest contexts][servletrequest propagation]
+- [OpenTracing Span contexts][opentracing span propagation]
 - _yours?_ Feel free to create an issue or pull-request
   if you believe there's a general context that was forgotten. 
 
