@@ -34,7 +34,7 @@
     <properties>
         <root.basedir>${project.parent.basedir}</root.basedir>
         <project.build.java.version>1.6</project.build.java.version>
-        <opentracing-api.version>0.30.0.RC2</opentracing-api.version>
+        <opentracing-api.version>0.30.0</opentracing-api.version>
     </properties>
 
     <dependencies>
