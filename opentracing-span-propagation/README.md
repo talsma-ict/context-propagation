@@ -21,7 +21,8 @@ Add it to your classpath.
 Done!
 
 Now the `GlobalTracer.getActiveSpan()` is propagated into each
-background thread you start with the `ContextAwareExecutorService`.
+snapshot created by the `ContextManagers.createSnapshot()` method.
+This includes all usages of the `ContextAwareExecutorService`.
 
 
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/opentracing-span-propagation.svg
