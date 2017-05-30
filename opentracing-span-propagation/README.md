@@ -4,8 +4,8 @@
 # OpenTracing Span propagation library
 
 Adding the `opentracing-span-propagation` jar to your classpath
-is all that is needed to automatically let the _active span_ 
-from the _global tracer_ become part of the `ContextSnapshot`.
+is all that is needed to automatically obtain an `ActiveSpan` `Continuation`
+from the `GlobalTracer` and become part of the `ContextSnapshot`.
 
 ## How to use this library
 
@@ -20,7 +20,7 @@ Add it to your classpath.
 
 Done!
 
-Now the `GlobalTracer.getActiveSpan()` is propagated into each
+Now the `GlobalTracer.get().activeSpan()` continuation is propagated into each
 snapshot created by the `ContextManagers.createSnapshot()` method.
 This includes all usages of the `ContextAwareExecutorService`.
 
