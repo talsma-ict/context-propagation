@@ -44,16 +44,6 @@ It is easy to add a custom `Context` type to be propagated:
 
 An example of a custom context implementation:
 ```java
-final class DummyContext extends AbstractThreadLocalContext<String> {
-    DummyContext(String newValue) {
-        super(newValue);
-    }
-
-    static Context<String> current() {
-        return AbstractThreadLocalContext.current(DummyContext.class);
-    }
-}
-
 public class DummyContextManager implements ContextManager<String> {
     public Context<String> initializeNewContext(String value) {
         return new DummyContext(value);
@@ -61,6 +51,16 @@ public class DummyContextManager implements ContextManager<String> {
 
     public Context<String> getActiveContext() {
         return DummyContext.current();
+    }
+    
+    private static final class DummyContext extends AbstractThreadLocalContext<String> {
+        private DummyContext(String newValue) {
+            super(newValue);
+        }
+        
+        private static Context<String> current() {
+            return AbstractThreadLocalContext.current(DummyContext.class);
+        }
     }
 }
 ```
