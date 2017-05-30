@@ -24,7 +24,7 @@ out of the box by this context-propagation library:
 - [ServletRequest contexts][servletrequest propagation]
 - [Slf4J Mapped Diagnostic Context (MDC)][mdc propagation]
 - [OpenTracing Span contexts][opentracing span propagation]
-- _yours?_ Feel free to create an issue or pull-request
+- _Yours?_ Feel free to create an issue or pull-request
   if you believe there's a general context that was forgotten. 
 
 Adding your own `Context` type is not difficult.
@@ -39,8 +39,9 @@ It is easy to add a custom `Context` type to be propagated:
 2. Create a service file called
    `/META-INF/services/nl.talsmasoftware.context.ContextManager` 
    containing the qualified class name of your `ContextManager` implementation.
-3. That's it. Now the `ContextManagers.createSnapshot()` method will 
-   include your context in the snapshots to be propagated.
+3. That's it. Now the result from your _getActiveContext_ method is propagated
+   into each snapshot created by the `ContextManagers.createSnapshot()` method.
+   This includes all usages of the `ContextAwareExecutorService`.
 
 An example of a custom context implementation:
 ```java
