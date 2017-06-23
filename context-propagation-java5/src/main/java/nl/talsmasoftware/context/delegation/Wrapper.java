@@ -75,7 +75,8 @@ public abstract class Wrapper<T> {
                 (other != null
                         && delegate != null
                         && getClass().equals(other.getClass())
-                        && delegate.equals(((Wrapper) other).delegate));
+                        && delegate.equals(((Wrapper) other).delegate
+                ));
     }
 
     static boolean equals(Object obj1, Object obj2) {
