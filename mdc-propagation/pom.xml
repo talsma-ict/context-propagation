@@ -39,23 +39,13 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>context-propagation</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
         </dependency>
     </dependencies>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>context-propagation-bom</artifactId>
-                <version>${project.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 </project>
