@@ -23,7 +23,7 @@ if the `ServletRequestContextFilter` was applied to the inbound request.
 Done!
 
 Now the `ServletRequestContextManager.currentServletRequest()` is propagated into each
-snapshot created by the `ContextManagers.createSnapshot()` method.
+snapshot created by the `ContextManagers.createSnapshot()` method.  
 This includes all usages of the `ContextAwareExecutorService`.
 
 
