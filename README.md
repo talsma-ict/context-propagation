@@ -55,9 +55,8 @@ public class DummyContextManager implements ContextManager<String> {
         return DummyContext.current();
     }
     
-    public static String currentValue() {
-        Context<String> currentContext = DummyContext.current();
-        return currentContext == null ? null : currentContext.getValue();
+    public static Optional<String> currentValue() {
+        return Optional.ofNullable(DummyContext.current()).map(Context::getValue);
     }
     
     private static final class DummyContext extends AbstractThreadLocalContext<String> {
