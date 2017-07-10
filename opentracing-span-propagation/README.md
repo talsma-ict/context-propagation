@@ -21,13 +21,13 @@ Add it to your classpath.
 Done!
 
 Now the `GlobalTracer.get().activeSpan()` continuation is propagated into each
-snapshot created by the `ContextManagers.createSnapshot()` method.
+snapshot created by the `ContextManagers.createSnapshot()` method.  
 This includes all usages of the `ContextAwareExecutorService`.
 
 _Please note:_ All snapshot `reactivate()` results **must be closed** 
 (from the same thread) if the `opentracing-span-propagation` is used due to the
-`ActiveSpan.Continuation` semantics.
-The `ContextAwareExecutorService` obviously conforms to this constraint.
+`ActiveSpan.Continuation` semantics.  
+The `ContextAwareExecutorService` conforms to this constraint.
 
 
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/opentracing-span-propagation.svg
