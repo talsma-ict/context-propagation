@@ -12,10 +12,12 @@ thread.
 
 ## How to use this library
 
-Use any supported `ThreadLocal`-based contexts like you are used to.
 Use a `ContextAwareExecutorService` instead of your usual threadpool to start
-background threads, and the ThreadLocal values from the calling thread
-will automatically be propagated into the background thread as well.
+background threads.  
+It will create a snapshot of supported `ThreadLocal`-based contexts and
+reactivate them in the background thread when started.
+The ThreadLocal values from the calling thread will therefore automatically 
+be available in the background thread as well.
 
 ## Supported contexts
 
