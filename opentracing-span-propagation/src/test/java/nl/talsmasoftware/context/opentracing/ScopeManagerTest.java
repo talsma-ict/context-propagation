@@ -15,39 +15,35 @@
  */
 package nl.talsmasoftware.context.opentracing;
 
-import io.opentracing.ActiveSpan;
-import io.opentracing.NoopTracerFactory;
+import io.opentracing.Scope;
+import io.opentracing.ScopeManager;
+import io.opentracing.Span;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
+import io.opentracing.noop.NoopTracerFactory;
 import io.opentracing.util.GlobalTracer;
-import io.opentracing.util.ThreadLocalActiveSpanSource;
+import io.opentracing.util.ThreadLocalScopeManager;
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.emptyCollectionOf;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 
 /**
- * Unit-test for the {@link ActiveSpanManager}.
+ * Unit-test for the {@link ScopeContextManager}.
  *
  * @author Sjoerd Talsma
  */
-public class ActiveSpanManagerTest {
-    static final ThreadLocalActiveSpanSource TL_ACTIVE_SPAN_SOURCE = new ThreadLocalActiveSpanSource();
+public class ScopeManagerTest {
+    static final ScopeManager SCOPE_MANAGER = new ThreadLocalScopeManager();
+//    static final ThreadLocalActiveSpanSource TL_ACTIVE_SPAN_SOURCE = new ThreadLocalActiveSpanSource();
 
     MockTracer mockTracer;
     ExecutorService threadpool;
@@ -55,7 +51,7 @@ public class ActiveSpanManagerTest {
     @Before
     public void registerMockGlobalTracer() {
         assertThat("Pre-existing GlobalTracer", GlobalTracer.isRegistered(), is(false));
-        GlobalTracer.register(mockTracer = new MockTracer(TL_ACTIVE_SPAN_SOURCE));
+        GlobalTracer.register(mockTracer = new MockTracer(SCOPE_MANAGER));
         threadpool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
     }
 
@@ -75,15 +71,16 @@ public class ActiveSpanManagerTest {
     private static final Callable<String> GET_BAGGAGE_ITEM = new Callable<String>() {
         @Override
         public String call() {
-            ActiveSpan activeSpan = GlobalTracer.get().activeSpan();
+            Scope activeScope = GlobalTracer.get().scopeManager().active();
+            Span activeSpan = activeScope == null ? null : activeScope.span();
             return activeSpan == null ? "no-active-span" : activeSpan.getBaggageItem("baggage-item");
         }
     };
 
     @Test
     public void testSingleSnapshotInBackgroundThread() throws Exception {
-        ActiveSpan outerSpan = mockTracer.buildSpan("first-op").startActive();
-        outerSpan.setBaggageItem("baggage-item", "in-outer-span");
+        Scope outerSpan = mockTracer.buildSpan("first-op").startActive();
+        outerSpan.span().setBaggageItem("baggage-item", "in-outer-span");
 
         // sanity-check: outerSpan should be the active span..
         assertThat("sanity-check", GET_BAGGAGE_ITEM.call(), equalTo("in-outer-span"));
@@ -100,8 +97,8 @@ public class ActiveSpanManagerTest {
 
     @Test
     public void testFinishSpanFromBlockingBackgroundThread() throws Exception {
-        ActiveSpan outerSpan = mockTracer.buildSpan("first-op").startActive();
-        outerSpan.setBaggageItem("baggage-item", "in-outer-span");
+        Scope outerSpan = mockTracer.buildSpan("first-op").startActive();
+        outerSpan.span().setBaggageItem("baggage-item", "in-outer-span");
 
         // sanity-check: outerSpan should be the active span..
         assertThat("sanity-check", GET_BAGGAGE_ITEM.call(), equalTo("in-outer-span"));
@@ -136,14 +133,14 @@ public class ActiveSpanManagerTest {
 
     @Test
     public void testFinishChildSpanFromBlockingBackgroundThread() throws Exception {
-        ActiveSpan outerSpan = mockTracer.buildSpan("first-op").startActive();
-        outerSpan.setBaggageItem("baggage-item", "in-outer-span");
+        Scope outerSpan = mockTracer.buildSpan("first-op").startActive();
+        outerSpan.span().setBaggageItem("baggage-item", "in-outer-span");
 
         // sanity-check: outerSpan should be the active span..
         assertThat("sanity-check", GET_BAGGAGE_ITEM.call(), equalTo("in-outer-span"));
 
-        ActiveSpan childSpan = mockTracer.buildSpan("child-op").startActive();
-        childSpan.setBaggageItem("baggage-item", "in-child-span");
+        Scope childSpan = mockTracer.buildSpan("child-op").startActive();
+        childSpan.span().setBaggageItem("baggage-item", "in-child-span");
 
         // sanity-check: childSpan should be the active span..
         assertThat("sanity-check", GET_BAGGAGE_ITEM.call(), equalTo("in-child-span"));

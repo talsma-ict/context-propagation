@@ -34,7 +34,7 @@
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
         <root.basedir>${project.parent.basedir}</root.basedir>
-        <opentracing-api.version>0.30.0</opentracing-api.version>
+        <opentracing-api.version>0.31.0-RC1</opentracing-api.version>
     </properties>
 
     <dependencies>
