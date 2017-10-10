@@ -31,9 +31,9 @@
     <packaging>jar</packaging>
 
     <properties>
+        <maven.compiler.source>1.5</maven.compiler.source>
+        <maven.compiler.target>1.5</maven.compiler.target>
         <root.basedir>${project.parent.basedir}</root.basedir>
-        <project.build.java.version>1.5</project.build.java.version>
-        <servlet-api.version>2.5</servlet-api.version>
     </properties>
 
     <dependencies>
@@ -44,9 +44,11 @@
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>${servlet-api.version}</version>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>3.0.1</version>
             <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
     </dependencies>
+
 </project>
