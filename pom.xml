@@ -217,8 +217,9 @@
                         <java>SLASHSTAR_STYLE</java>
                     </mapping>
                     <excludes>
-                        <exclude>.travis.yml</exclude>
                         <exclude>.gitignore</exclude>
+                        <exclude>.travis/**</exclude>
+                        <exclude>.travis.yml</exclude>
                         <exclude>.mvn/**</exclude>
                         <exclude>mvnw*</exclude>
                         <exclude>etc/header.txt</exclude>
