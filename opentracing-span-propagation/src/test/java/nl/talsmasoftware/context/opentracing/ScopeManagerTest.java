@@ -50,6 +50,7 @@ public class ScopeManagerTest {
 
     @Before
     public void registerMockGlobalTracer() {
+        resetGlobalTracer();
         assertThat("Pre-existing GlobalTracer", GlobalTracer.isRegistered(), is(false));
         GlobalTracer.register(mockTracer = new MockTracer(SCOPE_MANAGER));
         threadpool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
@@ -61,11 +62,15 @@ public class ScopeManagerTest {
     }
 
     @After
-    public void resetGlobalTracer() throws NoSuchFieldException, IllegalAccessException {
-        Field tracer = GlobalTracer.class.getDeclaredField("tracer");
-        tracer.setAccessible(true);
-        tracer.set(null, NoopTracerFactory.create());
-        tracer.setAccessible(false);
+    public void resetGlobalTracer() {
+        try {
+            Field tracer = GlobalTracer.class.getDeclaredField("tracer");
+            tracer.setAccessible(true);
+            tracer.set(null, NoopTracerFactory.create());
+            tracer.setAccessible(false);
+        } catch (Exception e) {
+            throw new IllegalStateException("Couldn't reset the Global Tracer: " + e.getMessage(), e);
+        }
     }
 
     private static final Callable<String> GET_BAGGAGE_ITEM = new Callable<String>() {
