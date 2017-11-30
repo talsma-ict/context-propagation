@@ -1,1 +1,1 @@
-nl.talsmasoftware.context.opentracing.ScopeContextManager
+nl.talsmasoftware.context.opentracing.OpentracingScopeManager
