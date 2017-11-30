@@ -53,8 +53,14 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
                 try {
                     SVC service = iterator.next();
                     if (service != null) services.add(service);
+                } catch (Error error) {
+                    if (isServiceConfigurationError(error)) {
+                        LOGGER.log(Level.SEVERE, "Service configuration error iterating service "
+                                + serviceType + ": " + error.getMessage(), error);
+                    } else throw error;
                 } catch (RuntimeException rte) {
-                    LOGGER.log(Level.SEVERE, "Exception iterating service " + serviceType + ": " + rte.getMessage(), rte);
+                    LOGGER.log(Level.SEVERE, "Exception iterating service "
+                            + serviceType + ": " + rte.getMessage(), rte);
                 }
             }
             if (PriorityComparator.PRIORITY_AVAILABLE) sort(services, PriorityComparator.INSTANCE);
@@ -62,6 +68,16 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
             iterable = delegate = unmodifiableList(services);
         }
         return iterable;
+    }
+
+    @SuppressWarnings("Since15")
+    private static boolean isServiceConfigurationError(Error error) {
+        try {
+            return java.util.ServiceConfigurationError.class.isInstance(error);
+        } catch (LinkageError le) {
+            LOGGER.log(Level.FINEST, "No ServiceConfigurationError available, probably running on Java 1.5.", le);
+            return false;
+        }
     }
 
     @SuppressWarnings("Since15")
