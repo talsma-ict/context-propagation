@@ -24,21 +24,52 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Manager to propagate the {@link MDC} content from one thread to another.
+ * <p>
+ * As {@link MDC} already manages its own threadlocal state,
+ * getting the active context is 100% delegated to the MDC.<br>
+ * This means that closing the resulting context from {@link #getActiveContext()} will have no side-effects,
+ * as it is not ours to manage.
+ * <p>
+ * Closing a context returned form {@link #initializeNewContext(Map)} <strong>will</strong> reset the MDC
+ * to the values it had before the context was created.<br>
+ * This means that closing nested contexts out-of-order will probably result in an undesirable state.<br>
+ * It is therefore strongly advised to use Java's {@code try-with-resources} mechanism to ensure proper
+ * closing when nesting new MDC contexts.
  *
  * @author Sjoerd Talsma
  */
 public class MdcManager implements ContextManager<Map<String, String>> {
 
-    public Context<Map<String, String>> initializeNewContext(final Map<String, String> value) {
-        // Capture current MDC as 'previous' and make value the new current MCC.
+    /**
+     * Initializes a new MDC context populated by the specified values.
+     * <p>
+     * The given values will become the active MDC values for the current thread.<br>
+     * Closing the resulting context will restore the MDC to the state it had just before this call.
+     * <p>
+     * Please be aware that this may overwrite changes made to the MDC from other code.
+     *
+     * @param mdcValues The values to initialize a new context for
+     *                  (which must be closed by the caller at the end of its lifecycle).
+     * @return A context that -when closed- will restore the active MDC values to what they were just before this call.
+     */
+    public Context<Map<String, String>> initializeNewContext(final Map<String, String> mdcValues) {
+        // Capture current MDC as 'previous' and make the given values the 'new current' MDC.
         final Map<String, String> previous = MDC.getCopyOfContextMap();
-        if (value == null) MDC.clear();
-        else MDC.setContextMap(value);
-        return new MdcContext(previous, value, false);
+        if (mdcValues == null) MDC.clear();
+        else MDC.setContextMap(mdcValues);
+        return new MdcContext(previous, mdcValues, false);
     }
 
+    /**
+     * Returns the active MDC values from the current thread.
+     * <p>
+     * <strong>Please note:</strong> <em>Because these values are managed by MDC itself and not by us,
+     * closing the resulting context has no effect.</em>
+     *
+     * @return Context containing the active MDC values.
+     */
     public Context<Map<String, String>> getActiveContext() {
-        // Return fresh context that is 'already-closed' without a previous mdc.
+        // Return fresh context that is 'already-closed'. Therefore it doesn't need a previous mdc.
         return new MdcContext(null, MDC.getCopyOfContextMap(), true);
     }
 
