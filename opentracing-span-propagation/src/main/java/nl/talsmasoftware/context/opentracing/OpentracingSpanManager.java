@@ -17,6 +17,7 @@ package nl.talsmasoftware.context.opentracing;
 
 import io.opentracing.Scope;
 import io.opentracing.ScopeManager;
+import io.opentracing.Span;
 import io.opentracing.util.GlobalTracer;
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManager;
@@ -26,21 +27,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author Sjoerd Talsma
  */
-public class OpentracingScopeManager implements ContextManager<Scope> {
+public class OpentracingSpanManager implements ContextManager<Span> {
 
     @Override
-    public Context<Scope> getActiveContext() {
+    public Context<Span> getActiveContext() {
         ScopeManager scopeManager = GlobalTracer.get().scopeManager();
         return new ScopeContext(scopeManager.active(), true);
     }
 
     @Override
-    public Context<Scope> initializeNewContext(final Scope scope) {
+    public Context<Span> initializeNewContext(final Span span) {
         ScopeManager scopeManager = GlobalTracer.get().scopeManager();
-        return new ScopeContext(scope == null ? null : scopeManager.activate(scope.span(), false), false);
+        return new ScopeContext(span == null ? null : scopeManager.activate(span, false), false);
     }
 
-    private static class ScopeContext implements Context<Scope> {
+    private static class ScopeContext implements Context<Span> {
         private final Scope scope;
         private final AtomicBoolean closed;
 
@@ -50,8 +51,8 @@ public class OpentracingScopeManager implements ContextManager<Scope> {
         }
 
         @Override
-        public Scope getValue() {
-            return scope;
+        public Span getValue() {
+            return scope == null ? null : scope.span();
         }
 
         @Override

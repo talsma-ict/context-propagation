@@ -37,11 +37,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 /**
- * Unit-test for the {@link OpentracingScopeManager}.
+ * Unit-test for the {@link OpentracingSpanManager}.
  *
  * @author Sjoerd Talsma
  */
-public class OpentracingScopeManagerTest {
+public class OpentracingSpanManagerTest {
     static final ScopeManager SCOPE_MANAGER = new ThreadLocalScopeManager();
 
     MockTracer mockTracer;
