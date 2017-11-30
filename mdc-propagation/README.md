@@ -3,8 +3,9 @@
 # Slf4J MDC propagation library
 
 Adding the `mdc-propagation` jar to your classpath
-is all that is needed to automatically let the [MDC] 
-from [Slf4J] become part of the `ContextSnapshot`.
+is all that is needed to let the [Mapped Diagnostic Context (MDC)][MDC] 
+from the [Simple Logging Facade for Java (SLF4J)][Slf4J] 
+be automatically included into the `ContextSnapshot`.
 
 ## How to use this library
 
@@ -19,9 +20,11 @@ Add it to your classpath.
 
 Done!
 
-Now the `MDC.getCopyOfContextMap()` is propagated into each
-snapshot created by the `ContextManagers.createSnapshot()` method.
-This includes all usages of the `ContextAwareExecutorService`.
+Now the `MDC.getCopyOfContextMap()` is copied into each snapshot 
+from the `ContextManagers.createSnapshot()` method
+to be reactivated by the `Contextsnapshot.reactivate()` call.
+The `ContextAwareExecutorService` automatically propagates the full [MDC] content
+into all executed tasks this way.
 
 
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/mdc-propagation.svg
