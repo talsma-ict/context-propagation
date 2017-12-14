@@ -208,6 +208,12 @@
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
                 <version>${license-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals><goal>check</goal></goals>
+                        <phase>compile</phase>
+                    </execution>
+                </executions>
                 <configuration>
                     <header>${root.basedir}/.mvn/license/header.txt</header>
                     <properties>
@@ -238,14 +244,6 @@
                         <version>${license-maven-plugin.version}</version>
                     </dependency>
                 </dependencies>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                        <phase>compile</phase>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
