@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Talsma ICT
+ * Copyright 2016-2018 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,7 +161,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
                 typeName = type.getName();
             }
             // Atomically get-or-create the appropriate ThreadLocal instance.
-            if (!INSTANCES.containsKey(type.getName())) INSTANCES.putIfAbsent(typeName, new ThreadLocal());
+            if (!INSTANCES.containsKey(typeName)) INSTANCES.putIfAbsent(typeName, new ThreadLocal());
         }
         return (ThreadLocal<CTX>) INSTANCES.get(typeName);
     }
