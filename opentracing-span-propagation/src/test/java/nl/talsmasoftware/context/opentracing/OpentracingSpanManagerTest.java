@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Talsma ICT
+ * Copyright 2016-2018 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,14 @@ import io.opentracing.ScopeManager;
 import io.opentracing.Span;
 import io.opentracing.mock.MockSpan;
 import io.opentracing.mock.MockTracer;
-import io.opentracing.noop.NoopTracerFactory;
 import io.opentracing.util.GlobalTracer;
+import io.opentracing.util.GlobalTracerTestUtil;
 import io.opentracing.util.ThreadLocalScopeManager;
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.lang.reflect.Field;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -49,27 +48,16 @@ public class OpentracingSpanManagerTest {
 
     @Before
     public void registerMockGlobalTracer() {
-        resetGlobalTracer();
+        GlobalTracerTestUtil.resetGlobalTracer();
         assertThat("Pre-existing GlobalTracer", GlobalTracer.isRegistered(), is(false));
         GlobalTracer.register(mockTracer = new MockTracer(SCOPE_MANAGER));
         threadpool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
     }
 
     @After
-    public void shutdownThreadpool() {
+    public void cleanup() {
         threadpool.shutdown();
-    }
-
-    @After
-    public void resetGlobalTracer() {
-        try {
-            Field tracer = GlobalTracer.class.getDeclaredField("tracer");
-            tracer.setAccessible(true);
-            tracer.set(null, NoopTracerFactory.create());
-            tracer.setAccessible(false);
-        } catch (Exception e) {
-            throw new IllegalStateException("Couldn't reset the Global Tracer: " + e.getMessage(), e);
-        }
+        GlobalTracerTestUtil.resetGlobalTracer();
     }
 
     private static final Callable<String> GET_BAGGAGE_ITEM = new Callable<String>() {
@@ -83,7 +71,7 @@ public class OpentracingSpanManagerTest {
 
     @Test
     public void testSingleSnapshotInBackgroundThread() throws Exception {
-        Scope outerSpan = mockTracer.buildSpan("first-op").startActive();
+        Scope outerSpan = mockTracer.buildSpan("first-op").startActive(true);
         outerSpan.span().setBaggageItem("baggage-item", "in-outer-span");
 
         // sanity-check: outerSpan should be the active span..
