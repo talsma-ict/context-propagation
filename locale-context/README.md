@@ -1,8 +1,8 @@
 [![Released Version][maven-img]][maven] 
 
-# Locale context library
+# Locale context module
 
-This library allows an application to maintain a custom `Locale`
+This module allows an application to maintain a custom `Locale`
 in a context that is bound to the current thread,
 allowing a configured `Locale` to be propagated.  
 
@@ -11,7 +11,7 @@ provides static access to the current `ServletRequest`
 via the `ServletRequestContextManager.currentServletRequest()` method
 if the `ServletRequestContextFilter` was applied to the inbound request.
 
-## How to use this library
+## How to use this module
 
 1. Add it to your classpath.
   ```xml
