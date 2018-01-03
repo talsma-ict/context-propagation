@@ -26,8 +26,8 @@ section in your maven `pom.xml`
 ```
 
 This does **not** add any dependencies to your project,
-but makes sure that dependencies to any `enumerables` modules
+but makes sure that dependencies to any `context propagation` module
 will all be of the declared version, including transitive dependencies.
 
-  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/opentracing-span-propagation.svg
-  [maven]: http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22nl.talsmasoftware.context%22%20AND%20a%3A%22opentracing-span-propagation%22
+  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation-bom.svg
+  [maven]: http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22nl.talsmasoftware.context%22%20AND%20a%3A%22context-propagation-bom%22
