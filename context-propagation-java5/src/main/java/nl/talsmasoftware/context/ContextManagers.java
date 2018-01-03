@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Talsma ICT
+ * Copyright 2016-2018 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import java.util.logging.Logger;
  * <center><img src="ContextManagers.svg" alt="Context managers utility-class"></center>
  *
  * @author Sjoerd Talsma
- * @navassoc - creates - ContextSnapshot
  */
 public final class ContextManagers {
     private static final Logger LOGGER = Logger.getLogger(ContextManagers.class.getName());
