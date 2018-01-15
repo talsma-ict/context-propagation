@@ -4,7 +4,7 @@
 
 To make sure your project uses consistent versions of the 
 various `context-propagation` modules, you can import this
-_bill of materials_ into your maven project in a `depencencyManagement`
+_bill of materials_ into your maven project in a `dependencyManagement`
 section of your build.
 
 ## How to import this bill-of-materials

@@ -22,12 +22,12 @@
     <parent>
         <groupId>nl.talsmasoftware.context</groupId>
         <artifactId>context-propagation-root</artifactId>
-        <version>0.4.11-SNAPSHOT</version>
+        <version>0.4.12-SNAPSHOT</version>
     </parent>
 
     <!-- Artifact identification -->
     <artifactId>locale-context</artifactId>
-    <name>Context to maintain a Locale per thread</name>
+    <name>Propagation of current Locale</name>
     <packaging>jar</packaging>
 
     <properties>
