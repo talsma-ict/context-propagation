@@ -34,7 +34,7 @@
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
         <root.basedir>${project.parent.basedir}</root.basedir>
-        <opentracing-api.version>0.30.0</opentracing-api.version>
+        <opentracing-api.version>0.31.0</opentracing-api.version>
     </properties>
 
     <dependencies>
@@ -52,6 +52,13 @@
             <groupId>io.opentracing</groupId>
             <artifactId>opentracing-mock</artifactId>
             <version>${opentracing-api.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.opentracing</groupId>
+            <artifactId>opentracing-util</artifactId>
+            <version>${opentracing-api.version}</version>
+            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
     </dependencies>

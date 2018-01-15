@@ -1,1 +1,1 @@
-nl.talsmasoftware.context.opentracing.ActiveSpanManager
+nl.talsmasoftware.context.opentracing.OpentracingSpanManager
