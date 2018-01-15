@@ -27,7 +27,7 @@
     <packaging>pom</packaging>
 
     <!-- Project information -->
-    <name>Context propagation library</name>
+    <name>Context propagation</name>
     <description>Standardized context propagation in concurrent systems.</description>
     <url>https://github.com/talsma-ict/context-propagation</url>
     <inceptionYear>2016</inceptionYear>
