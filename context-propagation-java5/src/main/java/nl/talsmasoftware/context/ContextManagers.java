@@ -87,6 +87,7 @@ public final class ContextManagers {
             }
         }
         if (noManagers) {
+            SERVICE_LOADER.reload();
             NoContextManagersFound noContextManagersFound = new NoContextManagersFound();
             LOGGER.log(Level.INFO, noContextManagersFound.getMessage(), noContextManagersFound);
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Talsma ICT
+ * Copyright 2016-2018 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,7 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static java.util.Collections.sort;
-import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.*;
 
 /**
  * Loader class to delegate to JDK 6 {@code ServiceLoader} or fallback to the old
@@ -63,9 +62,14 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
                             + serviceType + ": " + rte.getMessage(), rte);
                 }
             }
+
             if (PriorityComparator.PRIORITY_AVAILABLE) sort(services, PriorityComparator.INSTANCE);
-            services.trimToSize();
-            iterable = delegate = unmodifiableList(services);
+            if (services.isEmpty()) {
+                iterable = emptySet();
+            } else {
+                services.trimToSize();
+                iterable = delegate = unmodifiableList(services);
+            }
         }
         return iterable;
     }
