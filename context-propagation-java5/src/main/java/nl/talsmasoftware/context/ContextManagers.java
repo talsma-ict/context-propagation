@@ -17,10 +17,7 @@ package nl.talsmasoftware.context;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -89,7 +86,10 @@ public final class ContextManagers {
                 LOGGER.log(Level.WARNING, "Exception obtaining active context from " + manager + " for snapshot.", rte);
             }
         }
-        if (noManagers) LOGGER.log(Level.WARNING, "Context snapshot was created but no ContextManagers were found!");
+        if (noManagers) {
+            NoContextManagersFound noContextManagersFound = new NoContextManagersFound();
+            LOGGER.log(Level.INFO, noContextManagersFound.getMessage(), noContextManagersFound);
+        }
         return new ContextSnapshotImpl(snapshot);
     }
 
@@ -118,9 +118,10 @@ public final class ContextManagers {
          * or a new instance worst-case (warnings will be logged).
          */
         private static ContextManager<?> getContextManagerByName(String contextManagerClassName) {
-            for (ContextManager contextManager : SERVICE_LOADER) {
-                if (contextManagerClassName.equals(contextManager.getClass().getName())) return contextManager;
-            }
+            // A single serviceloader iteration is now done in the reactivate method.
+            //            for (ContextManager contextManager : SERVICE_LOADER) {
+            //                if (contextManagerClassName.equals(contextManager.getClass().getName())) return contextManager;
+            //            }
             LOGGER.log(Level.WARNING, "Context manager \"{0}\" not found in service locator! " +
                     "Attempting to create a new instance as last-resort.", contextManagerClassName);
             try {
@@ -150,11 +151,18 @@ public final class ContextManagers {
 
         @SuppressWarnings("unchecked") // As we got the values from the managers themselves, they must also accept them!
         public Context<Void> reactivate() {
+            final Set<String> remainingContextManagers = new LinkedHashSet<String>(snapshot.keySet());
             final List<Context<?>> reactivatedContexts = new ArrayList<Context<?>>(snapshot.size());
             try {
-                for (Map.Entry<String, Object> entry : snapshot.entrySet()) {
-                    final ContextManager contextManager = getContextManagerByName(entry.getKey());
-                    reactivatedContexts.add(contextManager.initializeNewContext(entry.getValue()));
+                for (ContextManager contextManager : SERVICE_LOADER) {
+                    String contextManagerName = contextManager.getClass().getName();
+                    if (remainingContextManagers.remove(contextManagerName)) {
+                        reactivatedContexts.add(contextManager.initializeNewContext(snapshot.get(contextManagerName)));
+                    }
+                }
+                for (String contextManagerName : remainingContextManagers) {
+                    final ContextManager contextManager = getContextManagerByName(contextManagerName);
+                    reactivatedContexts.add(contextManager.initializeNewContext(snapshot.get(contextManagerName)));
                 }
                 return new ReactivatedContext(reactivatedContexts);
             } catch (RuntimeException reactivationException) {
@@ -219,4 +227,13 @@ public final class ContextManagers {
         }
     }
 
+    /**
+     * Exception that we don't actually throw, but it helps track the issue if we log it including the stacktrace.
+     */
+    private static class NoContextManagersFound extends RuntimeException {
+        private NoContextManagersFound() {
+            super("Context snapshot was created but no ContextManagers were found! Current thread: "
+                    + Thread.currentThread());
+        }
+    }
 }
