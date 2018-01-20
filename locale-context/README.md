@@ -36,8 +36,7 @@ if the `ServletRequestContextFilter` was applied to the inbound request.
   ```java
   import nl.talsmasoftware.context.locale.LocaleContextManager;
   private void someMethod() {
-      Locale currentLocale = LocaleContextManager.getCurrentLocale();
-      // use current locale, taking care that it may be null.
+      Locale locale = Optional.ofNullable(LocaleContextManager.getCurrentLocale()).orElseGet(Locale::getDefault);
   } 
   ```
 
