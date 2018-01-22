@@ -36,7 +36,7 @@ script:
   - .travis/publish.sh
 
 after_success:
- - ./mvnw jacoco:report coveralls:report
+ - if [ -f context-propagation-java5/target/jacoco.exec ]; then ./mvnw jacoco:report coveralls:report; fi
 
 branches:
   except:
