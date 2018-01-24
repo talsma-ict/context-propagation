@@ -23,11 +23,14 @@ import io.opentracing.mock.MockTracer;
 import io.opentracing.util.GlobalTracer;
 import io.opentracing.util.GlobalTracerTestUtil;
 import io.opentracing.util.ThreadLocalScopeManager;
+import nl.talsmasoftware.context.Context;
+import nl.talsmasoftware.context.ContextManager;
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -36,11 +39,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 /**
- * Unit-test for the {@link OpentracingSpanManager}.
+ * Unit-test for the {@link SpanManager}.
  *
  * @author Sjoerd Talsma
  */
-public class OpentracingSpanManagerTest {
+public class SpanManagerTest {
     static final ScopeManager SCOPE_MANAGER = new ThreadLocalScopeManager();
 
     MockTracer mockTracer;
@@ -58,6 +61,14 @@ public class OpentracingSpanManagerTest {
     public void cleanup() {
         threadpool.shutdown();
         GlobalTracerTestUtil.resetGlobalTracer();
+    }
+
+    @Before
+    @After
+    public void removeActiveSope() throws NoSuchFieldException, IllegalAccessException {
+        Field tlsScope = ThreadLocalScopeManager.class.getDeclaredField("tlsScope");
+        tlsScope.setAccessible(true);
+        ((ThreadLocal) tlsScope.get(SCOPE_MANAGER)).remove();
     }
 
     private static final Callable<String> GET_BAGGAGE_ITEM = new Callable<String>() {
@@ -132,12 +143,6 @@ public class OpentracingSpanManagerTest {
         // sanity-check: outerSpan should be the active span..
         assertThat("sanity-check", GET_BAGGAGE_ITEM.call(), equalTo("in-outer-span"));
 
-//        Scope childSpan = mockTracer.buildSpan("child-op").startActive();
-//        childSpan.span().setBaggageItem("baggage-item", "in-child-span");
-//
-//        // sanity-check: childSpan should be the active span..
-//        assertThat("sanity-check", GET_BAGGAGE_ITEM.call(), equalTo("in-child-span"));
-
         // Start a blocking background thread.
         final Lock lock = new ReentrantLock();
         lock.lock();
@@ -146,9 +151,9 @@ public class OpentracingSpanManagerTest {
                 Scope child = GlobalTracer.get().buildSpan("child-op").startActive(true);
                 try {
                     child.span().setBaggageItem("baggage-item", "in-child-span");
-                    assertThat("active-span", GlobalTracer.get().scopeManager().active().span(), is(sameInstance(child.span())));
+                    assertThat("active-span", SCOPE_MANAGER.active().span(), is(sameInstance(child.span())));
                     if (!lock.tryLock(5, TimeUnit.MINUTES)) throw new IllegalStateException("Couldn't obtain lock!");
-                    assertThat("active-span", GlobalTracer.get().scopeManager().active().span(), is(sameInstance(child.span())));
+                    assertThat("active-span", SCOPE_MANAGER.active().span(), is(sameInstance(child.span())));
                     return GET_BAGGAGE_ITEM.call();
                 } finally {
                     child.close();
@@ -162,10 +167,10 @@ public class OpentracingSpanManagerTest {
 
         // Close outer span (child shouldn't finish until the background thread finishes, the outer span will).
         assertThat(GET_BAGGAGE_ITEM.call(), is("in-outer-span"));
-        assertThat("active-span", GlobalTracer.get().scopeManager().active().span(), is(sameInstance(parent.span())));
+        assertThat("active-span", SCOPE_MANAGER.active().span(), is(sameInstance(parent.span())));
         parent.close();
+        assertThat("active-span", SCOPE_MANAGER.active(), is(nullValue()));
         assertThat(GET_BAGGAGE_ITEM.call(), is("no-active-span"));
-        assertThat("active-span", GlobalTracer.get().scopeManager().active(), is(nullValue()));
 
         assertThat("outer span finished?", mockTracer.finishedSpans(), hasSize(1));
         assertThat(mockTracer.finishedSpans().get(0).getBaggageItem("baggage-item"), is("in-outer-span"));
@@ -182,4 +187,21 @@ public class OpentracingSpanManagerTest {
         assertThat(mockTracer.finishedSpans().get(1).parentId(), is(not(0L)));
     }
 
+    @Test
+    @Deprecated
+    public void testDeprecatedClassStillWorks() {
+        ContextManager<Span> deprecatedManager = new OpentracingSpanManager();
+
+        Scope parent = mockTracer.buildSpan("first-op").startActive(true);
+        Span newSpan = mockTracer.buildSpan("second-span").startManual();
+        assertThat(deprecatedManager.getActiveContext().getValue(), is(equalTo(parent.span())));
+
+        Context<Span> newContext = deprecatedManager.initializeNewContext(newSpan);
+        assertThat(SCOPE_MANAGER.active().span(), is(equalTo(newSpan)));
+        newContext.close();
+        assertThat(SCOPE_MANAGER.active().span(), not(equalTo(newSpan)));
+
+        newContext.close();
+        newContext.close();
+    }
 }
