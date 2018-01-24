@@ -4,7 +4,7 @@
 # OpenTracing Span propagation library
 
 Adding the `opentracing-span-propagation` jar to your classpath
-is all that is needed to automatically obtain an `ActiveSpan` `Continuation`
+is all that is needed to automatically obtain an active `Span` `Scope`
 from the `GlobalTracer` and become part of the `ContextSnapshot`.
 
 ## How to use this library
