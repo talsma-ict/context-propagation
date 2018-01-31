@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Talsma ICT
+ * Copyright 2016-2018 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@ package nl.talsmasoftware.context.servletrequest;
 
 import javax.servlet.*;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Servlet {@link Filter} that registers the current {@link ServletRequest} with the
@@ -27,16 +29,25 @@ import java.io.IOException;
  * @author Sjoerd Talsma
  */
 public class ServletRequestContextFilter implements Filter {
+    private static final Logger LOGGER = Logger.getLogger(ServletRequestContextFilter.class.getName());
 
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
         // no-op
     }
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         try {
+
             new ServletRequestContext(request); // Automatically becomes the new active context.
+            if (request.isAsyncStarted()) try {
+                request.getAsyncContext().addListener(new ServletRequestContextAsyncListener());
+            } catch (IllegalStateException e) {
+                LOGGER.log(Level.FINE, "Could not register servletrequest asynchronous listener: " + e.getMessage(), e);
+            }
+
             chain.doFilter(request, response);
+
         } finally {
             ServletRequestContext.clear(); // Make sure there are no requests returned to the HTTP threadpool.
         }
