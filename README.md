@@ -25,7 +25,7 @@ The following `ThreadLocal`-based contexts are currently supported
 out of the box by this context-propagation library:
 
 - [ServletRequest contexts][servletrequest propagation]
-- [Slf4J Mapped Diagnostic Context (MDC)][mdc propagation]
+- [Slf4J MDC (Mapped Diagnostic Context)][mdc propagation]
 - [Locale context][locale context]
 - [OpenTracing Span contexts][opentracing span propagation]
 - _Yours?_ Feel free to create an issue or pull-request
