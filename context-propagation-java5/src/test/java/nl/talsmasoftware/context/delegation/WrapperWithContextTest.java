@@ -22,12 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
@@ -57,8 +52,7 @@ public class WrapperWithContextTest {
         ContextSnapshot snapshot = mock(ContextSnapshot.class);
         Wrapper<Object> delegate = mock(Wrapper.class);
 
-        WrapperWithContext<Object> wrapper = new WrapperWithContext<Object>(snapshot, delegate) {
-        };
+        WrapperWithContext<Object> wrapper = new DoNothingWrapper(snapshot, delegate);
         assertThat(set.add(wrapper), is(true));
         assertThat(set.add(wrapper), is(false));
         assertThat(set.add(new WrapperWithContext<Object>(mock(ContextSnapshot.class), delegate) {
@@ -66,6 +60,18 @@ public class WrapperWithContextTest {
         assertThat(set.add(new WrapperWithContext<Object>(snapshot, mock(Wrapper.class)) {
         }), is(true));
         assertThat(set, hasSize(3));
+
+        assertThat(wrapper, equalTo(wrapper));
+        assertThat(wrapper, equalTo((WrapperWithContext<Object>) new DoNothingWrapper(snapshot, delegate)));
+        WrapperWithContext<Object> copy = new WrapperWithContext<Object>(snapshot, delegate) {
+        };
+        assertThat(wrapper, not(equalTo(copy))); // different inner class
+    }
+
+    private static class DoNothingWrapper extends WrapperWithContext<Object> {
+        protected DoNothingWrapper(ContextSnapshot snapshot, Object delegate) {
+            super(snapshot, delegate);
+        }
     }
 
     @Test

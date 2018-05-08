@@ -71,16 +71,13 @@ public abstract class Wrapper<T> {
 
     @Override
     public boolean equals(Object other) {
-        return this == other ||
-                (other != null
-                        && delegate != null
-                        && getClass().equals(other.getClass())
-                        && delegate.equals(((Wrapper) other).delegate
-                ));
+        return this == other || (other != null
+                && getClass().equals(other.getClass())
+                && equals(delegate, ((Wrapper) other).delegate));
     }
 
     static boolean equals(Object obj1, Object obj2) {
-        return obj1 == obj2 || (obj1 != null && obj2 != null && obj1.equals(obj2));
+        return obj1 == obj2 || (obj1 != null && obj1.equals(obj2));
     }
 
     /**

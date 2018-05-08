@@ -41,8 +41,7 @@ public abstract class WrapperWithContext<T> extends Wrapper<T> {
 
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || (super.equals(other) && snapshot.equals(((WrapperWithContext<?>) other).snapshot));
+        return this == other || (super.equals(other) && snapshot.equals(((WrapperWithContext<?>) other).snapshot));
     }
 
     @Override
