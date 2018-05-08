@@ -12,7 +12,7 @@ addons:
 
 cache:
   directories:
-  - $HOME/.m2/repository
+    - $HOME/.m2/repository
 
 before_install:
   # copy maven settings
@@ -29,15 +29,23 @@ before_install:
   - echo "https://$GH_TOKEN:@github.com" > .git/credentials
 
 install:
-  # Override default travis to use the maven wrapper
-  - ./mvnw install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+  - ./mvnw --version
 
 script:
-  - .travis/publish.sh
+  - .travis/scripts/build.sh
+  - .travis/scripts/release.sh
 
 after_success:
  - if [ -f context-propagation-java5/target/jacoco.exec ]; then ./mvnw jacoco:report coveralls:report; fi
 
-branches:
-  except:
-    - /^[0-9]/
+deploy:
+  provider: releases
+  name: Release $TRAVIS_TAG
+  api_key: $GH_TOKEN
+  file_glob: true
+  file:
+    - ./**/target/*.jar
+    - ./**/target/*.jar.asc
+  skip_cleanup: true
+  on:
+    tags: true
