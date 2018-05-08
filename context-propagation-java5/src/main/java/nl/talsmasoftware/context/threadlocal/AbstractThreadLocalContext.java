@@ -81,7 +81,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
      */
     @SuppressWarnings("unchecked")
     private AbstractThreadLocalContext<T> unwindIfNecessary() {
-        AbstractThreadLocalContext<?> head = sharedThreadLocalContext.get();
+        final AbstractThreadLocalContext<?> head = sharedThreadLocalContext.get();
         AbstractThreadLocalContext<?> current = head;
         while (current != null && current.closed.get()) { // Current is closed: unwind!
             current = (AbstractThreadLocalContext<?>) current.parentContext;
