@@ -95,4 +95,8 @@ public class LocaleContextManagerTest {
         assertThat(dutchCtx.getValue(), equalTo(DUTCH));
     }
 
+    @Test
+    public void testToString() {
+        assertThat(manager, hasToString(containsString("LocaleContextManager")));
+    }
 }
