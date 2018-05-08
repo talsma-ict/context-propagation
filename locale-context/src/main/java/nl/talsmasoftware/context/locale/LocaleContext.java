@@ -21,6 +21,13 @@ import java.util.Locale;
 
 /**
  * Package protected context implementation based on {@link AbstractThreadLocalContext}.
+ * <p>
+ * This context works subtly different from the abstract implementation:
+ * <ol>
+ * <li>It exposes the {@link #isClosed()} method, because</li>
+ * <li>The {@link #getValue()} method keeps returning the contained {@linkplain Locale},
+ * even after the context is already closed.</li>
+ * </ol>
  *
  * @author Sjoerd Talsma
  */
@@ -44,10 +51,30 @@ final class LocaleContext extends AbstractThreadLocalContext<Locale> {
     }
 
     /**
+     * @return Wether this locale context was already closed.
+     */
+    @Override
+    public boolean isClosed() {
+        return super.isClosed();
+    }
+
+    /**
+     * @return The locale of this context (even after the context itself is closed)
+     */
+    @Override
+    public Locale getValue() {
+        return value;
+    }
+
+    /**
      * Unconditionally clears the entire {@link LocaleContext}.
      * This can be useful when returning threads to a threadpool.
      */
     static void clear() {
-        AbstractThreadLocalContext.threadLocalInstanceOf(LocaleContext.class).remove();
+        try {
+            for (LocaleContext current = current(); current != null; current = current()) current.close();
+        } finally {
+            AbstractThreadLocalContext.threadLocalInstanceOf(LocaleContext.class).remove();
+        }
     }
 }

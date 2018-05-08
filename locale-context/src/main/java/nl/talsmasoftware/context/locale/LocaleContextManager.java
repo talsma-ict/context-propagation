@@ -62,6 +62,9 @@ public final class LocaleContextManager implements ContextManager<Locale> {
         LocaleContext.clear();
     }
 
+    /**
+     * @return String representation for this context manager.
+     */
     public String toString() {
         return getClass().getSimpleName();
     }

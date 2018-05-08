@@ -81,4 +81,18 @@ public class LocaleContextManagerTest {
         assertThat("Current context", manager.getActiveContext(), is(nullValue()));
     }
 
+    @Test
+    public void testClear() {
+        Context<Locale> dutchCtx = manager.initializeNewContext(DUTCH);
+        Context<Locale> englishCtx = manager.initializeNewContext(ENGLISH);
+        LocaleContextManager.clear();
+        assertThat(manager.getActiveContext(), is(nullValue()));
+        assertThat(LocaleContextManager.getCurrentLocale(), is(nullValue()));
+
+        assertThat(((LocaleContext) englishCtx).isClosed(), is(true));
+        assertThat(((LocaleContext) dutchCtx).isClosed(), is(true));
+        assertThat(englishCtx.getValue(), equalTo(ENGLISH));
+        assertThat(dutchCtx.getValue(), equalTo(DUTCH));
+    }
+
 }
