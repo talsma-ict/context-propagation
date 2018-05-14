@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Talsma ICT
+ * Copyright 2016-2018 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,39 @@ package nl.talsmasoftware.context;
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
 import org.junit.Test;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.fail;
 
 /**
  * @author Sjoerd Talsma
  */
 public class ContextManagersTest {
+
+    @Test
+    public void testUnsupportedConstructor() {
+        Constructor<?>[] constructors = ContextManagers.class.getDeclaredConstructors();
+        assertThat("Number of constructors", constructors.length, is(1));
+        assertThat("Constructor parameters", constructors[0].getParameterTypes().length, is(0));
+        assertThat("Constructor accessibility", constructors[0].isAccessible(), is(false));
+        try {
+            constructors[0].setAccessible(true);
+            constructors[0].newInstance();
+            fail("Exception expected.");
+        } catch (IllegalAccessException e) {
+            fail("InvocationTargetException expected.");
+        } catch (InstantiationException e) {
+            fail("InvocationTargetException expected.");
+        } catch (InvocationTargetException e) {
+            assertThat(e.getCause(), is(instanceOf(UnsupportedOperationException.class)));
+        }
+    }
 
     @Test
     public void testSnapshot_inSameThread() {
