@@ -35,6 +35,7 @@
         <maven.compiler.target>1.5</maven.compiler.target>
         <project.moduleName>${project.groupId}.servletrequest</project.moduleName>
         <root.basedir>${project.parent.basedir}</root.basedir>
+        <servlet-api.version>4.0.1</servlet-api.version>
     </properties>
 
     <dependencies>
@@ -46,7 +47,7 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>4.0.0</version>
+            <version>${servlet-api.version}</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
