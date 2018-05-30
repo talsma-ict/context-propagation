@@ -27,6 +27,7 @@ out of the box by this context-propagation library:
 - [ServletRequest contexts][servletrequest propagation]
 - [Slf4J MDC (Mapped Diagnostic Context)][mdc propagation]
 - [Locale context][locale context]
+- [Spring Security Context]
 - [OpenTracing Span contexts][opentracing span propagation]
 - _Yours?_ Feel free to create an issue or pull-request
   if you believe there's a general context that was forgotten. 
@@ -89,5 +90,6 @@ public class DummyContextManager implements ContextManager<String> {
   [servletrequest propagation]: ../servletrequest-propagation
   [mdc propagation]: ../mdc-propagation
   [locale context]: ../locale-context
+  [spring security context]: ../spring-security-context
   [opentracing span propagation]: ../opentracing-span-propagation
   [default constructor]: https://en.wikipedia.org/wiki/Nullary_constructor
