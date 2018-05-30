@@ -70,6 +70,11 @@
                 <artifactId>servletrequest-propagation</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>spring-security-propagation</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
             <dependency> <!-- concurrency 0.1.2 delegates to context-propagation -->
                 <groupId>nl.talsmasoftware</groupId>
