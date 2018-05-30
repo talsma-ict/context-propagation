@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Talsma ICT
+ * Copyright 2016-2018 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,9 +36,9 @@ public interface ContextManager<T> {
      * <p>
      * Whether the value is allowed to be <code>null</code> is up to the implementation.
      *
-     * @param value The value to initialize a new context for
-     *              (which should be closed by the caller at the end of its lifecycle).
-     * @return The new <em>active</em> context containing the specified value.
+     * @param value The value to initialize a new context for.
+     * @return The new <em>active</em> context containing the specified value
+     * which should be closed by the caller at the end of its lifecycle.
      */
     Context<T> initializeNewContext(T value);
 
