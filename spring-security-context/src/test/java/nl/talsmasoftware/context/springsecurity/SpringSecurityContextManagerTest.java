@@ -33,8 +33,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasToString;
+import static org.hamcrest.Matchers.*;
 
 /**
  * Unit test for the {@link SpringSecurityContextManager}.
@@ -73,6 +72,11 @@ public class SpringSecurityContextManagerTest {
         SecurityContext newContext = SecurityContextHolder.createEmptyContext();
         newContext.setAuthentication(name == null ? null : new TestAuthentication(name));
         SecurityContextHolder.setContext(newContext);
+    }
+
+    @Test
+    public void testWithoutAnyAuthentication() {
+        assertThat(new SpringSecurityContextManager().getActiveContext().getValue(), is(nullValue()));
     }
 
     @Test
