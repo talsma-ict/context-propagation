@@ -20,6 +20,7 @@ import nl.talsmasoftware.context.ContextSnapshot;
 import org.junit.Test;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -101,4 +102,30 @@ public class ContextAwareCompletableFutureTest {
         future.get(); // trigger asynchronous assertion
     }
 
+    @Test
+    public void testThenApply() throws ExecutionException, InterruptedException {
+        manager.initializeNewContext("Jimmie");
+        Future<Optional<String>> future = ContextAwareCompletableFuture
+                .runAsync(() -> manager.initializeNewContext("Bonnie"))
+                .thenApply(voidvalue -> DummyContextManager.currentValue());
+        assertThat(future.get().get(), is("Jimmie")); // Bug 51: This should functionally be "Bonnie".
+    }
+
+    @Test
+    public void testThenApplyAsync() throws ExecutionException, InterruptedException {
+        manager.initializeNewContext("Jimmie");
+        Future<Optional<String>> future = ContextAwareCompletableFuture
+                .runAsync(() -> manager.initializeNewContext("Bonnie"))
+                .thenApplyAsync(voidvalue -> DummyContextManager.currentValue());
+        assertThat(future.get().get(), is("Jimmie")); // Bug 51: This should functionally be "Bonnie".
+    }
+
+    @Test
+    public void testThenApplyAsync_executor() throws ExecutionException, InterruptedException {
+        manager.initializeNewContext("Jimmie");
+        Future<Optional<String>> future = ContextAwareCompletableFuture
+                .runAsync(() -> manager.initializeNewContext("Bonnie"))
+                .thenApplyAsync(voidvalue -> DummyContextManager.currentValue(), contextUnawareThreadpool);
+        assertThat(future.get().get(), is("Jimmie")); // Bug 51: This should functionally be "Bonnie".
+    }
 }
