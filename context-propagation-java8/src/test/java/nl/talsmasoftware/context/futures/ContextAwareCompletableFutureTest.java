@@ -271,12 +271,6 @@ public class ContextAwareCompletableFutureTest {
         future.get();
     }
 
-    /**
-     * This test for 'combine' is interesting.
-     * <p>
-     * When combining two processes, which context should be available in the combination function?
-     * Possibly the choice-of-least-surprise may be to use the original context snapshot.
-     */
     @Test
     public void testThenCombine() throws ExecutionException, InterruptedException {
         manager.initializeNewContext("Marcellus Wallace");
@@ -285,7 +279,7 @@ public class ContextAwareCompletableFutureTest {
                 .thenCombine(
                         ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Jules Winnfield")),
                         (voidA, voidB) -> DummyContextManager.currentValue());
-        assertThat(future.get(), is(Optional.of("Marcellus Wallace")));
+        assertThat(future.get(), is(Optional.of("Vincent Vega")));
     }
 
     @Test
@@ -296,6 +290,6 @@ public class ContextAwareCompletableFutureTest {
                 .thenCombineAsync(
                         ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Flock of Seagulls")),
                         (voidA, voidB) -> DummyContextManager.currentValue());
-        assertThat(future.get(), is(Optional.of("Brett")));
+        assertThat(future.get(), is(Optional.of("Marvin")));
     }
 }
