@@ -17,6 +17,7 @@ package nl.talsmasoftware.context.futures;
 
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
+import nl.talsmasoftware.context.DummyContextManager;
 import org.junit.Test;
 
 import java.util.Optional;
