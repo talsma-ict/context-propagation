@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Talsma ICT
+ * Copyright 2016-2018 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 package nl.talsmasoftware.context.functions;
 
 import nl.talsmasoftware.context.Context;
+import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.delegation.WrapperWithContext;
 
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,14 +37,26 @@ public class BiConsumerWithContext<T, U> extends WrapperWithContext<BiConsumer<T
     private static final Logger LOGGER = Logger.getLogger(BiConsumerWithContext.class.getName());
 
     public BiConsumerWithContext(ContextSnapshot snapshot, BiConsumer<T, U> delegate) {
-        super(snapshot, delegate);
+        this(snapshot, delegate, null);
+    }
+
+    public BiConsumerWithContext(ContextSnapshot snapshot, BiConsumer<T, U> delegate, Consumer<ContextSnapshot> consumer) {
+        super(snapshot, delegate, consumer == null ? null : consumer::accept);
     }
 
     @Override
     public void accept(T t, U u) {
         try (Context<Void> context = snapshot.reactivate()) {
-            LOGGER.log(Level.FINEST, "Delegating accept method with {0} to {1}.", new Object[]{context, delegate()});
-            nonNullDelegate().accept(t, u);
+            try {
+                LOGGER.log(Level.FINEST, "Delegating accept method with {0} to {1}.", new Object[]{context, delegate()});
+                nonNullDelegate().accept(t, u);
+            } finally {
+                if (consumer != null) {
+                    ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                    LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
+                    consumer.accept(resultSnapshot);
+                }
+            }
         }
     }
 
@@ -51,9 +65,17 @@ public class BiConsumerWithContext<T, U> extends WrapperWithContext<BiConsumer<T
         requireNonNull(after, "Cannot post-process with after bi-consumer <null>.");
         return (l, r) -> {
             try (Context<Void> context = snapshot.reactivate()) {
-                LOGGER.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});
-                nonNullDelegate().accept(l, r);
-                after.accept(l, r);
+                try {
+                    LOGGER.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});
+                    nonNullDelegate().accept(l, r);
+                    after.accept(l, r);
+                } finally {
+                    if (consumer != null) {
+                        ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                        LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
+                        consumer.accept(resultSnapshot);
+                    }
+                }
             }
         };
     }
