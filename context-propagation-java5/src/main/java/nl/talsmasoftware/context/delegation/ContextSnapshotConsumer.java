@@ -18,7 +18,7 @@ package nl.talsmasoftware.context.delegation;
 import nl.talsmasoftware.context.ContextSnapshot;
 
 /**
- * Interface for a {@code Consumer} for {@link ContextSnapshot}.
+ * Interface for a {@code Consumer} of {@link ContextSnapshot}.
  * <p>
  * Merely an equivalent of the functional interface
  * {@code java.util.Consumer<ContextSnapshot>}
