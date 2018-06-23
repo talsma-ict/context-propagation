@@ -24,8 +24,6 @@ package nl.talsmasoftware.context;
  * <p>
  * That will take care of any active context being captured in {@link ContextSnapshot} instances
  * managed by the {@link ContextManagers} utility class.
- * <p>
- * <center><img src="ContextManager.svg" alt="Context manager interface"></center>
  *
  * @author Sjoerd Talsma
  */
