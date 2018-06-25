@@ -102,7 +102,7 @@
         <coveralls-maven-plugin.version>4.3.0</coveralls-maven-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
         <buildnumber-maven-plugin.version>1.4</buildnumber-maven-plugin.version>
-        <umldoclet.version>1.0.16</umldoclet.version>
+        <umldoclet.version>2.0.0-alpha.4</umldoclet.version>
     </properties>
 
     <build>
@@ -205,20 +205,15 @@
                             <goal>jar</goal>
                         </goals>
                         <configuration>
+                            <jdkToolchain>
+                                <version>9</version>
+                            </jdkToolchain>
                             <doclet>nl.talsmasoftware.umldoclet.UMLDoclet</doclet>
                             <docletArtifact>
                                 <groupId>nl.talsmasoftware</groupId>
                                 <artifactId>umldoclet</artifactId>
                                 <version>${umldoclet.version}</version>
                             </docletArtifact>
-                            <docencoding>${project.reporting.outputEncoding}</docencoding>
-                            <useStandardDocletOptions>true</useStandardDocletOptions>
-                            <additionalOptions>
-                                <additionalOption>-umlImageFormat SVG</additionalOption>
-                                <additionalOption>-umlImageDirectory images</additionalOption>
-                                <additionalOption>-umlCommand "hide empty fields"</additionalOption>
-                                <additionalOption>-umlCommand "hide empty methods"</additionalOption>
-                            </additionalOptions>
                         </configuration>
                     </execution>
                 </executions>
