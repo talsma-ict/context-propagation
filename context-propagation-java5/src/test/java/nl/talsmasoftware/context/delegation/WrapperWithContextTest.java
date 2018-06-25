@@ -22,7 +22,14 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.hasToString;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
@@ -32,6 +39,7 @@ import static org.mockito.Mockito.mock;
 public class WrapperWithContextTest {
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testCreateWrapperWithoutDelegate() {
         WrapperWithContext<Object> wrapper = new WrapperWithContext<Object>(mock(ContextSnapshot.class), null) {
         };
@@ -40,6 +48,7 @@ public class WrapperWithContextTest {
     }
 
     @Test(expected = NullPointerException.class)
+    @SuppressWarnings("deprecation")
     public void testCreateWrapperWithoutContext() {
         new WrapperWithContext<Object>(null, mock(Wrapper.class)) {
         };
@@ -47,6 +56,7 @@ public class WrapperWithContextTest {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testEqualsHashcode() {
         Set<WrapperWithContext<Object>> set = new LinkedHashSet<WrapperWithContext<Object>>();
         ContextSnapshot snapshot = mock(ContextSnapshot.class);
@@ -70,11 +80,12 @@ public class WrapperWithContextTest {
 
     private static class DoNothingWrapper extends WrapperWithContext<Object> {
         protected DoNothingWrapper(ContextSnapshot snapshot, Object delegate) {
-            super(snapshot, delegate);
+            super(snapshot, delegate, null);
         }
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testToString() {
         ContextSnapshot snapshot = mock(ContextSnapshot.class);
         Wrapper<Object> delegate = mock(Wrapper.class);

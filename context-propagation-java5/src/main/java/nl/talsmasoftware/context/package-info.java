@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Talsma ICT
+ * Copyright 2016-2018 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /**
- * This package contains the core concepts of this context-propagation library.
+ * The core concepts of the context-propagation library.
  * <br>
- * <ul>
- * <li><a href="Context.html">Context</a>: Interface defining a context something with a value that can be closed.</li>
- * <li><a href="ContextManager.html">ContextManager</a>: Interface defining required operations to manage contexts: creating new contexts and obtaining 'current' contexts.</li>
- * <li><a href="ContextSnapshot.html">ContextSnapshot</a>: Interface for a snapshot of one or more contexts that can be reactivated temporarily (until closed).</li>
- * <li><a href="ContextManagers.html">ContextManagers</a>: ContextManagers utility class to create a new snapshot
- * of all known active Contexts from registered ContextManager implementations.</li>
- * </ul>
- * <p>
- * The relation between these concepts are represented in the following class diagram for this package:<br>
- * <center><img src="package.svg" alt="Package classes"></center>
+ * <dl>
+ * <dt><a href="Context.html">Context</a>:</dt>
+ * <dd>Defines a context as something with a value that can be closed.</dd>
+ * <dt><a href="ContextManager.html">ContextManager</a>:</dt>
+ * <dd>Interface defining required operations to manage contexts:
+ * creating new contexts and obtaining 'current' contexts.</dd>
+ * <dt><a href="ContextSnapshot.html">ContextSnapshot</a>:</dt>
+ * <dd>A snapshot of one or more active contexts
+ * that can be reactivated temporarily (until closed).</dd>
+ * <dt><a href="ContextManagers.html">ContextManagers</a>:</dt>
+ * <dd>Contains a static method to create a new snapshot
+ * from registered ContextManager implementations.</dd>
+ * </dl>
  *
  * @author Sjoerd Talsma
  */
