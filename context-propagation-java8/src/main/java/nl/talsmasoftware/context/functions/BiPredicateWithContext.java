@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Talsma ICT
+ * Copyright 2016-2018 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 package nl.talsmasoftware.context.functions;
 
 import nl.talsmasoftware.context.Context;
+import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.delegation.WrapperWithContext;
 
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,14 +37,26 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContext<BiPredi
     private static final Logger LOGGER = Logger.getLogger(BiPredicateWithContext.class.getName());
 
     public BiPredicateWithContext(ContextSnapshot snapshot, BiPredicate<IN1, IN2> delegate) {
-        super(snapshot, delegate);
+        this(snapshot, delegate, null);
+    }
+
+    public BiPredicateWithContext(ContextSnapshot snapshot, BiPredicate<IN1, IN2> delegate, Consumer<ContextSnapshot> consumer) {
+        super(snapshot, delegate, consumer == null ? null : consumer::accept);
     }
 
     @Override
     public boolean test(IN1 in1, IN2 in2) {
         try (Context<Void> context = snapshot.reactivate()) {
-            LOGGER.log(Level.FINEST, "Delegating test method with {0} to {1}.", new Object[]{context, delegate()});
-            return nonNullDelegate().test(in1, in2);
+            try {
+                LOGGER.log(Level.FINEST, "Delegating test method with {0} to {1}.", new Object[]{context, delegate()});
+                return nonNullDelegate().test(in1, in2);
+            } finally {
+                if (consumer != null) {
+                    ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                    LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
+                    consumer.accept(resultSnapshot);
+                }
+            }
         }
     }
 
@@ -51,8 +65,16 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContext<BiPredi
         requireNonNull(other, "Cannot combine bi-predicate with 'and' <null>.");
         return (IN1 in1, IN2 in2) -> {
             try (Context<Void> context = snapshot.reactivate()) {
-                LOGGER.log(Level.FINEST, "Delegating 'and' method with {0} to {1}.", new Object[]{context, delegate()});
-                return nonNullDelegate().test(in1, in2) && other.test(in1, in2);
+                try {
+                    LOGGER.log(Level.FINEST, "Delegating 'and' method with {0} to {1}.", new Object[]{context, delegate()});
+                    return nonNullDelegate().test(in1, in2) && other.test(in1, in2);
+                } finally {
+                    if (consumer != null) {
+                        ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                        LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
+                        consumer.accept(resultSnapshot);
+                    }
+                }
             }
         };
     }
@@ -62,8 +84,16 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContext<BiPredi
         requireNonNull(other, "Cannot combine bi-predicate with 'or' <null>.");
         return (IN1 in1, IN2 in2) -> {
             try (Context<Void> context = snapshot.reactivate()) {
-                LOGGER.log(Level.FINEST, "Delegating 'or' method with {0} to {1}.", new Object[]{context, delegate()});
-                return nonNullDelegate().test(in1, in2) || other.test(in1, in2);
+                try {
+                    LOGGER.log(Level.FINEST, "Delegating 'or' method with {0} to {1}.", new Object[]{context, delegate()});
+                    return nonNullDelegate().test(in1, in2) || other.test(in1, in2);
+                } finally {
+                    if (consumer != null) {
+                        ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                        LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
+                        consumer.accept(resultSnapshot);
+                    }
+                }
             }
         };
     }

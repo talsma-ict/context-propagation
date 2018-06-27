@@ -55,7 +55,7 @@ final class ServletRequestContext extends AbstractThreadLocalContext<ServletRequ
      */
     static Context<ServletRequest> current() {
         final ServletRequestContext current = CONTEXT.get();
-        return current != null ? current : DummyContext.INSTANCE;
+        return current != null ? current : None.INSTANCE;
     }
 
     /**
@@ -70,8 +70,8 @@ final class ServletRequestContext extends AbstractThreadLocalContext<ServletRequ
     /**
      * Dummy context containing no servlet request.
      */
-    private static final class DummyContext implements Context<ServletRequest> {
-        private static final DummyContext INSTANCE = new DummyContext();
+    private static final class None implements Context<ServletRequest> {
+        private static final None INSTANCE = new None();
 
         public ServletRequest getValue() {
             return null;
@@ -82,7 +82,7 @@ final class ServletRequestContext extends AbstractThreadLocalContext<ServletRequ
 
         @Override
         public String toString() {
-            return "DummyContext";
+            return "ServletRequestContext.None";
         }
     }
 }

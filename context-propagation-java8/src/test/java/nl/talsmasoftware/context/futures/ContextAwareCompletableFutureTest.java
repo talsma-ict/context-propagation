@@ -17,6 +17,7 @@ package nl.talsmasoftware.context.futures;
 
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
+import nl.talsmasoftware.context.DummyContextManager;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -107,7 +108,7 @@ public class ContextAwareCompletableFutureTest {
         Future<Optional<String>> future = ContextAwareCompletableFuture
                 .runAsync(() -> manager.initializeNewContext("Bonnie"))
                 .thenApply(voidvalue -> DummyContextManager.currentValue());
-        assertThat(future.get().get(), is("Jimmie")); // Bug 51: This should functionally be "Bonnie".
+        assertThat(future.get().get(), is("Bonnie"));
     }
 
     @Test
@@ -116,7 +117,7 @@ public class ContextAwareCompletableFutureTest {
         Future<Optional<String>> future = ContextAwareCompletableFuture
                 .runAsync(() -> manager.initializeNewContext("Esmerelda Villalobos"))
                 .thenApplyAsync(voidvalue -> DummyContextManager.currentValue());
-        assertThat(future.get().get(), is("Butch")); // Bug 51: This should functionally be "Esmerelda Villalobos".
+        assertThat(future.get().get(), is("Esmerelda Villalobos"));
     }
 
     @Test
@@ -125,7 +126,7 @@ public class ContextAwareCompletableFutureTest {
         Future<Optional<String>> future = ContextAwareCompletableFuture
                 .runAsync(() -> manager.initializeNewContext("Zed"))
                 .thenApplyAsync(voidvalue -> DummyContextManager.currentValue(), contextUnawareThreadpool);
-        assertThat(future.get().get(), is("Maynard")); // Bug 51: This should functionally be "Zed".
+        assertThat(future.get().get(), is("Zed"));
     }
 
     @Test
@@ -133,8 +134,8 @@ public class ContextAwareCompletableFutureTest {
         manager.initializeNewContext("The Gimp");
         Future<Void> future = ContextAwareCompletableFuture
                 .runAsync(() -> manager.initializeNewContext("Butch"))
-                .thenAccept(voidvalue -> assertThat(DummyContextManager.currentValue(), is(Optional.of("The Gimp"))));
-        future.get(); // trigger asynchronous assertion // Bug 51: This should functionally be "Butch".
+                .thenAccept(voidvalue -> assertThat(DummyContextManager.currentValue(), is(Optional.of("Butch"))));
+        future.get(); // trigger asynchronous assertion
     }
 
     @Test
@@ -142,8 +143,8 @@ public class ContextAwareCompletableFutureTest {
         manager.initializeNewContext("Butch");
         Future<Void> future = ContextAwareCompletableFuture
                 .runAsync(() -> manager.initializeNewContext("Fabienne"))
-                .thenAcceptAsync(voidvalue -> assertThat(DummyContextManager.currentValue(), is(Optional.of("Butch"))));
-        future.get(); // trigger asynchronous assertion // Bug 51: This should functionally be "Fabienne".
+                .thenAcceptAsync(voidvalue -> assertThat(DummyContextManager.currentValue(), is(Optional.of("Fabienne"))));
+        future.get(); // trigger asynchronous assertion
     }
 
     @Test
@@ -151,8 +152,8 @@ public class ContextAwareCompletableFutureTest {
         manager.initializeNewContext("Marvin");
         Future<Void> future = ContextAwareCompletableFuture
                 .runAsync(() -> manager.initializeNewContext("Winston Wolfe"))
-                .thenAcceptAsync(                       // Bug 51: This should functionally be "Winston Wolfe".
-                        voidvalue -> assertThat(DummyContextManager.currentValue(), is(Optional.of("Marvin"))),
+                .thenAcceptAsync(
+                        voidvalue -> assertThat(DummyContextManager.currentValue(), is(Optional.of("Winston Wolfe"))),
                         contextUnawareThreadpool);
         future.get(); // trigger asynchronous assertion
     }
@@ -162,8 +163,8 @@ public class ContextAwareCompletableFutureTest {
         manager.initializeNewContext("Lance");
         Future<Void> future = ContextAwareCompletableFuture
                 .runAsync(() -> manager.initializeNewContext("Jody"))
-                .thenRun(() -> assertThat(DummyContextManager.currentValue(), is(Optional.of("Lance"))));
-        future.get(); // trigger asynchronous assertion     // Bug 51: This should functionally be "Jody".
+                .thenRun(() -> assertThat(DummyContextManager.currentValue(), is(Optional.of("Jody"))));
+        future.get(); // trigger asynchronous assertion
     }
 
     @Test
@@ -171,8 +172,8 @@ public class ContextAwareCompletableFutureTest {
         manager.initializeNewContext("Ringo");
         Future<Void> future = ContextAwareCompletableFuture
                 .runAsync(() -> manager.initializeNewContext("Yolanda"))
-                .thenRunAsync(() -> assertThat(DummyContextManager.currentValue(), is(Optional.of("Ringo"))));
-        future.get(); // trigger asynchronous assertion     // Bug 51: This should functionally be "Yolanda".
+                .thenRunAsync(() -> assertThat(DummyContextManager.currentValue(), is(Optional.of("Yolanda"))));
+        future.get(); // trigger asynchronous assertion
     }
 
     @Test
@@ -181,9 +182,9 @@ public class ContextAwareCompletableFutureTest {
         Future<Void> future = ContextAwareCompletableFuture
                 .runAsync(() -> manager.initializeNewContext("Butch"))
                 .thenRunAsync(
-                        () -> assertThat(DummyContextManager.currentValue(), is(Optional.of("Capt. Koons"))),
+                        () -> assertThat(DummyContextManager.currentValue(), is(Optional.of("Butch"))),
                         contextUnawareThreadpool);
-        future.get(); // trigger asynchronous assertion     // Bug 51: This should functionally be "Butch".
+        future.get(); // trigger asynchronous assertion
     }
 
     @Test
@@ -191,8 +192,8 @@ public class ContextAwareCompletableFutureTest {
         manager.initializeNewContext("Butch");
         Future<Void> future = ContextAwareCompletableFuture
                 .runAsync(() -> manager.initializeNewContext("Floyd"))
-                .whenComplete((voidValue, exception) -> assertThat(DummyContextManager.currentValue(), is(Optional.of("Butch"))));
-        future.get(); // trigger asynchronous assertion                 // Bug 51: This should functionally be "Floyd".
+                .whenComplete((voidValue, exception) -> assertThat(DummyContextManager.currentValue(), is(Optional.of("Floyd"))));
+        future.get(); // trigger asynchronous assertion
     }
 
     @Test
@@ -200,8 +201,8 @@ public class ContextAwareCompletableFutureTest {
         manager.initializeNewContext("Zed");
         Future<Void> future = ContextAwareCompletableFuture
                 .runAsync(() -> manager.initializeNewContext("Pipe hittin' niggers"))
-                .whenCompleteAsync((voidValue, exception) -> assertThat(DummyContextManager.currentValue(), is(Optional.of("Zed"))));
-        future.get(); // trigger asynchronous assertion       // Bug 51: This should functionally be "Pipe hittin' niggers".
+                .whenCompleteAsync((voidValue, exception) -> assertThat(DummyContextManager.currentValue(), is(Optional.of("Pipe hittin' niggers"))));
+        future.get(); // trigger asynchronous assertion
     }
 
     @Test
@@ -210,9 +211,9 @@ public class ContextAwareCompletableFutureTest {
         Future<Void> future = ContextAwareCompletableFuture
                 .runAsync(() -> manager.initializeNewContext("Floyd"))
                 .whenCompleteAsync(
-                        (voidValue, exception) -> assertThat(DummyContextManager.currentValue(), is(Optional.of("Butch"))),
+                        (voidValue, exception) -> assertThat(DummyContextManager.currentValue(), is(Optional.of("Floyd"))),
                         contextUnawareThreadpool);
-        future.get(); // trigger asynchronous assertion                 // Bug 51: This should functionally be "Floyd".
+        future.get(); // trigger asynchronous assertion
     }
 
     @Test
@@ -225,7 +226,7 @@ public class ContextAwareCompletableFutureTest {
                     throw exception;
                 })
                 .handle((voidValue, throwable) -> DummyContextManager.currentValue());
-        assertThat(future.get(), is(Optional.of("Jody"))); // Bug 51: This should functionally be "Trudy".
+        assertThat(future.get(), is(Optional.of("Trudy")));
     }
 
     @Test
@@ -238,7 +239,7 @@ public class ContextAwareCompletableFutureTest {
                     throw exception;
                 })
                 .handleAsync((voidValue, throwable) -> DummyContextManager.currentValue());
-        assertThat(future.get(), is(Optional.of("Jody"))); // Bug 51: This should functionally be "Trudy".
+        assertThat(future.get(), is(Optional.of("Trudy")));
     }
 
     @Test
@@ -253,7 +254,7 @@ public class ContextAwareCompletableFutureTest {
                 .handleAsync(
                         (voidValue, throwable) -> DummyContextManager.currentValue(),
                         contextUnawareThreadpool);
-        assertThat(future.get(), is(Optional.of("Jody"))); // Bug 51: This should functionally be "Trudy".
+        assertThat(future.get(), is(Optional.of("Trudy")));
     }
 
     @Test
@@ -265,18 +266,12 @@ public class ContextAwareCompletableFutureTest {
                     throw new RuntimeException("Bad Motherfucker");
                 })
                 .exceptionally(ex -> {
-                    assertThat(DummyContextManager.currentValue(), is(Optional.of("Gringo")));
-                    return null;            // Bug 51: This should functionally be "Jules Winnfield".
+                    assertThat(DummyContextManager.currentValue(), is(Optional.of("Jules Winnfield")));
+                    return null;
                 });
         future.get();
     }
 
-    /**
-     * This test for 'combine' is interesting.
-     * <p>
-     * When combining two processes, which context should be available in the combination function?
-     * Possibly the choice-of-least-surprise may be to use the original context snapshot.
-     */
     @Test
     public void testThenCombine() throws ExecutionException, InterruptedException {
         manager.initializeNewContext("Marcellus Wallace");
@@ -285,7 +280,7 @@ public class ContextAwareCompletableFutureTest {
                 .thenCombine(
                         ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Jules Winnfield")),
                         (voidA, voidB) -> DummyContextManager.currentValue());
-        assertThat(future.get(), is(Optional.of("Marcellus Wallace")));
+        assertThat(future.get(), is(Optional.of("Vincent Vega")));
     }
 
     @Test
@@ -296,6 +291,6 @@ public class ContextAwareCompletableFutureTest {
                 .thenCombineAsync(
                         ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Flock of Seagulls")),
                         (voidA, voidB) -> DummyContextManager.currentValue());
-        assertThat(future.get(), is(Optional.of("Brett")));
+        assertThat(future.get(), is(Optional.of("Marvin")));
     }
 }

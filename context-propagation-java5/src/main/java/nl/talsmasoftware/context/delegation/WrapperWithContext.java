@@ -25,10 +25,17 @@ import nl.talsmasoftware.context.ContextSnapshot;
 public abstract class WrapperWithContext<T> extends Wrapper<T> {
 
     protected final ContextSnapshot snapshot;
+    protected final ContextSnapshotConsumer consumer;
 
+    @Deprecated
     protected WrapperWithContext(ContextSnapshot snapshot, T delegate) {
+        this(snapshot, delegate, null);
+    }
+
+    protected WrapperWithContext(ContextSnapshot snapshot, T delegate, ContextSnapshotConsumer consumer) {
         super(delegate);
         this.snapshot = snapshot;
+        this.consumer = consumer;
         if (snapshot == null) {
             throw new NullPointerException(String.format("No context snapshot provided to %s.", this));
         }

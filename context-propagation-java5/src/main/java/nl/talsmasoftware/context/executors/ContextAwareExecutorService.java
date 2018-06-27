@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Talsma ICT
+ * Copyright 2016-2018 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,15 +76,15 @@ public class ContextAwareExecutorService extends CallMappingExecutorService {
     private void tryClose(Context<?> context, boolean callWasDone) {
         if (context != null) try {
             context.close();
-        } catch (Exception ex) {
-            IllegalStateException exception = new IllegalStateException(
-                    "Exception restoring context after applied snapshot: " + ex.getMessage(), ex);
-            if (callWasDone) { // Call was already done; we have to re-throw the close.
-                throw ex instanceof RuntimeException ? (RuntimeException) ex : exception;
-            } else { // Call was not yet done, i.e. an exception was thrown.
-                // Logging a warning is the best we can do; there is no SuppressedException in java 5.
-                logger.log(Level.WARNING, exception.getMessage(), exception);
+        } catch (RuntimeException closeEx) {
+            if (callWasDone) { // Call was already done; we have to re-throw the close error.
+                throw closeEx;
             }
+            // Call was not yet done, i.e. an exception was thrown.
+            IllegalStateException exception = new IllegalStateException(
+                    "Exception restoring context after applied snapshot: " + closeEx.getMessage(), closeEx);
+            // Logging a warning is the best we can do; there is no SuppressedException in java 5.
+            logger.log(Level.WARNING, exception.getMessage(), exception);
         }
     }
 }

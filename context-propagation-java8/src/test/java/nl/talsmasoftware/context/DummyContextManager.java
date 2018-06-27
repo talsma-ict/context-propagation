@@ -13,17 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.futures;
+package nl.talsmasoftware.context;
 
-import nl.talsmasoftware.context.Context;
-import nl.talsmasoftware.context.ContextManager;
 import nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext;
 
 import java.util.Optional;
 
 public class DummyContextManager implements ContextManager<String> {
     public Context<String> initializeNewContext(String value) {
-        return new DummyContext(value);
+        return setCurrentValue(value);
     }
 
     public Context<String> getActiveContext() {
@@ -34,9 +32,30 @@ public class DummyContextManager implements ContextManager<String> {
         return Optional.ofNullable(DummyContext.current()).map(Context::getValue);
     }
 
+    /**
+     * For easier testing
+     *
+     * @param value The new value to be set (can be null)
+     * @return A context to optionally be closed
+     */
+    public static Context<String> setCurrentValue(String value) {
+        return new DummyContext(value);
+    }
+
+    /**
+     * For easier testing
+     */
+    public static void clear() {
+        DummyContext.clear();
+    }
+
     private static final class DummyContext extends AbstractThreadLocalContext<String> {
         private DummyContext(String newValue) {
             super(newValue);
+        }
+
+        private static void clear() {
+            AbstractThreadLocalContext.threadLocalInstanceOf(DummyContext.class).remove();
         }
 
         private static Context<String> current() {

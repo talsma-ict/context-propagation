@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Talsma ICT
+ * Copyright 2016-2018 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package nl.talsmasoftware.context.functions;
 
 import nl.talsmasoftware.context.ContextSnapshot;
 
+import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 /**
@@ -28,7 +29,11 @@ import java.util.function.UnaryOperator;
 public class UnaryOperatorWithContext<T> extends FunctionWithContext<T, T> implements UnaryOperator<T> {
 
     public UnaryOperatorWithContext(ContextSnapshot snapshot, UnaryOperator<T> delegate) {
-        super(snapshot, delegate);
+        this(snapshot, delegate, null);
+    }
+
+    public UnaryOperatorWithContext(ContextSnapshot snapshot, UnaryOperator<T> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
+        super(snapshot, delegate, snapshotConsumer);
     }
 
 }

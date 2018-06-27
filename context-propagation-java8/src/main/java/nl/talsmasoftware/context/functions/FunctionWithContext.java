@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Talsma ICT
+ * Copyright 2016-2018 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,11 @@
 package nl.talsmasoftware.context.functions;
 
 import nl.talsmasoftware.context.Context;
+import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.delegation.WrapperWithContext;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,13 +37,25 @@ public class FunctionWithContext<IN, OUT> extends WrapperWithContext<Function<IN
     private static final Logger LOGGER = Logger.getLogger(FunctionWithContext.class.getName());
 
     public FunctionWithContext(ContextSnapshot snapshot, Function<IN, OUT> delegate) {
-        super(snapshot, delegate);
+        this(snapshot, delegate, null);
+    }
+
+    public FunctionWithContext(ContextSnapshot snapshot, Function<IN, OUT> delegate, Consumer<ContextSnapshot> consumer) {
+        super(snapshot, delegate, consumer == null ? null : consumer::accept);
     }
 
     public OUT apply(IN in) {
         try (Context<Void> context = snapshot.reactivate()) {
-            LOGGER.log(Level.FINEST, "Delegating apply method with {0} to {1}.", new Object[]{context, delegate()});
-            return nonNullDelegate().apply(in);
+            try {
+                LOGGER.log(Level.FINEST, "Delegating apply method with {0} to {1}.", new Object[]{context, delegate()});
+                return nonNullDelegate().apply(in);
+            } finally {
+                if (consumer != null) {
+                    ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                    LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
+                    consumer.accept(resultSnapshot);
+                }
+            }
         }
     }
 
@@ -49,8 +63,16 @@ public class FunctionWithContext<IN, OUT> extends WrapperWithContext<Function<IN
         requireNonNull(before, "Cannot compose with before function <null>.");
         return (V v) -> {
             try (Context<Void> context = snapshot.reactivate()) {
-                LOGGER.log(Level.FINEST, "Delegating compose method with {0} to {1}.", new Object[]{context, delegate()});
-                return nonNullDelegate().apply(before.apply(v));
+                try {
+                    LOGGER.log(Level.FINEST, "Delegating compose method with {0} to {1}.", new Object[]{context, delegate()});
+                    return nonNullDelegate().apply(before.apply(v));
+                } finally {
+                    if (consumer != null) {
+                        ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                        LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
+                        consumer.accept(resultSnapshot);
+                    }
+                }
             }
         };
     }
@@ -59,8 +81,16 @@ public class FunctionWithContext<IN, OUT> extends WrapperWithContext<Function<IN
         requireNonNull(after, "Cannot transform with after function <null>.");
         return (IN in) -> {
             try (Context<Void> context = snapshot.reactivate()) {
-                LOGGER.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});
-                return after.apply(nonNullDelegate().apply(in));
+                try {
+                    LOGGER.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});
+                    return after.apply(nonNullDelegate().apply(in));
+                } finally {
+                    if (consumer != null) {
+                        ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                        LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
+                        consumer.accept(resultSnapshot);
+                    }
+                }
             }
         };
     }
