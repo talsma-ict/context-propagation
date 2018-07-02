@@ -18,8 +18,11 @@ package nl.talsmasoftware.context;
 import nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext;
 
 import java.util.Optional;
+import java.util.logging.Logger;
 
 public class DummyContextManager implements ContextManager<String> {
+    private static final Logger LOGGER = Logger.getLogger(DummyContextManager.class.getName());
+
     public Context<String> initializeNewContext(String value) {
         return setCurrentValue(value);
     }
@@ -29,7 +32,9 @@ public class DummyContextManager implements ContextManager<String> {
     }
 
     public static Optional<String> currentValue() {
-        return Optional.ofNullable(DummyContext.current()).map(Context::getValue);
+        Optional<String> currentValue = Optional.ofNullable(DummyContext.current()).map(Context::getValue);
+        LOGGER.fine(() -> "Current value in " + Thread.currentThread() + ": " + currentValue);
+        return currentValue;
     }
 
     /**
@@ -39,6 +44,7 @@ public class DummyContextManager implements ContextManager<String> {
      * @return A context to optionally be closed
      */
     public static Context<String> setCurrentValue(String value) {
+        LOGGER.fine(() -> "Setting current value in " + Thread.currentThread() + ": " + value);
         return new DummyContext(value);
     }
 
@@ -46,6 +52,7 @@ public class DummyContextManager implements ContextManager<String> {
      * For easier testing
      */
     public static void clear() {
+        LOGGER.fine(() -> "Clearing values in " + Thread.currentThread() + ", currently: " + DummyContext.current());
         DummyContext.clear();
     }
 
