@@ -47,7 +47,7 @@ deploy:
   file_glob: true
   file:
     - ./**/target/*.jar
-    - ./**/target/*.jar.asc
+#    - ./**/target/*.jar.asc
   skip_cleanup: true
   on:
     tags: true
