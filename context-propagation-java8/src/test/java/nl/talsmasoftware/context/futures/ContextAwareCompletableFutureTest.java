@@ -21,10 +21,13 @@ import nl.talsmasoftware.context.DummyContextManager;
 import org.junit.Test;
 
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -292,5 +295,38 @@ public class ContextAwareCompletableFutureTest {
                         ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Flock of Seagulls")),
                         (voidA, voidB) -> DummyContextManager.currentValue());
         assertThat(future.get(), is(Optional.of("Marvin")));
+    }
+
+    @Test
+    public void testTimingIssue55() throws ExecutionException, InterruptedException, TimeoutException {
+        manager.initializeNewContext("Vincent Vega");
+        final CountDownLatch latch1 = new CountDownLatch(1), latch2 = new CountDownLatch(2);
+        Future<String> future = ContextAwareCompletableFuture
+                .supplyAsync(() -> {
+                    String result = DummyContextManager.currentValue().orElse("NO VALUE");
+                    DummyContextManager.setCurrentValue("Jules Winnfield");
+                    waitFor(latch1);
+                    return result;
+                }).thenApplyAsync(value -> {
+                    String result = value + ", " + DummyContextManager.currentValue().orElse("NO VALUE");
+                    DummyContextManager.setCurrentValue("Marcellus Wallace");
+                    waitFor(latch2);
+                    return result;
+                }).thenApply(value -> value + ", " + DummyContextManager.currentValue().orElse("NO VALUE"));
+
+        assertThat("Future creation may not block on previous stages", future.isDone(), is(false));
+        latch1.countDown();
+        assertThat("Future creation may not block on previous stages", future.isDone(), is(false));
+        latch2.countDown();
+        assertThat(future.get(500, TimeUnit.MILLISECONDS), is("Vincent Vega, Jules Winnfield, Marcellus Wallace"));
+    }
+
+    private static void waitFor(CountDownLatch latch) {
+        try {
+            latch.await(5, TimeUnit.SECONDS);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            throw new AssertionError("Interrupted waiting for latch.", ie);
+        }
     }
 }
