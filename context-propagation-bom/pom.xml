@@ -72,7 +72,7 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>spring-security-propagation</artifactId>
+                <artifactId>spring-security-context</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
