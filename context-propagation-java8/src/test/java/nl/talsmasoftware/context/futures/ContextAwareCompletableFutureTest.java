@@ -284,6 +284,7 @@ public class ContextAwareCompletableFutureTest {
                         ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Jules Winnfield")),
                         (voidA, voidB) -> DummyContextManager.currentValue());
         assertThat(future.get(), is(Optional.of("Vincent Vega")));
+        assertThat(DummyContextManager.currentValue(), is(Optional.of("Marcellus Wallace")));
     }
 
     @Test
@@ -295,6 +296,7 @@ public class ContextAwareCompletableFutureTest {
                         ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Flock of Seagulls")),
                         (voidA, voidB) -> DummyContextManager.currentValue());
         assertThat(future.get(), is(Optional.of("Marvin")));
+        assertThat(DummyContextManager.currentValue(), is(Optional.of("Brett")));
     }
 
     @Test
@@ -318,7 +320,9 @@ public class ContextAwareCompletableFutureTest {
         latch1.countDown();
         assertThat("Future creation may not block on previous stages", future.isDone(), is(false));
         latch2.countDown();
+
         assertThat(future.get(500, TimeUnit.MILLISECONDS), is("Vincent Vega, Jules Winnfield, Marcellus Wallace"));
+        assertThat(DummyContextManager.currentValue(), is(Optional.of("Vincent Vega")));
     }
 
     private static void waitFor(CountDownLatch latch) {
