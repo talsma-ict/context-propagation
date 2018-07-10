@@ -22,6 +22,7 @@ import nl.talsmasoftware.context.delegation.WrapperWithContext;
 
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,7 +34,7 @@ import static java.util.Objects.requireNonNull;
  *
  * @author Sjoerd Talsma
  */
-public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContext<BiPredicate<IN1, IN2>> implements BiPredicate<IN1, IN2> {
+public class BiPredicateWithContext<IN1, IN2> extends Java8WrapperWithContext<BiPredicate<IN1, IN2>> implements BiPredicate<IN1, IN2> {
     private static final Logger LOGGER = Logger.getLogger(BiPredicateWithContext.class.getName());
 
     public BiPredicateWithContext(ContextSnapshot snapshot, BiPredicate<IN1, IN2> delegate) {
@@ -41,12 +42,16 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContext<BiPredi
     }
 
     public BiPredicateWithContext(ContextSnapshot snapshot, BiPredicate<IN1, IN2> delegate, Consumer<ContextSnapshot> consumer) {
-        super(snapshot, delegate, consumer == null ? null : consumer::accept);
+        this(() -> snapshot, delegate, consumer);
+    }
+
+    protected BiPredicateWithContext(Supplier<ContextSnapshot> supplier, BiPredicate<IN1, IN2> delegate, Consumer<ContextSnapshot> consumer) {
+        super(supplier, delegate, consumer);
     }
 
     @Override
     public boolean test(IN1 in1, IN2 in2) {
-        try (Context<Void> context = snapshot.reactivate()) {
+        try (Context<Void> context = snapshot().reactivate()) {
             try {
                 LOGGER.log(Level.FINEST, "Delegating test method with {0} to {1}.", new Object[]{context, delegate()});
                 return nonNullDelegate().test(in1, in2);
@@ -64,7 +69,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContext<BiPredi
     public BiPredicate<IN1, IN2> and(BiPredicate<? super IN1, ? super IN2> other) {
         requireNonNull(other, "Cannot combine bi-predicate with 'and' <null>.");
         return (IN1 in1, IN2 in2) -> {
-            try (Context<Void> context = snapshot.reactivate()) {
+            try (Context<Void> context = snapshot().reactivate()) {
                 try {
                     LOGGER.log(Level.FINEST, "Delegating 'and' method with {0} to {1}.", new Object[]{context, delegate()});
                     return nonNullDelegate().test(in1, in2) && other.test(in1, in2);
@@ -83,7 +88,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContext<BiPredi
     public BiPredicate<IN1, IN2> or(BiPredicate<? super IN1, ? super IN2> other) {
         requireNonNull(other, "Cannot combine bi-predicate with 'or' <null>.");
         return (IN1 in1, IN2 in2) -> {
-            try (Context<Void> context = snapshot.reactivate()) {
+            try (Context<Void> context = snapshot().reactivate()) {
                 try {
                     LOGGER.log(Level.FINEST, "Delegating 'or' method with {0} to {1}.", new Object[]{context, delegate()});
                     return nonNullDelegate().test(in1, in2) || other.test(in1, in2);

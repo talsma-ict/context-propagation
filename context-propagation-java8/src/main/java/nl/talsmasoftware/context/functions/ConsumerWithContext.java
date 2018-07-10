@@ -18,9 +18,9 @@ package nl.talsmasoftware.context.functions;
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
-import nl.talsmasoftware.context.delegation.WrapperWithContext;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,20 +32,24 @@ import static java.util.Objects.requireNonNull;
  *
  * @author Sjoerd Talsma
  */
-public class ConsumerWithContext<T> extends WrapperWithContext<Consumer<T>> implements Consumer<T> {
+public class ConsumerWithContext<T> extends Java8WrapperWithContext<Consumer<T>> implements Consumer<T> {
     private static final Logger LOGGER = Logger.getLogger(ConsumerWithContext.class.getName());
 
     public ConsumerWithContext(ContextSnapshot snapshot, Consumer<T> delegate) {
         this(snapshot, delegate, null);
     }
 
-    public ConsumerWithContext(ContextSnapshot snapshot, Consumer<T> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
-        super(snapshot, delegate, snapshotConsumer == null ? null : snapshotConsumer::accept);
+    public ConsumerWithContext(ContextSnapshot snapshot, Consumer<T> delegate, Consumer<ContextSnapshot> consumer) {
+        this(() -> snapshot, delegate, consumer);
+    }
+
+    protected ConsumerWithContext(Supplier<ContextSnapshot> supplier, Consumer<T> delegate, Consumer<ContextSnapshot> consumer) {
+        super(supplier, delegate, consumer);
     }
 
     @Override
     public void accept(T t) {
-        try (Context<Void> context = snapshot.reactivate()) {
+        try (Context<Void> context = snapshot().reactivate()) {
             try {
                 LOGGER.log(Level.FINEST, "Delegating accept method with {0} to {1}.", new Object[]{context, delegate()});
                 nonNullDelegate().accept(t);
@@ -63,7 +67,7 @@ public class ConsumerWithContext<T> extends WrapperWithContext<Consumer<T>> impl
     public Consumer<T> andThen(Consumer<? super T> after) {
         requireNonNull(after, "Cannot follow consumer with after consumer <null>.");
         return (T t) -> {
-            try (Context<Void> context = snapshot.reactivate()) {
+            try (Context<Void> context = snapshot().reactivate()) {
                 try {
                     LOGGER.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});
                     nonNullDelegate().accept(t);

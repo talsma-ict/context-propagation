@@ -21,6 +21,7 @@ import nl.talsmasoftware.context.DummyContextManager;
 import org.junit.Test;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -302,26 +303,37 @@ public class ContextAwareCompletableFutureTest {
     @Test
     public void testTimingIssue55() throws ExecutionException, InterruptedException, TimeoutException {
         manager.initializeNewContext("Vincent Vega");
-        final CountDownLatch latch1 = new CountDownLatch(1), latch2 = new CountDownLatch(2);
-        Future<String> future = ContextAwareCompletableFuture
+        final CountDownLatch latch1 = new CountDownLatch(1), latch2 = new CountDownLatch(1);
+        ContextAwareCompletableFuture<String> future1 = ContextAwareCompletableFuture
                 .supplyAsync(() -> {
                     String result = DummyContextManager.currentValue().orElse("NO VALUE");
                     DummyContextManager.setCurrentValue("Jules Winnfield");
                     waitFor(latch1);
                     return result;
-                }).thenApplyAsync(value -> {
-                    String result = value + ", " + DummyContextManager.currentValue().orElse("NO VALUE");
-                    DummyContextManager.setCurrentValue("Marcellus Wallace");
-                    waitFor(latch2);
-                    return result;
-                }).thenApply(value -> value + ", " + DummyContextManager.currentValue().orElse("NO VALUE"));
+                });
+        CompletableFuture<String> future2 = future1.thenApplyAsync(value -> {
+            String result = value + ", " + DummyContextManager.currentValue().orElse("NO VALUE");
+            DummyContextManager.setCurrentValue("Marcellus Wallace");
+            waitFor(latch2);
+            return result;
+        });
+        Future<String> future3 = future2.thenApplyAsync(value ->
+                value + ", " + DummyContextManager.currentValue().orElse("NO VALUE"));
 
-        assertThat("Future creation may not block on previous stages", future.isDone(), is(false));
+        assertThat("Future creation may not block on previous stages", future1.isDone(), is(false));
+        assertThat("Future creation may not block on previous stages", future2.isDone(), is(false));
+        assertThat("Future creation may not block on previous stages", future3.isDone(), is(false));
+
         latch1.countDown();
-        assertThat("Future creation may not block on previous stages", future.isDone(), is(false));
-        latch2.countDown();
+        future1.get(500, TimeUnit.MILLISECONDS);
+        assertThat("Future creation may not block on previous stages", future1.isDone(), is(true));
+        assertThat("Future creation may not block on previous stages", future2.isDone(), is(false));
+        assertThat("Future creation may not block on previous stages", future3.isDone(), is(false));
 
-        assertThat(future.get(500, TimeUnit.MILLISECONDS), is("Vincent Vega, Jules Winnfield, Marcellus Wallace"));
+        latch2.countDown();
+        future2.get(500, TimeUnit.MILLISECONDS);
+        assertThat("Future creation may not block on previous stages", future2.isDone(), is(true));
+        assertThat(future3.get(500, TimeUnit.MILLISECONDS), is("Vincent Vega, Jules Winnfield, Marcellus Wallace"));
         assertThat(DummyContextManager.currentValue(), is(Optional.of("Vincent Vega")));
     }
 

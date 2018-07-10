@@ -18,9 +18,9 @@ package nl.talsmasoftware.context.functions;
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
-import nl.talsmasoftware.context.delegation.WrapperWithContext;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  *
  * @author Sjoerd Talsma
  */
-public class RunnableWithContext extends WrapperWithContext<Runnable> implements Runnable {
+public class RunnableWithContext extends Java8WrapperWithContext<Runnable> implements Runnable {
     private static final Logger LOGGER = Logger.getLogger(RunnableWithContext.class.getName());
 
     /**
@@ -62,12 +62,16 @@ public class RunnableWithContext extends WrapperWithContext<Runnable> implements
      * @param consumer An optional consumer for the resulting contexts after the delegate ran (in case it changed)
      */
     public RunnableWithContext(ContextSnapshot snapshot, Runnable delegate, Consumer<ContextSnapshot> consumer) {
-        super(snapshot, delegate, consumer == null ? null : consumer::accept);
+        this(() -> snapshot, delegate, consumer);
+    }
+
+    protected RunnableWithContext(Supplier<ContextSnapshot> supplier, Runnable delegate, Consumer<ContextSnapshot> consumer) {
+        super(supplier, delegate, consumer);
     }
 
     @Override
     public void run() {
-        try (Context<Void> context = snapshot.reactivate()) {
+        try (Context<Void> context = snapshot().reactivate()) {
             try {
                 LOGGER.log(Level.FINEST, "Delegating run method with {0} to {1}.", new Object[]{context, delegate()});
                 nonNullDelegate().run();

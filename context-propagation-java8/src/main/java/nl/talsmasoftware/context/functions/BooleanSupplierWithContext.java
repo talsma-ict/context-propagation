@@ -22,8 +22,11 @@ import nl.talsmasoftware.context.delegation.WrapperWithContext;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * A wrapper for {@link BooleanSupplier} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
@@ -31,7 +34,7 @@ import java.util.logging.Logger;
  *
  * @author Sjoerd Talsma
  */
-public class BooleanSupplierWithContext extends WrapperWithContext<BooleanSupplier> implements BooleanSupplier {
+public class BooleanSupplierWithContext extends Java8WrapperWithContext<BooleanSupplier> implements BooleanSupplier {
     private static final Logger LOGGER = Logger.getLogger(BooleanSupplierWithContext.class.getName());
 
     public BooleanSupplierWithContext(ContextSnapshot snapshot, BooleanSupplier delegate) {
@@ -39,12 +42,16 @@ public class BooleanSupplierWithContext extends WrapperWithContext<BooleanSuppli
     }
 
     public BooleanSupplierWithContext(ContextSnapshot snapshot, BooleanSupplier delegate, Consumer<ContextSnapshot> consumer) {
-        super(snapshot, delegate, consumer == null ? null : consumer::accept);
+        this(() -> snapshot, delegate, consumer);
+    }
+
+    protected BooleanSupplierWithContext(Supplier<ContextSnapshot> supplier, BooleanSupplier delegate, Consumer<ContextSnapshot> consumer) {
+        super(supplier, delegate, consumer);
     }
 
     @Override
     public boolean getAsBoolean() {
-        try (Context<Void> context = snapshot.reactivate()) {
+        try (Context<Void> context = snapshot().reactivate()) {
             try {
                 LOGGER.log(Level.FINEST, "Delegating getAsBoolean method with {0} to {1}.", new Object[]{context, delegate()});
                 return nonNullDelegate().getAsBoolean();

@@ -18,10 +18,10 @@ package nl.talsmasoftware.context.functions;
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
-import nl.talsmasoftware.context.delegation.WrapperWithContext;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,7 +33,7 @@ import static java.util.Objects.requireNonNull;
  *
  * @author Sjoerd Talsma
  */
-public class PredicateWithContext<T> extends WrapperWithContext<Predicate<T>> implements Predicate<T> {
+public class PredicateWithContext<T> extends Java8WrapperWithContext<Predicate<T>> implements Predicate<T> {
     private static final Logger LOGGER = Logger.getLogger(PredicateWithContext.class.getName());
 
     public PredicateWithContext(ContextSnapshot snapshot, Predicate<T> delegate) {
@@ -41,12 +41,16 @@ public class PredicateWithContext<T> extends WrapperWithContext<Predicate<T>> im
     }
 
     public PredicateWithContext(ContextSnapshot snapshot, Predicate<T> delegate, Consumer<ContextSnapshot> consumer) {
-        super(snapshot, delegate, consumer == null ? null : consumer::accept);
+        this(() -> snapshot, delegate, consumer);
+    }
+
+    protected PredicateWithContext(Supplier<ContextSnapshot> supplier, Predicate<T> delegate, Consumer<ContextSnapshot> consumer) {
+        super(supplier, delegate, consumer);
     }
 
     @Override
     public boolean test(T t) {
-        try (Context<Void> context = snapshot.reactivate()) {
+        try (Context<Void> context = snapshot().reactivate()) {
             try {
                 LOGGER.log(Level.FINEST, "Delegating test method with {0} to {1}.", new Object[]{context, delegate()});
                 return nonNullDelegate().test(t);
@@ -64,7 +68,7 @@ public class PredicateWithContext<T> extends WrapperWithContext<Predicate<T>> im
     public Predicate<T> and(Predicate<? super T> other) {
         requireNonNull(other, "Cannot combine predicate with 'and' <null>.");
         return (t) -> {
-            try (Context<Void> context = snapshot.reactivate()) {
+            try (Context<Void> context = snapshot().reactivate()) {
                 try {
                     LOGGER.log(Level.FINEST, "Delegating 'and' method with {0} to {1}.", new Object[]{context, delegate()});
                     return nonNullDelegate().test(t) && other.test(t);
@@ -83,7 +87,7 @@ public class PredicateWithContext<T> extends WrapperWithContext<Predicate<T>> im
     public Predicate<T> or(Predicate<? super T> other) {
         requireNonNull(other, "Cannot combine predicate with 'or' <null>.");
         return (t) -> {
-            try (Context<Void> context = snapshot.reactivate()) {
+            try (Context<Void> context = snapshot().reactivate()) {
                 try {
                     LOGGER.log(Level.FINEST, "Delegating 'or' method with {0} to {1}.", new Object[]{context, delegate()});
                     return nonNullDelegate().test(t) || other.test(t);

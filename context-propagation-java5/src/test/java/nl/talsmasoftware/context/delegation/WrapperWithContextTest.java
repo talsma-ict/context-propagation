@@ -47,12 +47,16 @@ public class WrapperWithContextTest {
         assertThat(wrapper.delegate(), is(nullValue()));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     @SuppressWarnings("deprecation")
     public void testCreateWrapperWithoutContext() {
-        new WrapperWithContext<Object>(null, mock(Wrapper.class)) {
-        };
-        fail("Exception expected.");
+        try {
+            new WrapperWithContext<Object>(null, mock(Wrapper.class)) {
+            };
+            fail("Exception expected.");
+        } catch (NullPointerException expected) {
+            assertThat(expected, hasToString(containsString("No context snapshot provided")));
+        }
     }
 
     @Test
@@ -94,5 +98,30 @@ public class WrapperWithContextTest {
 
         assertThat(wrapper, hasToString(containsString(snapshot.toString())));
         assertThat(wrapper, hasToString(containsString(wrapper.toString())));
+    }
+
+    @Test
+    public void testSupplySnapshotNull() {
+        try {
+            new WrapperWithContext<String>(new ContextSnapshotSupplier() {
+                public ContextSnapshot get() {
+                    return null;
+                }
+            }, "Delegate", null) {
+            }.snapshot();
+            fail("Exception expected!");
+        } catch (NullPointerException expected) {
+            assertThat(expected, hasToString(containsString("Context snapshot is <null>")));
+        }
+    }
+
+    @Test
+    public void testToStringWithNullSupplier() {
+        assertThat(new WrapperWithContext<String>(new ContextSnapshotSupplier() {
+            public ContextSnapshot get() {
+                return null;
+            }
+        }, "Delegate", null) {
+        }, hasToString("{delegate=Delegate, snapshot=<null>}"));
     }
 }

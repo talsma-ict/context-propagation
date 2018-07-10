@@ -18,7 +18,6 @@ package nl.talsmasoftware.context.functions;
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
-import nl.talsmasoftware.context.delegation.WrapperWithContext;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -31,7 +30,7 @@ import java.util.logging.Logger;
  *
  * @author Sjoerd Talsma
  */
-public class SupplierWithContext<T> extends WrapperWithContext<Supplier<T>> implements Supplier<T> {
+public class SupplierWithContext<T> extends Java8WrapperWithContext<Supplier<T>> implements Supplier<T> {
     private static final Logger LOGGER = Logger.getLogger(SupplierWithContext.class.getName());
 
     public SupplierWithContext(ContextSnapshot snapshot, Supplier<T> delegate) {
@@ -39,12 +38,16 @@ public class SupplierWithContext<T> extends WrapperWithContext<Supplier<T>> impl
     }
 
     public SupplierWithContext(ContextSnapshot snapshot, Supplier<T> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
-        super(snapshot, delegate, snapshotConsumer == null ? null : snapshotConsumer::accept);
+        this(() -> snapshot, delegate, snapshotConsumer);
+    }
+
+    protected SupplierWithContext(Supplier<ContextSnapshot> snapshotSupplier, Supplier<T> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
+        super(snapshotSupplier, delegate, snapshotConsumer);
     }
 
     @Override
     public T get() {
-        try (Context<Void> context = snapshot.reactivate()) {
+        try (Context<Void> context = snapshot().reactivate()) {
             try {
                 LOGGER.log(Level.FINEST, "Delegating get method with {0} to {1}.", new Object[]{context, delegate()});
                 return nonNullDelegate().get();
