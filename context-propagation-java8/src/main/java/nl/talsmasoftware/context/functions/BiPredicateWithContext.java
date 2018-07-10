@@ -42,7 +42,7 @@ public class BiPredicateWithContext<IN1, IN2> extends Java8WrapperWithContext<Bi
     }
 
     public BiPredicateWithContext(ContextSnapshot snapshot, BiPredicate<IN1, IN2> delegate, Consumer<ContextSnapshot> consumer) {
-        this(() -> snapshot, delegate, consumer);
+        super(snapshot, delegate, consumer);
     }
 
     protected BiPredicateWithContext(Supplier<ContextSnapshot> supplier, BiPredicate<IN1, IN2> delegate, Consumer<ContextSnapshot> consumer) {

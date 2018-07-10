@@ -49,13 +49,24 @@ public class WrapperWithContextTest {
 
     @Test
     @SuppressWarnings("deprecation")
-    public void testCreateWrapperWithoutContext() {
+    public void testCreateWrapperWithoutSnapshot() {
         try {
             new WrapperWithContext<Object>(null, mock(Wrapper.class)) {
             };
             fail("Exception expected.");
         } catch (NullPointerException expected) {
             assertThat(expected, hasToString(containsString("No context snapshot provided")));
+        }
+    }
+
+    @Test
+    public void testCreateWrapperWithoutSnapshotSupplier() {
+        try {
+            new WrapperWithContext<Object>((ContextSnapshotSupplier) null, mock(Wrapper.class), null) {
+            };
+            fail("Exception expected.");
+        } catch (NullPointerException expected) {
+            assertThat(expected, hasToString(containsString("No context snapshot supplier provided")));
         }
     }
 

@@ -34,7 +34,7 @@ public class UnaryOperatorWithContext<T> extends FunctionWithContext<T, T> imple
     }
 
     public UnaryOperatorWithContext(ContextSnapshot snapshot, UnaryOperator<T> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
-        this(() -> snapshot, delegate, snapshotConsumer);
+        super(snapshot, delegate, snapshotConsumer);
     }
 
     protected UnaryOperatorWithContext(Supplier<ContextSnapshot> supplier, UnaryOperator<T> delegate, Consumer<ContextSnapshot> snapshotConsumer) {

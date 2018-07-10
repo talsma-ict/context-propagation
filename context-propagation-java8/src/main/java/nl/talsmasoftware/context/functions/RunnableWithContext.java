@@ -62,7 +62,7 @@ public class RunnableWithContext extends Java8WrapperWithContext<Runnable> imple
      * @param consumer An optional consumer for the resulting contexts after the delegate ran (in case it changed)
      */
     public RunnableWithContext(ContextSnapshot snapshot, Runnable delegate, Consumer<ContextSnapshot> consumer) {
-        this(() -> snapshot, delegate, consumer);
+        super(snapshot, delegate, consumer);
     }
 
     protected RunnableWithContext(Supplier<ContextSnapshot> supplier, Runnable delegate, Consumer<ContextSnapshot> consumer) {

@@ -34,7 +34,7 @@ public class BinaryOperatorWithContext<T> extends BiFunctionWithContext<T, T, T>
     }
 
     public BinaryOperatorWithContext(ContextSnapshot snapshot, BinaryOperator<T> delegate, Consumer<ContextSnapshot> consumer) {
-        this(() -> snapshot, delegate, consumer);
+        super(snapshot, delegate, consumer);
     }
 
     protected BinaryOperatorWithContext(Supplier<ContextSnapshot> supplier, BinaryOperator<T> delegate, Consumer<ContextSnapshot> consumer) {

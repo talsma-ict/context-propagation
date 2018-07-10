@@ -21,8 +21,6 @@ import nl.talsmasoftware.context.delegation.WrapperWithContext;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * Package-convenience subclass for {@linkplain WrapperWithContext} that takes Java 8 generic functional interfaces
  * {@link Supplier} and {@link Consumer} instead of the specific Java 5 versions.
@@ -31,12 +29,12 @@ import static java.util.Objects.requireNonNull;
  */
 abstract class Java8WrapperWithContext<T> extends WrapperWithContext<T> {
 
+    protected Java8WrapperWithContext(ContextSnapshot snapshot, T delegate, Consumer<ContextSnapshot> consumer) {
+        super(snapshot, delegate, consumer == null ? null : consumer::accept);
+    }
+
     protected Java8WrapperWithContext(Supplier<ContextSnapshot> supplier, T delegate, Consumer<ContextSnapshot> consumer) {
-        super(
-                requireNonNull(supplier, "Context snapshot supplier is <null>.")::get,
-                delegate,
-                consumer == null ? null : consumer::accept
-        );
+        super(supplier == null ? null : supplier::get, delegate, consumer == null ? null : consumer::accept);
     }
 
 }

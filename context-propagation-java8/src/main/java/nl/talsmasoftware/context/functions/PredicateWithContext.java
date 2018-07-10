@@ -41,7 +41,7 @@ public class PredicateWithContext<T> extends Java8WrapperWithContext<Predicate<T
     }
 
     public PredicateWithContext(ContextSnapshot snapshot, Predicate<T> delegate, Consumer<ContextSnapshot> consumer) {
-        this(() -> snapshot, delegate, consumer);
+        super(snapshot, delegate, consumer);
     }
 
     protected PredicateWithContext(Supplier<ContextSnapshot> supplier, Predicate<T> delegate, Consumer<ContextSnapshot> consumer) {

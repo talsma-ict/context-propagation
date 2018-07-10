@@ -40,7 +40,7 @@ public class ConsumerWithContext<T> extends Java8WrapperWithContext<Consumer<T>>
     }
 
     public ConsumerWithContext(ContextSnapshot snapshot, Consumer<T> delegate, Consumer<ContextSnapshot> consumer) {
-        this(() -> snapshot, delegate, consumer);
+        super(snapshot, delegate, consumer);
     }
 
     protected ConsumerWithContext(Supplier<ContextSnapshot> supplier, Consumer<T> delegate, Consumer<ContextSnapshot> consumer) {

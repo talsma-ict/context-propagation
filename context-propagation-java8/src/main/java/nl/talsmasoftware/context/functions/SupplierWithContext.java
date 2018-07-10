@@ -38,7 +38,7 @@ public class SupplierWithContext<T> extends Java8WrapperWithContext<Supplier<T>>
     }
 
     public SupplierWithContext(ContextSnapshot snapshot, Supplier<T> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
-        this(() -> snapshot, delegate, snapshotConsumer);
+        super(snapshot, delegate, snapshotConsumer);
     }
 
     protected SupplierWithContext(Supplier<ContextSnapshot> snapshotSupplier, Supplier<T> delegate, Consumer<ContextSnapshot> snapshotConsumer) {

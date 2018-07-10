@@ -43,7 +43,7 @@ public class BiFunctionWithContext<IN1, IN2, OUT> extends Java8WrapperWithContex
     }
 
     public BiFunctionWithContext(ContextSnapshot snapshot, BiFunction<IN1, IN2, OUT> delegate, Consumer<ContextSnapshot> consumer) {
-        this(() -> snapshot, delegate, consumer);
+        super(snapshot, delegate, consumer);
     }
 
     protected BiFunctionWithContext(Supplier<ContextSnapshot> supplier, BiFunction<IN1, IN2, OUT> delegate, Consumer<ContextSnapshot> consumer) {

@@ -41,7 +41,7 @@ public class FunctionWithContext<IN, OUT> extends Java8WrapperWithContext<Functi
     }
 
     public FunctionWithContext(ContextSnapshot snapshot, Function<IN, OUT> delegate, Consumer<ContextSnapshot> consumer) {
-        this(() -> snapshot, delegate, consumer);
+        super(snapshot, delegate, consumer);
     }
 
     protected FunctionWithContext(Supplier<ContextSnapshot> supplier, Function<IN, OUT> delegate, Consumer<ContextSnapshot> consumer) {

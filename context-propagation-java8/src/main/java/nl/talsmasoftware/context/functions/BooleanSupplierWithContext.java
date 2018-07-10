@@ -42,7 +42,7 @@ public class BooleanSupplierWithContext extends Java8WrapperWithContext<BooleanS
     }
 
     public BooleanSupplierWithContext(ContextSnapshot snapshot, BooleanSupplier delegate, Consumer<ContextSnapshot> consumer) {
-        this(() -> snapshot, delegate, consumer);
+        super(snapshot, delegate, consumer);
     }
 
     protected BooleanSupplierWithContext(Supplier<ContextSnapshot> supplier, BooleanSupplier delegate, Consumer<ContextSnapshot> consumer) {

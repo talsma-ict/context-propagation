@@ -41,7 +41,7 @@ public class BiConsumerWithContext<T, U> extends Java8WrapperWithContext<BiConsu
     }
 
     public BiConsumerWithContext(ContextSnapshot snapshot, BiConsumer<T, U> delegate, Consumer<ContextSnapshot> consumer) {
-        this(() -> snapshot, delegate, consumer);
+        super(snapshot, delegate, consumer);
     }
 
     protected BiConsumerWithContext(Supplier<ContextSnapshot> supplier, BiConsumer<T, U> delegate, Consumer<ContextSnapshot> consumer) {
