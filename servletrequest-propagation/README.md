@@ -1,4 +1,4 @@
-[![Released Version][maven-img]][maven] 
+[![Maven-central Version][maven-img]][maven] 
 
 # ServletRequest propagation library
 
@@ -27,5 +27,5 @@ snapshot created by the `ContextManagers.createSnapshot()` method.
 This includes all usages of the `ContextAwareExecutorService`.
 
 
-  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/servletrequest-propagation.svg
-  [maven]: http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22nl.talsmasoftware.context%22%20AND%20a%3A%22servletrequest-propagation%22
+  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation.svg
+  [maven]: http://mvnrepository.com/artifact/nl.talsmasoftware.context/servletrequest-propagation

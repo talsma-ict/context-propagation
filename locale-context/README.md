@@ -1,4 +1,4 @@
-[![Released Version][maven-img]][maven] 
+[![Maven-central Version][maven-img]][maven] 
 
 # Locale context module
 
@@ -37,5 +37,5 @@ allowing a configured `Locale` to be propagated.
   ```
 
 
-  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/locale-context.svg
-  [maven]: http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22nl.talsmasoftware.context%22%20AND%20a%3A%22locale-context%22
+  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation.svg
+  [maven]: http://mvnrepository.com/artifact/nl.talsmasoftware.context/locale-context
