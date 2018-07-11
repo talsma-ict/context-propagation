@@ -47,12 +47,27 @@ public class WrapperWithContextTest {
         assertThat(wrapper.delegate(), is(nullValue()));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     @SuppressWarnings("deprecation")
-    public void testCreateWrapperWithoutContext() {
-        new WrapperWithContext<Object>(null, mock(Wrapper.class)) {
-        };
-        fail("Exception expected.");
+    public void testCreateWrapperWithoutSnapshot() {
+        try {
+            new WrapperWithContext<Object>((ContextSnapshot) null, mock(Wrapper.class)) {
+            };
+            fail("Exception expected.");
+        } catch (NullPointerException expected) {
+            assertThat(expected, hasToString(containsString("No context snapshot provided")));
+        }
+    }
+
+    @Test
+    public void testCreateWrapperWithoutSnapshotSupplier() {
+        try {
+            new WrapperWithContext<Object>((ContextSnapshotSupplier) null, mock(Wrapper.class)) {
+            };
+            fail("Exception expected.");
+        } catch (NullPointerException expected) {
+            assertThat(expected, hasToString(containsString("No context snapshot supplier provided")));
+        }
     }
 
     @Test
@@ -80,7 +95,7 @@ public class WrapperWithContextTest {
 
     private static class DoNothingWrapper extends WrapperWithContext<Object> {
         protected DoNothingWrapper(ContextSnapshot snapshot, Object delegate) {
-            super(snapshot, delegate, null);
+            super(snapshot, delegate);
         }
     }
 
@@ -95,4 +110,20 @@ public class WrapperWithContextTest {
         assertThat(wrapper, hasToString(containsString(snapshot.toString())));
         assertThat(wrapper, hasToString(containsString(wrapper.toString())));
     }
+
+    @Test
+    public void testSupplySnapshotNull() {
+        try {
+            new WrapperWithContext<String>(new ContextSnapshotSupplier() {
+                public ContextSnapshot get() {
+                    return null;
+                }
+            }, "Delegate") {
+            }.snapshot();
+            fail("Exception expected!");
+        } catch (NullPointerException expected) {
+            assertThat(expected, hasToString(containsString("Context snapshot is <null>")));
+        }
+    }
+
 }

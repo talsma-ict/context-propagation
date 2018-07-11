@@ -18,12 +18,14 @@ package nl.talsmasoftware.context.functions;
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
-import nl.talsmasoftware.context.delegation.WrapperWithContext;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * A wrapper for {@link BooleanSupplier} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
@@ -31,7 +33,7 @@ import java.util.logging.Logger;
  *
  * @author Sjoerd Talsma
  */
-public class BooleanSupplierWithContext extends WrapperWithContext<BooleanSupplier> implements BooleanSupplier {
+public class BooleanSupplierWithContext extends WrapperWithContextAndConsumer<BooleanSupplier> implements BooleanSupplier {
     private static final Logger LOGGER = Logger.getLogger(BooleanSupplierWithContext.class.getName());
 
     public BooleanSupplierWithContext(ContextSnapshot snapshot, BooleanSupplier delegate) {
@@ -39,21 +41,25 @@ public class BooleanSupplierWithContext extends WrapperWithContext<BooleanSuppli
     }
 
     public BooleanSupplierWithContext(ContextSnapshot snapshot, BooleanSupplier delegate, Consumer<ContextSnapshot> consumer) {
-        super(snapshot, delegate, consumer == null ? null : consumer::accept);
+        super(snapshot, delegate, consumer);
+    }
+
+    protected BooleanSupplierWithContext(Supplier<ContextSnapshot> supplier, BooleanSupplier delegate, Consumer<ContextSnapshot> consumer) {
+        super(supplier, delegate, consumer);
     }
 
     @Override
     public boolean getAsBoolean() {
-        try (Context<Void> context = snapshot.reactivate()) {
-            try {
+        try (Context<Void> context = snapshot().reactivate()) {
+            try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                 LOGGER.log(Level.FINEST, "Delegating getAsBoolean method with {0} to {1}.", new Object[]{context, delegate()});
                 return nonNullDelegate().getAsBoolean();
             } finally {
-                if (consumer != null) {
+                consumer().ifPresent(consumer -> {
                     ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
                     LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                     consumer.accept(resultSnapshot);
-                }
+                });
             }
         }
     }

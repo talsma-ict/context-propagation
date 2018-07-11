@@ -19,6 +19,7 @@ import nl.talsmasoftware.context.ContextSnapshot;
 
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * A wrapper for {@link BinaryOperator} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
@@ -34,6 +35,10 @@ public class BinaryOperatorWithContext<T> extends BiFunctionWithContext<T, T, T>
 
     public BinaryOperatorWithContext(ContextSnapshot snapshot, BinaryOperator<T> delegate, Consumer<ContextSnapshot> consumer) {
         super(snapshot, delegate, consumer);
+    }
+
+    protected BinaryOperatorWithContext(Supplier<ContextSnapshot> supplier, BinaryOperator<T> delegate, Consumer<ContextSnapshot> consumer) {
+        super(supplier, delegate, consumer);
     }
 
 }

@@ -21,10 +21,14 @@ import nl.talsmasoftware.context.DummyContextManager;
 import org.junit.Test;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -281,6 +285,7 @@ public class ContextAwareCompletableFutureTest {
                         ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Jules Winnfield")),
                         (voidA, voidB) -> DummyContextManager.currentValue());
         assertThat(future.get(), is(Optional.of("Vincent Vega")));
+        assertThat(DummyContextManager.currentValue(), is(Optional.of("Marcellus Wallace")));
     }
 
     @Test
@@ -292,5 +297,52 @@ public class ContextAwareCompletableFutureTest {
                         ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Flock of Seagulls")),
                         (voidA, voidB) -> DummyContextManager.currentValue());
         assertThat(future.get(), is(Optional.of("Marvin")));
+        assertThat(DummyContextManager.currentValue(), is(Optional.of("Brett")));
+    }
+
+    @Test
+    public void testTimingIssue55() throws ExecutionException, InterruptedException, TimeoutException {
+        manager.initializeNewContext("Vincent Vega");
+        final CountDownLatch latch1 = new CountDownLatch(1), latch2 = new CountDownLatch(1);
+        ContextAwareCompletableFuture<String> future1 = ContextAwareCompletableFuture
+                .supplyAsync(() -> {
+                    String result = DummyContextManager.currentValue().orElse("NO VALUE");
+                    DummyContextManager.setCurrentValue("Jules Winnfield");
+                    waitFor(latch1);
+                    return result;
+                });
+        CompletableFuture<String> future2 = future1.thenApplyAsync(value -> {
+            String result = value + ", " + DummyContextManager.currentValue().orElse("NO VALUE");
+            DummyContextManager.setCurrentValue("Marcellus Wallace");
+            waitFor(latch2);
+            return result;
+        });
+        Future<String> future3 = future2.thenApplyAsync(value ->
+                value + ", " + DummyContextManager.currentValue().orElse("NO VALUE"));
+
+        assertThat("Future creation may not block on previous stages", future1.isDone(), is(false));
+        assertThat("Future creation may not block on previous stages", future2.isDone(), is(false));
+        assertThat("Future creation may not block on previous stages", future3.isDone(), is(false));
+
+        latch1.countDown();
+        future1.get(500, TimeUnit.MILLISECONDS);
+        assertThat("Future creation may not block on previous stages", future1.isDone(), is(true));
+        assertThat("Future creation may not block on previous stages", future2.isDone(), is(false));
+        assertThat("Future creation may not block on previous stages", future3.isDone(), is(false));
+
+        latch2.countDown();
+        future2.get(500, TimeUnit.MILLISECONDS);
+        assertThat("Future creation may not block on previous stages", future2.isDone(), is(true));
+        assertThat(future3.get(500, TimeUnit.MILLISECONDS), is("Vincent Vega, Jules Winnfield, Marcellus Wallace"));
+        assertThat(DummyContextManager.currentValue(), is(Optional.of("Vincent Vega")));
+    }
+
+    private static void waitFor(CountDownLatch latch) {
+        try {
+            latch.await(5, TimeUnit.SECONDS);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+            throw new AssertionError("Interrupted waiting for latch.", ie);
+        }
     }
 }

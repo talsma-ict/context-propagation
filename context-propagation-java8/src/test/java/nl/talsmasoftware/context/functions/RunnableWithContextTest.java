@@ -23,8 +23,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.fail;
@@ -64,6 +67,28 @@ public class RunnableWithContextTest {
         new RunnableWithContext(snapshot, () -> {
         }).run();
         verify(snapshot).reactivate();
+    }
+
+    @Test
+    public void testRunWithoutSnapshot() {
+        try {
+            new RunnableWithContext(null, () -> {
+            });
+            fail("Exception expected");
+        } catch (RuntimeException expected) {
+            assertThat(expected, hasToString(containsString("No context snapshot provided")));
+        }
+    }
+
+    @Test
+    public void testRunWithoutSnapshotSupplier() {
+        try {
+            new RunnableWithContext((Supplier<ContextSnapshot>) null, () -> {
+            }, null);
+            fail("Exception expected");
+        } catch (RuntimeException expected) {
+            assertThat(expected, hasToString(containsString("No context snapshot supplier provided")));
+        }
     }
 
     @Test

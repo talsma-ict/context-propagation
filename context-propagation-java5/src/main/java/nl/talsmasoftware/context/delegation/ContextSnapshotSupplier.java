@@ -18,23 +18,23 @@ package nl.talsmasoftware.context.delegation;
 import nl.talsmasoftware.context.ContextSnapshot;
 
 /**
- * Interface for a {@code Consumer} of {@link ContextSnapshot}.
+ * Interface for a {@code Supplier} of {@link ContextSnapshot}.
  * <p>
  * Merely an equivalent of the functional interface
- * {@code java.util.Consumer<ContextSnapshot>}
+ * {@code java.util.Supplier<ContextSnapshot>}
  * in order to retain JDK 5 compatibility.
  *
  * @author Sjoerd Talsma
  */
-public interface ContextSnapshotConsumer {
+public interface ContextSnapshotSupplier {
 
     /**
-     * Accept a resulting {@linkplain ContextSnapshot snapshot}.
+     * Supply a {@linkplain ContextSnapshot snapshot}.
      * <p>
-     * The consumer interface itself makes no guarantees whether the snapshot is nullable or not.
+     * The supplier interface itself makes no guarantees whether the snapshot is nullable or not.
      *
-     * @param snapshot The context snapshot.
+     * @return The context snapshot.
      */
-    void accept(ContextSnapshot snapshot);
+    ContextSnapshot get();
 
 }

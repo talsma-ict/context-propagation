@@ -18,6 +18,7 @@ package nl.talsmasoftware.context.functions;
 import nl.talsmasoftware.context.ContextSnapshot;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 /**
@@ -36,4 +37,7 @@ public class UnaryOperatorWithContext<T> extends FunctionWithContext<T, T> imple
         super(snapshot, delegate, snapshotConsumer);
     }
 
+    protected UnaryOperatorWithContext(Supplier<ContextSnapshot> supplier, UnaryOperator<T> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
+        super(supplier, delegate, snapshotConsumer);
+    }
 }
