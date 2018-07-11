@@ -1,4 +1,4 @@
-[![Released Version][maven-img]][maven] 
+[![Maven-central Version][maven-img]][maven] 
 
 # Spring Security Context propagation library
 
@@ -28,8 +28,7 @@ The `ContextAwareExecutorService` automatically propagates the active
 [spring security] `Authentication` into all executed tasks this way.
 
 
-  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/spring-security-context.svg
-  [maven]: http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22nl.talsmasoftware.context%22%20AND%20a%3A%22spring-security-context%22
-
+  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation.svg
+  [maven]: http://mvnrepository.com/artifact/nl.talsmasoftware.context/spring-security-context
   [spring security]: https://projects.spring.io/spring-security/
   [security context]: https://docs.spring.io/spring-security/site/docs/current/api/index.html?org/springframework/security/core/context/SecurityContext.html
