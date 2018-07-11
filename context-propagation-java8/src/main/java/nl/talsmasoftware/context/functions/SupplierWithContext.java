@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  *
  * @author Sjoerd Talsma
  */
-public class SupplierWithContext<T> extends Java8WrapperWithContext<Supplier<T>> implements Supplier<T> {
+public class SupplierWithContext<T> extends WrapperWithContextAndConsumer<Supplier<T>> implements Supplier<T> {
     private static final Logger LOGGER = Logger.getLogger(SupplierWithContext.class.getName());
 
     public SupplierWithContext(ContextSnapshot snapshot, Supplier<T> delegate) {
@@ -48,15 +48,15 @@ public class SupplierWithContext<T> extends Java8WrapperWithContext<Supplier<T>>
     @Override
     public T get() {
         try (Context<Void> context = snapshot().reactivate()) {
-            try {
+            try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                 LOGGER.log(Level.FINEST, "Delegating get method with {0} to {1}.", new Object[]{context, delegate()});
                 return nonNullDelegate().get();
             } finally {
-                if (consumer != null) {
+                consumer().ifPresent(consumer -> {
                     ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
                     LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                     consumer.accept(resultSnapshot);
-                }
+                });
             }
         }
     }

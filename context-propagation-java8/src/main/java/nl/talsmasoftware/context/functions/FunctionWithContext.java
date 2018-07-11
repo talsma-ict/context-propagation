@@ -33,7 +33,7 @@ import static java.util.Objects.requireNonNull;
  *
  * @author Sjoerd Talsma
  */
-public class FunctionWithContext<IN, OUT> extends Java8WrapperWithContext<Function<IN, OUT>> implements Function<IN, OUT> {
+public class FunctionWithContext<IN, OUT> extends WrapperWithContextAndConsumer<Function<IN, OUT>> implements Function<IN, OUT> {
     private static final Logger LOGGER = Logger.getLogger(FunctionWithContext.class.getName());
 
     public FunctionWithContext(ContextSnapshot snapshot, Function<IN, OUT> delegate) {
@@ -50,15 +50,15 @@ public class FunctionWithContext<IN, OUT> extends Java8WrapperWithContext<Functi
 
     public OUT apply(IN in) {
         try (Context<Void> context = snapshot().reactivate()) {
-            try {
+            try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                 LOGGER.log(Level.FINEST, "Delegating apply method with {0} to {1}.", new Object[]{context, delegate()});
                 return nonNullDelegate().apply(in);
             } finally {
-                if (consumer != null) {
+                consumer().ifPresent(consumer -> {
                     ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
                     LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                     consumer.accept(resultSnapshot);
-                }
+                });
             }
         }
     }
@@ -67,15 +67,15 @@ public class FunctionWithContext<IN, OUT> extends Java8WrapperWithContext<Functi
         requireNonNull(before, "Cannot compose with before function <null>.");
         return (V v) -> {
             try (Context<Void> context = snapshot().reactivate()) {
-                try {
+                try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                     LOGGER.log(Level.FINEST, "Delegating compose method with {0} to {1}.", new Object[]{context, delegate()});
                     return nonNullDelegate().apply(before.apply(v));
                 } finally {
-                    if (consumer != null) {
+                    consumer().ifPresent(consumer -> {
                         ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
                         LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                         consumer.accept(resultSnapshot);
-                    }
+                    });
                 }
             }
         };
@@ -85,15 +85,15 @@ public class FunctionWithContext<IN, OUT> extends Java8WrapperWithContext<Functi
         requireNonNull(after, "Cannot transform with after function <null>.");
         return (IN in) -> {
             try (Context<Void> context = snapshot().reactivate()) {
-                try {
+                try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                     LOGGER.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});
                     return after.apply(nonNullDelegate().apply(in));
                 } finally {
-                    if (consumer != null) {
+                    consumer().ifPresent(consumer -> {
                         ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
                         LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                         consumer.accept(resultSnapshot);
-                    }
+                    });
                 }
             }
         };

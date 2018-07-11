@@ -18,6 +18,7 @@ package nl.talsmasoftware.context.functions;
 import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.delegation.WrapperWithContext;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -27,14 +28,22 @@ import java.util.function.Supplier;
  *
  * @param <T> The type of the wrapped delegate object.
  */
-abstract class Java8WrapperWithContext<T> extends WrapperWithContext<T> {
+abstract class WrapperWithContextAndConsumer<T> extends WrapperWithContext<T> {
 
-    protected Java8WrapperWithContext(ContextSnapshot snapshot, T delegate, Consumer<ContextSnapshot> consumer) {
-        super(snapshot, delegate, consumer == null ? null : consumer::accept);
+    private final Consumer<ContextSnapshot> consumer;
+
+    protected WrapperWithContextAndConsumer(ContextSnapshot snapshot, T delegate, Consumer<ContextSnapshot> consumer) {
+        super(snapshot, delegate);
+        this.consumer = consumer;
     }
 
-    protected Java8WrapperWithContext(Supplier<ContextSnapshot> supplier, T delegate, Consumer<ContextSnapshot> consumer) {
-        super(supplier == null ? null : supplier::get, delegate, consumer == null ? null : consumer::accept);
+    protected WrapperWithContextAndConsumer(Supplier<ContextSnapshot> supplier, T delegate, Consumer<ContextSnapshot> consumer) {
+        super(supplier == null ? null : supplier::get, delegate);
+        this.consumer = consumer;
+    }
+
+    protected Optional<Consumer<ContextSnapshot>> consumer() {
+        return Optional.ofNullable(consumer);
     }
 
 }

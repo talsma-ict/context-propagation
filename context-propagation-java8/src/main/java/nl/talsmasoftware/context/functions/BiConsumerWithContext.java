@@ -33,7 +33,7 @@ import static java.util.Objects.requireNonNull;
  *
  * @author Sjoerd Talsma
  */
-public class BiConsumerWithContext<T, U> extends Java8WrapperWithContext<BiConsumer<T, U>> implements BiConsumer<T, U> {
+public class BiConsumerWithContext<T, U> extends WrapperWithContextAndConsumer<BiConsumer<T, U>> implements BiConsumer<T, U> {
     private static final Logger LOGGER = Logger.getLogger(BiConsumerWithContext.class.getName());
 
     public BiConsumerWithContext(ContextSnapshot snapshot, BiConsumer<T, U> delegate) {
@@ -51,15 +51,15 @@ public class BiConsumerWithContext<T, U> extends Java8WrapperWithContext<BiConsu
     @Override
     public void accept(T t, U u) {
         try (Context<Void> context = snapshot().reactivate()) {
-            try {
+            try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                 LOGGER.log(Level.FINEST, "Delegating accept method with {0} to {1}.", new Object[]{context, delegate()});
                 nonNullDelegate().accept(t, u);
             } finally {
-                if (consumer != null) {
+                consumer().ifPresent(consumer -> {
                     ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
                     LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                     consumer.accept(resultSnapshot);
-                }
+                });
             }
         }
     }
@@ -69,16 +69,16 @@ public class BiConsumerWithContext<T, U> extends Java8WrapperWithContext<BiConsu
         requireNonNull(after, "Cannot post-process with after bi-consumer <null>.");
         return (l, r) -> {
             try (Context<Void> context = snapshot().reactivate()) {
-                try {
+                try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                     LOGGER.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});
                     nonNullDelegate().accept(l, r);
                     after.accept(l, r);
                 } finally {
-                    if (consumer != null) {
+                    consumer().ifPresent(consumer -> {
                         ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
                         LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                         consumer.accept(resultSnapshot);
-                    }
+                    });
                 }
             }
         };

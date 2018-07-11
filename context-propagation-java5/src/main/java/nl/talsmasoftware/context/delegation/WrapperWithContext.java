@@ -26,49 +26,56 @@ public abstract class WrapperWithContext<T> extends Wrapper<T> {
 
     private final ContextSnapshotSupplier supplier;
     private volatile ContextSnapshot _snapshot = null;
-    protected final ContextSnapshotConsumer consumer;
 
-    @Deprecated
-    protected WrapperWithContext(ContextSnapshot snapshot, T delegate) {
-        this(snapshot, delegate, null);
-    }
-
-    protected WrapperWithContext(final ContextSnapshot snapshot, final T delegate, final ContextSnapshotConsumer consumer) {
+    /**
+     * Creates a new Wrapper with the specified context snapshot.
+     *
+     * @param snapshot The context snapshot (required, non-{@code null})
+     * @param delegate The wrapped delegate object providing core functionality
+     */
+    protected WrapperWithContext(final ContextSnapshot snapshot, final T delegate) {
         this(new ContextSnapshotSupplier() {
             public ContextSnapshot get() {
                 return snapshot;
             }
-        }, delegate, consumer);
+        }, delegate);
         if (snapshot == null) {
-            throw new NullPointerException(String.format("No context snapshot provided to %s.", this));
+            throw new NullPointerException("No context snapshot provided to " + this + '.');
         }
     }
 
     /**
-     * Wraps the delegate and provides a context.
+     * Wraps the delegate and provides a context snapshot.
      * <p>
      * <strong>Note:</strong> <em>Make sure the supplier function does <strong>not</strong> obtain the context snapshot
      * from any threadlocal storage! The wrapper is designed to propagate contexts from one thread to another.
      * Therefore, the snapshot must be {@link nl.talsmasoftware.context.ContextManagers#createContextSnapshot() captured}
      * in the source thread and {@link ContextSnapshot#reactivate() reactivated} in the target thread.
      * If unsure, please use the
-     * {@link #WrapperWithContext(ContextSnapshot, Object, ContextSnapshotConsumer) constructor with snapshot} instead.</em>
+     * {@link #WrapperWithContext(ContextSnapshot, Object) constructor with snapshot} instead.</em>
      *
-     * @param supplier The supplier for the context snapshot.
+     * @param supplier The supplier for the (fixed!) context snapshot.
      *                 This can be a straightforward 'holder' object or an ongoing background call.
      *                 Please do <strong>not</strong> make this supplier function access any {@code ThreadLocal} value,
      *                 as the wrapper is designed to propagate the snapshot from thread to thread!
      * @param delegate The delegate object to be wrapped.
-     * @param consumer The consumer of a resulting context snapshot (optional, only required if the caller is interested in it).
-     * @see #WrapperWithContext(ContextSnapshot, Object, ContextSnapshotConsumer)
+     * @see #WrapperWithContext(ContextSnapshot, Object)
      */
-    protected WrapperWithContext(ContextSnapshotSupplier supplier, T delegate, ContextSnapshotConsumer consumer) {
+    protected WrapperWithContext(ContextSnapshotSupplier supplier, T delegate) {
         super(delegate);
         this.supplier = supplier;
-        this.consumer = consumer;
         if (supplier == null) {
-            throw new NullPointerException(String.format("No context snapshot supplier provided to %s.", this));
+            throw new NullPointerException("No context snapshot supplier provided to " + this + '.');
         }
+    }
+
+    private ContextSnapshot resolveSnapshot() {
+        // Note: Double-checked locking works fine in decent JDKs
+        // Discussion here: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590407
+        if (_snapshot == null && supplier != null) synchronized (this) {
+            if (_snapshot == null) _snapshot = supplier.get();
+        }
+        return _snapshot;
     }
 
     /**
@@ -77,12 +84,9 @@ public abstract class WrapperWithContext<T> extends Wrapper<T> {
      * @return The snapshot value.
      */
     protected ContextSnapshot snapshot() {
-        // Note: Double-checked locking works fine in decent JDKs
-        if (_snapshot == null) synchronized (this) {
-            if (_snapshot == null) _snapshot = supplier.get();
-        }
-        if (_snapshot == null) throw new NullPointerException("Context snapshot is <null>.");
-        return _snapshot;
+        ContextSnapshot snapshot = resolveSnapshot();
+        if (snapshot == null) throw new NullPointerException("Context snapshot is <null>.");
+        return snapshot;
     }
 
     @Override
@@ -97,11 +101,9 @@ public abstract class WrapperWithContext<T> extends Wrapper<T> {
 
     @Override
     public String toString() {
-        try {
-            return getClass().getSimpleName() + "{delegate=" + delegate() + ", snapshot=" + snapshot() + '}';
-        } catch (NullPointerException ignored) {
-            return getClass().getSimpleName() + "{delegate=" + delegate() + ", snapshot=<null>}";
-        }
+        ContextSnapshot snapshot = resolveSnapshot();
+        String snapshotString = snapshot == null ? "<null>" : snapshot.toString();
+        return getClass().getSimpleName() + "{delegate=" + delegate() + ", snapshot=" + snapshotString + '}';
     }
 
 }

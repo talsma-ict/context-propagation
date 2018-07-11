@@ -51,7 +51,7 @@ public class WrapperWithContextTest {
     @SuppressWarnings("deprecation")
     public void testCreateWrapperWithoutSnapshot() {
         try {
-            new WrapperWithContext<Object>(null, mock(Wrapper.class)) {
+            new WrapperWithContext<Object>((ContextSnapshot) null, mock(Wrapper.class)) {
             };
             fail("Exception expected.");
         } catch (NullPointerException expected) {
@@ -62,7 +62,7 @@ public class WrapperWithContextTest {
     @Test
     public void testCreateWrapperWithoutSnapshotSupplier() {
         try {
-            new WrapperWithContext<Object>((ContextSnapshotSupplier) null, mock(Wrapper.class), null) {
+            new WrapperWithContext<Object>((ContextSnapshotSupplier) null, mock(Wrapper.class)) {
             };
             fail("Exception expected.");
         } catch (NullPointerException expected) {
@@ -95,7 +95,7 @@ public class WrapperWithContextTest {
 
     private static class DoNothingWrapper extends WrapperWithContext<Object> {
         protected DoNothingWrapper(ContextSnapshot snapshot, Object delegate) {
-            super(snapshot, delegate, null);
+            super(snapshot, delegate);
         }
     }
 
@@ -118,7 +118,7 @@ public class WrapperWithContextTest {
                 public ContextSnapshot get() {
                     return null;
                 }
-            }, "Delegate", null) {
+            }, "Delegate") {
             }.snapshot();
             fail("Exception expected!");
         } catch (NullPointerException expected) {
@@ -126,13 +126,4 @@ public class WrapperWithContextTest {
         }
     }
 
-    @Test
-    public void testToStringWithNullSupplier() {
-        assertThat(new WrapperWithContext<String>(new ContextSnapshotSupplier() {
-            public ContextSnapshot get() {
-                return null;
-            }
-        }, "Delegate", null) {
-        }, hasToString("{delegate=Delegate, snapshot=<null>}"));
-    }
 }
