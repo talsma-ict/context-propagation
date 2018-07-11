@@ -80,7 +80,7 @@ public class DummyContextManager implements ContextManager<String> {
 [Apache 2.0 license](../LICENSE)
 
 
-  [ci-img]: https://img.shields.io/travis/talsma-ict/context-propagation/develop.svg
+  [ci-img]: https://travis-ci.org/talsma-ict/context-propagation.svg?branch=develop
   [ci]: https://travis-ci.org/talsma-ict/context-propagation
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation.svg
   [maven]: http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22nl.talsmasoftware.context%22%20AND%20a%3A%22context-propagation%22
