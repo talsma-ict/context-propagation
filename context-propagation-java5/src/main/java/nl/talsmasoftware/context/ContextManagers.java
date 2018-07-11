@@ -122,10 +122,6 @@ public final class ContextManagers {
          * or a new instance worst-case (warnings will be logged).
          */
         private static ContextManager<?> getContextManagerByName(String contextManagerClassName) {
-            // A single serviceloader iteration is now done in the reactivate method.
-            //            for (ContextManager contextManager : SERVICE_LOADER) {
-            //                if (contextManagerClassName.equals(contextManager.getClass().getName())) return contextManager;
-            //            }
             LOGGER.log(Level.WARNING, "Context manager \"{0}\" not found in service locator! " +
                     "Attempting to create a new instance as last-resort.", contextManagerClassName);
             try {
