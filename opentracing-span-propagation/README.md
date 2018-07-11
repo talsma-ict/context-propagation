@@ -1,4 +1,4 @@
-[![Released Version][maven-img]][maven] 
+[![Maven-central Version][maven-img]][maven] 
 [![OpenTracing Badge][opentracing-img]][opentracing]
 
 # OpenTracing Span propagation library
@@ -32,7 +32,7 @@ The `ContextAwareExecutorService` and other propagation utilities in this librar
 conform to this constraint.
 
 
-  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/opentracing-span-propagation.svg
-  [maven]: http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22nl.talsmasoftware.context%22%20AND%20a%3A%22opentracing-span-propagation%22
+  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation.svg
+  [maven]: http://mvnrepository.com/artifact/nl.talsmasoftware.context/opentracing-span-propagation
   [opentracing-img]: https://img.shields.io/badge/OpenTracing-enabled-blue.svg
   [opentracing]: http://opentracing.io
