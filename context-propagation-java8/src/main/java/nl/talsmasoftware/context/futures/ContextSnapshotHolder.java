@@ -15,30 +15,29 @@
  */
 package nl.talsmasoftware.context.futures;
 
+import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 
-import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static java.util.Objects.requireNonNull;
+
 final class ContextSnapshotHolder implements Consumer<ContextSnapshot>, Supplier<ContextSnapshot> {
-    private final CountDownLatch latch = new CountDownLatch(1);
-    private ContextSnapshot snapshot;
+    private volatile ContextSnapshot snapshot;
+
+    ContextSnapshotHolder(ContextSnapshot snapshot) {
+        this.accept(snapshot == null ? ContextManagers.createContextSnapshot() : snapshot);
+    }
 
     @Override
     public void accept(ContextSnapshot snapshot) {
-        this.snapshot = snapshot;
-        latch.countDown();
+        this.snapshot = requireNonNull(snapshot, "Context snapshot is <null>.");
     }
 
     @Override
     public ContextSnapshot get() {
-        try {
-            latch.await();
-            return snapshot;
-        } catch (InterruptedException ie) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Interrupted waiting for context snapshot.");
-        }
+        return snapshot;
     }
+
 }

@@ -16,65 +16,35 @@
 package nl.talsmasoftware.context.futures;
 
 import nl.talsmasoftware.context.ContextSnapshot;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
-/**
- * @author Sjoerd Talsma
- */
 public class ContextSnapshotHolderTest {
-    private ExecutorService unawareThreadpool;
 
-    @Before
-    public void setUp() {
-        unawareThreadpool = Executors.newCachedThreadPool();
+    @Test
+    public void testCreateWithNull() {
+        assertThat(new ContextSnapshotHolder(null).get(), is(notNullValue()));
     }
 
-    @After
-    public void tearDown() throws InterruptedException {
-        unawareThreadpool.shutdown();
-        unawareThreadpool.awaitTermination(5, TimeUnit.SECONDS);
+    @Test(expected = NullPointerException.class)
+    public void testAcceptNull() {
+        new ContextSnapshotHolder(mock(ContextSnapshot.class)).accept(null);
     }
 
     @Test
-    public void testSetGet() {
-        ContextSnapshot snapshot = mock(ContextSnapshot.class);
-        ContextSnapshotHolder holder = new ContextSnapshotHolder();
+    public void testGet() {
+        ContextSnapshot snapshot1 = mock(ContextSnapshot.class);
+        ContextSnapshot snapshot2 = mock(ContextSnapshot.class);
 
-        holder.accept(snapshot);
-        assertThat(holder.get(), is(sameInstance(snapshot)));
+        ContextSnapshotHolder holder = new ContextSnapshotHolder(snapshot1);
+        assertThat(holder.get(), is(sameInstance(snapshot1)));
+
+        holder.accept(snapshot2);
+        assertThat(holder.get(), is(sameInstance(snapshot2)));
     }
-
-    @Test
-    public void testInterruption() throws InterruptedException {
-        ContextSnapshot snapshot = mock(ContextSnapshot.class);
-        ContextSnapshotHolder holder = new ContextSnapshotHolder();
-
-        Future<ContextSnapshot> future = unawareThreadpool.submit(holder::get);
-        unawareThreadpool.shutdownNow();
-        unawareThreadpool.awaitTermination(5, TimeUnit.SECONDS);
-
-        try {
-            future.get();
-            fail("Exception expected");
-        } catch (ExecutionException expected) {
-            assertThat(expected.getCause(), hasToString(containsString("Interrupted waiting for context snapshot")));
-        }
-    }
-
 }
