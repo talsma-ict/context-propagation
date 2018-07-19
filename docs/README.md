@@ -1,6 +1,6 @@
 [![Build Status][ci-img]][ci]
 [![Coverage Status][coveralls-img]][coveralls]
-[![Maven-central Version][maven-img]][maven]
+[![Maven Version][maven-img]][maven]
 
 # Context propagation library
 
@@ -82,8 +82,8 @@ public class DummyContextManager implements ContextManager<String> {
 
   [ci-img]: https://travis-ci.org/talsma-ict/context-propagation.svg?branch=develop
   [ci]: https://travis-ci.org/talsma-ict/context-propagation
-  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation.svg
-  [maven]: http://mvnrepository.com/search?q=nl.talsmasoftware.context
+  [maven-img]: https://img.shields.io/maven-metadata/v/http/central.maven.org/maven2/nl/talsmasoftware/context/context-propagation/maven-metadata.xml.svg
+  [maven]: http://mvnrepository.com/artifact/nl.talsmasoftware.context
   [release-img]: https://img.shields.io/github/release/talsma-ict/context-propagation.svg
   [release]: https://github.com/talsma-ict/context-propagation/releases
   [coveralls-img]: https://coveralls.io/repos/github/talsma-ict/context-propagation/badge.svg

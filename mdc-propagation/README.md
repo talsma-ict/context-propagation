@@ -1,4 +1,4 @@
-[![Released Version][maven-img]][maven] 
+[![Maven Version][maven-img]][maven] 
 
 # Slf4J MDC propagation library
 
@@ -14,7 +14,7 @@ Add it to your classpath.
 <dependency>
     <groupId>nl.talsmasoftware.context</groupId>
     <artifactId>mdc-propagation</artifactId>
-    <version>[see maven-central version above]</version>
+    <version>[see maven badge above]</version>
 </dependency>
 ```
 
@@ -27,7 +27,7 @@ The `ContextAwareExecutorService` automatically propagates the full [MDC] conten
 into all executed tasks this way.
 
 
-  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation.svg
+  [maven-img]: https://img.shields.io/maven-metadata/v/http/central.maven.org/maven2/nl/talsmasoftware/context/context-propagation/maven-metadata.xml.svg
   [maven]: http://mvnrepository.com/artifact/nl.talsmasoftware.context/mdc-propagation
 
   [slf4j]: https://www.slf4j.org/
