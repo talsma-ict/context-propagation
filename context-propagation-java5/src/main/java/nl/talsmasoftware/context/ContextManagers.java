@@ -84,6 +84,8 @@ public final class ContextManagers {
                     LOGGER.log(Level.FINEST, "There is no active context for {0} in this snapshot.", manager);
                 } else {
                     snapshot.put(manager.getClass().getName(), activeContext.getValue());
+                    LOGGER.log(Level.FINEST, "Active context of {0} added to new snapshot: {1}.",
+                            new Object[]{manager, activeContext});
                 }
             } catch (RuntimeException rte) {
                 LOGGER.log(Level.WARNING, "Exception obtaining active context from " + manager + " for snapshot.", rte);
@@ -149,7 +151,6 @@ public final class ContextManagers {
             }
         }
 
-        @SuppressWarnings("unchecked") // As we got the values from the managers themselves, they must also accept them!
         public Context<Void> reactivate() {
             final Set<String> remainingContextManagers = new LinkedHashSet<String>(snapshot.keySet());
             final List<Context<?>> reactivatedContexts = new ArrayList<Context<?>>(snapshot.size());
@@ -157,17 +158,18 @@ public final class ContextManagers {
                 for (ContextManager contextManager : SERVICE_LOADER) {
                     String contextManagerName = contextManager.getClass().getName();
                     if (remainingContextManagers.remove(contextManagerName)) {
-                        reactivatedContexts.add(contextManager.initializeNewContext(snapshot.get(contextManagerName)));
+                        reactivatedContexts.add(reactivate(contextManager, snapshot.get(contextManagerName)));
                     }
                 }
                 for (String contextManagerName : remainingContextManagers) {
                     final ContextManager contextManager = getContextManagerByName(contextManagerName);
-                    reactivatedContexts.add(contextManager.initializeNewContext(snapshot.get(contextManagerName)));
+                    reactivatedContexts.add(reactivate(contextManager, snapshot.get(contextManagerName)));
                 }
                 return new ReactivatedContext(reactivatedContexts);
             } catch (RuntimeException reactivationException) {
                 for (Context alreadyReactivated : reactivatedContexts) {
-                    if (alreadyReactivated != null) try { // Undo already reactivated contexts.
+                    if (alreadyReactivated != null) try {
+                        LOGGER.log(Level.FINEST, "Snapshot reactivation failed! Closing already reactivated context: {0}...", alreadyReactivated);
                         alreadyReactivated.close();
                     } catch (RuntimeException rte) {
                         addSuppressedOrWarn(reactivationException, rte, "Could not close already reactivated context.");
@@ -175,6 +177,14 @@ public final class ContextManagers {
                 }
                 throw reactivationException;
             }
+        }
+
+        @SuppressWarnings("unchecked") // As we got the values from the managers themselves, they must also accept them!
+        private Context reactivate(ContextManager contextManager, Object snapshotValue) {
+            Context reactivated = contextManager.initializeNewContext(snapshotValue);
+            LOGGER.log(Level.FINEST, "Context reactivated from snapshot by {0}: {1}.",
+                    new Object[]{contextManager, reactivated});
+            return reactivated;
         }
 
         @Override
@@ -218,7 +228,7 @@ public final class ContextManagers {
         }
     }
 
-    @SuppressWarnings("Since15")
+    @SuppressWarnings("Since15") // That's why we catch the LinkageError here
     private static void addSuppressedOrWarn(Throwable exception, Throwable toSuppress, String message) {
         if (exception != null && toSuppress != null) try {
             exception.addSuppressed(toSuppress);
