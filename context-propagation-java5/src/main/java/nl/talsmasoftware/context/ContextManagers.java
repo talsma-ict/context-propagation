@@ -81,13 +81,14 @@ public final class ContextManagers {
             managerStart = System.nanoTime();
             try {
                 final Context activeContext = manager.getActiveContext();
-                if (activeContext == null) {
-                    LOGGER.log(Level.FINEST, "There is no active context for {0} in this snapshot.", manager);
-                } else {
+                if (activeContext != null) {
                     snapshot.put(manager.getClass().getName(), activeContext.getValue());
-                    LOGGER.log(Level.FINEST, "Active context of {0} added to new snapshot: {1}.",
-                            new Object[]{manager, activeContext});
+                    if (LOGGER.isLoggable(Level.FINEST)) {
+                        LOGGER.finest("Active context of " + manager + " added to new snapshot: " + activeContext + ".");
+                    }
                     Timing.timed(System.nanoTime() - managerStart, manager.getClass(), "getActiveContext");
+                } else if (LOGGER.isLoggable(Level.FINEST)) {
+                    LOGGER.log(Level.FINEST, "There is no active context for " + manager + " in this snapshot.");
                 }
             } catch (RuntimeException rte) {
                 LOGGER.log(Level.WARNING, "Exception obtaining active context from " + manager + " for snapshot.", rte);
@@ -176,7 +177,10 @@ public final class ContextManagers {
             } catch (RuntimeException reactivationException) {
                 for (Context alreadyReactivated : reactivatedContexts) {
                     if (alreadyReactivated != null) try {
-                        LOGGER.log(Level.FINEST, "Snapshot reactivation failed! Closing already reactivated context: {0}...", alreadyReactivated);
+                        if (LOGGER.isLoggable(Level.FINEST)) {
+                            LOGGER.finest("Snapshot reactivation failed! " +
+                                    "Closing already reactivated context: " + alreadyReactivated + "...");
+                        }
                         alreadyReactivated.close();
                     } catch (RuntimeException rte) {
                         addSuppressedOrWarn(reactivationException, rte, "Could not close already reactivated context.");
@@ -190,8 +194,9 @@ public final class ContextManagers {
         private Context reactivate(ContextManager contextManager, Object snapshotValue) {
             long start = System.nanoTime();
             Context reactivated = contextManager.initializeNewContext(snapshotValue);
-            LOGGER.log(Level.FINEST, "Context reactivated from snapshot by {0}: {1}.",
-                    new Object[]{contextManager, reactivated});
+            if (LOGGER.isLoggable(Level.FINEST)) {
+                LOGGER.finest("Context reactivated from snapshot by " + contextManager + ": " + reactivated + ".");
+            }
             Timing.timed(System.nanoTime() - start, contextManager.getClass(), "initializeNewContext");
             return reactivated;
         }
