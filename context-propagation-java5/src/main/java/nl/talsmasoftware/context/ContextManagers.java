@@ -75,8 +75,8 @@ public final class ContextManagers {
      */
     public static ContextSnapshot createContextSnapshot() {
         final long start = System.nanoTime();
-        Long managerStart = null;
         final Map<String, Object> snapshot = new LinkedHashMap<String, Object>();
+        Long managerStart = null;
         for (ContextManager manager : SERVICE_LOADER) {
             managerStart = System.nanoTime();
             try {
