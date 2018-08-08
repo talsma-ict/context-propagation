@@ -38,6 +38,7 @@
         <module>context-propagation-bom</module>
         <module>context-propagation-java5</module>
         <module>context-propagation-java8</module>
+        <module>context-propagation-metrics</module>
         <module>locale-context</module>
         <module>mdc-propagation</module>
         <module>servletrequest-propagation</module>
