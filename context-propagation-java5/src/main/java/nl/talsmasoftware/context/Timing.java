@@ -15,27 +15,44 @@
  */
 package nl.talsmasoftware.context;
 
+import nl.talsmasoftware.context.timing.ContextTimer;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Simple timer class.
- * <p>
- * To enable rudimentary profiling of context switches:
- * <ol>
- * <li>Set the log level of {@code "nl.talsmasoftware.context.Timing"}
- * to {@code FINEST} level (or {@code TRACE} if using an api like Slf4J)</li>
- * </ol>
+ * Singleton initialized to lookup all {@link ContextTimer} delegates.
  *
  * @author Sjoerd Talsma
  */
 final class Timing {
     private static final Logger LOGGER = Logger.getLogger(Timing.class.getName());
 
-    static void timed(long elapsedNanos, Class<?> type, String method) {
-        // TODO use actual metrics / tracing api's if available
+    /**
+     * Singleton containing resolved ContextTimer delegates.
+     */
+    private enum Singleton {
+        INSTANCE;
+        private final ContextTimer[] delegates;
+
+        Singleton() {
+            List<ContextTimer> delegates = new ArrayList<ContextTimer>();
+            for (ContextTimer delegate : new PriorityServiceLoader<ContextTimer>(ContextTimer.class)) {
+                delegates.add(delegate);
+            }
+            this.delegates = delegates.toArray(new ContextTimer[0]);
+        }
+    }
+
+    static void timed(long durationNanos, Class<?> type, String method) {
+        for (ContextTimer delegate : Singleton.INSTANCE.delegates) {
+            delegate.update(type, method, durationNanos, TimeUnit.NANOSECONDS);
+        }
         if (LOGGER.isLoggable(Level.FINEST)) {
-            LOGGER.log(Level.FINEST, "{0}.{1}: {2,number}ns", new Object[]{type.getName(), method, elapsedNanos});
+            LOGGER.log(Level.FINEST, "{0}.{1}: {2,number}ns", new Object[]{type.getName(), method, durationNanos});
         }
     }
 

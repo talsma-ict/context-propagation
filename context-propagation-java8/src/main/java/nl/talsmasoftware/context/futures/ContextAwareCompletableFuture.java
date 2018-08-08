@@ -177,6 +177,7 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      *
      * @param runnable the action to run before completing the returned CompletableFuture
      * @param executor the executor to use for asynchronous execution
+     * @param snapshot the context snapshot to apply to the runnable action
      * @return the new CompletableFuture that propagates a snapshot of the current context
      * @see CompletableFuture#runAsync(Runnable, Executor)
      */
