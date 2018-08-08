@@ -16,22 +16,42 @@
 package nl.talsmasoftware.context;
 
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.fail;
 
 /**
  * @author Sjoerd Talsma
  */
 public class ContextManagersTest {
+
+    @BeforeClass
+    public static void initLogback() {
+        if (!SLF4JBridgeHandler.isInstalled()) {
+            /* Initialize SLF4J bridge. This re-routes logging through java.util.logging to SLF4J. */
+            java.util.logging.LogManager.getLogManager().reset();
+            SLF4JBridgeHandler.install();
+            LoggerFactory.getILoggerFactory();
+        }
+    }
 
     @Test
     public void testUnsupportedConstructor() {

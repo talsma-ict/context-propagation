@@ -74,11 +74,13 @@ public final class ContextManagers {
      * within a try-with-resources construct.
      */
     public static ContextSnapshot createContextSnapshot() {
+        final long start = System.nanoTime();
         final Map<String, Object> snapshot = new LinkedHashMap<String, Object>();
         boolean noManagers = true;
         for (ContextManager manager : SERVICE_LOADER) {
             noManagers = false;
             try {
+                long managerStart = System.nanoTime();
                 final Context activeContext = manager.getActiveContext();
                 if (activeContext == null) {
                     LOGGER.log(Level.FINEST, "There is no active context for {0} in this snapshot.", manager);
@@ -86,6 +88,7 @@ public final class ContextManagers {
                     snapshot.put(manager.getClass().getName(), activeContext.getValue());
                     LOGGER.log(Level.FINEST, "Active context of {0} added to new snapshot: {1}.",
                             new Object[]{manager, activeContext});
+                    Timing.timed(System.nanoTime() - managerStart, manager.getClass(), "getActiveContext");
                 }
             } catch (RuntimeException rte) {
                 LOGGER.log(Level.WARNING, "Exception obtaining active context from " + manager + " for snapshot.", rte);
@@ -96,7 +99,9 @@ public final class ContextManagers {
             NoContextManagersFound noContextManagersFound = new NoContextManagersFound();
             LOGGER.log(Level.INFO, noContextManagersFound.getMessage(), noContextManagersFound);
         }
-        return new ContextSnapshotImpl(snapshot);
+        ContextSnapshot result = new ContextSnapshotImpl(snapshot);
+        Timing.timed(System.nanoTime() - start, ContextManagers.class, "createContextSnapshot");
+        return result;
     }
 
     /**
@@ -152,6 +157,7 @@ public final class ContextManagers {
         }
 
         public Context<Void> reactivate() {
+            final long start = System.nanoTime();
             final Set<String> remainingContextManagers = new LinkedHashSet<String>(snapshot.keySet());
             final List<Context<?>> reactivatedContexts = new ArrayList<Context<?>>(snapshot.size());
             try {
@@ -165,7 +171,9 @@ public final class ContextManagers {
                     final ContextManager contextManager = getContextManagerByName(contextManagerName);
                     reactivatedContexts.add(reactivate(contextManager, snapshot.get(contextManagerName)));
                 }
-                return new ReactivatedContext(reactivatedContexts);
+                ReactivatedContext reactivatedContext = new ReactivatedContext(reactivatedContexts);
+                Timing.timed(System.nanoTime() - start, ContextSnapshot.class, "reactivate");
+                return reactivatedContext;
             } catch (RuntimeException reactivationException) {
                 for (Context alreadyReactivated : reactivatedContexts) {
                     if (alreadyReactivated != null) try {
@@ -181,9 +189,11 @@ public final class ContextManagers {
 
         @SuppressWarnings("unchecked") // As we got the values from the managers themselves, they must also accept them!
         private Context reactivate(ContextManager contextManager, Object snapshotValue) {
+            long start = System.nanoTime();
             Context reactivated = contextManager.initializeNewContext(snapshotValue);
             LOGGER.log(Level.FINEST, "Context reactivated from snapshot by {0}: {1}.",
                     new Object[]{contextManager, reactivated});
+            Timing.timed(System.nanoTime() - start, contextManager.getClass(), "initializeNewContext");
             return reactivated;
         }
 
