@@ -75,12 +75,11 @@ public final class ContextManagers {
      */
     public static ContextSnapshot createContextSnapshot() {
         final long start = System.nanoTime();
+        Long managerStart = null;
         final Map<String, Object> snapshot = new LinkedHashMap<String, Object>();
-        boolean noManagers = true;
         for (ContextManager manager : SERVICE_LOADER) {
-            noManagers = false;
+            managerStart = System.nanoTime();
             try {
-                long managerStart = System.nanoTime();
                 final Context activeContext = manager.getActiveContext();
                 if (activeContext == null) {
                     LOGGER.log(Level.FINEST, "There is no active context for {0} in this snapshot.", manager);
@@ -94,7 +93,7 @@ public final class ContextManagers {
                 LOGGER.log(Level.WARNING, "Exception obtaining active context from " + manager + " for snapshot.", rte);
             }
         }
-        if (noManagers) {
+        if (managerStart == null) {
             SERVICE_LOADER.reload();
             NoContextManagersFound noContextManagersFound = new NoContextManagersFound();
             LOGGER.log(Level.INFO, noContextManagersFound.getMessage(), noContextManagersFound);
