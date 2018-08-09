@@ -46,7 +46,8 @@ deploy:
   api_key: $GH_TOKEN
   file_glob: true
   file:
-    - ./**/target/*.jar
+    - ./**/target/*$TRAVIS_TAG.jar
+    - ./**/target/*-sources.jar
 #    - ./**/target/*.jar.asc
   skip_cleanup: true
   on:
