@@ -19,6 +19,7 @@ import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext;
 
 import javax.servlet.ServletRequest;
+import java.util.logging.Logger;
 
 /**
  * ThreadLocal context containing the current {@link ServletRequest}.
@@ -26,6 +27,7 @@ import javax.servlet.ServletRequest;
  * @author Sjoerd Talsma
  */
 final class ServletRequestContext extends AbstractThreadLocalContext<ServletRequest> {
+    private static final Logger LOGGER = Logger.getLogger(ServletRequestContext.class.getName());
 
     /**
      * The ThreadLocal context containing the {@link ServletRequest}.
@@ -65,6 +67,7 @@ final class ServletRequestContext extends AbstractThreadLocalContext<ServletRequ
      */
     static void clear() {
         CONTEXT.remove();
+        LOGGER.finest("Cleared ServletRequestContext stack.");
     }
 
     /**
