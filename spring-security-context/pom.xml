@@ -33,7 +33,7 @@
     <properties>
         <maven.compiler.source>1.5</maven.compiler.source>
         <maven.compiler.target>1.5</maven.compiler.target>
-        <project.moduleName>${project.groupId}.servletrequest</project.moduleName>
+        <project.moduleName>${project.groupId}.springsecurity</project.moduleName>
         <root.basedir>${project.parent.basedir}</root.basedir>
         <spring-security.version>5.0.7.RELEASE</spring-security.version>
     </properties>
