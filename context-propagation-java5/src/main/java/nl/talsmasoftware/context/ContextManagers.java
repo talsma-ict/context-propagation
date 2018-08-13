@@ -40,12 +40,6 @@ public final class ContextManagers {
     private static final Logger LOGGER = Logger.getLogger(ContextManagers.class.getName());
 
     /**
-     * Service loader for registered {@link ContextManager} implementations.
-     */
-    private static final PriorityServiceLoader<ContextManager> SERVICE_LOADER =
-            new PriorityServiceLoader<ContextManager>(ContextManager.class);
-
-    /**
      * Private constructor to avoid instantiation of this class.
      */
     private ContextManagers() {
@@ -77,7 +71,7 @@ public final class ContextManagers {
         final long start = System.nanoTime();
         final Map<String, Object> snapshot = new LinkedHashMap<String, Object>();
         Long managerStart = null;
-        for (ContextManager manager : SERVICE_LOADER) {
+        for (ContextManager manager : new PriorityServiceLoader<ContextManager>(ContextManager.class)) {
             managerStart = System.nanoTime();
             try {
                 final Context activeContext = manager.getActiveContext();
@@ -95,7 +89,6 @@ public final class ContextManagers {
             }
         }
         if (managerStart == null) {
-            SERVICE_LOADER.reload();
             NoContextManagersFound noContextManagersFound = new NoContextManagersFound();
             LOGGER.log(Level.INFO, noContextManagersFound.getMessage(), noContextManagersFound);
         }
@@ -120,7 +113,7 @@ public final class ContextManagers {
 
         /**
          * Tries to get the context manager instance by its classname.<br>
-         * This should obviously be available in the {@link #SERVICE_LOADER} instance, but if it's not
+         * This should obviously be available in the {@link PriorityServiceLoader} instance, but if it's not
          * (after deserialization on another malconfigured node?) we will print a warning
          * (due to the potential performance penalty) and return a new instance of the manager.
          *
@@ -161,7 +154,7 @@ public final class ContextManagers {
             final Set<String> remainingContextManagers = new LinkedHashSet<String>(snapshot.keySet());
             final List<Context<?>> reactivatedContexts = new ArrayList<Context<?>>(snapshot.size());
             try {
-                for (ContextManager contextManager : SERVICE_LOADER) {
+                for (ContextManager contextManager : new PriorityServiceLoader<ContextManager>(ContextManager.class)) {
                     String contextManagerName = contextManager.getClass().getName();
                     if (remainingContextManagers.remove(contextManagerName)) {
                         reactivatedContexts.add(reactivate(contextManager, snapshot.get(contextManagerName)));
