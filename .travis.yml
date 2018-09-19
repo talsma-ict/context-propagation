@@ -38,7 +38,7 @@ script:
   - .travis/scripts/release.sh
 
 after_success:
- - if [ -f context-propagation-java5/target/jacoco.exec ]; then ./mvnw jacoco:report coveralls:report; fi
+ - if [ -f target/jacoco.exec ]; then ./mvnw jacoco:report coveralls:report; fi
 
 deploy:
   provider: releases
@@ -46,9 +46,11 @@ deploy:
   api_key: $GH_TOKEN
   file_glob: true
   file:
-    - ./**/target/*$TRAVIS_TAG.jar
-    - ./**/target/*-sources.jar
-#    - ./**/target/*.jar.asc
+#    - ./**/target/*$TRAVIS_TAG.jar
+#    - ./**/target/*-javadoc.jar
+#    - ./**/target/*-sources.jar
+    - ./**/target/*.jar
+    - ./**/target/*.jar.asc
   skip_cleanup: true
   on:
     tags: true
