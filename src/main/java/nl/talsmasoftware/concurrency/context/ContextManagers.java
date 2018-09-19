@@ -17,10 +17,6 @@
 
 package nl.talsmasoftware.concurrency.context;
 
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * Utility class to allow concurrent systems to {@link #createContextSnapshot() take snapshots of all contexts} from
  * known {@link ContextManager ContextManager} implementations.

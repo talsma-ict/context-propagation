@@ -45,4 +45,9 @@ public abstract class AbstractThreadLocalContext<T>
         super(newValue);
     }
 
+    @Override
+    public String toString() {
+        return "Legacy" + super.toString();
+    }
+
 }

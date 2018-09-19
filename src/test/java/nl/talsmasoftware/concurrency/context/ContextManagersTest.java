@@ -42,7 +42,7 @@ public class ContextManagersTest {
         assertThat(DummyContext.currentValue(), is("second value"));
 
         ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
-        assertThat(DummyContext.currentValue(), is("second value")); // No context changed just because a snapshot was.
+        assertThat(DummyContext.currentValue(), is("second value")); // context mustn't change just because a snapshot is taken.
 
         DummyContext ctx3 = new DummyContext("third value");
         assertThat(DummyContext.currentValue(), is("third value"));

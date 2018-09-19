@@ -1,7 +1,10 @@
 package nl.talsmasoftware.concurrency.context;
 
-import java.util.*;
-import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ServiceLoader;
 import java.util.logging.Logger;
 
 /**
@@ -43,32 +46,40 @@ public class LegacyContextManagerBridge implements nl.talsmasoftware.context.Con
 
     private static final Logger LOGGER = Logger.getLogger(ContextManagers.class.getName());
 
-    /**
-     * Service locator for registered legacy {@link ContextManager} implementations.
-     */
-    private static final ServiceLoader<ContextManager> LEGACY_LOCATOR =
-            ServiceLoader.load(ContextManager.class, LegacyContextManagerBridge.class.getClassLoader());
-
     private static ContextSnapshot createLegacyContextSnapshot() {
         final Map<ContextManager, Object> snapshot = new IdentityHashMap<ContextManager, Object>();
         boolean empty = true;
-        for (ContextManager manager : LEGACY_LOCATOR) {
+        for (ContextManager legacyManager : ServiceLoader.load(ContextManager.class, LegacyContextManagerBridge.class.getClassLoader())) {
             empty = false;
-            final nl.talsmasoftware.concurrency.context.Context activeContext = manager.getActiveContext();
-            if (activeContext != null) snapshot.put(manager, activeContext.getValue());
+            final nl.talsmasoftware.concurrency.context.Context activeLegacyContext = legacyManager.getActiveContext();
+            if (activeLegacyContext != null) snapshot.put(legacyManager, activeLegacyContext.getValue());
         }
-        if (empty) LOGGER.log(Level.WARNING, "Context snapshot was created but no ContextManagers were found!");
-        return new ContextSnapshotImpl(snapshot);
+        if (empty) {
+            LOGGER.finer("No legacy context managers found. It's probably safe to remove the legacy bridge from your application.");
+        }
+        return snapshot.isEmpty() ? LegacyContextSnapshot.EMPTY : new LegacyContextSnapshot(snapshot);
     }
 
     /**
      * Implementation of the <code>createContextSnapshot</code> functionality that can reactivate all values from the
      * snapshot in each corresponding {@link ContextManager}.
      */
-    private static final class ContextSnapshotImpl implements ContextSnapshot {
+    private static final class LegacyContextSnapshot implements ContextSnapshot {
+        private static ContextSnapshot EMPTY = new ContextSnapshot() {
+            @Override
+            public Context<Void> reactivate() {
+                return ReactivatedContext.EMPTY;
+            }
+
+            @Override
+            public String toString() {
+                return "LegacyContextSnapshot{size=0}";
+            }
+        };
+
         private final Map<ContextManager, Object> snapshot;
 
-        ContextSnapshotImpl(Map<ContextManager, Object> snapshot) {
+        LegacyContextSnapshot(Map<ContextManager, Object> snapshot) {
             this.snapshot = snapshot;
         }
 
@@ -94,7 +105,7 @@ public class LegacyContextManagerBridge implements nl.talsmasoftware.context.Con
 
         @Override
         public String toString() {
-            return "ContextSnapshot{size=" + snapshot.size() + '}';
+            return "LegacyContextSnapshot{size=" + snapshot.size() + '}';
         }
     }
 
@@ -103,6 +114,23 @@ public class LegacyContextManagerBridge implements nl.talsmasoftware.context.Con
      * itself. This context contains no value of itself.
      */
     private static final class ReactivatedContext implements Context<Void> {
+        private static Context<Void> EMPTY = new Context<Void>() {
+            @Override
+            public Void getValue() {
+                return null;
+            }
+
+            @Override
+            public void close() {
+                // no-op
+            }
+
+            @Override
+            public String toString() {
+                return "ReactivatedLegacyContext{size=0}";
+            }
+        };
+
         private final List<Context<?>> reactivated;
 
         private ReactivatedContext(List<Context<?>> reactivated) {
@@ -128,7 +156,7 @@ public class LegacyContextManagerBridge implements nl.talsmasoftware.context.Con
 
         @Override
         public String toString() {
-            return "ReactivatedContext{size=" + reactivated.size() + '}';
+            return "ReactivatedLegacyContext{size=" + reactivated.size() + '}';
         }
     }
 

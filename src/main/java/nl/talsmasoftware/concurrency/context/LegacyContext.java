@@ -14,9 +14,8 @@ public class LegacyContext<T> implements Context<T>, nl.talsmasoftware.context.C
         this.wrapped = requireNonNull(wrapped, "Wrapped context is <null>.");
     }
 
-    public static <T> Context<T> wrap(nl.talsmasoftware.context.Context<T> newContext) {
-        return newContext == null || newContext instanceof Context
-                ? (Context<T>) newContext : new LegacyContext<>(newContext);
+    public static <T> Context<T> wrap(nl.talsmasoftware.context.Context<T> ctx) {
+        return ctx == null || ctx instanceof Context ? (Context<T>) ctx : new LegacyContext<>(ctx);
     }
 
     @Override
