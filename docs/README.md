@@ -6,4 +6,4 @@ Library with concurrency utility methods.
 by the [context-propagation](https://github.com/talsma-ict/context-propagation)
 library.
 
-**_This `develop-0.1` project branch is now deprecated._**
+**_This `develop-v0` project branch is now deprecated._**
