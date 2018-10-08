@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Talsma ICT
+ * Copyright 2016-2018 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,4 +30,18 @@ public class DummyContextManager implements ContextManager<String> {
         return DummyContext.current();
     }
 
+    @Override
+    public int hashCode() {
+        return DummyContextManager.class.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return this == other || other instanceof DummyContextManager;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
+    }
 }

@@ -37,6 +37,7 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
     private volatile Iterable<SVC> delegate;
 
     PriorityServiceLoader(Class<SVC> serviceType) {
+        if (serviceType == null) throw new NullPointerException("Service type is <null>.");
         this.serviceType = serviceType;
     }
 
