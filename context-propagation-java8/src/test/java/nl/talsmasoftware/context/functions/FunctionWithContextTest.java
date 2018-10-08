@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -33,6 +34,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -65,16 +67,14 @@ public class FunctionWithContextTest {
 
     @Test
     public void testApply() {
-        when(snapshot.reactivate()).thenReturn(context);
-        new FunctionWithContext<>(snapshot, var -> var).apply(null);
+        new FunctionWithContext<>(snapshot, Function.identity()).apply("input");
         verify(snapshot).reactivate();
-        verify(context).close();
     }
 
     @Test
-    public void testFunctionWithoutSnapshot() {
+    public void testApplyWithoutSnapshot() {
         try {
-            new FunctionWithContext<>(null, var -> var);
+            new FunctionWithContext<>(null, Function.identity());
             fail("Exception expected");
         } catch (RuntimeException expected) {
             assertThat(expected, hasToString(containsString("No context snapshot provided")));
@@ -82,9 +82,10 @@ public class FunctionWithContextTest {
     }
 
     @Test
-    public void testFunctionWithoutSnapshotSupplier() {
+    public void testApplyWithoutSnapshotSupplier() {
         try {
-            new FunctionWithContext<>((Supplier<ContextSnapshot>) null, var -> var, null);
+            new FunctionWithContext<>((Supplier<ContextSnapshot>) null, Function.identity(), context -> {
+            });
             fail("Exception expected");
         } catch (RuntimeException expected) {
             assertThat(expected, hasToString(containsString("No context snapshot supplier provided")));
@@ -96,10 +97,12 @@ public class FunctionWithContextTest {
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
         DummyContextManager.setCurrentValue("Old value");
 
-        Thread t = new Thread(() -> new FunctionWithContext<String, String>(snapshot, var -> {
-            DummyContextManager.setCurrentValue(var);
-            return var;
-        }, snapshot -> snapshotHolder[0] = snapshot).apply("New value"));
+        Thread t = new Thread(() -> new FunctionWithContext<>(snapshot,
+                input -> {
+                    DummyContextManager.setCurrentValue("New value");
+                    return input;
+                },
+                snapshot -> snapshotHolder[0] = snapshot).apply("input"));
         t.start();
         t.join();
 
@@ -107,6 +110,7 @@ public class FunctionWithContextTest {
         try (Context<Void> reactivation = snapshotHolder[0].reactivate()) {
             assertThat(DummyContextManager.currentValue(), is(Optional.of("New value")));
         }
+        assertThat(DummyContextManager.currentValue(), is(Optional.of("Old value")));
 
         verify(snapshot).reactivate();
     }
@@ -117,7 +121,7 @@ public class FunctionWithContextTest {
         final RuntimeException expectedException = new RuntimeException("Whoops!");
 
         try {
-            new FunctionWithContext<>(snapshot, throwing(expectedException)).apply("Some value");
+            new FunctionWithContext<>(snapshot, throwing(expectedException)).apply("input");
             fail("Exception expected");
         } catch (RuntimeException rte) {
             assertThat(rte, is(sameInstance(expectedException)));
@@ -127,8 +131,58 @@ public class FunctionWithContextTest {
         verify(context).close();
     }
 
-    private static <T, U> Function<T, U> throwing(RuntimeException rte) {
-        return var -> {
+    @Test
+    public void testComposeWithNull() {
+        try {
+            new FunctionWithContext<>(snapshot, Function.identity()).compose(null);
+            fail("Exception expected");
+        } catch (NullPointerException expected) {
+            assertThat(expected, hasToString(containsString("before function <null>")));
+        }
+    }
+
+    @Test
+    public void testComposeWith_singleContextSwitch() {
+        when(snapshot.reactivate()).thenReturn(context);
+        Function<Integer, Integer> before = i -> i * 10;
+        Function<Integer, Integer> function = i -> i + 3;
+        AtomicInteger consumed = new AtomicInteger(0);
+
+        Function<Integer, Integer> composed = new FunctionWithContext<>(snapshot, function, snapshot -> consumed.incrementAndGet()).compose(before);
+
+        assertThat(composed.apply(2), is((2 * 10) + 3));
+        verify(snapshot, times(1)).reactivate();
+        verify(context, times(1)).close();
+        assertThat(consumed.get(), is(1));
+    }
+
+    @Test
+    public void testAndThen_singleContextSwitch() {
+        when(snapshot.reactivate()).thenReturn(context);
+        Function<Integer, Integer> after = i -> i * 10;
+        Function<Integer, Integer> function = i -> i + 3;
+        AtomicInteger consumed = new AtomicInteger(0);
+
+        Function<Integer, Integer> composed = new FunctionWithContext<>(snapshot, function, snapshot -> consumed.incrementAndGet()).andThen(after);
+
+        assertThat(composed.apply(2), is((2 + 3) * 10));
+        verify(snapshot, times(1)).reactivate();
+        verify(context, times(1)).close();
+        assertThat(consumed.get(), is(1));
+    }
+
+    @Test
+    public void testAndThenWithNull() {
+        try {
+            new FunctionWithContext<>(snapshot, Function.identity()).andThen(null);
+            fail("Exception expected");
+        } catch (NullPointerException expected) {
+            assertThat(expected, hasToString(containsString("after function <null>")));
+        }
+    }
+
+    private static <IN, OUT> Function<IN, OUT> throwing(RuntimeException rte) {
+        return input -> {
             throw rte;
         };
     }
