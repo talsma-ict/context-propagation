@@ -30,9 +30,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.fail;
 
 /**
  * @author Sjoerd Talsma
@@ -57,6 +61,27 @@ public class BooleanSupplierWithContextTest {
     public void tearDown() throws InterruptedException {
         unawareThreadpool.shutdown();
         unawareThreadpool.awaitTermination(5, TimeUnit.SECONDS);
+    }
+
+    @Test
+    public void testConstructWithoutSnapshot() {
+        try {
+            new BooleanSupplierWithContext(null, () -> true);
+            fail("Exception expected");
+        } catch (RuntimeException expected) {
+            assertThat(expected, hasToString(containsString("No context snapshot provided")));
+        }
+    }
+
+    @Test
+    public void testConstructWithoutSnapshotSupplier() {
+        try {
+            new BooleanSupplierWithContext((Supplier<ContextSnapshot>) null, () -> true, snapshot -> {
+            });
+            fail("Exception expected");
+        } catch (RuntimeException expected) {
+            assertThat(expected, hasToString(containsString("No context snapshot supplier provided")));
+        }
     }
 
     @Test

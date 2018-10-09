@@ -45,11 +45,12 @@ import static java.util.Objects.requireNonNull;
  */
 public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
 
+    // Holder for context snapshots to be propagated from one CompletionStage to the next
     private final ContextSnapshotHolder snapshotHolder;
 
     /**
-     * Creates a new {@link ContextSnapshot} and remembers that in this completable future, running all
-     * completion methods within this snapshot.
+     * Creates a new {@link ContextSnapshot} and remembers that in this completable future,
+     * running all completion methods within this snapshot.
      *
      * @see ContextManagers#createContextSnapshot()
      */
@@ -61,8 +62,8 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * Creates a new {@link CompletableFuture} where all completion methods are run within the specified
      * snapshot context.
      *
-     * @param snapshot The snapshot to run completion methods in (or specify <code>null</code> to take a
-     *                 new snapshot upon creation of this completable future).
+     * @param snapshot The snapshot to run completion methods in.
+     *                 Optional, the completable future will take a new snaphot if {@code null} is provided.
      * @see ContextManagers#createContextSnapshot()
      */
     public ContextAwareCompletableFuture(ContextSnapshot snapshot) {
@@ -78,7 +79,7 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * <em>within the current context</em> and also applies that context to all successive
      * calls to the {@code CompletableFuture}.
      *
-     * @param supplier a function returning the value to be used to complete the returned CompletableFuture
+     * @param supplier a function to be performed asynchronously returning the result of the CompletableFuture
      * @param <U>      the function's return type
      * @return the new CompletableFuture that propagates a snapshot of the current context
      * @see CompletableFuture#supplyAsync(Supplier)
