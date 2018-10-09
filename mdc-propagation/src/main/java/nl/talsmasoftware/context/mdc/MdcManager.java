@@ -73,6 +73,11 @@ public class MdcManager implements ContextManager<Map<String, String>> {
         return new MdcContext(null, MDC.getCopyOfContextMap(), true);
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
+    }
+
     private static final class MdcContext implements Context<Map<String, String>> {
         private final Map<String, String> previous, value;
         private final AtomicBoolean closed;
