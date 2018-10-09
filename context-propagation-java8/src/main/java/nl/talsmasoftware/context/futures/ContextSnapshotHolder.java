@@ -23,18 +23,42 @@ import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Snapshot holder that is used internally to temporarily 'hold' a context snapshot
+ * to be propagated from one {@code CompletionStage} to another.
+ *
+ * @author Sjoerd Talsma
+ */
 final class ContextSnapshotHolder implements Consumer<ContextSnapshot>, Supplier<ContextSnapshot> {
     private volatile ContextSnapshot snapshot;
 
+    /**
+     * Create a new snapshot holder initially containing either the provided snapshot,
+     * or takes a new snapshot as initial value.
+     *
+     * @param snapshot The snapshot to hold initially.
+     *                 Optional, if {@code null} the holder will initialize with a new snapshot.
+     */
     ContextSnapshotHolder(ContextSnapshot snapshot) {
         this.accept(snapshot == null ? ContextManagers.createContextSnapshot() : snapshot);
     }
 
+    /**
+     * Accept a new snapshot (i.e. after a single stage is completed) to be propagated
+     * into another completion stage.
+     *
+     * @param snapshot The snapshot to hold (required, must not be {@code null})
+     */
     @Override
     public void accept(ContextSnapshot snapshot) {
         this.snapshot = requireNonNull(snapshot, "Context snapshot is <null>.");
     }
 
+    /**
+     * Returns the current snapshot, normally to activate when beginning a new completion stage.
+     *
+     * @return The held snapshot (should never be {@code null})
+     */
     @Override
     public ContextSnapshot get() {
         return snapshot;
