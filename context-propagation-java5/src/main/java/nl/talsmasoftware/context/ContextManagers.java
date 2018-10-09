@@ -16,7 +16,6 @@
 package nl.talsmasoftware.context;
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -86,6 +85,7 @@ public final class ContextManagers {
                 }
             } catch (RuntimeException rte) {
                 LOGGER.log(Level.WARNING, "Exception obtaining active context from " + manager + " for snapshot.", rte);
+                Timing.timed(System.nanoTime() - managerStart, manager.getClass(), "getActiveContext.exception");
             }
         }
         if (managerStart == null) {
@@ -111,44 +111,6 @@ public final class ContextManagers {
             this.snapshot = snapshot;
         }
 
-        /**
-         * Tries to get the context manager instance by its classname.<br>
-         * This should obviously be available in the {@link PriorityServiceLoader} instance, but if it's not
-         * (after deserialization on another malconfigured node?) we will print a warning
-         * (due to the potential performance penalty) and return a new instance of the manager.
-         *
-         * @param contextManagerClassName The class name of the context manager to be returned.
-         * @return The appropriate context manager from the locator (hopefully)
-         * or a new instance worst-case (warnings will be logged).
-         */
-        private static ContextManager<?> getContextManagerByName(String contextManagerClassName) {
-            LOGGER.log(Level.WARNING, "Context manager \"{0}\" not found in service locator! " +
-                    "Attempting to create a new instance as last-resort.", contextManagerClassName);
-            try {
-
-                return (ContextManager) Class.forName(contextManagerClassName).getConstructor().newInstance();
-
-            } catch (ClassNotFoundException cnfe) {
-                throw new IllegalStateException(String.format(
-                        "Context manager \"%s\" is not available on this node!", contextManagerClassName), cnfe);
-            } catch (NoSuchMethodException nsme) {
-                throw new IllegalStateException(String.format(
-                        "Context manager \"%s\" no longer has a default constructor!", contextManagerClassName), nsme);
-            } catch (InvocationTargetException ite) {
-                throw new IllegalStateException(String.format(
-                        "Exception reconstructing ContextManager \"%s\"!", contextManagerClassName), ite.getCause());
-            } catch (InstantiationException ie) {
-                throw new IllegalStateException(String.format(
-                        "Context manager \"%s\" is no longer available!", contextManagerClassName), ie);
-            } catch (IllegalAccessException iae) {
-                throw new IllegalStateException(String.format(
-                        "Not allowed to reload ContextManager \"%s\" on this node!", contextManagerClassName), iae);
-            } catch (RuntimeException rte) {
-                throw new IllegalStateException(String.format(
-                        "Context manager \"%s\" is no longer available!", contextManagerClassName), rte);
-            }
-        }
-
         public Context<Void> reactivate() {
             final long start = System.nanoTime();
             final Set<String> remainingContextManagers = new LinkedHashSet<String>(snapshot.keySet());
@@ -161,8 +123,8 @@ public final class ContextManagers {
                     }
                 }
                 for (String contextManagerName : remainingContextManagers) {
-                    final ContextManager contextManager = getContextManagerByName(contextManagerName);
-                    reactivatedContexts.add(reactivate(contextManager, snapshot.get(contextManagerName)));
+                    LOGGER.log(Level.WARNING, "Context manager \"{0}\" not found in service loader! " +
+                            "Cannot reactivate: {1}", new Object[]{contextManagerName, snapshot.get(contextManagerName)});
                 }
                 ReactivatedContext reactivatedContext = new ReactivatedContext(reactivatedContexts);
                 Timing.timed(System.nanoTime() - start, ContextSnapshot.class, "reactivate");
@@ -172,7 +134,7 @@ public final class ContextManagers {
                     if (alreadyReactivated != null) try {
                         if (LOGGER.isLoggable(Level.FINEST)) {
                             LOGGER.finest("Snapshot reactivation failed! " +
-                                    "Closing already reactivated context: " + alreadyReactivated + "...");
+                                    "Closing already reactivated context: " + alreadyReactivated + ".");
                         }
                         alreadyReactivated.close();
                     } catch (RuntimeException rte) {

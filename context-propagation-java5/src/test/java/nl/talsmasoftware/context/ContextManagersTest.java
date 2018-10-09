@@ -15,12 +15,18 @@
  */
 package nl.talsmasoftware.context;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -36,12 +42,16 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.fail;
 
 /**
  * @author Sjoerd Talsma
  */
 public class ContextManagersTest {
+    private static final String SERVICE_LOCATION = "target/test-classes/META-INF/services/";
+    private static final File SERVICE_FILE = new File(SERVICE_LOCATION + ContextManager.class.getName());
+    private static final File TMP_SERVICE_FILE = new File(SERVICE_LOCATION + "tmp-ContextManager");
 
     @BeforeClass
     public static void initLogback() {
@@ -51,6 +61,18 @@ public class ContextManagersTest {
             SLF4JBridgeHandler.install();
             LoggerFactory.getILoggerFactory();
         }
+        ((Logger) LoggerFactory.getLogger(ContextManagers.class)).setLevel(Level.ALL);
+    }
+
+    @AfterClass
+    public static void restoreLoglevel() {
+        ((Logger) LoggerFactory.getLogger(ContextManagers.class)).setLevel(null);
+    }
+
+    @Before
+    @After
+    public void resetContexts() {
+        DummyContext.reset();
     }
 
     @Test
@@ -166,4 +188,78 @@ public class ContextManagersTest {
         }
     }
 
+    @Test
+    public void testCreateSnapshot_ExceptionHandling() {
+        ThrowingContextManager.onGet = new IllegalStateException("No active context!");
+        Context<String> ctx = new DummyContext("blah");
+        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        ctx.close();
+
+        assertThat(DummyContext.currentValue(), is(nullValue()));
+        Context<Void> reactivation = snapshot.reactivate();
+        assertThat(DummyContext.currentValue(), is("blah"));
+        reactivation.close();
+        assertThat(DummyContext.current(), is(nullValue()));
+    }
+
+    @Test
+    public void testReactivateSnapshot_ExceptionHandling() {
+        final RuntimeException reactivationException = new IllegalStateException("Cannot create new context!");
+        ThrowingContextManager mgr = new ThrowingContextManager();
+        Context<String> ctx1 = new DummyContext("foo");
+        Context<String> ctx2 = mgr.initializeNewContext("bar");
+        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        ThrowingContextManager.onInitialize = reactivationException;
+
+        assertThat(DummyContext.currentValue(), is("foo"));
+        assertThat(mgr.getActiveContext().getValue(), is("bar"));
+        ctx1.close();
+        ctx2.close();
+
+        assertThat(DummyContext.currentValue(), is(nullValue()));
+        assertThat(mgr.getActiveContext(), is(nullValue()));
+        try {
+            snapshot.reactivate();
+            fail("Exception expected");
+        } catch (RuntimeException expected) {
+            assertThat(expected, is(sameInstance(reactivationException)));
+        }
+        // foo + bar mustn't be set after exception!
+        assertThat(DummyContext.currentValue(), is(nullValue()));
+        assertThat(mgr.getActiveContext(), is(nullValue()));
+    }
+
+    @Test
+    public void testReactivate_withoutContextManagers() {
+        Context<String> ctx1 = new DummyContext("foo");
+        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        ctx1.close();
+
+        assertThat("Move service file", SERVICE_FILE.renameTo(TMP_SERVICE_FILE), is(true));
+        try {
+
+            Context<Void> reactivated = snapshot.reactivate();
+            reactivated.close();
+
+        } finally {
+            assertThat("Restore service file!", TMP_SERVICE_FILE.renameTo(SERVICE_FILE), is(true));
+        }
+    }
+
+    @Test
+    public void testCreateSnapshot_withoutContextManagers() {
+        assertThat("Move service file", SERVICE_FILE.renameTo(TMP_SERVICE_FILE), is(true));
+        try {
+
+            ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+            assertThat(snapshot, is(notNullValue()));
+
+            Context<Void> reactivated = snapshot.reactivate();
+            assertThat(reactivated, is(notNullValue()));
+            reactivated.close();
+
+        } finally {
+            assertThat("Restore service file!", TMP_SERVICE_FILE.renameTo(SERVICE_FILE), is(true));
+        }
+    }
 }
