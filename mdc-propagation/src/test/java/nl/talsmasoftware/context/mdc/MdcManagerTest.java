@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Talsma ICT
+ * Copyright 2016-2018 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,9 +24,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.MDC;
 
-import java.util.concurrent.*;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 
 /**
@@ -85,4 +91,22 @@ public class MdcManagerTest {
         assertThat("MDC restored?", GET_MDC_ITEM.call(), is("Value 2"));
     }
 
+    @Test
+    public void testMdcManagerToString() {
+        assertThat(new MdcManager(), hasToString("MdcManager"));
+    }
+
+    @Test
+    public void testMdcContextToString() {
+        MdcManager mgr = new MdcManager();
+        MDC.put("dummy", "value");
+        Map<String, String> mdc = MDC.getCopyOfContextMap();
+        assertThat(mgr.getActiveContext(), hasToString("MdcContext{closed}"));
+        Context<Map<String, String>> ctx = mgr.initializeNewContext(mdc);
+        try {
+            assertThat(ctx, hasToString("MdcContext" + mdc));
+        } finally {
+            ctx.close();
+        }
+    }
 }

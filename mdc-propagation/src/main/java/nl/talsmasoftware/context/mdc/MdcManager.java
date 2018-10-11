@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Talsma ICT
+ * Copyright 2016-2018 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,6 +71,11 @@ public class MdcManager implements ContextManager<Map<String, String>> {
     public Context<Map<String, String>> getActiveContext() {
         // Return fresh context that is 'already-closed'. Therefore it doesn't need a previous mdc.
         return new MdcContext(null, MDC.getCopyOfContextMap(), true);
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
     }
 
     private static final class MdcContext implements Context<Map<String, String>> {
