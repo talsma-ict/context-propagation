@@ -88,7 +88,7 @@ Please **do not** turn this on in production as the logging overhead will most l
 have a noticable impact to the context management itself.
 
 ### Dropwizard metrics
-If your project happens to be using [dropwizard metrics](https://metrics.dropwizard.io/),
+If your project happens to use [dropwizard metrics](https://metrics.dropwizard.io/),
 adding the [context propagation metrics] module to your classpath will automatically 
 configure various timers in the default metric registry of your application.
 
