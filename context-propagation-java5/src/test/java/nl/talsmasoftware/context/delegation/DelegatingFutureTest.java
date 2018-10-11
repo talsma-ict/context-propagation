@@ -130,7 +130,7 @@ public class DelegatingFutureTest {
         } catch (ExecutionException expected) {
             assertThat(expected, is(sameInstance(exception)));
         }
-        verify(delegate).get();
+        verify(delegate).get(eq(1234L), eq(SECONDS));
     }
 
     @Test
