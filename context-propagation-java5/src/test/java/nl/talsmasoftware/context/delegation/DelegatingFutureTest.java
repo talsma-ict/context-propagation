@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.fail;
@@ -117,6 +118,19 @@ public class DelegatingFutureTest {
         when(delegate.get(anyLong(), (TimeUnit) anyObject())).thenReturn(result);
         assertThat(subject.get(2387L, MILLISECONDS), is(sameInstance(result)));
         verify(delegate).get(eq(2387L), eq(MILLISECONDS));
+    }
+
+    @Test
+    public void testGetTimeoutException() throws ExecutionException, InterruptedException, TimeoutException {
+        ExecutionException exception = new ExecutionException(new RuntimeException());
+        when(delegate.get(anyLong(), (TimeUnit) anyObject())).thenThrow(exception);
+        try {
+            subject.get(1234L, SECONDS);
+            fail("Exception expected.");
+        } catch (ExecutionException expected) {
+            assertThat(expected, is(sameInstance(exception)));
+        }
+        verify(delegate).get();
     }
 
     @Test
