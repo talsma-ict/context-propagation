@@ -2,7 +2,7 @@
 
 # Metrics instrumentation for context-propagation
 
-This module provides [metrics] timing instrumentation for:
+This module provides [metrics] `Timer` instrumentation for:
  - all context snapshots that are created with `ContextManagers.createContextSnapshot()` 
  - all context snapshots that are reactivated with `ContextSnapshot.reactivate()`
  - for each specific `ContextManager`:
