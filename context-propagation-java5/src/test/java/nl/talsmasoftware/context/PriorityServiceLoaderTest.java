@@ -17,11 +17,16 @@ package nl.talsmasoftware.context;
 
 import org.junit.Test;
 
+import javax.annotation.Priority;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.fail;
@@ -44,39 +49,6 @@ public class PriorityServiceLoaderTest {
     }
 
     @Test
-    public void testReloadBeforeIteration() {
-        List<ContextManager<?>> managers = new ArrayList<ContextManager<?>>();
-        PriorityServiceLoader<ContextManager> subject = new PriorityServiceLoader<ContextManager>(ContextManager.class);
-        subject.reload();
-        for (ContextManager<?> mgr : subject) managers.add(mgr);
-
-        assertThat(managers, hasItem(new DummyContextManager()));
-    }
-
-    @Test
-    public void testReloadDuringIteration() {
-        List<ContextManager<?>> managers = new ArrayList<ContextManager<?>>();
-        PriorityServiceLoader<ContextManager> subject = new PriorityServiceLoader<ContextManager>(ContextManager.class);
-        for (ContextManager<?> mgr : subject) {
-            subject.reload();
-            managers.add(mgr);
-            subject.reload();
-        }
-
-        assertThat(managers, hasItem(new DummyContextManager()));
-    }
-
-    @Test
-    public void testReloadAfterIteration() {
-        List<ContextManager<?>> managers = new ArrayList<ContextManager<?>>();
-        PriorityServiceLoader<ContextManager> subject = new PriorityServiceLoader<ContextManager>(ContextManager.class);
-        for (ContextManager<?> mgr : subject) managers.add(mgr);
-        subject.reload();
-
-        assertThat(managers, hasItem(new DummyContextManager()));
-    }
-
-    @Test
     public void testMultipleIterations() {
         List<ContextManager<?>> managers = new ArrayList<ContextManager<?>>();
         PriorityServiceLoader<ContextManager> subject = new PriorityServiceLoader<ContextManager>(ContextManager.class);
@@ -86,4 +58,56 @@ public class PriorityServiceLoaderTest {
         assertThat(managers, hasItem(new DummyContextManager()));
     }
 
+    @Test
+    public void testUnimplementedService() {
+        Collection<UnimplementedService> found = new ArrayList<UnimplementedService>();
+        for (UnimplementedService svc : new PriorityServiceLoader<UnimplementedService>(UnimplementedService.class)) {
+            found.add(svc);
+        }
+        assertThat(found, is(empty()));
+    }
+
+    @Test
+    public void testSingleService() {
+        assertThat(new PriorityServiceLoader<ServiceWithSingleImplementation>(ServiceWithSingleImplementation.class), contains(
+                instanceOf(SingleImplementationWithLowestPriority.class)
+        ));
+    }
+
+    @Test
+    public void testPrioritization() {
+        assertThat(new PriorityServiceLoader<TestService>(TestService.class), contains(
+                instanceOf(HighestPrioImplementation.class),
+                instanceOf(ImplementationWithoutPriority.class),
+                instanceOf(LowestPrioImplementation.class)
+        ));
+    }
+
+    interface UnimplementedService {
+    }
+
+    interface ServiceWithSingleImplementation {
+    }
+
+    interface TestService {
+    }
+
+    @Priority(Integer.MIN_VALUE)
+    public static class LowestPrioImplementation implements TestService {
+
+    }
+
+    @Priority(0)
+    public static class HighestPrioImplementation implements TestService {
+
+    }
+
+    public static class ImplementationWithoutPriority implements TestService {
+
+    }
+
+    @Priority(Integer.MIN_VALUE)
+    public static class SingleImplementationWithLowestPriority implements ServiceWithSingleImplementation {
+
+    }
 }

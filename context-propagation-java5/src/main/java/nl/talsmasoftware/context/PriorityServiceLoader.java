@@ -21,7 +21,10 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static java.util.Collections.*;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
+import static java.util.Collections.sort;
+import static java.util.Collections.unmodifiableList;
 
 /**
  * Loader class to delegate to JDK 6 {@code ServiceLoader} or fallback to the old
@@ -34,55 +37,27 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
     private static final Logger LOGGER = Logger.getLogger(PriorityServiceLoader.class.getName());
 
     private final Class<SVC> serviceType;
-    private volatile Iterable<SVC> delegate;
 
     PriorityServiceLoader(Class<SVC> serviceType) {
         if (serviceType == null) throw new NullPointerException("Service type is <null>.");
         this.serviceType = serviceType;
     }
 
-    void reload() {
-        delegate = null;
-    }
-
-    private synchronized Iterable<SVC> delegate() {
-        Iterable<SVC> iterable = delegate;
-        if (iterable == null) {
-            final ArrayList<SVC> services = new ArrayList<SVC>();
-            for (Iterator<SVC> iterator = loadServices(serviceType); iterator.hasNext(); ) {
-                try {
-                    SVC service = iterator.next();
-                    if (service != null) services.add(service);
-                } catch (Error error) {
-                    if (isServiceConfigurationError(error)) {
-                        LOGGER.log(Level.SEVERE, "Service configuration error iterating service "
-                                + serviceType + ": " + error.getMessage(), error);
-                    } else throw error;
-                } catch (RuntimeException rte) {
-                    LOGGER.log(Level.SEVERE, "Exception iterating service "
-                            + serviceType + ": " + rte.getMessage(), rte);
-                }
-            }
-
-            if (PriorityComparator.PRIORITY_AVAILABLE) sort(services, PriorityComparator.INSTANCE);
-            if (services.isEmpty()) {
-                iterable = emptySet();
-            } else {
-                services.trimToSize();
-                iterable = delegate = unmodifiableList(services);
-            }
+    @SuppressWarnings("unchecked")
+    public synchronized Iterator<SVC> iterator() {
+        ArrayList<SVC> services = new ArrayList<SVC>();
+        for (Iterator<SVC> iterator = loadServices(serviceType); iterator.hasNext(); ) {
+            SVC service = iterator.next();
+            if (service != null) services.add(service);
         }
-        return iterable;
-    }
 
-    @SuppressWarnings("Since15")
-    private static boolean isServiceConfigurationError(Error error) {
-        try {
-            return java.util.ServiceConfigurationError.class.isInstance(error);
-        } catch (LinkageError le) {
-            LOGGER.log(Level.FINEST, "No ServiceConfigurationError available, probably running on Java 1.5.", le);
-            return false;
+        if (services.isEmpty()) {
+            return (Iterator<SVC>) emptySet().iterator();
+        } else if (services.size() == 1) {
+            return singleton(services.get(0)).iterator();
         }
+        if (PriorityComparator.PRIORITY_AVAILABLE) sort(services, PriorityComparator.INSTANCE);
+        return unmodifiableList(services).iterator();
     }
 
     @SuppressWarnings("Since15")
@@ -96,10 +71,6 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
             LOGGER.log(Level.WARNING, "Unexpected error loading services of " + serviceType, loadingException);
             return Collections.<SVC>emptySet().iterator();
         }
-    }
-
-    public Iterator<SVC> iterator() {
-        return delegate().iterator();
     }
 
 }
