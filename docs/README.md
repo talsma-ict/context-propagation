@@ -77,8 +77,10 @@ public class DummyContextManager implements ContextManager<String> {
 
 ## Performance metrics
 
-Capturing a context snapshot and reactivating it in another thread is not 'free' with regards
-to performance. To gain insight, the library tracks the time it spends.
+No library is 'free' with regards to performance.
+Capturing a context snapshot and reactivating it in another thread is no different.
+For performance insight, the library tracks the overall time used creating and reactivating
+context snapshots along with time spent in each individual `ContextManager`.
 
 ### Logging performance
 On a development machine, you can get timing for each snapshot by turning on logging
