@@ -35,8 +35,8 @@ import static java.util.Collections.singletonMap;
  * @author Sjoerd Talsma
  */
 public class OpentracingContextTimer implements ContextTimer {
-    private static final String SYS_DISABLED = "opentracing.contexttimer.disabled";
-    private static final String ENV_DISABLED = SYS_DISABLED.toUpperCase().replace('.', '_');
+    private static final String SYS_ENABLED = "opentracing.trace.contextmanager";
+    private static final String ENV_ENABLED = SYS_ENABLED.toUpperCase().replace('.', '_');
     private static final String LOG_FIELD_THREAD = "context.thread";
 
     @Override
@@ -61,11 +61,13 @@ public class OpentracingContextTimer implements ContextTimer {
     }
 
     private static boolean reportContextSwitchesFor(Class<?> type) {
-        final String disabled = System.getProperty(SYS_DISABLED, System.getenv(ENV_DISABLED));
-        if ("1".equals(disabled) || "true".equalsIgnoreCase(disabled)) return false;
-
-        // Only report spans for entire snapshots, not individual context managers
-        // Could be made configurable if somebody ever asks for it..
-        return ContextManagers.class.equals(type) || ContextSnapshot.class.equals(type);
+        boolean enableTracing = false;
+        final String prop = System.getProperty(SYS_ENABLED, System.getenv(ENV_ENABLED));
+        if ("1".equals(prop) || "true".equalsIgnoreCase(prop) || "enabled".equalsIgnoreCase(prop)) {
+            // Only report spans for entire snapshots, not individual context managers
+            // Could be made configurable if somebody ever asks for it..
+            enableTracing = ContextManagers.class.equals(type) || ContextSnapshot.class.equals(type);
+        }
+        return enableTracing;
     }
 }
