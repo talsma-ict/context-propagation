@@ -35,8 +35,7 @@
         <maven.compiler.target>1.6</maven.compiler.target>
         <project.moduleName>${project.groupId}.opentracing</project.moduleName>
         <root.basedir>${project.parent.basedir}</root.basedir>
-        <!-- TODO switch to 0.32.0-SNAPSHOT after https://github.com/opentracing/opentracing-java/pull/309 is merged -->
-        <opentracing-api.version>0.31.1-SNAPSHOT</opentracing-api.version>
+        <opentracing-api.version>0.32.0-SNAPSHOT</opentracing-api.version>
     </properties>
 
     <dependencies>
