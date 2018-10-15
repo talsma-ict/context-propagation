@@ -35,7 +35,8 @@ import static org.junit.Assert.fail;
 public class MockSpanMatcher extends BaseMatcher<MockSpan> {
 
     private Collection<Matcher<String>> operationNameMatchers = new ArrayList<Matcher<String>>();
-    private Collection<Matcher<MockSpan.Reference>> referenceMatchers = new ArrayList<Matcher<MockSpan.Reference>>();
+    private Collection<Matcher<Iterable<? super MockSpan.Reference>>> referenceMatchers =
+            new ArrayList<Matcher<Iterable<? super MockSpan.Reference>>>();
 
     private MockSpanMatcher() {
     }
@@ -64,7 +65,7 @@ public class MockSpanMatcher extends BaseMatcher<MockSpan> {
 
     public MockSpanMatcher andReference(Matcher<MockSpan.Reference> reference) {
         if (reference == null) fail("Refrence matcher is <null>.");
-        this.referenceMatchers.add(reference);
+        this.referenceMatchers.add(hasItem(reference));
         return this;
     }
 
@@ -76,24 +77,22 @@ public class MockSpanMatcher extends BaseMatcher<MockSpan> {
         for (Matcher<String> operationName : operationNameMatchers) {
             if (!operationName.matches(mockSpan.operationName())) return false;
         }
-        for (Matcher<MockSpan.Reference> reference : referenceMatchers) {
-            if (!hasItem(reference).matches(mockSpan.references())) return false;
+        for (Matcher<Iterable<? super MockSpan.Reference>> reference : referenceMatchers) {
+            if (!reference.matches(mockSpan.references())) return false;
         }
         return true;
     }
 
     @Override
     public void describeTo(Description description) {
-        description.appendText("MockSpan ");
-        String sep = "with ";
+        description.appendText("MockSpan");
+        String sep = " with ";
         for (Matcher<String> operationName : operationNameMatchers) {
-            description.appendText(sep).appendText("operationName ");
-            operationName.describeTo(description);
+            operationName.describeTo(description.appendText(sep).appendText("operationName "));
             sep = " and ";
         }
-        for (Matcher<MockSpan.Reference> reference : referenceMatchers) {
-            description.appendText(sep).appendText("references ");
-            hasItem(reference).describeTo(description);
+        for (Matcher<Iterable<? super MockSpan.Reference>> reference : referenceMatchers) {
+            reference.describeTo(description.appendText(sep).appendText("references "));
             sep = " and ";
         }
     }
