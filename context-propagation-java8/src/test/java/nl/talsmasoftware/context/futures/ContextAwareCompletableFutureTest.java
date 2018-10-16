@@ -352,6 +352,20 @@ public class ContextAwareCompletableFutureTest {
     }
 
     @Test
+    public void testThenCombineAsync_executor() throws ExecutionException, InterruptedException {
+        try (Context<String> ctx = manager.initializeNewContext("Brett")) {
+            Future<Optional<String>> future = ContextAwareCompletableFuture
+                    .runAsync(() -> manager.initializeNewContext("Marvin"))
+                    .thenCombineAsync(
+                            ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Flock of Seagulls")),
+                            (voidA, voidB) -> DummyContextManager.currentValue(),
+                            contextUnawareThreadpool);
+            assertThat(future.get(), is(Optional.of("Marvin")));
+            assertThat(DummyContextManager.currentValue(), is(Optional.of("Brett")));
+        }
+    }
+
+    @Test
     public void testTimingIssue55() throws ExecutionException, InterruptedException, TimeoutException {
         try (Context<String> ctx = manager.initializeNewContext("Vincent Vega")) {
             final CountDownLatch latch1 = new CountDownLatch(1), latch2 = new CountDownLatch(1);
