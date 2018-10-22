@@ -98,10 +98,28 @@ public final class ContextManagers {
     }
 
     /**
+     * Clears all managed contexts from the current thread.
+     * <p>
+     * Contexts that are 'stacked' (i.e. restore the previous state upon close) should be
+     * closed in a way that includes all 'parent' contexts as well.
+     * <p>
+     * This operation is not intended to be used by general application code as it breaks any current context stack
+     * that surrounding code may depend upon.
+     * Appropriate use includes thread management, where threads can be reused by some pooling
+     * mechanism. For example, it is considered safe to clear the context when obtaining a 'fresh' thread from a
+     * thread pool (as no context expectations should exist at that point). It would be even better to clear the
+     * context just before returning a used thread to the pool as this will allow any unclosed contexts to be
+     * garbage collected and reduces the risk of memory leaks.
+     */
+    public static void clearManagedContexts() {
+        throw new UnsupportedOperationException("Clearing all managed contexts is currently under development.");
+    }
+
+    /**
      * Implementation of the <code>createContextSnapshot</code> functionality that can reactivate all values from the
      * snapshot in each corresponding {@link ContextManager}.
      * <p>
-     * This class is only really {@link Serializable} if all captured {@link Context#getValue() values} actually are
+     * This class is only really {@link Serializable} if all captured {@link Context#getValue() values} are
      * serializable as well. The {@link ContextManager} implementations do not need to be {@link Serializable}.
      */
     private static final class ContextSnapshotImpl implements ContextSnapshot, Serializable {
