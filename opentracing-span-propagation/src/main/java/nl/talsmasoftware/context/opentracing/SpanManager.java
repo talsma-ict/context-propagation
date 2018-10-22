@@ -35,24 +35,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class SpanManager implements ContextManager<Span> {
 
     /**
-     * Return the {@link Scope#span() span} from the {@link ScopeManager#active() currently active scope}
-     * as a {@link Context}.
+     * Return the {@link GlobalTracer#activeSpan() active span} as a {@link Context}.
      * <p>
-     * Please note: Closing this context will <strong>not</strong> close the corresponding scope
+     * Please note: Closing this context will <strong>not</strong> close the corresponding OpenTracing scope
      * as it is not ours to manage.
      *
      * @return The currently active span as a context.
      */
     @Override
     public Context<Span> getActiveContext() {
-        ScopeManager scopeManager = GlobalTracer.get().scopeManager();
-        return new ScopeContext(scopeManager.active(), true);
+        return new ManagedSpan(GlobalTracer.get().activeSpan(), null);
     }
 
     /**
-     * {@linkplain ScopeManager#activate(Span, boolean) activates} the given {@linkplain Span span}.
-     * <p>
-     * Activation is delegated to the {@link ScopeManager} of the {@link GlobalTracer}.
+     * {@linkplain GlobalTracer#activateSpan(Span) Activates} the given {@linkplain Span span}.
      * <p>
      * {@linkplain Context#close() Closing} the returned {@link Context} will also close the
      * corresponding {@link Scope} as it was also activated by us.<br>
@@ -71,22 +67,22 @@ public class SpanManager implements ContextManager<Span> {
      */
     @Override
     public Context<Span> initializeNewContext(final Span span) {
-        ScopeManager scopeManager = GlobalTracer.get().scopeManager();
-        return new ScopeContext(span == null ? null : scopeManager.activate(span, false), false);
+        return new ManagedSpan(span, span == null ? null : GlobalTracer.get().activateSpan(span));
     }
 
-    private static class ScopeContext implements Context<Span> {
+    private static class ManagedSpan implements Context<Span> {
+        private final AtomicBoolean closed = new AtomicBoolean(false);
+        private final Span span;
         private final Scope scope;
-        private final AtomicBoolean closed;
 
-        private ScopeContext(Scope scope, boolean alreadyClosed) {
+        private ManagedSpan(Span span, Scope scope) {
+            this.span = span;
             this.scope = scope;
-            this.closed = new AtomicBoolean(alreadyClosed);
         }
 
         @Override
         public Span getValue() {
-            return scope == null ? null : scope.span();
+            return closed.get() ? null : span;
         }
 
         @Override
