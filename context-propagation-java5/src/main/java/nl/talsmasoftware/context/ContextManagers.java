@@ -105,7 +105,7 @@ public final class ContextManagers {
      * Contexts that are 'stacked' (i.e. restore the previous state upon close) should be
      * closed in a way that includes all 'parent' contexts as well.
      * <p>
-     * This operation is not intended to be used by general application code as likely breaks any 'stacked'
+     * This operation is not intended to be used by general application code as it likely breaks any 'stacked'
      * active context that surrounding code may depend upon.
      * Appropriate use includes thread management, where threads are reused by some pooling
      * mechanism. For example, it is considered safe to clear the context when obtaining a 'fresh' thread from a
