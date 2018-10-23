@@ -262,4 +262,15 @@ public class ContextManagersTest {
             assertThat("Restore service file!", TMP_SERVICE_FILE.renameTo(SERVICE_FILE), is(true));
         }
     }
+
+    @Test
+    public void testClearManagedContexts_withoutContextManagers() {
+        assertThat("Move service file", SERVICE_FILE.renameTo(TMP_SERVICE_FILE), is(true));
+        try {
+            ContextManagers.clearActiveContexts();
+            // there should be no exception
+        } finally {
+            assertThat("Restore service file!", TMP_SERVICE_FILE.renameTo(SERVICE_FILE), is(true));
+        }
+    }
 }
