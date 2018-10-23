@@ -15,6 +15,8 @@
  */
 package nl.talsmasoftware.context;
 
+import nl.talsmasoftware.context.clearable.Clearable;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -98,21 +100,77 @@ public final class ContextManagers {
     }
 
     /**
-     * Clears all managed contexts from the current thread.
+     * Clears all active contexts from the current thread.
      * <p>
      * Contexts that are 'stacked' (i.e. restore the previous state upon close) should be
      * closed in a way that includes all 'parent' contexts as well.
      * <p>
-     * This operation is not intended to be used by general application code as it breaks any current context stack
-     * that surrounding code may depend upon.
-     * Appropriate use includes thread management, where threads can be reused by some pooling
+     * This operation is not intended to be used by general application code as likely breaks any 'stacked'
+     * active context that surrounding code may depend upon.
+     * Appropriate use includes thread management, where threads are reused by some pooling
      * mechanism. For example, it is considered safe to clear the context when obtaining a 'fresh' thread from a
-     * thread pool (as no context expectations should exist at that point). It would be even better to clear the
-     * context just before returning a used thread to the pool as this will allow any unclosed contexts to be
-     * garbage collected and reduces the risk of memory leaks.
+     * thread pool (as no context expectations should exist at that point).
+     * An even better strategy would be to clear the context right before returning a used thread to the pool
+     * as this will allow any unclosed contexts to be garbage collected. Besides preventing contextual issues,
+     * this reduces the risk of memory leaks by unbalanced context calls.
+     * <p>
+     * For context managers that are not {@linkplain Clearable} and contain an active {@linkplain Context}
+     * that is not {@code Clearable} either, this active context will be closed normally.
      */
-    public static void clearManagedContexts() {
-        throw new UnsupportedOperationException("Clearing all managed contexts is currently under development.");
+    public static void clearActiveContexts() {
+        final long start = System.nanoTime();
+        Long managerStart = null;
+        for (ContextManager manager : new PriorityServiceLoader<ContextManager>(ContextManager.class)) {
+            managerStart = System.nanoTime();
+            try {
+                if (manager instanceof Clearable) {
+                    ((Clearable) manager).clear();
+                    if (LOGGER.isLoggable(Level.FINEST)) {
+                        LOGGER.finest("Active context of " + manager + " was cleared.");
+                    }
+                    Timing.timed(System.nanoTime() - managerStart, manager.getClass(), "clear");
+                } else {
+                    Context activeContext = manager.getActiveContext();
+                    if (activeContext != null) {
+                        clearContext(manager, activeContext);
+                    } else if (LOGGER.isLoggable(Level.FINEST)) {
+                        LOGGER.finest("There is no active context for " + manager + " to be cleared.");
+                    }
+                }
+            } catch (RuntimeException rte) {
+                LOGGER.log(Level.WARNING, "Exception clearing active context from " + manager + ".", rte);
+                Timing.timed(System.nanoTime() - managerStart, manager.getClass(), "clear.exception");
+            }
+        }
+        if (managerStart == null) {
+            NoContextManagersFound noContextManagersFound = new NoContextManagersFound();
+            LOGGER.log(Level.INFO, noContextManagersFound.getMessage(), noContextManagersFound);
+        }
+        Timing.timed(System.nanoTime() - start, ContextManagers.class, "clearActiveContexts");
+    }
+
+    private static void clearContext(ContextManager manager, Context context) {
+        final long start = System.nanoTime();
+        final Class<? extends Context> contextType = context.getClass();
+        if (context instanceof Clearable) {
+            ((Clearable) context).clear();
+            if (LOGGER.isLoggable(Level.FINEST)) {
+                LOGGER.finest("Active context of " + manager + " was cleared.");
+            }
+        } else {
+            int maxAttempts = 255;
+            while (context != null && --maxAttempts > 0) {
+                context.close();
+                context = manager.getActiveContext();
+            }
+            if (context != null) {
+                Logger.getLogger(manager.getClass().getName()).warning(
+                        "Possible endless loop prevented clearing the active context for " + manager +
+                                ". Could it be that this manager returns a non-null context by default " +
+                                "and has not implemented the Clearable interface?");
+            }
+        }
+        Timing.timed(System.nanoTime() - start, contextType, "clear");
     }
 
     /**

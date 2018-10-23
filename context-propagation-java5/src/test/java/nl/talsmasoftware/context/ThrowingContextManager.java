@@ -23,7 +23,7 @@ import nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext;
  * @author Sjoerd Talsma
  */
 public class ThrowingContextManager implements ContextManager<String> {
-    static RuntimeException inConstructor = null, onInitialize = null, onGet = null;
+    public static RuntimeException inConstructor = null, onInitialize = null, onGet = null;
 
     public ThrowingContextManager() {
         if (inConstructor != null) try {

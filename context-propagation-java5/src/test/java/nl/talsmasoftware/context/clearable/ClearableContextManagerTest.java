@@ -15,8 +15,17 @@
  */
 package nl.talsmasoftware.context.clearable;
 
+import nl.talsmasoftware.context.ContextManager;
 import nl.talsmasoftware.context.ContextManagers;
+import nl.talsmasoftware.context.DummyContextManager;
+import nl.talsmasoftware.context.ThrowingContextManager;
 import org.junit.Test;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 
 /**
  * Tests for clearing context managers.
@@ -24,10 +33,69 @@ import org.junit.Test;
  * @author Sjoerd Talsma
  */
 public class ClearableContextManagerTest {
+    private static ContextManager<String> CLEARABLE = new ClearableDummyContextManager();
+    private static ContextManager<String> CONTEXT_CLEARABLE = new DummyManagerOfClearableContext();
+    private static ContextManager<String> AUTO_INITIALIZING = new AutoInitializingContextManager();
+    private static ContextManager<String> MANAGER_OF_ABSTRACTTLC = new DummyContextManager();
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testUnsupportedBehaviour() {
-        ContextManagers.clearManagedContexts();
+    @Test
+    public void testClearActiveContexts_byManager() {
+        assertThat(CLEARABLE, is(instanceOf(Clearable.class)));
+
+        CLEARABLE.initializeNewContext("First value");
+        CLEARABLE.initializeNewContext("Second value");
+        CLEARABLE.initializeNewContext("Third value");
+        assertThat(CLEARABLE.getActiveContext().getValue(), is("Third value"));
+
+        ContextManagers.clearActiveContexts();
+        assertThat(CLEARABLE.getActiveContext(), is(nullValue()));
     }
 
+    @Test
+    public void testClearActiveContexts_byClearableContext() {
+        assertThat(CONTEXT_CLEARABLE, is(not(instanceOf(Clearable.class))));
+
+        CONTEXT_CLEARABLE.initializeNewContext("First value");
+        CONTEXT_CLEARABLE.initializeNewContext("Second value");
+        CONTEXT_CLEARABLE.initializeNewContext("Third value");
+        assertThat(CONTEXT_CLEARABLE.getActiveContext(), is(instanceOf(Clearable.class)));
+        assertThat(CONTEXT_CLEARABLE.getActiveContext().getValue(), is("Third value"));
+
+        ContextManagers.clearActiveContexts();
+        assertThat(CONTEXT_CLEARABLE.getActiveContext(), is(nullValue()));
+    }
+
+    @Test
+    public void testClearActiveContexts_byAbstractTLC() {
+        assertThat(MANAGER_OF_ABSTRACTTLC, is(not(instanceOf(Clearable.class))));
+
+        MANAGER_OF_ABSTRACTTLC.initializeNewContext("First value");
+        MANAGER_OF_ABSTRACTTLC.initializeNewContext("Second value");
+        MANAGER_OF_ABSTRACTTLC.initializeNewContext("Third value");
+        assertThat(MANAGER_OF_ABSTRACTTLC.getActiveContext().getValue(), is("Third value"));
+
+        ContextManagers.clearActiveContexts();
+        assertThat(MANAGER_OF_ABSTRACTTLC.getActiveContext(), is(nullValue()));
+    }
+
+    @Test
+    public void testClearActiveContexts_autoReinitializeNewContext() {
+        assertThat(AUTO_INITIALIZING, is(not(instanceOf(Clearable.class))));
+
+        AUTO_INITIALIZING.initializeNewContext("First value");
+        AUTO_INITIALIZING.initializeNewContext("Second value");
+        AUTO_INITIALIZING.initializeNewContext("Third value");
+        assertThat(AUTO_INITIALIZING.getActiveContext().getValue(), is("Third value"));
+
+        ContextManagers.clearActiveContexts();
+        assertThat(AUTO_INITIALIZING.getActiveContext().getValue(), is(nullValue()));
+    }
+
+    @Test
+    public void testClearActiveContexts_exception() {
+        ThrowingContextManager.onGet = new IllegalStateException("Cannot get the current active context!");
+
+        ContextManagers.clearActiveContexts();
+        // Mustn't throw exceptions.
+    }
 }
