@@ -17,6 +17,7 @@ package nl.talsmasoftware.context.mdc;
 
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManager;
+import nl.talsmasoftware.context.clearable.Clearable;
 import org.slf4j.MDC;
 
 import java.util.Map;
@@ -78,7 +79,7 @@ public class MdcManager implements ContextManager<Map<String, String>> {
         return getClass().getSimpleName();
     }
 
-    private static final class MdcContext implements Context<Map<String, String>> {
+    private static final class MdcContext implements Context<Map<String, String>>, Clearable {
         private final Map<String, String> previous, value;
         private final AtomicBoolean closed;
 
@@ -99,9 +100,14 @@ public class MdcManager implements ContextManager<Map<String, String>> {
             }
         }
 
+        public void clear() {
+            close();
+        }
+
         @Override
         public String toString() {
             return closed.get() ? "MdcContext{closed}" : "MdcContext" + (value == null ? "{}" : value);
         }
+
     }
 }
