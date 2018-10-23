@@ -109,4 +109,13 @@ public class MdcManagerTest {
             ctx.close();
         }
     }
+
+    @Test
+    public void testClearActiveContexts() {
+        MdcManager mgr = new MdcManager();
+        MDC.put("dummy", "value");
+        // Test no-op for MdcManager
+        ContextManagers.clearActiveContexts();
+        assertThat(MDC.get("dummy"), is("value"));
+    }
 }
