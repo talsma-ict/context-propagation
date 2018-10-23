@@ -48,7 +48,7 @@ public class SpanManager implements ContextManager<Span> {
     }
 
     /**
-     * {@linkplain GlobalTracer#activateSpan(Span) Activates} the given {@linkplain Span span}.
+     * {@linkplain ScopeManager#activate(Span, boolean) activates} the given {@linkplain Span span}.
      * <p>
      * {@linkplain Context#close() Closing} the returned {@link Context} will also close the
      * corresponding {@link Scope} as it was also activated by us.<br>
@@ -67,7 +67,8 @@ public class SpanManager implements ContextManager<Span> {
      */
     @Override
     public Context<Span> initializeNewContext(final Span span) {
-        return new ManagedSpan(span, span == null ? null : GlobalTracer.get().activateSpan(span));
+        Scope scope = span == null ? null : GlobalTracer.get().scopeManager().activate(span, false);
+        return new ManagedSpan(span, scope);
     }
 
     private static class ManagedSpan implements Context<Span> {
