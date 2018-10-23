@@ -15,11 +15,16 @@
  */
 package nl.talsmasoftware.context.clearable;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
 import nl.talsmasoftware.context.ContextManager;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.DummyContextManager;
 import nl.talsmasoftware.context.ThrowingContextManager;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
@@ -37,6 +42,17 @@ public class ClearableContextManagerTest {
     private static ContextManager<String> CONTEXT_CLEARABLE = new DummyManagerOfClearableContext();
     private static ContextManager<String> AUTO_INITIALIZING = new AutoInitializingContextManager();
     private static ContextManager<String> MANAGER_OF_ABSTRACTTLC = new DummyContextManager();
+
+    @BeforeClass
+    public static void initLogback() {
+        if (!SLF4JBridgeHandler.isInstalled()) {
+            /* Initialize SLF4J bridge. This re-routes logging through java.util.logging to SLF4J. */
+            java.util.logging.LogManager.getLogManager().reset();
+            SLF4JBridgeHandler.install();
+            LoggerFactory.getILoggerFactory();
+        }
+        ((Logger) LoggerFactory.getLogger(ContextManagers.class)).setLevel(Level.ALL);
+    }
 
     @Test
     public void testClearActiveContexts_byManager() {
