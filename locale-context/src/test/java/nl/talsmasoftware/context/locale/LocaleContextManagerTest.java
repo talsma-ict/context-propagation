@@ -16,16 +16,28 @@
 package nl.talsmasoftware.context.locale;
 
 import nl.talsmasoftware.context.Context;
+import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Locale;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasToString;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 
 /**
  * @author Sjoerd Talsma
@@ -85,7 +97,23 @@ public class LocaleContextManagerTest {
     public void testClear() {
         Context<Locale> dutchCtx = manager.initializeNewContext(DUTCH);
         Context<Locale> englishCtx = manager.initializeNewContext(ENGLISH);
+
         LocaleContextManager.clear();
+        assertThat(manager.getActiveContext(), is(nullValue()));
+        assertThat(LocaleContextManager.getCurrentLocale(), is(nullValue()));
+
+        assertThat(((LocaleContext) englishCtx).isClosed(), is(true));
+        assertThat(((LocaleContext) dutchCtx).isClosed(), is(true));
+        assertThat(englishCtx.getValue(), equalTo(ENGLISH));
+        assertThat(dutchCtx.getValue(), equalTo(DUTCH));
+    }
+
+    @Test
+    public void testClearActiveContexts() {
+        Context<Locale> dutchCtx = manager.initializeNewContext(DUTCH);
+        Context<Locale> englishCtx = manager.initializeNewContext(ENGLISH);
+
+        ContextManagers.clearActiveContexts();
         assertThat(manager.getActiveContext(), is(nullValue()));
         assertThat(LocaleContextManager.getCurrentLocale(), is(nullValue()));
 
