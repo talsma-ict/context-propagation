@@ -15,6 +15,7 @@
  */
 package nl.talsmasoftware.context.locale;
 
+import nl.talsmasoftware.context.clearable.Clearable;
 import nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext;
 
 import java.util.Locale;
@@ -31,7 +32,7 @@ import java.util.Locale;
  *
  * @author Sjoerd Talsma
  */
-final class LocaleContext extends AbstractThreadLocalContext<Locale> {
+final class LocaleContext extends AbstractThreadLocalContext<Locale> implements Clearable {
     /**
      * Instantiates a new context with the specified value.
      * The new context will be made the active context for the current thread.
@@ -67,10 +68,17 @@ final class LocaleContext extends AbstractThreadLocalContext<Locale> {
     }
 
     /**
+     * Clears all remembered locales from this thread.
+     */
+    public void clear() {
+        clearAll();
+    }
+
+    /**
      * Unconditionally clears the entire {@link LocaleContext}.
      * This can be useful when returning threads to a threadpool.
      */
-    static void clear() {
+    static void clearAll() {
         try {
             for (LocaleContext current = current(); current != null; current = current()) current.close();
         } finally {
