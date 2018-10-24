@@ -33,7 +33,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasToString;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 /**
  * Unit test for the {@link SpringSecurityContextManager}.
@@ -57,7 +60,7 @@ public class SpringSecurityContextManagerTest {
 
     @Before
     @After
-    public void clearMDC() {
+    public void clearSecurityContext() {
         SecurityContextHolder.clearContext();
     }
 
@@ -111,7 +114,20 @@ public class SpringSecurityContextManagerTest {
 
     @Test
     public void testClosingCurrentAuthenticationContext() {
+        setAuthentication("Vincent Vega");
+        assertThat(new SpringSecurityContextManager().getActiveContext().getValue().getName(), is("Vincent Vega"));
 
+        new SpringSecurityContextManager().getActiveContext().close(); // Not ours to manage!
+        assertThat(new SpringSecurityContextManager().getActiveContext().getValue().getName(), is("Vincent Vega"));
+    }
+
+    @Test
+    public void testClearableImplementation() {
+        setAuthentication("Vincent Vega");
+        assertThat(new SpringSecurityContextManager().getActiveContext().getValue().getName(), is("Vincent Vega"));
+
+        ContextManagers.clearActiveContexts();
+        assertThat(new SpringSecurityContextManager().getActiveContext().getValue(), is(nullValue()));
     }
 
 }
