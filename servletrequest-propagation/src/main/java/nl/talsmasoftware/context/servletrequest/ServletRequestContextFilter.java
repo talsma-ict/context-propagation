@@ -49,7 +49,7 @@ public class ServletRequestContextFilter implements Filter {
             chain.doFilter(request, response);
 
         } finally {
-            ServletRequestContext.clear(); // Make sure there are no requests returned to the HTTP threadpool.
+            ServletRequestContextManager.clear(); // Make sure there are no requests returned to the HTTP threadpool.
         }
     }
 

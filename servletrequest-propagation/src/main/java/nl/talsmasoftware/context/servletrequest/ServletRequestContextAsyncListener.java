@@ -32,14 +32,14 @@ final class ServletRequestContextAsyncListener implements AsyncListener {
     }
 
     public void onComplete(AsyncEvent event) {
-        ServletRequestContext.clear();
+        ServletRequestContextManager.clear();
     }
 
     public void onTimeout(AsyncEvent event) {
-        ServletRequestContext.clear();
+        ServletRequestContextManager.clear();
     }
 
     public void onError(AsyncEvent event) {
-        ServletRequestContext.clear();
+        ServletRequestContextManager.clear();
     }
 }

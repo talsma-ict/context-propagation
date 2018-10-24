@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Talsma ICT
+ * Copyright 2016-2018 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,10 @@ public final class ServletRequestContextManager implements ContextManager<Servle
      * This is useful for boundary filters, whose Threads may be returned to some threadpool.
      */
     public static void clear() {
-        ServletRequestContext.clear();
+        Context<ServletRequest> current = ServletRequestContext.current();
+        if (current != null) {
+            current.close();
+        }
     }
 
     public String toString() {

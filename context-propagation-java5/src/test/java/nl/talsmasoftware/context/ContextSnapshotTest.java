@@ -21,6 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.startsWith;
 
 /**
  * @author Sjoerd Talsma
@@ -32,7 +33,7 @@ public class ContextSnapshotTest {
     public void testSnapshotToString() {
         Context<String> ctx = MGR.initializeNewContext("Dummy value");
         try {
-            assertThat(ContextManagers.createContextSnapshot(), hasToString("ContextSnapshot{size=1}"));
+            assertThat(ContextManagers.createContextSnapshot(), hasToString(startsWith("ContextSnapshot{size=")));
         } finally {
             ctx.close();
         }
@@ -51,7 +52,7 @@ public class ContextSnapshotTest {
                 try {
                     assertThat(MGR.getActiveContext().getValue(), is("Old value"));
                     assertThat(reactivation.getValue(), is(nullValue()));
-                    assertThat(reactivation, hasToString("ReactivatedContext{size=1}"));
+                    assertThat(reactivation, hasToString(startsWith("ReactivatedContext{size=")));
                 } finally {
                     reactivation.close();
                 }

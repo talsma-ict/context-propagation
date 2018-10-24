@@ -59,7 +59,7 @@ public final class LocaleContextManager implements ContextManager<Locale> {
      * This is useful for boundary filters, whose Threads may be returned to some threadpool.
      */
     public static void clear() {
-        LocaleContext.clear();
+        LocaleContext.clearAll();
     }
 
     /**
