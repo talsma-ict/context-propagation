@@ -16,7 +16,7 @@
 package nl.talsmasoftware.context.springsecurity;
 
 import nl.talsmasoftware.context.Context;
-import nl.talsmasoftware.context.ContextManager;
+import nl.talsmasoftware.context.clearable.ClearableContextManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @author Sjoerd Talsma
  */
-public class SpringSecurityContextManager implements ContextManager<Authentication> {
+public class SpringSecurityContextManager implements ClearableContextManager<Authentication> {
 
     /**
      * Creates a new Spring {@linkplain SecurityContext} and sets the {@linkplain Authentication value} in it.
@@ -59,8 +59,16 @@ public class SpringSecurityContextManager implements ContextManager<Authenticati
         return new AuthenticationContext(SecurityContextHolder.getContext(), null, true);
     }
 
+    /**
+     * Clears the Spring {@linkplain SecurityContext} by calling {@linkplain SecurityContextHolder#clearContext()}.
+     */
+    public void clear() {
+        SecurityContextHolder.clearContext();
+    }
+
     private static final class AuthenticationContext implements Context<Authentication> {
-        private final SecurityContext current, previous;
+        private volatile SecurityContext current;
+        private final SecurityContext previous;
         private final AtomicBoolean closed;
 
         private AuthenticationContext(SecurityContext current, SecurityContext previous, boolean alreadyClosed) {
