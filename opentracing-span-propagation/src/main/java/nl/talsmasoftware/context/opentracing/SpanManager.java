@@ -44,7 +44,8 @@ public class SpanManager implements ContextManager<Span> {
      */
     @Override
     public Context<Span> getActiveContext() {
-        return new ManagedSpan(GlobalTracer.get().activeSpan(), null);
+        Span activeSpan = GlobalTracer.get().activeSpan();
+        return activeSpan == null ? null : new ManagedSpan(activeSpan, null);
     }
 
     /**
