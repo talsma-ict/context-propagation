@@ -119,7 +119,8 @@ public class UnaryOperatorWithContextTest {
         final RuntimeException expectedException = new RuntimeException("Whoops!");
 
         try {
-            new UnaryOperatorWithContext<>(snapshot, throwing(expectedException)).apply("input");
+            new UnaryOperatorWithContext<String>(() -> snapshot, throwing(expectedException), null) {
+            }.apply("input");
             fail("Exception expected");
         } catch (RuntimeException rte) {
             assertThat(rte, is(sameInstance(expectedException)));

@@ -124,7 +124,8 @@ public class BinaryOperatorWithContextTest {
         final RuntimeException expectedException = new RuntimeException("Whoops!");
 
         try {
-            new BinaryOperatorWithContext<>(snapshot, throwing(expectedException)).apply("input1", "input2");
+            new BinaryOperatorWithContext<String>(() -> snapshot, throwing(expectedException), null) {
+            }.apply("input1", "input2");
             fail("Exception expected");
         } catch (RuntimeException rte) {
             assertThat(rte, is(sameInstance(expectedException)));
