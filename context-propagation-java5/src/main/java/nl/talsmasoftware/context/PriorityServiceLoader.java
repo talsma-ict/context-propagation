@@ -44,7 +44,7 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
     }
 
     @SuppressWarnings("unchecked")
-    public synchronized Iterator<SVC> iterator() {
+    public Iterator<SVC> iterator() {
         ArrayList<SVC> services = new ArrayList<SVC>();
         for (Iterator<SVC> iterator = loadServices(serviceType); iterator.hasNext(); ) {
             SVC service = iterator.next();
