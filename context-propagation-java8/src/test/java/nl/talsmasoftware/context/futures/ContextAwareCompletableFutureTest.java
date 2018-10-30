@@ -452,7 +452,7 @@ public class ContextAwareCompletableFutureTest {
                     .applyToEither(
                             ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Metric system")),
                             (voidValue) -> manager.getActiveContext().getValue())
-                    .get(), is("Royale with Cheese"));
+                    .get(), isOneOf("Quarterpounder with Cheese", "Royale with Cheese"));
         }
     }
 
@@ -464,7 +464,7 @@ public class ContextAwareCompletableFutureTest {
                     .applyToEitherAsync(
                             ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Metric system")),
                             (voidValue) -> manager.getActiveContext().getValue())
-                    .get(), is("Royale with Cheese"));
+                    .get(), isOneOf("Quarterpounder with Cheese", "Royale with Cheese"));
         }
     }
 
@@ -477,7 +477,7 @@ public class ContextAwareCompletableFutureTest {
                             ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Metric system")),
                             voidValue -> manager.getActiveContext().getValue(),
                             contextUnawareThreadpool)
-                    .get(), is("Royale with Cheese"));
+                    .get(), isOneOf("Quarterpounder with Cheese", "Royale with Cheese"));
         }
     }
 
