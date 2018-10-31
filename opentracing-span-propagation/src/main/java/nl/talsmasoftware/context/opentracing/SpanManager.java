@@ -16,7 +16,6 @@
 package nl.talsmasoftware.context.opentracing;
 
 import io.opentracing.Scope;
-import io.opentracing.ScopeManager;
 import io.opentracing.Span;
 import io.opentracing.util.GlobalTracer;
 import nl.talsmasoftware.context.Context;
@@ -27,8 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Manager for <a href="http://opentracing.io/">OpenTracing</a> {@linkplain Span}.
  * <p>
- * Management of {@linkplain Span spans} is delegated to the {@linkplain ScopeManager}
- * from the {@linkplain GlobalTracer}.
+ * Management of {@linkplain Span spans} is delegated to the {@linkplain GlobalTracer}.
  *
  * @author Sjoerd Talsma
  */
