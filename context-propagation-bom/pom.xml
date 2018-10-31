@@ -192,4 +192,14 @@
         </dependencies>
     </dependencyManagement>
 
+    <dependencies>
+        <dependency> <!-- Declare UML doclet version as provided dependency in the BOM to get dependabot notifications -->
+            <groupId>nl.talsmasoftware</groupId>
+            <artifactId>umldoclet</artifactId>
+            <version>${umldoclet.version}</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+
 </project>
