@@ -57,8 +57,9 @@ public final class ServletRequestContextManager implements ContextManager<Servle
         }
     }
 
+    @Override
     public String toString() {
-        return "ServletRequestContextManager";
+        return getClass().getSimpleName();
     }
 
 }
