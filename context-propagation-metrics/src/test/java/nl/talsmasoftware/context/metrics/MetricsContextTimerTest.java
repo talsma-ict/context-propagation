@@ -25,12 +25,14 @@ import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -122,5 +124,15 @@ public class MetricsContextTimerTest {
 
         assertThat(registry2.getTimers().containsKey(name), is(true));
         assertThat(registry2.timer(name).getCount(), is(3L));
+    }
+
+    @Test
+    public void testMetricsContextTimerToString() {
+        MetricsContextTimer metricsContextTimer = new MetricsContextTimer();
+        assertThat(metricsContextTimer, hasToString("MetricsContextTimer{timers=[]}"));
+
+        metricsContextTimer.update(getClass(), "method", 1, TimeUnit.SECONDS);
+        assertThat(metricsContextTimer,
+                hasToString("MetricsContextTimer{timers=[" + getClass().getName() + ".method]}"));
     }
 }

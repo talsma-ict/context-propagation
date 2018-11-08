@@ -117,4 +117,8 @@ public class MetricsContextTimer implements ContextTimer {
         return singleton(SharedMetricRegistries.getOrCreate(registryName));
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{timers=" + TIMERS.keySet() + "}";
+    }
 }
