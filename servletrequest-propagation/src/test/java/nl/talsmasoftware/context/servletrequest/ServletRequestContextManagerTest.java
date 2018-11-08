@@ -133,4 +133,16 @@ public class ServletRequestContextManagerTest {
         assertThat("Current closed context", manager.getActiveContext(), is(nullValue()));
     }
 
+    @Test
+    public void testServletRequestContextToString() {
+        ServletRequestContextManager manager = new ServletRequestContextManager();
+        assertThat(manager.getActiveContext(), nullValue());
+
+        ServletRequest request = mock(ServletRequest.class);
+        Context<ServletRequest> servletRequestContext = manager.initializeNewContext(request);
+        assertThat(servletRequestContext, hasToString("ServletRequestContext{value=" + request + "}"));
+
+        servletRequestContext.close();
+        assertThat(servletRequestContext, hasToString("ServletRequestContext{closed}"));
+    }
 }

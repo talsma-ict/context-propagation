@@ -48,4 +48,9 @@ final class ServletRequestContext implements Context<ServletRequest> {
         CONTEXT.set(null);
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + (servletRequest == null ? "{closed}" : "{value=" + servletRequest + "}");
+    }
+
 }
