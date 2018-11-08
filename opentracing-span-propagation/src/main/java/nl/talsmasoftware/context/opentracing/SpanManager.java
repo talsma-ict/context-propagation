@@ -43,11 +43,11 @@ public class SpanManager implements ContextManager<Span> {
     @Override
     public Context<Span> getActiveContext() {
         Span activeSpan = GlobalTracer.get().activeSpan();
-        return activeSpan == null ? null : new ManagedSpan(activeSpan, null);
+        return activeSpan == null ? null : new SpanContext(activeSpan, null);
     }
 
     /**
-     * {@linkplain ScopeManager#activate(Span, boolean) activates} the given {@linkplain Span span}.
+     * {@linkplain ScopeManager#activate(Span, boolean) Activates} the given {@linkplain Span span}.
      * <p>
      * {@linkplain Context#close() Closing} the returned {@link Context} will also close the
      * corresponding {@link Scope} as it was also activated by us.<br>
@@ -67,15 +67,23 @@ public class SpanManager implements ContextManager<Span> {
     @Override
     public Context<Span> initializeNewContext(final Span span) {
         Scope scope = span == null ? null : GlobalTracer.get().scopeManager().activate(span, false);
-        return new ManagedSpan(span, scope);
+        return new SpanContext(span, scope);
     }
 
-    private static class ManagedSpan implements Context<Span> {
+    /**
+     * @return Just the simple class name as this class carries no internal state.
+     */
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
+    }
+
+    private static class SpanContext implements Context<Span> {
         private final AtomicBoolean closed = new AtomicBoolean(false);
         private final Span span;
         private final Scope scope;
 
-        private ManagedSpan(Span span, Scope scope) {
+        private SpanContext(Span span, Scope scope) {
             this.span = span;
             this.scope = scope;
         }
@@ -90,6 +98,11 @@ public class SpanManager implements ContextManager<Span> {
             if (closed.compareAndSet(false, true) && scope != null) {
                 scope.close();
             }
+        }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + (closed.get() ? "{closed}" : "{" + span + '}');
         }
     }
 

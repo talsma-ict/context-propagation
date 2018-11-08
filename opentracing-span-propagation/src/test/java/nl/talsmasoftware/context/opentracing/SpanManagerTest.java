@@ -44,6 +44,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
@@ -226,5 +227,27 @@ public class SpanManagerTest {
         ContextManagers.clearActiveContexts();
         // TODO Test after this is merged: https://github.com/opentracing/opentracing-java/pull/313
 //        assertThat(new SpanManager().getActiveContext(), is(nullValue()));
+    }
+
+    @Test
+    public void testSpanManagerToString() {
+        assertThat(new SpanManager(), hasToString("SpanManager"));
+    }
+
+    @Test
+    public void testSpanContextToString() {
+        Span span = mockTracer.buildSpan("test-span").start();
+        assertThat(new SpanManager().getActiveContext(), nullValue());
+
+        Scope scope = mockTracer.scopeManager().activate(span, false);
+        Context<Span> spanContext = new SpanManager().getActiveContext();
+        assertThat(spanContext, hasToString("SpanContext{" + span + "}"));
+
+        scope.close();
+        assertThat(new SpanManager().getActiveContext(), nullValue());
+        assertThat(spanContext, hasToString("SpanContext{" + span + "}"));
+
+        spanContext.close();
+        assertThat(spanContext, hasToString("SpanContext{closed}"));
     }
 }
