@@ -41,6 +41,12 @@ public final class ContextManagers {
     private static final Logger LOGGER = Logger.getLogger(ContextManagers.class.getName());
 
     /**
+     * The service loader that loads (and possibly caches) {@linkplain ContextManager} instances in prioritized order.
+     */
+    private static final PriorityServiceLoader<ContextManager> CONTEXT_MANAGERS =
+            new PriorityServiceLoader<ContextManager>(ContextManager.class);
+
+    /**
      * Private constructor to avoid instantiation of this class.
      */
     private ContextManagers() {
@@ -72,7 +78,7 @@ public final class ContextManagers {
         final long start = System.nanoTime();
         final Map<String, Object> snapshot = new LinkedHashMap<String, Object>();
         Long managerStart = null;
-        for (ContextManager manager : new PriorityServiceLoader<ContextManager>(ContextManager.class)) {
+        for (ContextManager manager : CONTEXT_MANAGERS) {
             managerStart = System.nanoTime();
             try {
                 final Context activeContext = manager.getActiveContext();
@@ -86,6 +92,7 @@ public final class ContextManagers {
                     LOGGER.log(Level.FINEST, "There is no active context for " + manager + " in this snapshot.");
                 }
             } catch (RuntimeException rte) {
+                CONTEXT_MANAGERS.clearCache();
                 LOGGER.log(Level.WARNING, "Exception obtaining active context from " + manager + " for snapshot.", rte);
                 Timing.timed(System.nanoTime() - managerStart, manager.getClass(), "getActiveContext.exception");
             }
@@ -120,7 +127,7 @@ public final class ContextManagers {
     public static void clearActiveContexts() {
         final long start = System.nanoTime();
         Long managerStart = null;
-        for (ContextManager manager : new PriorityServiceLoader<ContextManager>(ContextManager.class)) {
+        for (ContextManager manager : CONTEXT_MANAGERS) {
             managerStart = System.nanoTime();
             try {
                 if (manager instanceof Clearable) {
@@ -192,20 +199,31 @@ public final class ContextManagers {
             final Set<String> remainingContextManagers = new LinkedHashSet<String>(snapshot.keySet());
             final List<Context<?>> reactivatedContexts = new ArrayList<Context<?>>(snapshot.size());
             try {
-                for (ContextManager contextManager : new PriorityServiceLoader<ContextManager>(ContextManager.class)) {
+                for (ContextManager contextManager : CONTEXT_MANAGERS) {
                     String contextManagerName = contextManager.getClass().getName();
                     if (remainingContextManagers.remove(contextManagerName)) {
                         reactivatedContexts.add(reactivate(contextManager, snapshot.get(contextManagerName)));
                     }
                 }
-                for (String contextManagerName : remainingContextManagers) {
-                    LOGGER.log(Level.WARNING, "Context manager \"{0}\" not found in service loader! " +
-                            "Cannot reactivate: {1}", new Object[]{contextManagerName, snapshot.get(contextManagerName)});
+
+                if (!remainingContextManagers.isEmpty()) { // Should not happen, print warnings!
+                    CONTEXT_MANAGERS.clearCache();
+                    for (ContextManager contextManager : CONTEXT_MANAGERS) {
+                        String contextManagerName = contextManager.getClass().getName();
+                        if (remainingContextManagers.remove(contextManagerName)) {
+                            reactivatedContexts.add(reactivate(contextManager, snapshot.get(contextManagerName)));
+                        }
+                    }
+                    for (String contextManagerName : remainingContextManagers) {
+                        LOGGER.log(Level.WARNING, "Context manager \"{0}\" not found in service loader! " +
+                                "Cannot reactivate: {1}", new Object[]{contextManagerName, snapshot.get(contextManagerName)});
+                    }
                 }
                 ReactivatedContext reactivatedContext = new ReactivatedContext(reactivatedContexts);
                 Timing.timed(System.nanoTime() - start, ContextSnapshot.class, "reactivate");
                 return reactivatedContext;
             } catch (RuntimeException reactivationException) {
+                CONTEXT_MANAGERS.clearCache();
                 for (Context alreadyReactivated : reactivatedContexts) {
                     if (alreadyReactivated != null) try {
                         if (LOGGER.isLoggable(Level.FINEST)) {

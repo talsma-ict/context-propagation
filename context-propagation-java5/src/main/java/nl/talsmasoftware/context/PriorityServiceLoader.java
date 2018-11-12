@@ -18,11 +18,12 @@ package nl.talsmasoftware.context;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static java.util.Collections.emptySet;
-import static java.util.Collections.singleton;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.Collections.sort;
 import static java.util.Collections.unmodifiableList;
 
@@ -35,29 +36,57 @@ import static java.util.Collections.unmodifiableList;
  */
 final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
     private static final Logger LOGGER = Logger.getLogger(PriorityServiceLoader.class.getName());
+    private static final String SYSTEMPROPERTY_CACHING = "talsmasoftware.context.caching";
 
     private final Class<SVC> serviceType;
+    private final boolean cachingDisabled;
+    private volatile List<SVC> cache;
 
     PriorityServiceLoader(Class<SVC> serviceType) {
         if (serviceType == null) throw new NullPointerException("Service type is <null>.");
         this.serviceType = serviceType;
+        final String cachingProperty = System.getProperty(SYSTEMPROPERTY_CACHING,
+                System.getenv(SYSTEMPROPERTY_CACHING.replace('.', '_').toUpperCase()));
+        this.cachingDisabled = "0".equals(cachingProperty) || "false".equalsIgnoreCase(cachingProperty);
     }
 
     @SuppressWarnings("unchecked")
     public Iterator<SVC> iterator() {
-        ArrayList<SVC> services = new ArrayList<SVC>();
-        for (Iterator<SVC> iterator = loadServices(serviceType); iterator.hasNext(); ) {
-            SVC service = iterator.next();
-            if (service != null) services.add(service);
+        List<SVC> services = cache;
+        if (services == null) {
+            services = new ArrayList<SVC>();
+            for (Iterator<SVC> iterator = loadServices(serviceType); iterator.hasNext(); ) {
+                SVC service = iterator.next();
+                if (service != null) services.add(service);
+            }
+            services = sortAndMakeUnmodifiable(services);
+            if (canCache(services)) cache = services;
         }
+        return services.iterator();
+    }
 
-        if (services.isEmpty()) {
-            return (Iterator<SVC>) emptySet().iterator();
-        } else if (services.size() == 1) {
-            return singleton(services.get(0)).iterator();
+    /**
+     * Removes the cache to the next call to {@linkplain #iterator()} will attempt to load the objects again.
+     */
+    void clearCache() {
+        cache = null;
+    }
+
+    private boolean canCache(List<?> services) {
+        if (cachingDisabled || services.isEmpty()) return false;
+        // If we could detect that we run on a JEE application server somehow, we should return false in that case too.
+        final ClassLoader ourClassLoader = ContextManagers.class.getClassLoader();
+        for (Object service : services) {
+            if (ourClassLoader != service.getClass().getClassLoader()) return false;
         }
-        if (PriorityComparator.PRIORITY_AVAILABLE) sort(services, PriorityComparator.INSTANCE);
-        return unmodifiableList(services).iterator();
+        return true;
+    }
+
+    private static <T> List<T> sortAndMakeUnmodifiable(List<T> services) {
+        if (services.isEmpty()) return emptyList();
+        else if (services.size() == 1) return singletonList(services.get(0));
+        else if (PriorityComparator.PRIORITY_AVAILABLE) sort(services, PriorityComparator.INSTANCE);
+        return unmodifiableList(services);
     }
 
     @SuppressWarnings("Since15")
