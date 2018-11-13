@@ -77,7 +77,7 @@ public class DummyContextManager implements ContextManager<String> {
 
 ## Caching
 
-By default the `ContextManagers` class caches the found context manager instances per
+By default the `ContextManagers` class caches the context manager instances it finds per
 _context classloader_. Since the cache is per classloader, this should work satisfactory
 for applications with simple classloader hierarchies (e.g. _spring boot_, _dropwizard_ etc) 
 and complex hierarchies (JEE and the like).
