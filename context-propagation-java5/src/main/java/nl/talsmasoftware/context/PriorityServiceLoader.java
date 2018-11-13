@@ -88,7 +88,7 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
             return java.util.ServiceLoader.load(serviceType, classLoader).iterator();
         } catch (LinkageError le) {
             LOGGER.log(Level.FINEST, "No ServiceLoader available, probably running on Java 1.5.", le);
-            return javax.imageio.spi.ServiceRegistry.lookupProviders(serviceType, classLoader);
+            return javax.imageio.spi.ServiceRegistry.lookupProviders(serviceType);
         } catch (RuntimeException loadingException) {
             LOGGER.log(Level.WARNING, "Unexpected error loading services of " + serviceType, loadingException);
             return Collections.<SVC>emptySet().iterator();
