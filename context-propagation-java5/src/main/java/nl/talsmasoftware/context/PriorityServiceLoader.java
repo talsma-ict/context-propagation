@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,7 +42,7 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
 
     private final Class<SVC> serviceType;
     private final boolean cachingDisabled;
-    private volatile List<SVC> cache;
+    private final Map<ClassLoader, List<SVC>> cache = new WeakHashMap<ClassLoader, List<SVC>>();
 
     PriorityServiceLoader(Class<SVC> serviceType) {
         if (serviceType == null) throw new NullPointerException("Service type is <null>.");
@@ -52,15 +54,16 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
 
     @SuppressWarnings("unchecked")
     public Iterator<SVC> iterator() {
-        List<SVC> services = cache;
+        final ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        List<SVC> services = cache.get(cl);
         if (services == null) {
             services = new ArrayList<SVC>();
-            for (Iterator<SVC> iterator = loadServices(serviceType); iterator.hasNext(); ) {
+            for (Iterator<SVC> iterator = loadServices(serviceType, cl); iterator.hasNext(); ) {
                 SVC service = iterator.next();
                 if (service != null) services.add(service);
             }
             services = sortAndMakeUnmodifiable(services);
-            if (canCache(services)) cache = services;
+            if (!cachingDisabled) cache.put(cl, services);
         }
         return services.iterator();
     }
@@ -69,17 +72,7 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
      * Removes the cache to the next call to {@linkplain #iterator()} will attempt to load the objects again.
      */
     void clearCache() {
-        cache = null;
-    }
-
-    private boolean canCache(List<?> services) {
-        if (cachingDisabled || services.isEmpty()) return false;
-        // If we could detect that we run on a JEE application server somehow, we should return false in that case too.
-        final ClassLoader ourClassLoader = ContextManagers.class.getClassLoader();
-        for (Object service : services) {
-            if (ourClassLoader != service.getClass().getClassLoader()) return false;
-        }
-        return true;
+        cache.clear();
     }
 
     private static <T> List<T> sortAndMakeUnmodifiable(List<T> services) {
@@ -90,12 +83,12 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
     }
 
     @SuppressWarnings("Since15")
-    private static <SVC> Iterator<SVC> loadServices(Class<SVC> serviceType) {
+    private static <SVC> Iterator<SVC> loadServices(Class<SVC> serviceType, ClassLoader classLoader) {
         try {
-            return java.util.ServiceLoader.load(serviceType).iterator();
+            return java.util.ServiceLoader.load(serviceType, classLoader).iterator();
         } catch (LinkageError le) {
             LOGGER.log(Level.FINEST, "No ServiceLoader available, probably running on Java 1.5.", le);
-            return javax.imageio.spi.ServiceRegistry.lookupProviders(serviceType);
+            return javax.imageio.spi.ServiceRegistry.lookupProviders(serviceType, classLoader);
         } catch (RuntimeException loadingException) {
             LOGGER.log(Level.WARNING, "Unexpected error loading services of " + serviceType, loadingException);
             return Collections.<SVC>emptySet().iterator();
