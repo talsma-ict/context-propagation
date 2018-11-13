@@ -41,15 +41,11 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
     private static final String SYSTEMPROPERTY_CACHING = "talsmasoftware.context.caching";
 
     private final Class<SVC> serviceType;
-    private final boolean cachingDisabled;
     private final Map<ClassLoader, List<SVC>> cache = new WeakHashMap<ClassLoader, List<SVC>>();
 
     PriorityServiceLoader(Class<SVC> serviceType) {
         if (serviceType == null) throw new NullPointerException("Service type is <null>.");
         this.serviceType = serviceType;
-        final String cachingProperty = System.getProperty(SYSTEMPROPERTY_CACHING,
-                System.getenv(SYSTEMPROPERTY_CACHING.replace('.', '_').toUpperCase()));
-        this.cachingDisabled = "0".equals(cachingProperty) || "false".equalsIgnoreCase(cachingProperty);
     }
 
     @SuppressWarnings("unchecked")
@@ -63,9 +59,15 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
                 if (service != null) services.add(service);
             }
             services = sortAndMakeUnmodifiable(services);
-            if (!cachingDisabled) cache.put(contextClassLoader, services);
+            if (!isCachingDisabled()) cache.put(contextClassLoader, services);
         }
         return services.iterator();
+    }
+
+    private static boolean isCachingDisabled() {
+        final String cachingProperty = System.getProperty(SYSTEMPROPERTY_CACHING,
+                System.getenv(SYSTEMPROPERTY_CACHING.replace('.', '_').toUpperCase()));
+        return "0".equals(cachingProperty) || "false".equalsIgnoreCase(cachingProperty);
     }
 
     /**
