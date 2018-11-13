@@ -53,12 +53,7 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
         final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         List<SVC> services = cache.get(contextClassLoader);
         if (services == null) {
-            services = new ArrayList<SVC>();
-            for (Iterator<SVC> iterator = loadServices(serviceType, contextClassLoader); iterator.hasNext(); ) {
-                SVC service = iterator.next();
-                if (service != null) services.add(service);
-            }
-            services = sortAndMakeUnmodifiable(services);
+            services = findServices(contextClassLoader);
             if (!isCachingDisabled()) cache.put(contextClassLoader, services);
         }
         return services.iterator();
@@ -77,10 +72,20 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
         cache.clear();
     }
 
-    private static <T> List<T> sortAndMakeUnmodifiable(List<T> services) {
+    private List<SVC> findServices(ClassLoader classLoader) {
+        ArrayList<SVC> found = new ArrayList<SVC>();
+        for (Iterator<SVC> iterator = loadServices(serviceType, classLoader); iterator.hasNext(); ) {
+            SVC service = iterator.next();
+            if (service != null) found.add(service);
+        }
+        return sortAndMakeUnmodifiable(found);
+    }
+
+    private static <T> List<T> sortAndMakeUnmodifiable(ArrayList<T> services) {
         if (services.isEmpty()) return emptyList();
         else if (services.size() == 1) return singletonList(services.get(0));
         else if (PriorityComparator.PRIORITY_AVAILABLE) sort(services, PriorityComparator.INSTANCE);
+        services.trimToSize();
         return unmodifiableList(services);
     }
 
