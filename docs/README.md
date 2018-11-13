@@ -84,9 +84,9 @@ and complex hierarchies (JEE and the like).
 
 ### Disable caching
 
-If however, you wish to disable caching of the context manager instances, you can:
-- Set the java system property `talsmasoftware.context.caching`, or
-- The environment variable `TALSMASOFTWARE_CONTEXT_CACHNG`
+If however, you wish to disable caching of the context manager instances, you can set either:
+- the java system property `talsmasoftware.context.caching`, or
+- the environment variable `TALSMASOFTWARE_CONTEXT_CACHNG`
 
 to the values `false` or `0`.
 

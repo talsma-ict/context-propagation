@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
@@ -39,6 +40,8 @@ import static java.util.Collections.unmodifiableList;
 final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
     private static final Logger LOGGER = Logger.getLogger(PriorityServiceLoader.class.getName());
     private static final String SYSTEMPROPERTY_CACHING = "talsmasoftware.context.caching";
+    private static final String ENVIRONMENT_CACHING_VALUE = System.getenv(
+            SYSTEMPROPERTY_CACHING.replace('.', '_').toUpperCase(Locale.ENGLISH));
 
     private final Class<SVC> serviceType;
     private final Map<ClassLoader, List<SVC>> cache = new WeakHashMap<ClassLoader, List<SVC>>();
@@ -60,8 +63,7 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
     }
 
     private static boolean isCachingDisabled() {
-        final String cachingProperty = System.getProperty(SYSTEMPROPERTY_CACHING,
-                System.getenv(SYSTEMPROPERTY_CACHING.replace('.', '_').toUpperCase()));
+        final String cachingProperty = System.getProperty(SYSTEMPROPERTY_CACHING, ENVIRONMENT_CACHING_VALUE);
         return "0".equals(cachingProperty) || "false".equalsIgnoreCase(cachingProperty);
     }
 
