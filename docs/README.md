@@ -75,6 +75,21 @@ public class DummyContextManager implements ContextManager<String> {
 }
 ```
 
+## Caching
+
+By default the `ContextManagers` class caches the found context manager instances per
+_context classloader_. Since the cache is per classloader, this should work satisfactory
+for applications with simple classloader hierarchies (e.g. _spring boot_, _dropwizard_ etc) 
+and complex hierarchies (JEE and the like).
+
+### Disable caching
+
+If however, you wish to disable caching of the context manager instances, you can:
+- Set the java system property `talsmasoftware.context.caching`, or
+- The environment variable `TALSMASOFTWARE_CONTEXT_CACHNG`
+
+to the values `false` or `0`.
+
 ## Performance metrics
 
 No library is 'free' with regards to performance.
