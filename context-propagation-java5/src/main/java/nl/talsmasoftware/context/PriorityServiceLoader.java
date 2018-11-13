@@ -18,11 +18,15 @@ package nl.talsmasoftware.context;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static java.util.Collections.emptySet;
-import static java.util.Collections.singleton;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.Collections.sort;
 import static java.util.Collections.unmodifiableList;
 
@@ -35,8 +39,12 @@ import static java.util.Collections.unmodifiableList;
  */
 final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
     private static final Logger LOGGER = Logger.getLogger(PriorityServiceLoader.class.getName());
+    private static final String SYSTEMPROPERTY_CACHING = "talsmasoftware.context.caching";
+    private static final String ENVIRONMENT_CACHING_VALUE = System.getenv(
+            SYSTEMPROPERTY_CACHING.replace('.', '_').toUpperCase(Locale.ENGLISH));
 
     private final Class<SVC> serviceType;
+    private final Map<ClassLoader, List<SVC>> cache = new WeakHashMap<ClassLoader, List<SVC>>();
 
     PriorityServiceLoader(Class<SVC> serviceType) {
         if (serviceType == null) throw new NullPointerException("Service type is <null>.");
@@ -45,25 +53,48 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
 
     @SuppressWarnings("unchecked")
     public Iterator<SVC> iterator() {
-        ArrayList<SVC> services = new ArrayList<SVC>();
-        for (Iterator<SVC> iterator = loadServices(serviceType); iterator.hasNext(); ) {
-            SVC service = iterator.next();
-            if (service != null) services.add(service);
+        final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        List<SVC> services = cache.get(contextClassLoader);
+        if (services == null) {
+            services = findServices(contextClassLoader);
+            if (!isCachingDisabled()) cache.put(contextClassLoader, services);
         }
+        return services.iterator();
+    }
 
-        if (services.isEmpty()) {
-            return (Iterator<SVC>) emptySet().iterator();
-        } else if (services.size() == 1) {
-            return singleton(services.get(0)).iterator();
+    private static boolean isCachingDisabled() {
+        final String cachingProperty = System.getProperty(SYSTEMPROPERTY_CACHING, ENVIRONMENT_CACHING_VALUE);
+        return "0".equals(cachingProperty) || "false".equalsIgnoreCase(cachingProperty);
+    }
+
+    /**
+     * Removes the cache so the next call to {@linkplain #iterator()} will attempt to load the objects again.
+     */
+    void clearCache() {
+        cache.clear();
+    }
+
+    private List<SVC> findServices(ClassLoader classLoader) {
+        ArrayList<SVC> found = new ArrayList<SVC>();
+        for (Iterator<SVC> iterator = loadServices(serviceType, classLoader); iterator.hasNext(); ) {
+            SVC service = iterator.next();
+            if (service != null) found.add(service);
         }
-        if (PriorityComparator.PRIORITY_AVAILABLE) sort(services, PriorityComparator.INSTANCE);
-        return unmodifiableList(services).iterator();
+        return sortAndMakeUnmodifiable(found);
+    }
+
+    private static <T> List<T> sortAndMakeUnmodifiable(ArrayList<T> services) {
+        if (services.isEmpty()) return emptyList();
+        else if (services.size() == 1) return singletonList(services.get(0));
+        else if (PriorityComparator.PRIORITY_AVAILABLE) sort(services, PriorityComparator.INSTANCE);
+        services.trimToSize();
+        return unmodifiableList(services);
     }
 
     @SuppressWarnings("Since15")
-    private static <SVC> Iterator<SVC> loadServices(Class<SVC> serviceType) {
+    private static <SVC> Iterator<SVC> loadServices(Class<SVC> serviceType, ClassLoader classLoader) {
         try {
-            return java.util.ServiceLoader.load(serviceType).iterator();
+            return java.util.ServiceLoader.load(serviceType, classLoader).iterator();
         } catch (LinkageError le) {
             LOGGER.log(Level.FINEST, "No ServiceLoader available, probably running on Java 1.5.", le);
             return javax.imageio.spi.ServiceRegistry.lookupProviders(serviceType);
