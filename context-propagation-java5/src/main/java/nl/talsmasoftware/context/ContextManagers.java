@@ -208,12 +208,6 @@ public final class ContextManagers {
 
                 if (!remainingContextManagers.isEmpty()) { // Should not happen, print warnings!
                     CONTEXT_MANAGERS.clearCache();
-                    for (ContextManager contextManager : CONTEXT_MANAGERS) {
-                        String contextManagerName = contextManager.getClass().getName();
-                        if (remainingContextManagers.remove(contextManagerName)) {
-                            reactivatedContexts.add(reactivate(contextManager, snapshot.get(contextManagerName)));
-                        }
-                    }
                     for (String contextManagerName : remainingContextManagers) {
                         LOGGER.log(Level.WARNING, "Context manager \"{0}\" not found in service loader! " +
                                 "Cannot reactivate: {1}", new Object[]{contextManagerName, snapshot.get(contextManagerName)});
