@@ -54,22 +54,22 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
 
     @SuppressWarnings("unchecked")
     public Iterator<SVC> iterator() {
-        final ClassLoader cl = Thread.currentThread().getContextClassLoader();
-        List<SVC> services = cache.get(cl);
+        final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        List<SVC> services = cache.get(contextClassLoader);
         if (services == null) {
             services = new ArrayList<SVC>();
-            for (Iterator<SVC> iterator = loadServices(serviceType, cl); iterator.hasNext(); ) {
+            for (Iterator<SVC> iterator = loadServices(serviceType, contextClassLoader); iterator.hasNext(); ) {
                 SVC service = iterator.next();
                 if (service != null) services.add(service);
             }
             services = sortAndMakeUnmodifiable(services);
-            if (!cachingDisabled) cache.put(cl, services);
+            if (!cachingDisabled) cache.put(contextClassLoader, services);
         }
         return services.iterator();
     }
 
     /**
-     * Removes the cache to the next call to {@linkplain #iterator()} will attempt to load the objects again.
+     * Removes the cache so the next call to {@linkplain #iterator()} will attempt to load the objects again.
      */
     void clearCache() {
         cache.clear();
