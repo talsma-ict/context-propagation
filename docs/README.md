@@ -43,7 +43,7 @@ private static final ExecutorService THREADPOOL =
 
 It will automatically create a snapshot and reactivate it in the 
 background thread when started.  
-The ThreadLocal values from the calling thread will therefore automatically 
+The ThreadLocal values from the calling thread will therefore 
 be available in the background thread as well.
 
 ## Supported contexts
