@@ -1,8 +1,12 @@
 [![Released Version][maven-img]][maven] 
 
-# Context propagation Java 8 module
+# Context propagation (Java 8)
 
-Extends CompletableFuture to propagate context in a multi threaded environment.
+Provides wrappers around the Java 8 functional interfaces that can be called with a captured context snapshot.
+This may help if you cannot use a `ContextAwareExecutorService` for some reason.
+
+Also provides a `ContextAwareCompletableFuture` that propagates the context snapshot
+accros comletion stages where this makes sense.
 
 ## How to use this module
 
