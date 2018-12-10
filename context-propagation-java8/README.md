@@ -40,10 +40,9 @@ that will apply a captured context snapshot to the wrapped function:
 ## ContextAwareCompletableFuture
 
 The [`CompletableFuture`][CompletableFuture] class that was introduced in Java 8 that:
-> _A {@link Future} that may be explicitly completed (setting its
-> value and status), and may be used as a [`CompletionStage`][CompletionStage],
-> supporting dependent functions and actions that trigger upon its
-> completion._
+> _A `Future` that may be explicitly completed (setting its value and status),
+> and may be used as a [`CompletionStage`][CompletionStage],
+> supporting dependent functions and actions that trigger upon its completion._
 
 The _context-aware_ completable future will propagate the context into most completion stage
 operations, in particular:
