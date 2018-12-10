@@ -2,7 +2,7 @@
 
 # Context propagation (Java 8)
 
-- Wrappers around the standard Java 8 functional interfaces to used with a context snapshot.
+- Wrappers around the standard Java 8 functional interfaces to use with a context snapshot.
 - A `ContextAwareCompletableFuture` implementation.
 
 ## How to get this module
@@ -15,6 +15,14 @@ Add the following dependency to your classpath:
     <version>[see maven-central version above]</version>
 </dependency>
 ```
+
+## Applicability
+
+By far the easiest use of the context propagation libary is using the
+[`ContextAwareExecutorService`][ContextAwareExecutorService].
+
+If that is not a possibility, the following java functional interface wrappers
+in this java 8 module may be of help to you:
 
 ## Functional interfaces
 
@@ -66,6 +74,18 @@ to the next.
 
 The [`ContextAwareCompletableFutureTest`](https://github.com/talsma-ict/context-propagation/blob/develop/context-propagation-java8/src/test/java/nl/talsmasoftware/context/futures/ContextAwareCompletableFutureTest.java) class contains
 test cases that demonstrate the behaviour of this complex class.
+
+### Caveats
+
+Please be aware that:
+1. in almost all circumstances it's preferrable 
+   to choose `ContextAwareExecutorService` over `ContextAwareCompletableFuture`.
+2. neither the standard `CompletableFuture` (nor this context-aware version)
+   will attempt to cancel any ongoing task when cancelled.
+3. when traversing completion stages, context snapshots are taken
+   which may or may not be needed for the next completion stage 
+   [Issue 85](https://github.com/talsma-ict/context-propagation/issues/85).
+   Depending on the operation, this could be costly.
 
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation-java8.svg
   [maven]: http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22nl.talsmasoftware.context%22%20AND%20a%3A%22context-propagation-java8%22
