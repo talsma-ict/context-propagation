@@ -2,7 +2,7 @@
 
 # Context propagation (Java 8)
 
-- Wrappers around the standard Java 8 functional to be used with context snapshots.
+- Wrappers around the standard Java 8 functional interfaces to used with a context snapshot.
 - A `ContextAwareCompletableFuture` implementation.
 
 ## How to get this module
@@ -18,7 +18,12 @@ Add the following dependency to your classpath:
 
 ## Functional interfaces
 
-The following functional interfaces have a `..WithContext` wrapper:
+The easiest use of the context propagation libary is using the
+[`ContextAwareExecutorService`](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/executors/ContextAwareExecutorService.html).
+
+If that is not a possibility, you can use the following java functional interface wrappers
+that will apply a captured context snapshot to the wrapped function:
+
 - [`BiConsumer`](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation-java8/latest/nl/talsmasoftware/context/functions/BiConsumerWithContext.html)
 - [`BiFunction`](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation-java8/latest/nl/talsmasoftware/context/functions/BiFunctionWithContext.html)
 - [`BinaryOperator`](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation-java8/latest/nl/talsmasoftware/context/functions/BinaryOperatorWithContext.html)
