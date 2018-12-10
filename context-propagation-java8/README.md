@@ -84,7 +84,7 @@ Please be aware that:
    will attempt to cancel any ongoing task when cancelled.
 3. when traversing completion stages, context snapshots are taken
    which may or may not be needed for the next completion stage 
-   [Issue 85](https://github.com/talsma-ict/context-propagation/issues/85).
+   (ref [Issue 85](https://github.com/talsma-ict/context-propagation/issues/85)).
    Depending on the operation, this could be costly.
 
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation-java8.svg
