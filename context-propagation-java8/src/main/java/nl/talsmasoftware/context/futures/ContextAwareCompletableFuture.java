@@ -301,8 +301,8 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
     @SuppressWarnings("unchecked")
     public <U> ContextAwareCompletableFuture<Void> thenAcceptBothAsync(
             CompletionStage<? extends U> other, BiConsumer<? super T, ? super U> action, Executor executor) {
-        final ContextSnapshot snapshot = snapshotHolder.get();
-        return wrap(super.thenAcceptBothAsync(other, new BiConsumerWithContext(snapshot, action), executor), snapshotHolder);
+        return wrap(super.thenAcceptBothAsync(other, new BiConsumerWithContext(snapshotHolder, action, null) {
+        }, executor), snapshotHolder);
     }
 
     @Override
