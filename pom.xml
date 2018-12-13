@@ -174,6 +174,16 @@
                                 <artifactId>umldoclet</artifactId>
                                 <version>${umldoclet.version}</version>
                             </docletArtifact>
+                            <links> <!-- These seem to fail due to a SSL handshake somehow.. -->
+                                <link>https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest</link>
+                                <link>https://javadoc.io/page/nl.talsmasoftware.context/context-propagation-java8/latest</link>
+                                <link>https://javadoc.io/page/nl.talsmasoftware.context/context-propagation-metrics/latest</link>
+                                <link>https://javadoc.io/page/nl.talsmasoftware.context/locale-context/latest</link>
+                                <link>https://javadoc.io/page/nl.talsmasoftware.context/mdc-propagation/latest</link>
+                                <link>https://javadoc.io/page/nl.talsmasoftware.context/opentracing-span-propagation/latest</link>
+                                <link>https://javadoc.io/page/nl.talsmasoftware.context/servletrequest-propagation/latest</link>
+                                <link>https://javadoc.io/page/nl.talsmasoftware.context/spring-security-context/latest</link>
+                            </links>
                         </configuration>
                     </execution>
                 </executions>
