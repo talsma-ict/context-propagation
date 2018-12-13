@@ -203,48 +203,48 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <U> CompletableFuture<U> thenApply(Function<? super T, ? extends U> fn) {
+    public <U> ContextAwareCompletableFuture<U> thenApply(Function<? super T, ? extends U> fn) {
         return wrap(super.thenApply(new FunctionWithContext(snapshotHolder, fn, snapshotHolder) {
         }), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <U> CompletableFuture<U> thenApplyAsync(Function<? super T, ? extends U> fn) {
+    public <U> ContextAwareCompletableFuture<U> thenApplyAsync(Function<? super T, ? extends U> fn) {
         return wrap(super.thenApplyAsync(new FunctionWithContext(snapshotHolder, fn, snapshotHolder) {
         }), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <U> CompletableFuture<U> thenApplyAsync(Function<? super T, ? extends U> fn, Executor executor) {
+    public <U> ContextAwareCompletableFuture<U> thenApplyAsync(Function<? super T, ? extends U> fn, Executor executor) {
         return wrap(super.thenApplyAsync(new FunctionWithContext(snapshotHolder, fn, snapshotHolder) {
         }, executor), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public CompletableFuture<Void> thenAccept(Consumer<? super T> action) {
+    public ContextAwareCompletableFuture<Void> thenAccept(Consumer<? super T> action) {
         return wrap(super.thenAccept(new ConsumerWithContext(snapshotHolder, action, snapshotHolder) {
         }), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public CompletableFuture<Void> thenAcceptAsync(Consumer<? super T> action) {
+    public ContextAwareCompletableFuture<Void> thenAcceptAsync(Consumer<? super T> action) {
         return wrap(super.thenAcceptAsync(new ConsumerWithContext(snapshotHolder, action, snapshotHolder) {
         }), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public CompletableFuture<Void> thenAcceptAsync(Consumer<? super T> action, Executor executor) {
+    public ContextAwareCompletableFuture<Void> thenAcceptAsync(Consumer<? super T> action, Executor executor) {
         return wrap(super.thenAcceptAsync(new ConsumerWithContext(snapshotHolder, action, snapshotHolder) {
         }, executor), snapshotHolder);
     }
 
     @Override
-    public CompletableFuture<Void> thenRun(Runnable action) {
+    public ContextAwareCompletableFuture<Void> thenRun(Runnable action) {
         return wrap(super.thenRun(new RunnableWithContext(snapshotHolder, action, snapshotHolder) {
         }), snapshotHolder);
     }
@@ -256,28 +256,28 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
     }
 
     @Override
-    public CompletableFuture<Void> thenRunAsync(Runnable action, Executor executor) {
+    public ContextAwareCompletableFuture<Void> thenRunAsync(Runnable action, Executor executor) {
         return wrap(super.thenRunAsync(new RunnableWithContext(snapshotHolder, action, snapshotHolder) {
         }, executor), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <U, V> CompletableFuture<V> thenCombine(CompletionStage<? extends U> other, BiFunction<? super T, ? super U, ? extends V> fn) {
+    public <U, V> ContextAwareCompletableFuture<V> thenCombine(CompletionStage<? extends U> other, BiFunction<? super T, ? super U, ? extends V> fn) {
         return wrap(super.thenCombine(other, new BiFunctionWithContext(snapshotHolder, fn, null) {
         }), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <U, V> CompletableFuture<V> thenCombineAsync(CompletionStage<? extends U> other, BiFunction<? super T, ? super U, ? extends V> fn) {
+    public <U, V> ContextAwareCompletableFuture<V> thenCombineAsync(CompletionStage<? extends U> other, BiFunction<? super T, ? super U, ? extends V> fn) {
         return wrap(super.thenCombineAsync(other, new BiFunctionWithContext(snapshotHolder, fn, null) {
         }), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <U, V> CompletableFuture<V> thenCombineAsync(
+    public <U, V> ContextAwareCompletableFuture<V> thenCombineAsync(
             CompletionStage<? extends U> other, BiFunction<? super T, ? super U, ? extends V> fn, Executor executor) {
         return wrap(super.thenCombineAsync(other, new BiFunctionWithContext(snapshotHolder, fn, null) {
         }, executor), snapshotHolder);
@@ -285,166 +285,166 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <U> CompletableFuture<Void> thenAcceptBoth(CompletionStage<? extends U> other, BiConsumer<? super T, ? super U> action) {
+    public <U> ContextAwareCompletableFuture<Void> thenAcceptBoth(CompletionStage<? extends U> other, BiConsumer<? super T, ? super U> action) {
         return wrap(super.thenAcceptBoth(other, new BiConsumerWithContext(snapshotHolder, action, null) {
         }), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <U> CompletableFuture<Void> thenAcceptBothAsync(CompletionStage<? extends U> other, BiConsumer<? super T, ? super U> action) {
-        return super.thenAcceptBothAsync(other, new BiConsumerWithContext(snapshotHolder, action, null) {
-        });
+    public <U> ContextAwareCompletableFuture<Void> thenAcceptBothAsync(CompletionStage<? extends U> other, BiConsumer<? super T, ? super U> action) {
+        return wrap(super.thenAcceptBothAsync(other, new BiConsumerWithContext(snapshotHolder, action, null) {
+        }), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <U> CompletableFuture<Void> thenAcceptBothAsync(
+    public <U> ContextAwareCompletableFuture<Void> thenAcceptBothAsync(
             CompletionStage<? extends U> other, BiConsumer<? super T, ? super U> action, Executor executor) {
-        return wrap(super.thenAcceptBothAsync(other, new BiConsumerWithContext(snapshotHolder, action, null) {
-        }, executor), snapshotHolder);
+        final ContextSnapshot snapshot = snapshotHolder.get();
+        return wrap(super.thenAcceptBothAsync(other, new BiConsumerWithContext(snapshot, action), executor), snapshotHolder);
     }
 
     @Override
-    public CompletableFuture<Void> runAfterBoth(CompletionStage<?> other, Runnable action) {
+    public ContextAwareCompletableFuture<Void> runAfterBoth(CompletionStage<?> other, Runnable action) {
         return wrap(super.runAfterBoth(other, new RunnableWithContext(snapshotHolder, action, snapshotHolder) {
         }), snapshotHolder);
     }
 
     @Override
-    public CompletableFuture<Void> runAfterBothAsync(CompletionStage<?> other, Runnable action) {
+    public ContextAwareCompletableFuture<Void> runAfterBothAsync(CompletionStage<?> other, Runnable action) {
         return wrap(super.runAfterBothAsync(other, new RunnableWithContext(snapshotHolder, action, snapshotHolder) {
         }), snapshotHolder);
     }
 
     @Override
-    public CompletableFuture<Void> runAfterBothAsync(CompletionStage<?> other, Runnable action, Executor executor) {
+    public ContextAwareCompletableFuture<Void> runAfterBothAsync(CompletionStage<?> other, Runnable action, Executor executor) {
         return wrap(super.runAfterBothAsync(other, new RunnableWithContext(snapshotHolder, action, snapshotHolder) {
         }, executor), snapshotHolder);
     }
 
     @Override
-    public <U> CompletableFuture<U> applyToEither(CompletionStage<? extends T> other, Function<? super T, U> fn) {
+    public <U> ContextAwareCompletableFuture<U> applyToEither(CompletionStage<? extends T> other, Function<? super T, U> fn) {
         final ContextSnapshot snapshot = snapshotHolder.get();
         return wrap(super.applyToEither(other, new FunctionWithContext<>(snapshot, fn)), snapshotHolder);
     }
 
     @Override
-    public <U> CompletableFuture<U> applyToEitherAsync(CompletionStage<? extends T> other, Function<? super T, U> fn) {
+    public <U> ContextAwareCompletableFuture<U> applyToEitherAsync(CompletionStage<? extends T> other, Function<? super T, U> fn) {
         final ContextSnapshot snapshot = snapshotHolder.get();
         return wrap(super.applyToEitherAsync(other, new FunctionWithContext<>(snapshot, fn)), snapshotHolder);
     }
 
     @Override
-    public <U> CompletableFuture<U> applyToEitherAsync(
+    public <U> ContextAwareCompletableFuture<U> applyToEitherAsync(
             CompletionStage<? extends T> other, Function<? super T, U> fn, Executor executor) {
         final ContextSnapshot snapshot = snapshotHolder.get();
         return wrap(super.applyToEitherAsync(other, new FunctionWithContext<>(snapshot, fn), executor), snapshotHolder);
     }
 
     @Override
-    public CompletableFuture<Void> acceptEither(CompletionStage<? extends T> other, Consumer<? super T> action) {
+    public ContextAwareCompletableFuture<Void> acceptEither(CompletionStage<? extends T> other, Consumer<? super T> action) {
         final ContextSnapshot snapshot = snapshotHolder.get();
         return wrap(super.acceptEither(other, new ConsumerWithContext<>(snapshot, action)), snapshotHolder);
     }
 
     @Override
-    public CompletableFuture<Void> acceptEitherAsync(CompletionStage<? extends T> other, Consumer<? super T> action) {
+    public ContextAwareCompletableFuture<Void> acceptEitherAsync(CompletionStage<? extends T> other, Consumer<? super T> action) {
         final ContextSnapshot snapshot = snapshotHolder.get();
         return wrap(super.acceptEitherAsync(other, new ConsumerWithContext<>(snapshot, action)), snapshotHolder);
     }
 
     @Override
-    public CompletableFuture<Void> acceptEitherAsync(
+    public ContextAwareCompletableFuture<Void> acceptEitherAsync(
             CompletionStage<? extends T> other, Consumer<? super T> action, Executor executor) {
         final ContextSnapshot snapshot = snapshotHolder.get();
         return wrap(super.acceptEitherAsync(other, new ConsumerWithContext<>(snapshot, action), executor), snapshotHolder);
     }
 
     @Override
-    public CompletableFuture<Void> runAfterEither(CompletionStage<?> other, Runnable action) {
+    public ContextAwareCompletableFuture<Void> runAfterEither(CompletionStage<?> other, Runnable action) {
         final ContextSnapshot snapshot = snapshotHolder.get();
         return wrap(super.runAfterEither(other, new RunnableWithContext(snapshot, action)), snapshotHolder);
     }
 
     @Override
-    public CompletableFuture<Void> runAfterEitherAsync(CompletionStage<?> other, Runnable action) {
+    public ContextAwareCompletableFuture<Void> runAfterEitherAsync(CompletionStage<?> other, Runnable action) {
         final ContextSnapshot snapshot = snapshotHolder.get();
         return wrap(super.runAfterEitherAsync(other, new RunnableWithContext(snapshot, action)), snapshotHolder);
     }
 
     @Override
-    public CompletableFuture<Void> runAfterEitherAsync(CompletionStage<?> other, Runnable action, Executor executor) {
+    public ContextAwareCompletableFuture<Void> runAfterEitherAsync(CompletionStage<?> other, Runnable action, Executor executor) {
         final ContextSnapshot snapshot = snapshotHolder.get();
         return wrap(super.runAfterEitherAsync(other, new RunnableWithContext(snapshot, action), executor), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <U> CompletableFuture<U> thenCompose(Function<? super T, ? extends CompletionStage<U>> fn) {
+    public <U> ContextAwareCompletableFuture<U> thenCompose(Function<? super T, ? extends CompletionStage<U>> fn) {
         return wrap(super.thenCompose(new FunctionWithContext(snapshotHolder, fn, snapshotHolder) {
         }), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <U> CompletableFuture<U> thenComposeAsync(Function<? super T, ? extends CompletionStage<U>> fn) {
+    public <U> ContextAwareCompletableFuture<U> thenComposeAsync(Function<? super T, ? extends CompletionStage<U>> fn) {
         return wrap(super.thenComposeAsync(new FunctionWithContext(snapshotHolder, fn, snapshotHolder) {
         }), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <U> CompletableFuture<U> thenComposeAsync(Function<? super T, ? extends CompletionStage<U>> fn, Executor executor) {
+    public <U> ContextAwareCompletableFuture<U> thenComposeAsync(Function<? super T, ? extends CompletionStage<U>> fn, Executor executor) {
         return wrap(super.thenComposeAsync(new FunctionWithContext(snapshotHolder, fn, snapshotHolder) {
         }, executor), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public CompletableFuture<T> whenComplete(BiConsumer<? super T, ? super Throwable> action) {
+    public ContextAwareCompletableFuture<T> whenComplete(BiConsumer<? super T, ? super Throwable> action) {
         return wrap(super.whenComplete(new BiConsumerWithContext(snapshotHolder, action, snapshotHolder) {
         }), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public CompletableFuture<T> whenCompleteAsync(BiConsumer<? super T, ? super Throwable> action) {
+    public ContextAwareCompletableFuture<T> whenCompleteAsync(BiConsumer<? super T, ? super Throwable> action) {
         return wrap(super.whenCompleteAsync(new BiConsumerWithContext(snapshotHolder, action, snapshotHolder) {
         }), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public CompletableFuture<T> whenCompleteAsync(BiConsumer<? super T, ? super Throwable> action, Executor executor) {
+    public ContextAwareCompletableFuture<T> whenCompleteAsync(BiConsumer<? super T, ? super Throwable> action, Executor executor) {
         return wrap(super.whenCompleteAsync(new BiConsumerWithContext(snapshotHolder, action, snapshotHolder) {
         }, executor), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <U> CompletableFuture<U> handle(BiFunction<? super T, Throwable, ? extends U> fn) {
+    public <U> ContextAwareCompletableFuture<U> handle(BiFunction<? super T, Throwable, ? extends U> fn) {
         return wrap(super.handle(new BiFunctionWithContext(snapshotHolder, fn, snapshotHolder) {
         }), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <U> CompletableFuture<U> handleAsync(BiFunction<? super T, Throwable, ? extends U> fn) {
+    public <U> ContextAwareCompletableFuture<U> handleAsync(BiFunction<? super T, Throwable, ? extends U> fn) {
         return wrap(super.handleAsync(new BiFunctionWithContext(snapshotHolder, fn, snapshotHolder) {
         }), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <U> CompletableFuture<U> handleAsync(BiFunction<? super T, Throwable, ? extends U> fn, Executor executor) {
+    public <U> ContextAwareCompletableFuture<U> handleAsync(BiFunction<? super T, Throwable, ? extends U> fn, Executor executor) {
         return wrap(super.handleAsync(new BiFunctionWithContext(snapshotHolder, fn, snapshotHolder) {
         }, executor), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public CompletableFuture<T> exceptionally(Function<Throwable, ? extends T> fn) {
+    public ContextAwareCompletableFuture<T> exceptionally(Function<Throwable, ? extends T> fn) {
         return wrap(super.exceptionally(new FunctionWithContext(snapshotHolder, fn, snapshotHolder) {
         }), snapshotHolder);
     }
