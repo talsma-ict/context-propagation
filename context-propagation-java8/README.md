@@ -47,7 +47,7 @@ that will apply a captured context snapshot to the wrapped function:
 
 ## ContextAwareCompletableFuture
 
-The [`CompletableFuture`][CompletableFuture] class was introduced in Java 8 that:
+The [`CompletableFuture`][CompletableFuture] class was introduced in Java 8:
 > _A `Future` that may be explicitly completed (setting its value and status),
 > and may be used as a [`CompletionStage`][CompletionStage],
 > supporting dependent functions and actions that trigger upon its completion._
@@ -80,8 +80,8 @@ test cases that demonstrate the behaviour of this complex class.
 Please be aware that:
 1. in almost all circumstances it's preferrable 
    to choose `ContextAwareExecutorService` over `ContextAwareCompletableFuture`.
-2. neither the standard `CompletableFuture` (nor this context-aware version)
-   will attempt to cancel any ongoing task when cancelled.
+2. neither the standard `CompletableFuture` nor this context-aware version
+   will attempt to cancel or interrupt an ongoing process when cancelled.
 3. when traversing completion stages, context snapshots are taken
    which may or may not be needed for the next completion stage 
    (ref [Issue 85](https://github.com/talsma-ict/context-propagation/issues/85)).
