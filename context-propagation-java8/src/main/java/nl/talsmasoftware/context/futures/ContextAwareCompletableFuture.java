@@ -244,20 +244,38 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
     @Override
     @SuppressWarnings("unchecked")
     public ContextAwareCompletableFuture<Void> thenAccept(Consumer<? super T> action) {
-        return wrap(super.thenAccept(new ConsumerWithContext(snapshotHolder, action, snapshotHolder) {
+        return wrap(super.thenAccept(new ConsumerWithContext(snapshotHolder, action, null) {
         }), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public ContextAwareCompletableFuture<Void> thenAcceptAsync(Consumer<? super T> action) {
-        return wrap(super.thenAcceptAsync(new ConsumerWithContext(snapshotHolder, action, snapshotHolder) {
+        return wrap(super.thenAcceptAsync(new ConsumerWithContext(snapshotHolder, action, null) {
         }), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public ContextAwareCompletableFuture<Void> thenAcceptAsync(Consumer<? super T> action, Executor executor) {
+        return wrap(super.thenAcceptAsync(new ConsumerWithContext(snapshotHolder, action, null) {
+        }, executor), snapshotHolder);
+    }
+
+    @SuppressWarnings("unchecked")
+    public ContextAwareCompletableFuture<Void> thenAcceptAndTakeNewSnapshot(Consumer<? super T> action) {
+        return wrap(super.thenAccept(new ConsumerWithContext(snapshotHolder, action, snapshotHolder) {
+        }), snapshotHolder);
+    }
+
+    @SuppressWarnings("unchecked")
+    public ContextAwareCompletableFuture<Void> thenAcceptAsyncAndTakeNewSnapshot(Consumer<? super T> action) {
+        return wrap(super.thenAcceptAsync(new ConsumerWithContext(snapshotHolder, action, snapshotHolder) {
+        }), snapshotHolder);
+    }
+
+    @SuppressWarnings("unchecked")
+    public ContextAwareCompletableFuture<Void> thenAcceptAsyncAndTakeNewSnapshot(Consumer<? super T> action, Executor executor) {
         return wrap(super.thenAcceptAsync(new ConsumerWithContext(snapshotHolder, action, snapshotHolder) {
         }, executor), snapshotHolder);
     }
