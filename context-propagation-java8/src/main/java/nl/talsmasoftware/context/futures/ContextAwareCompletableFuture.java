@@ -204,20 +204,39 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
     @Override
     @SuppressWarnings("unchecked")
     public <U> ContextAwareCompletableFuture<U> thenApply(Function<? super T, ? extends U> fn) {
-        return wrap(super.thenApply(new FunctionWithContext(snapshotHolder, fn, snapshotHolder) {
+        return wrap(super.thenApply(new FunctionWithContext(snapshotHolder, fn, null) {
         }), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <U> ContextAwareCompletableFuture<U> thenApplyAsync(Function<? super T, ? extends U> fn) {
-        return wrap(super.thenApplyAsync(new FunctionWithContext(snapshotHolder, fn, snapshotHolder) {
+        return wrap(super.thenApplyAsync(new FunctionWithContext(snapshotHolder, fn, null) {
         }), snapshotHolder);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <U> ContextAwareCompletableFuture<U> thenApplyAsync(Function<? super T, ? extends U> fn, Executor executor) {
+        return wrap(super.thenApplyAsync(new FunctionWithContext(snapshotHolder, fn, null) {
+        }, executor), snapshotHolder);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <U> ContextAwareCompletableFuture<U> thenApplyAndTakeNewSnapshot(Function<? super T, ? extends U> fn) {
+        return wrap(super.thenApply(new FunctionWithContext(snapshotHolder, fn, snapshotHolder) {
+        }), snapshotHolder);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <U> ContextAwareCompletableFuture<U> thenApplyAsyncAndTakeNewSnapshot(Function<? super T, ? extends U> fn) {
+        return wrap(super.thenApplyAsync(new FunctionWithContext(snapshotHolder, fn, snapshotHolder) {
+        }), snapshotHolder);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <U> ContextAwareCompletableFuture<U> thenApplyAsyncAndTakeNewSnapshot(Function<? super T, ? extends U> fn,
+                                                                                 Executor executor) {
         return wrap(super.thenApplyAsync(new FunctionWithContext(snapshotHolder, fn, snapshotHolder) {
         }, executor), snapshotHolder);
     }
