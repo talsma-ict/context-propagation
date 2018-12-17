@@ -172,6 +172,60 @@ public class ContextAwareCompletableFutureTest {
     }
 
     @Test
+    public void testThenApplyAndTakeNewSnapshot() throws ExecutionException, InterruptedException {
+        try (Context<String> ctx = manager.initializeNewContext("Jimmie")) {
+            ContextAwareCompletableFuture
+                    .runAsync(() -> manager.initializeNewContext("Bonnie"))
+                    .thenApplyAndTakeNewSnapshot(voidvalue -> {
+                        String val = DummyContextManager.currentValue().get();
+                        manager.initializeNewContext("-" + val);
+                        return val;
+                    })
+                    .thenAccept(s -> {
+                        assertThat(s, is("Bonnie"));
+                        assertThat(DummyContextManager.currentValue(), is(Optional.of("-Bonnie")));
+                    })
+                    .get();
+        }
+    }
+
+    @Test
+    public void testThenApplyAsyncAndTakeNewSnapshot() throws ExecutionException, InterruptedException {
+        try (Context<String> ctx = manager.initializeNewContext("Butch")) {
+            ContextAwareCompletableFuture
+                    .runAsync(() -> manager.initializeNewContext("Esmerelda Villalobos"))
+                    .thenApplyAsyncAndTakeNewSnapshot(voidvalue -> {
+                        String val = DummyContextManager.currentValue().get();
+                        manager.initializeNewContext("-" + val);
+                        return val;
+                    })
+                    .thenAccept(s -> {
+                        assertThat(s, is("Esmerelda Villalobos"));
+                        assertThat(DummyContextManager.currentValue(), is(Optional.of("-Esmerelda Villalobos")));
+                    })
+                    .get();
+        }
+    }
+
+    @Test
+    public void testThenApplyAsyncAndTakeNewSnapshot_executor() throws ExecutionException, InterruptedException {
+        try (Context<String> ctx = manager.initializeNewContext("Maynard")) {
+            ContextAwareCompletableFuture
+                    .runAsync(() -> manager.initializeNewContext("Zed"))
+                    .thenApplyAsyncAndTakeNewSnapshot(voidvalue -> {
+                        String val = DummyContextManager.currentValue().get();
+                        manager.initializeNewContext("-" + val);
+                        return val;
+                    }, contextUnawareThreadpool)
+                    .thenAccept(s -> {
+                        assertThat(s, is("Zed"));
+                        assertThat(DummyContextManager.currentValue(), is(Optional.of("-Zed")));
+                    })
+                    .get();
+        }
+    }
+
+    @Test
     public void testThenAccept() throws ExecutionException, InterruptedException {
         try (Context<String> ctx = manager.initializeNewContext("The Gimp")) {
             Future<Void> future = ContextAwareCompletableFuture
@@ -621,13 +675,13 @@ public class ContextAwareCompletableFutureTest {
                         waitFor(latch1);
                         return result;
                     });
-            CompletableFuture<String> future2 = future1.thenApplyAsync(value -> {
+            ContextAwareCompletableFuture<String> future2 = future1.thenApplyAsyncAndTakeNewSnapshot(value -> {
                 String result = value + ", " + DummyContextManager.currentValue().orElse("NO VALUE");
                 DummyContextManager.setCurrentValue("Marcellus Wallace");
                 waitFor(latch2);
                 return result;
             });
-            Future<String> future3 = future2.thenApplyAsync(value ->
+            Future<String> future3 = future2.thenApplyAsyncAndTakeNewSnapshot(value ->
                     value + ", " + DummyContextManager.currentValue().orElse("NO VALUE"));
 
             assertThat("Future creation may not block on previous stages", future1.isDone(), is(false));
