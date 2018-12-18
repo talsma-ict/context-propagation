@@ -377,6 +377,27 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
         }, executor), snapshotHolder);
     }
 
+    @SuppressWarnings("unchecked")
+    public <U> ContextAwareCompletableFuture<Void> thenAcceptBothAndTakeNewSnapshot(
+            CompletionStage<? extends U> other, BiConsumer<? super T, ? super U> action) {
+        return wrap(super.thenAcceptBoth(other, new BiConsumerWithContext(snapshotHolder, action, snapshotHolder) {
+        }), snapshotHolder);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <U> ContextAwareCompletableFuture<Void> thenAcceptBothAsyncAndTakeNewSnapshot(
+            CompletionStage<? extends U> other, BiConsumer<? super T, ? super U> action) {
+        return wrap(super.thenAcceptBothAsync(other, new BiConsumerWithContext(snapshotHolder, action, snapshotHolder) {
+        }), snapshotHolder);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <U> ContextAwareCompletableFuture<Void> thenAcceptBothAsyncAndTakeNewSnapshot(
+            CompletionStage<? extends U> other, BiConsumer<? super T, ? super U> action, Executor executor) {
+        return wrap(super.thenAcceptBothAsync(other, new BiConsumerWithContext(snapshotHolder, action, snapshotHolder) {
+        }, executor), snapshotHolder);
+    }
+
     @Override
     public ContextAwareCompletableFuture<Void> runAfterBoth(CompletionStage<?> other, Runnable action) {
         return wrap(super.runAfterBoth(other, new RunnableWithContext(snapshotHolder, action, snapshotHolder) {
