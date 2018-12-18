@@ -400,18 +400,34 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
 
     @Override
     public ContextAwareCompletableFuture<Void> runAfterBoth(CompletionStage<?> other, Runnable action) {
-        return wrap(super.runAfterBoth(other, new RunnableWithContext(snapshotHolder, action, snapshotHolder) {
+        return wrap(super.runAfterBoth(other, new RunnableWithContext(snapshotHolder, action, null) {
         }), snapshotHolder);
     }
 
     @Override
     public ContextAwareCompletableFuture<Void> runAfterBothAsync(CompletionStage<?> other, Runnable action) {
-        return wrap(super.runAfterBothAsync(other, new RunnableWithContext(snapshotHolder, action, snapshotHolder) {
+        return wrap(super.runAfterBothAsync(other, new RunnableWithContext(snapshotHolder, action, null) {
         }), snapshotHolder);
     }
 
     @Override
     public ContextAwareCompletableFuture<Void> runAfterBothAsync(CompletionStage<?> other, Runnable action, Executor executor) {
+        return wrap(super.runAfterBothAsync(other, new RunnableWithContext(snapshotHolder, action, null) {
+        }, executor), snapshotHolder);
+    }
+
+    public ContextAwareCompletableFuture<Void> runAfterBothAndTakeNewSnapshot(CompletionStage<?> other, Runnable action) {
+        return wrap(super.runAfterBoth(other, new RunnableWithContext(snapshotHolder, action, snapshotHolder) {
+        }), snapshotHolder);
+    }
+
+    public ContextAwareCompletableFuture<Void> runAfterBothAsyncAndTakeNewSnapshot(CompletionStage<?> other, Runnable action) {
+        return wrap(super.runAfterBothAsync(other, new RunnableWithContext(snapshotHolder, action, snapshotHolder) {
+        }), snapshotHolder);
+    }
+
+    public ContextAwareCompletableFuture<Void> runAfterBothAsyncAndTakeNewSnapshot(
+            CompletionStage<?> other, Runnable action, Executor executor) {
         return wrap(super.runAfterBothAsync(other, new RunnableWithContext(snapshotHolder, action, snapshotHolder) {
         }, executor), snapshotHolder);
     }
