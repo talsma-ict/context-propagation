@@ -282,18 +282,33 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
 
     @Override
     public ContextAwareCompletableFuture<Void> thenRun(Runnable action) {
-        return wrap(super.thenRun(new RunnableWithContext(snapshotHolder, action, snapshotHolder) {
+        return wrap(super.thenRun(new RunnableWithContext(snapshotHolder, action, null) {
         }), snapshotHolder);
     }
 
     @Override
     public CompletableFuture<Void> thenRunAsync(Runnable action) {
-        return wrap(super.thenRunAsync(new RunnableWithContext(snapshotHolder, action, snapshotHolder) {
+        return wrap(super.thenRunAsync(new RunnableWithContext(snapshotHolder, action, null) {
         }), snapshotHolder);
     }
 
     @Override
     public ContextAwareCompletableFuture<Void> thenRunAsync(Runnable action, Executor executor) {
+        return wrap(super.thenRunAsync(new RunnableWithContext(snapshotHolder, action, null) {
+        }, executor), snapshotHolder);
+    }
+
+    public ContextAwareCompletableFuture<Void> thenRunAndTakeNewSnapshot(Runnable action) {
+        return wrap(super.thenRun(new RunnableWithContext(snapshotHolder, action, snapshotHolder) {
+        }), snapshotHolder);
+    }
+
+    public CompletableFuture<Void> thenRunAsyncAndTakeNewSnapshot(Runnable action) {
+        return wrap(super.thenRunAsync(new RunnableWithContext(snapshotHolder, action, snapshotHolder) {
+        }), snapshotHolder);
+    }
+
+    public ContextAwareCompletableFuture<Void> thenRunAsyncAndTakeNewSnapshot(Runnable action, Executor executor) {
         return wrap(super.thenRunAsync(new RunnableWithContext(snapshotHolder, action, snapshotHolder) {
         }, executor), snapshotHolder);
     }
