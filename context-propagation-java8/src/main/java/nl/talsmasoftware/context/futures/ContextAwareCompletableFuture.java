@@ -335,6 +335,26 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
         }, executor), snapshotHolder);
     }
 
+    @SuppressWarnings("unchecked")
+    public <U, V> ContextAwareCompletableFuture<V> thenCombineAndTakeNewSnapshot(CompletionStage<? extends U> other, BiFunction<? super T, ? super U, ? extends V> fn) {
+        return wrap(super.thenCombine(other, new BiFunctionWithContext(snapshotHolder, fn, snapshotHolder) {
+        }), snapshotHolder);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <U, V> ContextAwareCompletableFuture<V> thenCombineAsyncAndTakeNewSnapshot(
+            CompletionStage<? extends U> other, BiFunction<? super T, ? super U, ? extends V> fn) {
+        return wrap(super.thenCombineAsync(other, new BiFunctionWithContext(snapshotHolder, fn, snapshotHolder) {
+        }), snapshotHolder);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <U, V> ContextAwareCompletableFuture<V> thenCombineAsyncAndTakeNewSnapshot(
+            CompletionStage<? extends U> other, BiFunction<? super T, ? super U, ? extends V> fn, Executor executor) {
+        return wrap(super.thenCombineAsync(other, new BiFunctionWithContext(snapshotHolder, fn, snapshotHolder) {
+        }, executor), snapshotHolder);
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public <U> ContextAwareCompletableFuture<Void> thenAcceptBoth(CompletionStage<? extends U> other, BiConsumer<? super T, ? super U> action) {
