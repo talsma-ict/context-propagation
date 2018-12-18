@@ -516,20 +516,35 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
 
     @Override
     public ContextAwareCompletableFuture<Void> runAfterEither(CompletionStage<?> other, Runnable action) {
-        final ContextSnapshot snapshot = snapshotHolder.get();
-        return wrap(super.runAfterEither(other, new RunnableWithContext(snapshot, action)), snapshotHolder);
+        return wrap(super.runAfterEither(other, new RunnableWithContext(snapshotHolder, action, null) {
+        }), snapshotHolder);
     }
 
     @Override
     public ContextAwareCompletableFuture<Void> runAfterEitherAsync(CompletionStage<?> other, Runnable action) {
-        final ContextSnapshot snapshot = snapshotHolder.get();
-        return wrap(super.runAfterEitherAsync(other, new RunnableWithContext(snapshot, action)), snapshotHolder);
+        return wrap(super.runAfterEitherAsync(other, new RunnableWithContext(snapshotHolder, action, null) {
+        }), snapshotHolder);
     }
 
     @Override
     public ContextAwareCompletableFuture<Void> runAfterEitherAsync(CompletionStage<?> other, Runnable action, Executor executor) {
-        final ContextSnapshot snapshot = snapshotHolder.get();
-        return wrap(super.runAfterEitherAsync(other, new RunnableWithContext(snapshot, action), executor), snapshotHolder);
+        return wrap(super.runAfterEitherAsync(other, new RunnableWithContext(snapshotHolder, action, null) {
+        }, executor), snapshotHolder);
+    }
+
+    public ContextAwareCompletableFuture<Void> runAfterEitherAndTakeNewSnapshot(CompletionStage<?> other, Runnable action) {
+        return wrap(super.runAfterEither(other, new RunnableWithContext(snapshotHolder, action, snapshotHolder) {
+        }), snapshotHolder);
+    }
+
+    public ContextAwareCompletableFuture<Void> runAfterEitherAsyncAndTakeNewSnapshot(CompletionStage<?> other, Runnable action) {
+        return wrap(super.runAfterEitherAsync(other, new RunnableWithContext(snapshotHolder, action, snapshotHolder) {
+        }), snapshotHolder);
+    }
+
+    public ContextAwareCompletableFuture<Void> runAfterEitherAsyncAndTakeNewSnapshot(CompletionStage<?> other, Runnable action, Executor executor) {
+        return wrap(super.runAfterEitherAsync(other, new RunnableWithContext(snapshotHolder, action, snapshotHolder) {
+        }, executor), snapshotHolder);
     }
 
     @Override
