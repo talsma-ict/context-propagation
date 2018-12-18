@@ -881,6 +881,58 @@ public class ContextAwareCompletableFutureTest {
     }
 
     @Test
+    public void testAcceptEitherAndTakeNewSnapshot() throws ExecutionException, InterruptedException {
+        try (Context<String> ctx = manager.initializeNewContext("Hash bar")) {
+            ContextAwareCompletableFuture
+                    .runAsync(() -> manager.initializeNewContext("Hash is legal there"))
+                    .acceptEitherAndTakeNewSnapshot(
+                            ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Smoke at home or certain designated places")),
+                            voidValue -> {
+                                String val = manager.getActiveContext().getValue();
+                                assertThat(val, isOneOf("Hash bar", "Hash is legal there"));
+                                manager.initializeNewContext("-" + val);
+                            })
+                    .thenAccept(aVoid -> assertThat(manager.getActiveContext().getValue(), startsWith("-Hash")))
+                    .get();
+        }
+    }
+
+    @Test
+    public void testAcceptEitherAsyncAndTakeNewSnapshot() throws ExecutionException, InterruptedException {
+        try (Context<String> ctx = manager.initializeNewContext("Hash bar")) {
+            ContextAwareCompletableFuture
+                    .runAsync(() -> manager.initializeNewContext("Hash is legal there"))
+                    .acceptEitherAsyncAndTakeNewSnapshot(
+                            ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Smoke at home or certain designated places")),
+                            voidValue -> {
+                                String val = manager.getActiveContext().getValue();
+                                assertThat(val, isOneOf("Hash bar", "Hash is legal there"));
+                                manager.initializeNewContext("-" + val);
+                            })
+                    .thenAccept(aVoid -> assertThat(manager.getActiveContext().getValue(), startsWith("-Hash")))
+                    .get();
+        }
+    }
+
+    @Test
+    public void testAcceptEitherAsyncAndTakeNewSnapshot_executor() throws ExecutionException, InterruptedException {
+        try (Context<String> ctx = manager.initializeNewContext("Hash bar")) {
+            ContextAwareCompletableFuture
+                    .runAsync(() -> manager.initializeNewContext("Hash is legal there"))
+                    .acceptEitherAsyncAndTakeNewSnapshot(
+                            ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Smoke at home or certain designated places")),
+                            voidValue -> {
+                                String val = manager.getActiveContext().getValue();
+                                assertThat(val, isOneOf("Hash bar", "Hash is legal there"));
+                                manager.initializeNewContext("-" + val);
+                            },
+                            contextUnawareThreadpool)
+                    .thenAccept(aVoid -> assertThat(manager.getActiveContext().getValue(), startsWith("-Hash")))
+                    .get();
+        }
+    }
+
+    @Test
     public void testRunAfterEither() throws ExecutionException, InterruptedException {
         try (Context<String> ctx = manager.initializeNewContext("Movie theater")) {
             ContextAwareCompletableFuture

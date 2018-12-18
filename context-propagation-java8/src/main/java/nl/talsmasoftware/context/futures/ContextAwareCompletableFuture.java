@@ -474,22 +474,44 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ContextAwareCompletableFuture<Void> acceptEither(CompletionStage<? extends T> other, Consumer<? super T> action) {
-        final ContextSnapshot snapshot = snapshotHolder.get();
-        return wrap(super.acceptEither(other, new ConsumerWithContext<>(snapshot, action)), snapshotHolder);
+        return wrap(super.acceptEither(other, new ConsumerWithContext(snapshotHolder, action, null) {
+        }), snapshotHolder);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ContextAwareCompletableFuture<Void> acceptEitherAsync(CompletionStage<? extends T> other, Consumer<? super T> action) {
-        final ContextSnapshot snapshot = snapshotHolder.get();
-        return wrap(super.acceptEitherAsync(other, new ConsumerWithContext<>(snapshot, action)), snapshotHolder);
+        return wrap(super.acceptEitherAsync(other, new ConsumerWithContext(snapshotHolder, action, null) {
+        }), snapshotHolder);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ContextAwareCompletableFuture<Void> acceptEitherAsync(
             CompletionStage<? extends T> other, Consumer<? super T> action, Executor executor) {
-        final ContextSnapshot snapshot = snapshotHolder.get();
-        return wrap(super.acceptEitherAsync(other, new ConsumerWithContext<>(snapshot, action), executor), snapshotHolder);
+        return wrap(super.acceptEitherAsync(other, new ConsumerWithContext(snapshotHolder, action, null) {
+        }, executor), snapshotHolder);
+    }
+
+    @SuppressWarnings("unchecked")
+    public ContextAwareCompletableFuture<Void> acceptEitherAndTakeNewSnapshot(CompletionStage<? extends T> other, Consumer<? super T> action) {
+        return wrap(super.acceptEither(other, new ConsumerWithContext(snapshotHolder, action, snapshotHolder) {
+        }), snapshotHolder);
+    }
+
+    @SuppressWarnings("unchecked")
+    public ContextAwareCompletableFuture<Void> acceptEitherAsyncAndTakeNewSnapshot(CompletionStage<? extends T> other, Consumer<? super T> action) {
+        return wrap(super.acceptEitherAsync(other, new ConsumerWithContext(snapshotHolder, action, snapshotHolder) {
+        }), snapshotHolder);
+    }
+
+    @SuppressWarnings("unchecked")
+    public ContextAwareCompletableFuture<Void> acceptEitherAsyncAndTakeNewSnapshot(
+            CompletionStage<? extends T> other, Consumer<? super T> action, Executor executor) {
+        return wrap(super.acceptEitherAsync(other, new ConsumerWithContext(snapshotHolder, action, snapshotHolder) {
+        }, executor), snapshotHolder);
     }
 
     @Override
