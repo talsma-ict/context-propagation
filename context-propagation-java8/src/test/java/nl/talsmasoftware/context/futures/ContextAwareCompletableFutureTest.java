@@ -38,6 +38,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isOneOf;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.startsWith;
 
 /**
  * @author Sjoerd Talsma
@@ -783,6 +784,58 @@ public class ContextAwareCompletableFutureTest {
                             ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Metric system")),
                             voidValue -> manager.getActiveContext().getValue(),
                             contextUnawareThreadpool)
+                    .get(), isOneOf("Quarterpounder with Cheese", "Royale with Cheese"));
+        }
+    }
+
+    @Test
+    public void testApplyToEitherAndTakeNewSnapshot() throws ExecutionException, InterruptedException {
+        try (Context<String> ctx = manager.initializeNewContext("Quarterpounder with Cheese")) {
+            assertThat(ContextAwareCompletableFuture
+                    .runAsync(() -> manager.initializeNewContext("Royale with Cheese"))
+                    .applyToEitherAndTakeNewSnapshot(
+                            ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Metric system")),
+                            (voidValue) -> {
+                                String val = manager.getActiveContext().getValue();
+                                manager.initializeNewContext("-" + val);
+                                return val;
+                            })
+                    .whenComplete((result, exception) -> assertThat(manager.getActiveContext().getValue(), startsWith("-")))
+                    .get(), isOneOf("Quarterpounder with Cheese", "Royale with Cheese"));
+        }
+    }
+
+    @Test
+    public void testApplyToEitherAsyncAndTakeNewSnapshot() throws ExecutionException, InterruptedException {
+        try (Context<String> ctx = manager.initializeNewContext("Quarterpounder with Cheese")) {
+            assertThat(ContextAwareCompletableFuture
+                    .runAsync(() -> manager.initializeNewContext("Royale with Cheese"))
+                    .applyToEitherAsyncAndTakeNewSnapshot(
+                            ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Metric system")),
+                            (voidValue) -> {
+                                String val = manager.getActiveContext().getValue();
+                                manager.initializeNewContext("-" + val);
+                                return val;
+                            })
+                    .whenComplete((result, exception) -> assertThat(manager.getActiveContext().getValue(), startsWith("-")))
+                    .get(), isOneOf("Quarterpounder with Cheese", "Royale with Cheese"));
+        }
+    }
+
+    @Test
+    public void testApplyToEitherAsyncAndTakeNewSnapshot_executor() throws ExecutionException, InterruptedException {
+        try (Context<String> ctx = manager.initializeNewContext("Quarterpounder with Cheese")) {
+            assertThat(ContextAwareCompletableFuture
+                    .runAsync(() -> manager.initializeNewContext("Royale with Cheese"))
+                    .applyToEitherAsyncAndTakeNewSnapshot(
+                            ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Metric system")),
+                            (voidValue) -> {
+                                String val = manager.getActiveContext().getValue();
+                                manager.initializeNewContext("-" + val);
+                                return val;
+                            },
+                            contextUnawareThreadpool)
+                    .whenComplete((result, exception) -> assertThat(manager.getActiveContext().getValue(), startsWith("-")))
                     .get(), isOneOf("Quarterpounder with Cheese", "Royale with Cheese"));
         }
     }
