@@ -433,22 +433,44 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <U> ContextAwareCompletableFuture<U> applyToEither(CompletionStage<? extends T> other, Function<? super T, U> fn) {
-        final ContextSnapshot snapshot = snapshotHolder.get();
-        return wrap(super.applyToEither(other, new FunctionWithContext<>(snapshot, fn)), snapshotHolder);
+        return wrap(super.applyToEither(other, new FunctionWithContext(snapshotHolder, fn, null) {
+        }), snapshotHolder);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <U> ContextAwareCompletableFuture<U> applyToEitherAsync(CompletionStage<? extends T> other, Function<? super T, U> fn) {
-        final ContextSnapshot snapshot = snapshotHolder.get();
-        return wrap(super.applyToEitherAsync(other, new FunctionWithContext<>(snapshot, fn)), snapshotHolder);
+        return wrap(super.applyToEitherAsync(other, new FunctionWithContext(snapshotHolder, fn, null) {
+        }), snapshotHolder);
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <U> ContextAwareCompletableFuture<U> applyToEitherAsync(
             CompletionStage<? extends T> other, Function<? super T, U> fn, Executor executor) {
-        final ContextSnapshot snapshot = snapshotHolder.get();
-        return wrap(super.applyToEitherAsync(other, new FunctionWithContext<>(snapshot, fn), executor), snapshotHolder);
+        return wrap(super.applyToEitherAsync(other, new FunctionWithContext(snapshotHolder, fn, null) {
+        }, executor), snapshotHolder);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <U> ContextAwareCompletableFuture<U> applyToEitherAndTakeNewSnapshot(CompletionStage<? extends T> other, Function<? super T, U> fn) {
+        return wrap(super.applyToEither(other, new FunctionWithContext(snapshotHolder, fn, snapshotHolder) {
+        }), snapshotHolder);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <U> ContextAwareCompletableFuture<U> applyToEitherAsyncAndTakeNewSnapshot(CompletionStage<? extends T> other, Function<? super T, U> fn) {
+        return wrap(super.applyToEitherAsync(other, new FunctionWithContext(snapshotHolder, fn, snapshotHolder) {
+        }), snapshotHolder);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <U> ContextAwareCompletableFuture<U> applyToEitherAsyncAndTakeNewSnapshot(
+            CompletionStage<? extends T> other, Function<? super T, U> fn, Executor executor) {
+        return wrap(super.applyToEitherAsync(other, new FunctionWithContext(snapshotHolder, fn, snapshotHolder) {
+        }, executor), snapshotHolder);
     }
 
     @Override
