@@ -66,7 +66,7 @@ public class SpanManager implements ContextManager<Span> {
      */
     @Override
     public Context<Span> initializeNewContext(final Span span) {
-        Scope scope = span == null ? null : GlobalTracer.get().scopeManager().activate(span, false);
+        Scope scope = span == null ? null : GlobalTracer.get().scopeManager().activate(span);
         return new SpanContext(span, scope);
     }
 
