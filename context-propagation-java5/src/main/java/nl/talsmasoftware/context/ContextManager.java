@@ -16,7 +16,7 @@
 package nl.talsmasoftware.context;
 
 /**
- * This interface defines the contract for a ContextManager Service.
+ * The contract for a ContextManager Service.
  * <p>
  * Concrete implementations can be registered by providing an implementation class with a default constructor,
  * along with a class declaration in a service file called:<br>
@@ -30,7 +30,7 @@ package nl.talsmasoftware.context;
 public interface ContextManager<T> {
 
     /**
-     * This method initializes a new context containing the specified <code>value</code>.
+     * Initialize a new context containing the specified <code>value</code>.
      * <p>
      * Whether the value is allowed to be <code>null</code> is up to the implementation.
      *
@@ -41,9 +41,9 @@ public interface ContextManager<T> {
     Context<T> initializeNewContext(T value);
 
     /**
-     * This method returns the current context, or <code>null</code> if no context is currently active.
+     * The currently active context, or <code>null</code> if no context is active.
      *
-     * @return The active context or <code>null</code> if there is no context currently active.
+     * @return The active context or <code>null</code> if there is none.
      */
     Context<T> getActiveContext();
 
