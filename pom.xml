@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright 2016-2018 Talsma ICT
+    Copyright 2016-2019 Talsma ICT
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -174,8 +174,14 @@
                                 <artifactId>umldoclet</artifactId>
                                 <version>${umldoclet.version}</version>
                             </docletArtifact>
+                            <additionalJOptions>
+                                <additionalJOption>-J-Dhttp.agent=maven-javadoc-plugin</additionalJOption>
+                            </additionalJOptions>
                             <links> <!-- These seem to fail due to a SSL handshake somehow.. -->
+                                <!-- https://stackoverflow.com/questions/33866209/linking-to-javadoc-io-using-javadoc-link-option -->
                                 <link>https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest</link>
+                                <!--<link>https://static.javadoc.io/nl.talsmasoftware.context/context-propagation/1.0.2</link>-->
+<!--
                                 <link>https://javadoc.io/page/nl.talsmasoftware.context/context-propagation-java8/latest</link>
                                 <link>https://javadoc.io/page/nl.talsmasoftware.context/context-propagation-metrics/latest</link>
                                 <link>https://javadoc.io/page/nl.talsmasoftware.context/locale-context/latest</link>
@@ -183,6 +189,7 @@
                                 <link>https://javadoc.io/page/nl.talsmasoftware.context/opentracing-span-propagation/latest</link>
                                 <link>https://javadoc.io/page/nl.talsmasoftware.context/servletrequest-propagation/latest</link>
                                 <link>https://javadoc.io/page/nl.talsmasoftware.context/spring-security-context/latest</link>
+-->
                             </links>
                         </configuration>
                     </execution>
