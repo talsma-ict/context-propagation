@@ -11,7 +11,15 @@ and _reactivating_ it in another thread.
 
 # Context
 
-_(Work in progress)_
+A context can be _anything_ that needs to be maintained on the 'current thread' level.
+
+Implementations are typically maintained within a static [ThreadLocal] variable.
+Contexts have a very simple life-cycle: they can be created and closed.
+A well-behaved Context restores the original thread-local state when it is closed.
+
+An abstract implementation is available that takes care of random-depth nested contexts 
+and restoring the 'previous' context state.
+
 - [javadoc](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/Context.html)
 
 # Context Manager
