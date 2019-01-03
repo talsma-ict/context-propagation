@@ -47,7 +47,7 @@ that will apply a captured context snapshot to the wrapped function:
 
 ## ContextAwareCompletableFuture
 
-The [`CompletableFuture`][CompletableFuture] class was introduced in Java 8 that:
+The [`CompletableFuture`][CompletableFuture] class was introduced in Java 8:
 > _A `Future` that may be explicitly completed (setting its value and status),
 > and may be used as a [`CompletionStage`][CompletionStage],
 > supporting dependent functions and actions that trigger upon its completion._
@@ -68,9 +68,11 @@ operations, in particular:
 - `acceptEither` and its _async_ variants
 - `runAfterEither` and its _async_ variants
 
-Furthermore, when the order of stages is clearly defined (e.g. the _thenXyz_, _whenComplete_ etc),
-a new context snapshot will be taken between each stage, allowing for context changes from one stage
-to the next.
+### Completion stages
+When the order of stages is clearly defined (e.g. the _thenXyz_, _whenComplete_ etc),
+a new context snapshot can be taken between each stage by invoking the `takeNewSnapshot()`
+before declaring the new stage. This takes a new snapshot after each completion stage and
+propagates that to following stages.
 
 The [`ContextAwareCompletableFutureTest`](https://github.com/talsma-ict/context-propagation/blob/develop/context-propagation-java8/src/test/java/nl/talsmasoftware/context/futures/ContextAwareCompletableFutureTest.java) class contains
 test cases that demonstrate the behaviour of this complex class.
@@ -80,12 +82,8 @@ test cases that demonstrate the behaviour of this complex class.
 Please be aware that:
 1. in almost all circumstances it's preferrable 
    to choose `ContextAwareExecutorService` over `ContextAwareCompletableFuture`.
-2. neither the standard `CompletableFuture` (nor this context-aware version)
-   will attempt to cancel any ongoing task when cancelled.
-3. when traversing completion stages, context snapshots are taken
-   which may or may not be needed for the next completion stage 
-   (ref [Issue 85](https://github.com/talsma-ict/context-propagation/issues/85)).
-   Depending on the operation, this could be costly.
+2. neither the standard `CompletableFuture` nor this context-aware version
+   will attempt to cancel or interrupt an ongoing process when cancelled.
 
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation-java8.svg
   [maven]: http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22nl.talsmasoftware.context%22%20AND%20a%3A%22context-propagation-java8%22

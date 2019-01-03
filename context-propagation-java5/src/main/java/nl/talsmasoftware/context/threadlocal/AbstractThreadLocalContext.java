@@ -25,8 +25,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Abstract base class that will maintain a shared, static {@link ThreadLocal} instance for each concrete
- * subclass of this type. This threadlocal can be accessed by subclasses through the protected method:
+ * Abstract base class maintaining a shared, static {@link ThreadLocal} instance for each concrete subclass.
+ * This threadlocal can be accessed by subclasses through the protected method:
  * {@link #threadLocalInstanceOf(Class)}.
  *
  * @author Sjoerd Talsma
