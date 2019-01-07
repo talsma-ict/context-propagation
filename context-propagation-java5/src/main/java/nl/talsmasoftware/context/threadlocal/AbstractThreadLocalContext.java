@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 package nl.talsmasoftware.context.threadlocal;
 
 import nl.talsmasoftware.context.Context;
+import nl.talsmasoftware.context.ContextManager;
+import nl.talsmasoftware.context.observer.ContextObservers;
 
 import java.lang.reflect.Modifier;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,6 +44,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
     private final ThreadLocal<AbstractThreadLocalContext<T>> sharedThreadLocalContext = threadLocalInstanceOf((Class) getClass());
     private final Logger logger = Logger.getLogger(getClass().getName());
     private final AtomicBoolean closed = new AtomicBoolean(false);
+    private final Class<? extends ContextManager<? super T>> contextManagerType;
 
     /**
      * The parent context that was active at the time this context was created (if any)
@@ -62,16 +65,19 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
      * Instantiates a new context with the specified value.
      * The new context will be made the active context for the current thread.
      *
-     * @param newValue The new value to become active in this new context
-     *                 (or <code>null</code> to register a new context with 'no value').
+     * @param contextManagerType The context manager type (required to notify appropriate observers)
+     * @param newValue           The new value to become active in this new context
+     *                           (or <code>null</code> to register a new context with 'no value').
      */
     @SuppressWarnings("unchecked")
-    protected AbstractThreadLocalContext(T newValue) {
+    protected AbstractThreadLocalContext(Class<? extends ContextManager<? super T>> contextManagerType, T newValue) {
         this.unwindIfNecessary(); // avoid unnecessary parentContexts
+        this.contextManagerType = contextManagerType;
         this.parentContext = sharedThreadLocalContext.get();
         this.value = newValue;
         this.sharedThreadLocalContext.set(this);
         logger.log(Level.FINEST, "Initialized new {0}.", this);
+        ContextObservers.onActivate(contextManagerType, value, parentContext == null ? null : parentContext.getValue());
     }
 
     /**
@@ -119,9 +125,12 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
      * This method has no side-effects if the context was already closed (it is safe to call multiple times).
      */
     public void close() {
-        closed.set(true);
-        this.unwindIfNecessary(); // Remove this context created in the same thread.
+        final boolean observe = closed.compareAndSet(false, true);
+        final Context<T> restored = this.unwindIfNecessary(); // Remove this context created in the same thread.
         logger.log(Level.FINEST, "Closed {0}.", this);
+        if (observe) {
+            ContextObservers.onDeactivate(contextManagerType, this.value, restored == null ? null : restored.getValue());
+        }
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import io.opentracing.Span;
 import io.opentracing.util.GlobalTracer;
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManager;
+import nl.talsmasoftware.context.observer.ContextObservers;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -88,6 +89,7 @@ public class SpanManager implements ContextManager<Span> {
         private SpanContext(Span span, Scope scope) {
             this.span = span;
             this.scope = scope;
+            ContextObservers.onActivate(SpanManager.class, span, null);
         }
 
         @Override
@@ -97,8 +99,11 @@ public class SpanManager implements ContextManager<Span> {
 
         @Override
         public void close() {
-            if (closed.compareAndSet(false, true) && scope != null) {
-                scope.close();
+            if (closed.compareAndSet(false, true)) {
+                if (scope != null) {
+                    scope.close();
+                }
+                ContextObservers.onDeactivate(SpanManager.class, span, null);
             }
         }
 
