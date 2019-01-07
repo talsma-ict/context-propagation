@@ -34,6 +34,7 @@ import java.util.logging.Logger;
  * @author Sjoerd Talsma
  */
 public abstract class AbstractThreadLocalContext<T> implements Context<T> {
+    private static final AtomicBoolean DEPRECATED_CONSTRUCTOR_WARNING = new AtomicBoolean(true);
     /**
      * The constant of ThreadLocal context instances per subclass name so different types don't get mixed.
      */
@@ -60,6 +61,24 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
      * on the desired features of the particular implementation.
      */
     protected final T value;
+
+    /**
+     * Instantiates a new context with the specified value.
+     * The new context will be made the active context for the current thread.
+     *
+     * @param newValue The new value to become active in this new context
+     *                 (or <code>null</code> to register a new context with 'no value').
+     * @deprecated Using this constructor makes it impossible to register a {@code ContextObserver}!
+     */
+    @Deprecated
+    protected AbstractThreadLocalContext(T newValue) {
+        this(null, newValue);
+        logger.log(DEPRECATED_CONSTRUCTOR_WARNING.compareAndSet(true, false) ? Level.WARNING : Level.FINE,
+                "Initialized new {0} without context manager type. " +
+                        "This makes it impossible to register ContextObservers for it. " +
+                        "Please fix this context by specifying a ContextManager type " +
+                        "using the correct AbstractThreadLocalContext constructor.", this);
+    }
 
     /**
      * Instantiates a new context with the specified value.
