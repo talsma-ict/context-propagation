@@ -28,7 +28,7 @@ Manages contexts by initializing and maintaining the active context.
 
 Normally it is not necessary to interact directly with individual context managers.
 The `ContextManagers` utility class can detect available context managers and allows 
-you to make a _snapshot_ of **all** active contexts all at once.
+you to take a [_snapshot_](#context-snapshot) of **all** active contexts all at once.
 
 - [ContextManager javadoc][contextmanager]
 - [ContextManagers javadoc][contextmanagers]
