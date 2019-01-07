@@ -24,8 +24,18 @@ and restoring the 'previous' context state.
 
 # Context Manager
 
+Manages contexts by initializing and maintaining the active context.
+
+Normally it is not necessary to interact directly with individual context managers.
+The `ContextManagers` utility class can detect available context managers and allows 
+you to make a _snapshot_ of **all** active contexts all at once.
+
+- [ContextManager javadoc][contextmanager]
+- [ContextManagers javadoc][contextmanagers]
+
+## Creating your own context manager
+
 _(Work in progress)_
-- [javadoc](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextManager.html)
 
 # Context Snapshot
 
