@@ -29,12 +29,16 @@ import java.lang.reflect.InvocationTargetException;
 
 import static nl.talsmasoftware.context.observer.Observed.Action.ACTIVATE;
 import static nl.talsmasoftware.context.observer.Observed.Action.DEACTIVATE;
+import static nl.talsmasoftware.context.observer.Observed.activated;
+import static nl.talsmasoftware.context.observer.Observed.deactivated;
 import static nl.talsmasoftware.context.observer.SimpleContextObserver.observed;
 import static nl.talsmasoftware.context.observer.SimpleContextObserver.observedContextManager;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.fail;
 
 public class ContextObserversTest {
@@ -122,6 +126,24 @@ public class ContextObserversTest {
         assertThat(observed, contains(
                 new Observed(ACTIVATE, "Activated context", null),
                 new Observed(DEACTIVATE, "Activated context", null)));
+    }
+
+    @Test
+    public void testUnobservableDeprecatedLegacyAbstractThreadLocalContext() {
+        observedContextManager = DeprecatedContextManager.class;
+        final ContextManager<String> manager = new DeprecatedContextManager();
+        final Context<String> ctx = manager.initializeNewContext("Activated context");
+        Context<String> ctx2 = null;
+        try {
+            assertThat(manager.getActiveContext().getValue(), is("Activated context"));
+            assertThat(observed, not(hasItem(activated(is("Activated context")))));
+            ctx2 = manager.initializeNewContext("Nested active context");
+
+        } finally {
+            if (ctx2 != null) ctx2.close();
+            ctx.close();
+        }
+        assertThat(observed, not(hasItem(deactivated(is("Activated context")))));
     }
 
 }

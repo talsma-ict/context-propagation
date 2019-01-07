@@ -76,8 +76,9 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
         logger.log(DEPRECATED_CONSTRUCTOR_WARNING.compareAndSet(true, false) ? Level.WARNING : Level.FINE,
                 "Initialized new {0} without context manager type. " +
                         "This makes it impossible to register ContextObservers for it. " +
-                        "Please fix this context by specifying a ContextManager type " +
-                        "using the correct AbstractThreadLocalContext constructor.", this);
+                        "Please fix {1} by specifying a ContextManager type " +
+                        "in the AbstractThreadLocalContext constructor.",
+                new Object[]{this, getClass().getSimpleName()});
     }
 
     /**
