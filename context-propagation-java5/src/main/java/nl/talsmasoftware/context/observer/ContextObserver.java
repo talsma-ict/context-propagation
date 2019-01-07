@@ -50,7 +50,7 @@ public interface ContextObserver<T> {
      *
      * @return The observed context manager class or {@code null} to disable this observer.
      */
-    Class<? extends ContextManager<T>> getObservedContext();
+    Class<? extends ContextManager<T>> getObservedContextManager();
 
     /**
      * Indicates that a context <em>was just activated</em>.

@@ -60,16 +60,15 @@ public final class ContextObservers {
                                       T previousContextValue) {
         if (contextManager != null) for (ContextObserver observer : CONTEXT_OBSERVERS) {
             try {
-                final Class observedContext = observer.getObservedContext();
+                final Class observedContext = observer.getObservedContextManager();
                 if (observedContext != null && observedContext.isAssignableFrom(contextManager)) {
                     observer.onActivate(activatedContextValue, previousContextValue);
                 }
             } catch (RuntimeException observationException) {
                 Logger.getLogger(observer.getClass().getName()).log(Level.WARNING,
-                        "Exception notifying observer " + observer
-                                + " for context manager " + contextManager.getSimpleName()
-                                + " of activated context value " + activatedContextValue
-                                + " (previous: " + previousContextValue + "): " + observationException.getMessage(),
+                        "Exception in " + observer.getClass().getSimpleName()
+                                + ".onActivate(" + activatedContextValue + ", " + previousContextValue
+                                + ") for " + contextManager.getSimpleName() + ": " + observationException.getMessage(),
                         observationException);
             }
         }
@@ -90,16 +89,15 @@ public final class ContextObservers {
                                         T restoredContextValue) {
         if (contextManager != null) for (ContextObserver observer : CONTEXT_OBSERVERS) {
             try {
-                final Class observedContext = observer.getObservedContext();
+                final Class observedContext = observer.getObservedContextManager();
                 if (observedContext != null && observedContext.isAssignableFrom(contextManager)) {
                     observer.onDeactivate(deactivatedContextValue, restoredContextValue);
                 }
             } catch (RuntimeException observationException) {
                 Logger.getLogger(observer.getClass().getName()).log(Level.WARNING,
-                        "Exception notifying observer " + observer
-                                + " for context manager " + contextManager.getSimpleName()
-                                + " of deactivated context value " + deactivatedContextValue
-                                + " (restored: " + restoredContextValue + "): " + observationException.getMessage(),
+                        "Exception in " + observer.getClass().getSimpleName()
+                                + ".onDeactivate(" + deactivatedContextValue + ", " + deactivatedContextValue
+                                + ") for " + contextManager.getSimpleName() + ": " + observationException.getMessage(),
                         observationException);
             }
         }
