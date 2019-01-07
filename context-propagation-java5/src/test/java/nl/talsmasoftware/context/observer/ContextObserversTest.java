@@ -15,17 +15,36 @@
  */
 package nl.talsmasoftware.context.observer;
 
+import nl.talsmasoftware.context.Context;
+import nl.talsmasoftware.context.ContextManager;
+import nl.talsmasoftware.context.DummyContextManager;
+import nl.talsmasoftware.context.ThrowingContextManager;
+import org.hamcrest.Matchers;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import static nl.talsmasoftware.context.observer.Observed.Action.ACTIVATE;
+import static nl.talsmasoftware.context.observer.Observed.Action.DEACTIVATE;
+import static nl.talsmasoftware.context.observer.SimpleContextObserver.observed;
+import static nl.talsmasoftware.context.observer.SimpleContextObserver.observedContextManager;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 
 public class ContextObserversTest {
+
+    @Before
+    @After
+    public void clearObserved() {
+        observedContextManager = null;
+        observed.clear();
+    }
 
     @Test
     public void testUnsupportedConstructor() {
@@ -46,5 +65,63 @@ public class ContextObserversTest {
         }
     }
 
+    @Test
+    public void testSimpleContextObserver_observingNull() {
+        final ContextManager<String> manager = new DummyContextManager();
+        final Context<String> ctx = manager.initializeNewContext("Activated context");
+        try {
+            assertThat(manager.getActiveContext().getValue(), is("Activated context"));
+            assertThat(observed, is(Matchers.<Observed>empty()));
+        } finally {
+            ctx.close();
+        }
+        assertThat(observed, is(Matchers.<Observed>empty()));
+    }
+
+    @Test
+    public void testSimpleContextObserver_observingDifferentContextManager() {
+        observedContextManager = ThrowingContextManager.class;
+        final ContextManager<String> manager = new DummyContextManager();
+        final Context<String> ctx = manager.initializeNewContext("Activated context");
+        try {
+            assertThat(manager.getActiveContext().getValue(), is("Activated context"));
+            assertThat(observed, is(Matchers.<Observed>empty()));
+        } finally {
+            ctx.close();
+        }
+        assertThat(observed, is(Matchers.<Observed>empty()));
+    }
+
+    @Test
+    public void testSimpleContextObserver_observingSpecificContextManager() {
+        observedContextManager = DummyContextManager.class;
+        final ContextManager<String> manager = new DummyContextManager();
+        final Context<String> ctx = manager.initializeNewContext("Activated context");
+        try {
+            assertThat(manager.getActiveContext().getValue(), is("Activated context"));
+            assertThat(observed, contains(new Observed(ACTIVATE, "Activated context", null)));
+        } finally {
+            ctx.close();
+        }
+        assertThat(observed, contains(
+                new Observed(ACTIVATE, "Activated context", null),
+                new Observed(DEACTIVATE, "Activated context", null)));
+    }
+
+    @Test
+    public void testSimpleContextObserver_observingAnyContextManager() {
+        observedContextManager = ContextManager.class;
+        final ContextManager<String> manager = new DummyContextManager();
+        final Context<String> ctx = manager.initializeNewContext("Activated context");
+        try {
+            assertThat(manager.getActiveContext().getValue(), is("Activated context"));
+            assertThat(observed, contains(new Observed(ACTIVATE, "Activated context", null)));
+        } finally {
+            ctx.close();
+        }
+        assertThat(observed, contains(
+                new Observed(ACTIVATE, "Activated context", null),
+                new Observed(DEACTIVATE, "Activated context", null)));
+    }
 
 }
