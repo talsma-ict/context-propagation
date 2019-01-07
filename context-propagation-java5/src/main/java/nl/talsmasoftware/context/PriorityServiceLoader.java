@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ import static java.util.Collections.unmodifiableList;
  * @param <SVC> The type of service to load.
  * @author Sjoerd Talsma
  */
-final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
+public final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
     private static final Logger LOGGER = Logger.getLogger(PriorityServiceLoader.class.getName());
     private static final String SYSTEMPROPERTY_CACHING = "talsmasoftware.context.caching";
     private static final String ENVIRONMENT_CACHING_VALUE = System.getenv(
@@ -46,7 +46,7 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
     private final Class<SVC> serviceType;
     private final Map<ClassLoader, List<SVC>> cache = new WeakHashMap<ClassLoader, List<SVC>>();
 
-    PriorityServiceLoader(Class<SVC> serviceType) {
+    public PriorityServiceLoader(Class<SVC> serviceType) {
         if (serviceType == null) throw new NullPointerException("Service type is <null>.");
         this.serviceType = serviceType;
     }
@@ -62,16 +62,16 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
         return services.iterator();
     }
 
-    private static boolean isCachingDisabled() {
-        final String cachingProperty = System.getProperty(SYSTEMPROPERTY_CACHING, ENVIRONMENT_CACHING_VALUE);
-        return "0".equals(cachingProperty) || "false".equalsIgnoreCase(cachingProperty);
-    }
-
     /**
      * Removes the cache so the next call to {@linkplain #iterator()} will attempt to load the objects again.
      */
-    void clearCache() {
+    public void clearCache() {
         cache.clear();
+    }
+
+    private static boolean isCachingDisabled() {
+        final String cachingProperty = System.getProperty(SYSTEMPROPERTY_CACHING, ENVIRONMENT_CACHING_VALUE);
+        return "0".equals(cachingProperty) || "false".equalsIgnoreCase(cachingProperty);
     }
 
     private List<SVC> findServices(ClassLoader classLoader) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,9 @@ import java.io.Closeable;
 
 /**
  * A context can be anything that needs to be maintained on the 'current thread' level.
+ * <p>
+ * It is the responsibility of the one activating a new context to
+ * also {@linkplain #close() close} it again <em>from the same thread</em>.
  * <p>
  * Implementations are typically maintained within a static {@link ThreadLocal} variable.<br>
  * A context has a very simple life-cycle: they can be created and {@link #close() closed}.
@@ -48,8 +51,9 @@ public interface Context<T> extends Closeable {
     T getValue();
 
     /**
-     * Closes this context and restores any context changes made by this object to the way things were before it
-     * got created.
+     * Closes this context.
+     * <p>
+     * It is the responsibility of the one activating a new context to also close it again <em>from the same thread</em>.
      * <p>
      * It must be possible to call this method multiple times.
      * It is the responsibility of the implementor of this context to make sure that closing an already-closed context
@@ -57,6 +61,7 @@ public interface Context<T> extends Closeable {
      * A simple way to achieve this is by using an {@link java.util.concurrent.atomic.AtomicBoolean} to make sure the
      * 'closing' transition is executed only once.
      * <p>
+     * Implementors should attempt to restore previous contextual state upon close.
      *
      * @throws RuntimeException if an error occurs while restoring the context.
      */

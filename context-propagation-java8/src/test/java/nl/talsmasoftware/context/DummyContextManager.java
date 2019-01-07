@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ public class DummyContextManager implements ContextManager<String> {
 
     private static final class DummyContext extends AbstractThreadLocalContext<String> {
         private DummyContext(String newValue) {
-            super(newValue);
+            super(DummyContextManager.class, newValue);
         }
 
         private static void clear() {

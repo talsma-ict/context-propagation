@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package nl.talsmasoftware.context.springsecurity;
 
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.clearable.ClearableContextManager;
+import nl.talsmasoftware.context.observer.ContextObservers;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -75,16 +76,28 @@ public class SpringSecurityContextManager implements ClearableContextManager<Aut
             this.current = current;
             this.previous = previous;
             this.closed = new AtomicBoolean(alreadyClosed);
+            ContextObservers.onActivate(SpringSecurityContextManager.class, auth(current), auth(previous));
         }
 
         public Authentication getValue() {
-            return current == null ? null : current.getAuthentication();
+            return auth(current);
         }
 
         public void close() {
             if (closed.compareAndSet(false, true)) {
                 SecurityContextHolder.setContext(previous);
+                ContextObservers.onDeactivate(SpringSecurityContextManager.class, auth(current), auth(previous));
             }
+        }
+
+        /**
+         * Null-safe {@code getAuthentication()} call
+         *
+         * @param securityContext optional security context to get authentication object from.
+         * @return the authentication object or null if security context itself was null.
+         */
+        private static Authentication auth(SecurityContext securityContext) {
+            return securityContext == null ? null : securityContext.getAuthentication();
         }
     }
 
