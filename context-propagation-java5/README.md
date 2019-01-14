@@ -13,22 +13,25 @@ and _reactivating_ it in another thread.
 
 A context can be _anything_ that needs to be maintained on the 'current thread' level.
 
-Implementations are typically maintained within a static [ThreadLocal] variable.
-Contexts have a very simple life-cycle: they can be created and closed.
-A well-behaved Context restores the original thread-local state when it is closed.
+Implementations are typically maintained with a static [ThreadLocal] variable.
+Contexts have a life-cycle that is simply defined as: they can be created and closed, 
+within a single thread.
+A well-behaved Context restores the original value when it is closed.
 
-An abstract implementation is available that takes care of random-depth nested contexts 
+An abstract implementation is available that takes care of nested contexts 
 and restoring the 'previous' context state.
+It contains safeguards for concurrency and out-of-sequence closing of contexts, 
+although technically these use cases are not appropriate.
 
 - [javadoc](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/Context.html)
 
 # Context Manager
 
-Manages contexts by initializing and maintaining the active context.
+Manages contexts by initializing and maintaining an active context value.
 
 Normally it is not necessary to interact directly with individual context managers.
-The `ContextManagers` utility class can detect available context managers and allows 
-you to take a [_snapshot_](#context-snapshot) of **all** active contexts all at once.
+The `ContextManagers` utility class detects available context managers and lets 
+you take a [_snapshot_](#context-snapshot) of **all** active contexts at once.
 
 - [ContextManager javadoc][contextmanager]
 - [ContextManagers javadoc][contextmanagers]
