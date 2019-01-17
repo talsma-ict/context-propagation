@@ -42,7 +42,14 @@ _(Work in progress)_
 
 # Context Snapshot
 
-_(Work in progress)_
+A context snapshot is created by the [ContextManagers]' `createContextSnapshot()` method.
+This context contains the active context value from all known [ContextManager] implementations.
+Once created, the captured _values_ in such context snapshot will not change again, 
+even when the active context is modified. 
+All values from this snapshot can be _reactivated_ all at once in another thread 
+until the reactivation is closed again.
+
+
 - [ContextSnapshot javadoc](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextSnapshot.html)
 - [ContextManagers javadoc](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextManagers.html)
 
