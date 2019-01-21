@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,14 @@ public interface ContextSnapshot {
     /**
      * This method activates all contained values by the snapshot in their respective {@link Context} implementations.
      * <p>
-     * These reactivated contexts can all be closed at once by closing the returned <code>Void</code> context.
-     * The resulting context is Void, because it does not contain any value itself.
+     * The reactivated context is of type {@code Void}, because it does not contain any value itself.
+     * It closes all contained snapshot values collectively from its {@code close()} method.
+     * <p>
+     * <strong>Note:</strong> <em>The reactivated context <strong>must</strong> be closed from the same thread that
+     * reactivated it. It is the responsibility of the caller to make sure this happens
+     * (preferably in a try-with-resources block)</em><br>
+     * Using the {@linkplain nl.talsmasoftware.context.executors.ContextAwareExecutorService ContextAwareExecutorService}
+     * is a safe way to propagate context snapshots without having to worry about closing them.
      *
      * @return A new reactivationcontext with the snapshot values that will be valid until closed
      * (or new values are registered).
