@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -76,14 +77,14 @@ public final class ContextManagers {
      */
     public static ContextSnapshot createContextSnapshot() {
         final long start = System.nanoTime();
-        final Map<String, Object> snapshot = new LinkedHashMap<String, Object>();
+        final List<ContextSnapshotEntry> entries = new LinkedList<ContextSnapshotEntry>();
         Long managerStart = null;
         for (ContextManager manager : CONTEXT_MANAGERS) {
             managerStart = System.nanoTime();
             try {
                 final Context activeContext = manager.getActiveContext();
                 if (activeContext != null) {
-                    snapshot.put(manager.getClass().getName(), activeContext.getValue());
+                    entries.add(new ContextSnapshotEntry(manager, activeContext.getValue()));
                     if (LOGGER.isLoggable(Level.FINEST)) {
                         LOGGER.finest("Active context of " + manager + " added to new snapshot: " + activeContext + ".");
                     }
@@ -101,7 +102,7 @@ public final class ContextManagers {
             NoContextManagersFound noContextManagersFound = new NoContextManagersFound();
             LOGGER.log(Level.INFO, noContextManagersFound.getMessage(), noContextManagersFound);
         }
-        ContextSnapshot result = new ContextSnapshotImpl(snapshot);
+        ContextSnapshot result = new ContextSnapshotImpl(entries);
         Timing.timed(System.nanoTime() - start, ContextManagers.class, "createContextSnapshot");
         return result;
     }
@@ -188,30 +189,18 @@ public final class ContextManagers {
      * serializable as well. The {@link ContextManager} implementations do not need to be {@link Serializable}.
      */
     private static final class ContextSnapshotImpl implements ContextSnapshot, Serializable {
-        private final Map<String, Object> snapshot;
+        private final List<ContextSnapshotEntry> entries;
 
-        private ContextSnapshotImpl(Map<String, Object> snapshot) {
-            this.snapshot = snapshot;
+        private ContextSnapshotImpl(List<ContextSnapshotEntry> entries) {
+            this.entries = entries;
         }
 
         public Context<Void> reactivate() {
             final long start = System.nanoTime();
-            final Set<String> remainingContextManagers = new LinkedHashSet<String>(snapshot.keySet());
-            final List<Context<?>> reactivatedContexts = new ArrayList<Context<?>>(snapshot.size());
+            final List<Context<?>> reactivatedContexts = new ArrayList<Context<?>>(entries.size());
             try {
-                for (ContextManager contextManager : CONTEXT_MANAGERS) {
-                    String contextManagerName = contextManager.getClass().getName();
-                    if (remainingContextManagers.remove(contextManagerName)) {
-                        reactivatedContexts.add(reactivate(contextManager, snapshot.get(contextManagerName)));
-                    }
-                }
-
-                if (!remainingContextManagers.isEmpty()) { // Should not happen, print warnings!
-                    CONTEXT_MANAGERS.clearCache();
-                    for (String contextManagerName : remainingContextManagers) {
-                        LOGGER.log(Level.WARNING, "Context manager \"{0}\" not found in service loader! " +
-                                "Cannot reactivate: {1}", new Object[]{contextManagerName, snapshot.get(contextManagerName)});
-                    }
+                for (ContextSnapshotEntry entry : entries) {
+                    reactivatedContexts.add(entry.reactivate());
                 }
                 ReactivatedContext reactivatedContext = new ReactivatedContext(reactivatedContexts);
                 Timing.timed(System.nanoTime() - start, ContextSnapshot.class, "reactivate");
@@ -233,8 +222,24 @@ public final class ContextManagers {
             }
         }
 
+        @Override
+        public String toString() {
+            return "ContextSnapshot{size=" + entries.size() + '}';
+        }
+    }
+
+    // TODO: Make serializable using adapter object for contextManager lookup after deserialization
+    private static final class ContextSnapshotEntry implements Serializable {
+        private final ContextManager contextManager;
+        private final Object snapshotValue;
+
+        private ContextSnapshotEntry(ContextManager contextManager, Object snapshotValue) {
+            this.contextManager = contextManager;
+            this.snapshotValue = snapshotValue;
+        }
+
         @SuppressWarnings("unchecked") // As we got the values from the managers themselves, they must also accept them!
-        private Context reactivate(ContextManager contextManager, Object snapshotValue) {
+        private Context reactivate() {
             long start = System.nanoTime();
             Context reactivated = contextManager.initializeNewContext(snapshotValue);
             if (LOGGER.isLoggable(Level.FINEST)) {
@@ -242,11 +247,6 @@ public final class ContextManagers {
             }
             Timing.timed(System.nanoTime() - start, contextManager.getClass(), "initializeNewContext");
             return reactivated;
-        }
-
-        @Override
-        public String toString() {
-            return "ContextSnapshot{size=" + snapshot.size() + '}';
         }
     }
 
