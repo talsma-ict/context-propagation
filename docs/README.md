@@ -51,11 +51,11 @@ be available in the background thread as well.
 The following `ThreadLocal`-based contexts are currently supported 
 out of the box by this context-propagation library:
 
-- [ServletRequest contexts][servletrequest propagation]
 - [Slf4J MDC (Mapped Diagnostic Context)][mdc propagation]
-- [Locale context][locale context]
-- [Spring Security Context]
 - [OpenTracing Span contexts][opentracing span propagation]
+- [Spring Security Context]
+- [Locale context][locale context]
+- [ServletRequest contexts][servletrequest propagation]
 - _Yours?_ Feel free to create an issue or pull-request
   if you believe there's a general context that was forgotten. 
 
