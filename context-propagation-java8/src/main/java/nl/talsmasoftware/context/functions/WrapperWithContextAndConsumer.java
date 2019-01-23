@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,20 +30,42 @@ import java.util.function.Supplier;
  */
 abstract class WrapperWithContextAndConsumer<T> extends WrapperWithContext<T> {
 
-    private final Consumer<ContextSnapshot> consumer;
+    /**
+     * The context snapshot consumer to provide a new snapshot to after the function is completed, may be {@code null}.
+     */
+    protected final Consumer<ContextSnapshot> contextSnapshotConsumer;
 
-    protected WrapperWithContextAndConsumer(ContextSnapshot snapshot, T delegate, Consumer<ContextSnapshot> consumer) {
+    /**
+     * A new wrapper around a delegate object with a {@linkplain ContextSnapshot}.
+     *
+     * @param snapshot                The context snapshot to be reactivated around the delegate (required).
+     * @param delegate                The delegate action to perform.
+     * @param contextSnapshotConsumer An optional post-action consumer to receive a new context snapshot taken after the action.
+     */
+    protected WrapperWithContextAndConsumer(ContextSnapshot snapshot, T delegate, Consumer<ContextSnapshot> contextSnapshotConsumer) {
         super(snapshot, delegate);
-        this.consumer = consumer;
+        this.contextSnapshotConsumer = contextSnapshotConsumer;
     }
 
-    protected WrapperWithContextAndConsumer(Supplier<ContextSnapshot> supplier, T delegate, Consumer<ContextSnapshot> consumer) {
-        super(supplier == null ? null : supplier::get, delegate);
-        this.consumer = consumer;
+    /**
+     * A new wrapper around a delegate object with a {@linkplain ContextSnapshot}.
+     *
+     * @param contextSnapshotSupplier Supplies the context snapshot to be reactivated around the delegate (required).
+     * @param delegate                The delegate action to perform.
+     * @param contextSnapshotConsumer An optional post-action consumer to receive a new context snapshot taken after the action.
+     */
+    protected WrapperWithContextAndConsumer(Supplier<ContextSnapshot> contextSnapshotSupplier, T delegate, Consumer<ContextSnapshot> contextSnapshotConsumer) {
+        super(contextSnapshotSupplier == null ? null : contextSnapshotSupplier::get, delegate);
+        this.contextSnapshotConsumer = contextSnapshotConsumer;
     }
 
+    /**
+     * @return An optional post-action consumer to receive a new context snapshot taken after the action.
+     * @deprecated The functional wrappers currently no longer use this method.
+     */
+    @Deprecated
     protected Optional<Consumer<ContextSnapshot>> consumer() {
-        return Optional.ofNullable(consumer);
+        return Optional.ofNullable(contextSnapshotConsumer);
     }
 
 }
