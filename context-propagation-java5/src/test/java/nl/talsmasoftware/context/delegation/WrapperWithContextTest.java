@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,6 +109,24 @@ public class WrapperWithContextTest {
 
         assertThat(wrapper, hasToString(containsString(snapshot.toString())));
         assertThat(wrapper, hasToString(containsString(wrapper.toString())));
+    }
+
+    @Test
+    public void testToString_contextSnapshotSupplier() {
+        final ContextSnapshot snapshot = mock(ContextSnapshot.class);
+        final Wrapper<Object> delegate = mock(Wrapper.class);
+        final WrapperWithContext<Object> wrapper = new WrapperWithContext<Object>(new ContextSnapshotSupplier() {
+            public ContextSnapshot get() {
+                return snapshot;
+            }
+        }, delegate) {
+        };
+
+        // Test that toString does NOT trigger eager snapshot evaluation.
+        assertThat(wrapper, hasToString(not(containsString(snapshot.toString()))));
+        assertThat(wrapper, hasToString(containsString(wrapper.toString())));
+        wrapper.snapshot();
+        assertThat(wrapper, hasToString(containsString(snapshot.toString())));
     }
 
     @Test
