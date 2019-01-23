@@ -276,8 +276,9 @@ public final class ContextManagers {
      */
     private static class NoContextManagersFound extends RuntimeException {
         private NoContextManagersFound() {
-            super("Context snapshot was created but no ContextManagers were found! Current thread: "
-                    + Thread.currentThread());
+            super("Context snapshot was created but no ContextManagers were found!"
+                    + " Thread=" + Thread.currentThread()
+                    + ", ContextClassLoader=" + Thread.currentThread().getContextClassLoader());
         }
     }
 }
