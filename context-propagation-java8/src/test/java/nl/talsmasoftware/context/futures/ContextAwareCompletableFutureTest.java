@@ -1981,6 +1981,50 @@ public class ContextAwareCompletableFutureTest {
         }
     }
 
+    @Test
+    public void testAllOf() throws ExecutionException, InterruptedException {
+        manager.initializeNewContext("Vincent Vega");
+        CompletableFuture<String> cf1 = new CompletableFuture<>();
+        CompletableFuture<String> cf2 = new ContextAwareCompletableFuture<String>()
+                .takeNewSnapshot()
+                .thenApply(s -> {
+                    manager.initializeNewContext("-" + s); // This context should be ignored
+                    return s;
+                });
+        ContextAwareCompletableFuture<Void> future = ContextAwareCompletableFuture.allOf(cf1, cf2);
+        manager.initializeNewContext("Jules Winnfield");
+
+        ContextAwareCompletableFuture<String> result = future.thenApplyAsync(aVoid -> manager.getActiveContext().getValue());
+        assertThat(result.isDone(), is(false));
+        cf1.complete("Value 1");
+        assertThat(result.isDone(), is(false));
+        cf2.complete("Value 2");
+        assertThat(result.get(), is("Vincent Vega"));
+    }
+
+    @Test
+    public void testAllOfWithSpecificSnapshot() throws ExecutionException, InterruptedException {
+        manager.initializeNewContext("Vincent Vega");
+        final ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        manager.initializeNewContext("Marcellus Wallace");
+        CompletableFuture<String> cf1 = new CompletableFuture<>();
+        CompletableFuture<String> cf2 = new ContextAwareCompletableFuture<String>()
+                .takeNewSnapshot()
+                .thenApply(s -> {
+                    manager.initializeNewContext("-" + s); // This context should be ignored
+                    return s;
+                });
+        ContextAwareCompletableFuture<Void> future = ContextAwareCompletableFuture.allOf(snapshot, cf1, cf2);
+        manager.initializeNewContext("Jules Winnfield");
+
+        ContextAwareCompletableFuture<String> result = future.thenApplyAsync(aVoid -> manager.getActiveContext().getValue());
+        assertThat(result.isDone(), is(false));
+        cf1.complete("Value 1");
+        assertThat(result.isDone(), is(false));
+        cf2.complete("Value 2");
+        assertThat(result.get(), is("Vincent Vega"));
+    }
+
     private static void waitFor(CountDownLatch latch) {
         try {
             latch.await(5, TimeUnit.SECONDS);

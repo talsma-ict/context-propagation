@@ -361,6 +361,69 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
         return failedFuture(ex, null);
     }
 
+    /**
+     * Returns a new CompletableFuture that is completed when all of
+     * the given CompletableFutures complete.  If any of the given
+     * CompletableFutures complete exceptionally, then the returned
+     * CompletableFuture also does so, with a CompletionException
+     * holding this exception as its cause.  Otherwise, the results,
+     * if any, of the given CompletableFutures are not reflected in
+     * the returned CompletableFuture, but may be obtained by
+     * inspecting them individually. If no CompletableFutures are
+     * provided, returns a CompletableFuture completed with the value
+     * {@code null}.
+     *
+     * <p>Among the applications of this method is to await completion
+     * of a set of independent CompletableFutures before continuing a
+     * program, as in: {@code CompletableFuture.allOf(c1, c2,
+     * c3).join();}.
+     *
+     * <p>A new {@linkplain ContextSnapshot} is taken and applied to all
+     * following {@linkplain CompletionStage completion stages}.
+     *
+     * @param cfs the CompletableFutures
+     * @return A new {@code ContextAwareCompletableFuture} that is completed when all of the
+     * given CompletableFutures complete
+     * @throws NullPointerException if the array or any of its elements are {@code null}
+     * @since 1.0.5
+     */
+    public static ContextAwareCompletableFuture<Void> allOf(CompletableFuture<?>... cfs) {
+        return allOf((ContextSnapshot) null, cfs);
+    }
+
+    /**
+     * Returns a new CompletableFuture that is completed when all of
+     * the given CompletableFutures complete.  If any of the given
+     * CompletableFutures complete exceptionally, then the returned
+     * CompletableFuture also does so, with a CompletionException
+     * holding this exception as its cause.  Otherwise, the results,
+     * if any, of the given CompletableFutures are not reflected in
+     * the returned CompletableFuture, but may be obtained by
+     * inspecting them individually. If no CompletableFutures are
+     * provided, returns a CompletableFuture completed with the value
+     * {@code null}.
+     *
+     * <p>Among the applications of this method is to await completion
+     * of a set of independent CompletableFutures before continuing a
+     * program, as in: {@code CompletableFuture.allOf(c1, c2,
+     * c3).join();}.
+     *
+     * <p>The specified {@linkplain ContextSnapshot} is applied to all
+     * following {@linkplain CompletionStage completion stages}.
+     *
+     * @param snapshot the context snapshot to apply to following completion stages
+     *                 (optional, specify {@code null} to take a new snapshot)
+     * @param cfs      the CompletableFutures
+     * @return A new {@code ContextAwareCompletableFuture} that is completed when all of the
+     * given CompletableFutures complete
+     * @throws NullPointerException if the array or any of its elements are {@code null}
+     * @since 1.0.5
+     */
+    public static ContextAwareCompletableFuture<Void> allOf(ContextSnapshot snapshot, CompletableFuture<?>... cfs) {
+        final ContextSnapshotHolder holder = new ContextSnapshotHolder(snapshot);
+        return wrap(CompletableFuture.allOf(cfs), holder, false);
+    }
+
     private static <U> ContextAwareCompletableFuture<U> wrap(CompletableFuture<U> completableFuture, ContextSnapshotHolder holder, boolean takeNewSnapshot) {
         ContextAwareCompletableFuture<U> contextAwareCompletableFuture = new ContextAwareCompletableFuture<>(holder, takeNewSnapshot);
         completableFuture.whenComplete((result, throwable) -> {
