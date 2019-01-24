@@ -256,23 +256,87 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
                 takeNewSnapshot);
     }
 
+    /**
+     * Creates a new {@code ContextAwareCompletableFuture} from the already-completed value.
+     * A new {@linkplain ContextSnapshot} is taken and applied to all
+     * following {@linkplain CompletionStage completion stages}.
+     *
+     * @param value The value to return from the already-completed future.
+     * @param <U>   The type of the value
+     * @return New {@code ContextAwareCompletableFuture} returning the completed value
+     * and containing a new {@code ContextSnapshot}.
+     * @see #completedFuture(Object, ContextSnapshot)
+     * @since 1.0.5
+     */
     public static <U> ContextAwareCompletableFuture<U> completedFuture(U value) {
         return completedFuture(value, null);
     }
 
+    /**
+     * Creates a new {@code ContextAwareCompletableFuture} from the already-completed value.
+     * A new {@linkplain ContextSnapshot} is taken and applied to all
+     * following {@linkplain CompletionStage completion stages}.
+     *
+     * @param value    The value to return from the already-completed future.
+     * @param snapshot The context snapshot to apply to following completion stages
+     *                 (optional, specify {@code null} to take a new snapshot)
+     * @param <U>      The type of the value
+     * @return New {@code ContextAwareCompletableFuture} returning the completed value
+     * and containing the specified {@code ContextSnapshot}.
+     * @since 1.0.5
+     */
     public static <U> ContextAwareCompletableFuture<U> completedFuture(U value, ContextSnapshot snapshot) {
         final ContextSnapshotHolder holder = new ContextSnapshotHolder(snapshot);
         return wrap(CompletableFuture.completedFuture(value), holder, false);
     }
 
+    /**
+     * Creates a new {@code CompletionStage} from the already-completed value.
+     * A new {@linkplain ContextSnapshot} is taken and applied to all
+     * following {@linkplain CompletionStage completion stages}.
+     *
+     * @param value The value to return from the already-completed stage.
+     * @param <U>   The type of the value
+     * @return New {@code CompletionStage} returning the completed value
+     * and containing a new {@code ContextSnapshot}.
+     * @see #completedFuture(Object, ContextSnapshot)
+     * @since 1.0.5
+     */
     public static <U> CompletionStage<U> completedStage(U value) {
         return completedFuture(value, null);
     }
 
+    /**
+     * Creates a new {@code ContextAwareCompletableFuture} that is already completed
+     * exceptionally with the given exception.
+     * A new {@linkplain ContextSnapshot} is taken and applied to all
+     * following {@linkplain CompletionStage completion stages}.
+     *
+     * @param ex  The exception
+     * @param <U> The type of the value
+     * @return New {@code ContextAwareCompletableFuture} throwing the exception
+     * and containing a new {@code ContextSnapshot}.
+     * @see #failedFuture(Throwable, ContextSnapshot)
+     * @since 1.0.5
+     */
     public static <U> ContextAwareCompletableFuture<U> failedFuture(Throwable ex) {
         return failedFuture(ex, null);
     }
 
+    /**
+     * Creates a new {@code ContextAwareCompletableFuture} that is already completed
+     * exceptionally with the given exception.
+     * The specified {@code snapshot} is applied to all
+     * following {@linkplain CompletionStage completion stages}.
+     *
+     * @param ex       The exception
+     * @param snapshot The context snapshot to apply to following completion stages
+     *                 (optional, specify {@code null} to take a new snapshot)
+     * @param <U>      The type of the value
+     * @return New {@code ContextAwareCompletableFuture} throwing the exception
+     * and containing the specified {@code snapshot}.
+     * @since 1.0.5
+     */
     public static <U> ContextAwareCompletableFuture<U> failedFuture(Throwable ex, ContextSnapshot snapshot) {
         final ContextSnapshotHolder holder = new ContextSnapshotHolder(snapshot);
         final CompletableFuture<U> future = new CompletableFuture<>();
@@ -280,6 +344,19 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
         return wrap(future, holder, false);
     }
 
+    /**
+     * Creates a new {@code CompletionStage} that is already completed
+     * exceptionally with the given exception.
+     * A new {@linkplain ContextSnapshot} is taken and applied to all
+     * following {@linkplain CompletionStage completion stages}.
+     *
+     * @param ex  The exception
+     * @param <U> The type of the value
+     * @return New {@code CompletionStage} throwing the exception
+     * and containing a new {@code ContextSnapshot}.
+     * @see #failedFuture(Throwable, ContextSnapshot)
+     * @since 1.0.5
+     */
     public static <U> CompletionStage<U> failedStage(Throwable ex) {
         return failedFuture(ex, null);
     }
@@ -291,6 +368,13 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
             else contextAwareCompletableFuture.complete(result);
         });
         return contextAwareCompletableFuture;
+    }
+
+    /**
+     * @return The {@code snapshotHolder} if {@code takeNewSnapshot == true} or otherwise {@code null}.
+     */
+    private Consumer<ContextSnapshot> resultSnapshotConsumer() {
+        return takeNewSnapshot ? snapshotHolder : null;
     }
 
     /**
@@ -326,13 +410,6 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      */
     public ContextAwareCompletableFuture<T> takeNewSnapshot(boolean takeSnapshot) {
         return this.takeNewSnapshot == takeSnapshot ? this : wrap(this, snapshotHolder, takeSnapshot);
-    }
-
-    /**
-     * @return The {@code snapshotHolder} if {@code takeNewSnapshot == true} or otherwise {@code null}.
-     */
-    private Consumer<ContextSnapshot> resultSnapshotConsumer() {
-        return takeNewSnapshot ? snapshotHolder : null;
     }
 
     @Override
