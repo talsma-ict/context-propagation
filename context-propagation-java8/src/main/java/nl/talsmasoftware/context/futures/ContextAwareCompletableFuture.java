@@ -338,10 +338,9 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * @since 1.0.5
      */
     public static <U> ContextAwareCompletableFuture<U> failedFuture(Throwable ex, ContextSnapshot snapshot) {
-        final ContextSnapshotHolder holder = new ContextSnapshotHolder(snapshot);
-        final CompletableFuture<U> future = new CompletableFuture<>();
+        final ContextAwareCompletableFuture<U> future = new ContextAwareCompletableFuture<>(snapshot);
         future.completeExceptionally(ex);
-        return wrap(future, holder, false);
+        return future;
     }
 
     /**
