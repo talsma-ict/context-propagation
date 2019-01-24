@@ -69,7 +69,7 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * Creates a new {@link CompletableFuture} where all completion methods are run within the specified
      * snapshot context.
      *
-     * @param snapshot The snapshot to run completion methods in.
+     * @param snapshot the snapshot to run completion methods in.
      *                 Optional, the completable future will take a new snaphot if {@code null} is provided.
      * @see ContextManagers#createContextSnapshot()
      */
@@ -89,7 +89,7 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      *
      * @param supplier a function to be performed asynchronously returning the result of the CompletableFuture
      * @param <U>      the function's return type
-     * @return the new CompletableFuture that propagates a snapshot of the current context
+     * @return The new CompletableFuture that propagates a snapshot of the current context
      * @see CompletableFuture#supplyAsync(Supplier)
      * @see ContextAwareCompletableFuture#supplyAsync(Supplier, Executor, ContextSnapshot, boolean)
      */
@@ -105,7 +105,7 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * @param supplier a function returning the value to be used to complete the returned CompletableFuture
      * @param executor the executor to use for asynchronous execution
      * @param <U>      the function's return type
-     * @return the new CompletableFuture that propagates a snapshot of the current context
+     * @return The new CompletableFuture that propagates a snapshot of the current context
      * @see CompletableFuture#supplyAsync(Supplier, Executor)
      * @see ContextAwareCompletableFuture#supplyAsync(Supplier, Executor, ContextSnapshot, boolean)
      */
@@ -129,7 +129,7 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * @param snapshot a snapshot of the context to be propagated in the supplier function
      *                 and all successive calls of this completable future
      * @param <U>      the function's return type
-     * @return the new CompletableFuture that propagates the specified context snapshot
+     * @return The new CompletableFuture that propagates the specified context snapshot
      * @see CompletableFuture#supplyAsync(Supplier, Executor)
      * @see ContextAwareCompletableFuture#supplyAsync(Supplier, Executor, ContextSnapshot, boolean)
      */
@@ -156,13 +156,13 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      *                        If {@code false}, the snapshot from the caller propagate to all following completion stages.
      *                        If {@code true}, a new snapshot is taken after each completion stage to propagate into the next.
      * @param <U>             the function's return type
-     * @return the new CompletableFuture that propagates the specified context snapshot
+     * @return The new CompletableFuture that propagates the specified context snapshot
      * @see CompletableFuture#supplyAsync(Supplier, Executor)
      */
     public static <U> ContextAwareCompletableFuture<U> supplyAsync(
             Supplier<U> supplier, Executor executor, ContextSnapshot snapshot, boolean takeNewSnapshot) {
 
-        ContextSnapshotHolder holder = new ContextSnapshotHolder(snapshot);
+        final ContextSnapshotHolder holder = new ContextSnapshotHolder(snapshot);
         supplier = new SupplierWithContext<U>(holder, supplier, takeNewSnapshot ? holder : null) {
         };
         return wrap(executor == null
@@ -178,7 +178,7 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * calls to the {@code CompletableFuture}.
      *
      * @param runnable the action to run before completing the returned CompletableFuture
-     * @return the new CompletableFuture that propagates a snapshot of the current context
+     * @return The new CompletableFuture that propagates a snapshot of the current context
      * @see CompletableFuture#runAsync(Runnable)
      * @see ContextAwareCompletableFuture#runAsync(Runnable, Executor, ContextSnapshot, boolean)
      */
@@ -193,7 +193,7 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      *
      * @param runnable the action to run before completing the returned CompletableFuture
      * @param executor the executor to use for asynchronous execution
-     * @return the new CompletableFuture that propagates a snapshot of the current context
+     * @return The new CompletableFuture that propagates a snapshot of the current context
      * @see CompletableFuture#runAsync(Runnable, Executor)
      * @see ContextAwareCompletableFuture#runAsync(Runnable, Executor, ContextSnapshot, boolean)
      */
@@ -215,7 +215,7 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * @param runnable the action to run before completing the returned CompletableFuture
      * @param executor the executor to use for asynchronous execution
      * @param snapshot the context snapshot to apply to the runnable action
-     * @return the new CompletableFuture that propagates a snapshot of the current context
+     * @return The new CompletableFuture that propagates a snapshot of the current context
      * @see CompletableFuture#runAsync(Runnable, Executor)
      * @see ContextAwareCompletableFuture#runAsync(Runnable, Executor, ContextSnapshot, boolean)
      */
@@ -240,7 +240,7 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * @param takeNewSnapshot whether or not a new ContextSnapshot should be taken after the supplier function is done.
      *                        If {@code false}, the snapshot from the caller propagate to all following completion stages.
      *                        If {@code true}, a new snapshot is taken after each completion stage to propagate into the next.
-     * @return the new CompletableFuture that propagates a snapshot of the current context
+     * @return The new CompletableFuture that propagates a snapshot of the current context
      * @see CompletableFuture#runAsync(Runnable, Executor)
      */
     public static ContextAwareCompletableFuture<Void> runAsync(
@@ -261,8 +261,8 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * A new {@linkplain ContextSnapshot} is taken and applied to all
      * following {@linkplain CompletionStage completion stages}.
      *
-     * @param value The value to return from the already-completed future.
-     * @param <U>   The type of the value
+     * @param value the value to return from the already-completed future.
+     * @param <U>   the type of the value
      * @return New {@code ContextAwareCompletableFuture} returning the completed value
      * and containing a new {@code ContextSnapshot}.
      * @see #completedFuture(Object, ContextSnapshot)
@@ -277,17 +277,18 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * A new {@linkplain ContextSnapshot} is taken and applied to all
      * following {@linkplain CompletionStage completion stages}.
      *
-     * @param value    The value to return from the already-completed future.
-     * @param snapshot The context snapshot to apply to following completion stages
+     * @param value    the value to return from the already-completed future.
+     * @param snapshot the context snapshot to apply to following completion stages
      *                 (optional, specify {@code null} to take a new snapshot)
-     * @param <U>      The type of the value
+     * @param <U>      the type of the value
      * @return New {@code ContextAwareCompletableFuture} returning the completed value
      * and containing the specified {@code ContextSnapshot}.
      * @since 1.0.5
      */
     public static <U> ContextAwareCompletableFuture<U> completedFuture(U value, ContextSnapshot snapshot) {
-        final ContextSnapshotHolder holder = new ContextSnapshotHolder(snapshot);
-        return wrap(CompletableFuture.completedFuture(value), holder, false);
+        final ContextAwareCompletableFuture<U> completedFuture = new ContextAwareCompletableFuture<>(snapshot);
+        completedFuture.complete(value);
+        return completedFuture;
     }
 
     /**
@@ -295,8 +296,8 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * A new {@linkplain ContextSnapshot} is taken and applied to all
      * following {@linkplain CompletionStage completion stages}.
      *
-     * @param value The value to return from the already-completed stage.
-     * @param <U>   The type of the value
+     * @param value the value to return from the already-completed stage.
+     * @param <U>   the type of the value
      * @return New {@code CompletionStage} returning the completed value
      * and containing a new {@code ContextSnapshot}.
      * @see #completedFuture(Object, ContextSnapshot)
@@ -312,8 +313,8 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * A new {@linkplain ContextSnapshot} is taken and applied to all
      * following {@linkplain CompletionStage completion stages}.
      *
-     * @param ex  The exception
-     * @param <U> The type of the value
+     * @param ex  the exception
+     * @param <U> the type of the value
      * @return New {@code ContextAwareCompletableFuture} throwing the exception
      * and containing a new {@code ContextSnapshot}.
      * @see #failedFuture(Throwable, ContextSnapshot)
@@ -329,18 +330,18 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * The specified {@code snapshot} is applied to all
      * following {@linkplain CompletionStage completion stages}.
      *
-     * @param ex       The exception
-     * @param snapshot The context snapshot to apply to following completion stages
+     * @param ex       the exception
+     * @param snapshot the context snapshot to apply to following completion stages
      *                 (optional, specify {@code null} to take a new snapshot)
-     * @param <U>      The type of the value
+     * @param <U>      the type of the value
      * @return New {@code ContextAwareCompletableFuture} throwing the exception
      * and containing the specified {@code snapshot}.
      * @since 1.0.5
      */
     public static <U> ContextAwareCompletableFuture<U> failedFuture(Throwable ex, ContextSnapshot snapshot) {
-        final ContextAwareCompletableFuture<U> future = new ContextAwareCompletableFuture<>(snapshot);
-        future.completeExceptionally(ex);
-        return future;
+        final ContextAwareCompletableFuture<U> failedFuture = new ContextAwareCompletableFuture<>(snapshot);
+        failedFuture.completeExceptionally(ex);
+        return failedFuture;
     }
 
     /**
@@ -349,8 +350,8 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * A new {@linkplain ContextSnapshot} is taken and applied to all
      * following {@linkplain CompletionStage completion stages}.
      *
-     * @param ex  The exception
-     * @param <U> The type of the value
+     * @param ex  the exception
+     * @param <U> the type of the value
      * @return New {@code CompletionStage} throwing the exception
      * and containing a new {@code ContextSnapshot}.
      * @see #failedFuture(Throwable, ContextSnapshot)
