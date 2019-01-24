@@ -138,6 +138,41 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
     }
 
     /**
+     * Runs the {@code supplier} task in the specified {@link Executor executor}
+     * <em>within the specified {@link ContextSnapshot context snapshot}</em> and also applies that context
+     * to all successive calls to the {@code CompletableFuture}.
+     * <p>
+     * This method is lenient to {@code null} values for {@code executor} and {@code snapshot}:<br>
+     * If {@code executor == null} the common {@link java.util.concurrent.ForkJoinPool ForkJoinPool} is used as
+     * specified by {@link CompletableFuture#supplyAsync(Supplier)}.<br>
+     * If {@code snapshot == null} a {@link ContextManagers#createContextSnapshot() new context snapshot} is
+     * created for the {@link Supplier} (if not already a {@link SupplierWithContext}).
+     *
+     * @param supplier        a function returning the value to be used to complete the returned CompletableFuture
+     * @param executor        the executor to use for asynchronous execution
+     * @param snapshot        a snapshot of the context to be propagated in the supplier function
+     *                        and all successive calls of this completable future
+     * @param takeNewSnapshot whether or not a new ContextSnapshot should be taken after the supplier function is done.
+     *                        If {@code false}, the snapshot from the caller propagate to all following completion stages.
+     *                        If {@code true}, a new snapshot is taken after each completion stage to propagate into the next.
+     * @param <U>             the function's return type
+     * @return the new CompletableFuture that propagates the specified context snapshot
+     * @see CompletableFuture#supplyAsync(Supplier, Executor)
+     */
+    public static <U> ContextAwareCompletableFuture<U> supplyAsync(
+            Supplier<U> supplier, Executor executor, ContextSnapshot snapshot, boolean takeNewSnapshot) {
+
+        ContextSnapshotHolder holder = new ContextSnapshotHolder(snapshot);
+        supplier = new SupplierWithContext<U>(holder, supplier, takeNewSnapshot ? holder : null) {
+        };
+        return wrap(executor == null
+                        ? CompletableFuture.supplyAsync(supplier)
+                        : CompletableFuture.supplyAsync(supplier, executor),
+                holder,
+                takeNewSnapshot);
+    }
+
+    /**
      * Runs the {@code runnable} task in the common {@link java.util.concurrent.ForkJoinPool ForkJoinPool}
      * <em>within the current context</em> and also applies that context to all successive
      * calls to the {@code CompletableFuture}.
@@ -189,41 +224,6 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
     }
 
     /**
-     * Runs the {@code supplier} task in the specified {@link Executor executor}
-     * <em>within the specified {@link ContextSnapshot context snapshot}</em> and also applies that context
-     * to all successive calls to the {@code CompletableFuture}.
-     * <p>
-     * This method is lenient to {@code null} values for {@code executor} and {@code snapshot}:<br>
-     * If {@code executor == null} the common {@link java.util.concurrent.ForkJoinPool ForkJoinPool} is used as
-     * specified by {@link CompletableFuture#supplyAsync(Supplier)}.<br>
-     * If {@code snapshot == null} a {@link ContextManagers#createContextSnapshot() new context snapshot} is
-     * created for the {@link Supplier} (if not already a {@link SupplierWithContext}).
-     *
-     * @param supplier        a function returning the value to be used to complete the returned CompletableFuture
-     * @param executor        the executor to use for asynchronous execution
-     * @param snapshot        a snapshot of the context to be propagated in the supplier function
-     *                        and all successive calls of this completable future
-     * @param takeNewSnapshot whether or not a new ContextSnapshot should be taken after the supplier function is done.
-     *                        If {@code false}, the snapshot from the caller propagate to all following completion stages.
-     *                        If {@code true}, a new snapshot is taken after each completion stage to propagate into the next.
-     * @param <U>             the function's return type
-     * @return the new CompletableFuture that propagates the specified context snapshot
-     * @see CompletableFuture#supplyAsync(Supplier, Executor)
-     */
-    public static <U> ContextAwareCompletableFuture<U> supplyAsync(
-            Supplier<U> supplier, Executor executor, ContextSnapshot snapshot, boolean takeNewSnapshot) {
-
-        ContextSnapshotHolder holder = new ContextSnapshotHolder(snapshot);
-        supplier = new SupplierWithContext<U>(holder, supplier, takeNewSnapshot ? holder : null) {
-        };
-        return wrap(executor == null
-                        ? CompletableFuture.supplyAsync(supplier)
-                        : CompletableFuture.supplyAsync(supplier, executor),
-                holder,
-                takeNewSnapshot);
-    }
-
-    /**
      * Runs the {@code runnable} task in the specified {@link Executor executor}
      * <em>within the specified {@link ContextSnapshot context snapshot}</em> and also applies that context
      * to all successive calls to the {@code CompletableFuture}.
@@ -254,6 +254,34 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
                         : CompletableFuture.runAsync(runnable, executor),
                 holder,
                 takeNewSnapshot);
+    }
+
+    public static <U> ContextAwareCompletableFuture<U> completedFuture(U value) {
+        return completedFuture(value, null);
+    }
+
+    public static <U> ContextAwareCompletableFuture<U> completedFuture(U value, ContextSnapshot snapshot) {
+        final ContextSnapshotHolder holder = new ContextSnapshotHolder(snapshot);
+        return wrap(CompletableFuture.completedFuture(value), holder, false);
+    }
+
+    public static <U> CompletionStage<U> completedStage(U value) {
+        return completedFuture(value, null);
+    }
+
+    public static <U> ContextAwareCompletableFuture<U> failedFuture(Throwable ex) {
+        return failedFuture(ex, null);
+    }
+
+    public static <U> ContextAwareCompletableFuture<U> failedFuture(Throwable ex, ContextSnapshot snapshot) {
+        final ContextSnapshotHolder holder = new ContextSnapshotHolder(snapshot);
+        final CompletableFuture<U> future = new CompletableFuture<>();
+        future.completeExceptionally(ex);
+        return wrap(future, holder, false);
+    }
+
+    public static <U> CompletionStage<U> failedStage(Throwable ex) {
+        return failedFuture(ex, null);
     }
 
     private static <U> ContextAwareCompletableFuture<U> wrap(CompletableFuture<U> completableFuture, ContextSnapshotHolder holder, boolean takeNewSnapshot) {
