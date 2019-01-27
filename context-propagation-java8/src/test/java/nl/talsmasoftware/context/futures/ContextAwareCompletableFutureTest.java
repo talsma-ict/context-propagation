@@ -2025,6 +2025,50 @@ public class ContextAwareCompletableFutureTest {
         assertThat(result.get(), is("Vincent Vega"));
     }
 
+    @Test
+    public void testAnyOf() throws ExecutionException, InterruptedException {
+        manager.initializeNewContext("Vincent Vega");
+        CompletableFuture<String> cf1 = new CompletableFuture<>();
+        CompletableFuture<String> cf2 = new ContextAwareCompletableFuture<String>()
+                .takeNewSnapshot()
+                .thenApply(s -> {
+                    manager.initializeNewContext("-" + s); // This context should be ignored
+                    return s;
+                });
+        ContextAwareCompletableFuture<Object> future = ContextAwareCompletableFuture.anyOf(cf1, cf2);
+        manager.initializeNewContext("Jules Winnfield");
+
+        ContextAwareCompletableFuture<String> result = future
+                .thenApplyAsync(s -> manager.getActiveContext().getValue());
+        assertThat(result.isDone(), is(false));
+        cf2.complete("Value 2");
+        assertThat(result.get(), is("Vincent Vega"));
+        assertThat(future.get(), is("Value 2"));
+    }
+
+    @Test
+    public void testAnyOfWithSpecificSnapshot() throws ExecutionException, InterruptedException {
+        manager.initializeNewContext("Vincent Vega");
+        final ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        manager.initializeNewContext("Marcellus Wallace");
+        CompletableFuture<String> cf1 = new CompletableFuture<>();
+        CompletableFuture<String> cf2 = new ContextAwareCompletableFuture<String>()
+                .takeNewSnapshot()
+                .thenApply(s -> {
+                    manager.initializeNewContext("-" + s); // This context should be ignored
+                    return s;
+                });
+        ContextAwareCompletableFuture<Object> future = ContextAwareCompletableFuture.anyOf(snapshot, cf1, cf2);
+        manager.initializeNewContext("Jules Winnfield");
+
+        ContextAwareCompletableFuture<String> result = future
+                .thenApplyAsync(s -> manager.getActiveContext().getValue());
+        assertThat(result.isDone(), is(false));
+        cf1.complete("Value 1");
+        assertThat(result.get(), is("Vincent Vega"));
+        assertThat(future.get(), is("Value 1"));
+    }
+
     private static void waitFor(CountDownLatch latch) {
         try {
             latch.await(5, TimeUnit.SECONDS);

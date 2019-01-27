@@ -372,13 +372,13 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * inspecting them individually. If no CompletableFutures are
      * provided, returns a CompletableFuture completed with the value
      * {@code null}.
-     *
-     * <p>Among the applications of this method is to await completion
+     * <p>
+     * Among the applications of this method is to await completion
      * of a set of independent CompletableFutures before continuing a
      * program, as in: {@code CompletableFuture.allOf(c1, c2,
      * c3).join();}.
-     *
-     * <p>A new {@linkplain ContextSnapshot} is taken and applied to all
+     * <p>
+     * A new {@linkplain ContextSnapshot} is taken and applied to all
      * following {@linkplain CompletionStage completion stages}.
      *
      * @param cfs the CompletableFutures
@@ -402,13 +402,13 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * inspecting them individually. If no CompletableFutures are
      * provided, returns a CompletableFuture completed with the value
      * {@code null}.
-     *
-     * <p>Among the applications of this method is to await completion
+     * <p>
+     * Among the applications of this method is to await completion
      * of a set of independent CompletableFutures before continuing a
      * program, as in: {@code CompletableFuture.allOf(c1, c2,
      * c3).join();}.
-     *
-     * <p>The specified {@linkplain ContextSnapshot} is applied to all
+     * <p>
+     * The specified {@linkplain ContextSnapshot} is applied to all
      * following {@linkplain CompletionStage completion stages}.
      *
      * @param snapshot the context snapshot to apply to following completion stages
@@ -422,6 +422,51 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
     public static ContextAwareCompletableFuture<Void> allOf(ContextSnapshot snapshot, CompletableFuture<?>... cfs) {
         final ContextSnapshotHolder holder = new ContextSnapshotHolder(snapshot);
         return wrap(CompletableFuture.allOf(cfs), holder, false);
+    }
+
+    /**
+     * Returns a new CompletableFuture that is completed when any of
+     * the given CompletableFutures complete, with the same result.
+     * Otherwise, if it completed exceptionally, the returned
+     * CompletableFuture also does so, with a CompletionException
+     * holding this exception as its cause.  If no CompletableFutures
+     * are provided, returns an incomplete CompletableFuture.
+     * <p>
+     * A new {@linkplain ContextSnapshot} is taken and applied to all
+     * following {@linkplain CompletionStage completion stages}.
+     *
+     * @param cfs the CompletableFutures
+     * @return a new CompletableFuture that is completed with the result or exception
+     * of any of the given CompletableFutures when one completes
+     * @throws NullPointerException if the array or any of its elements are {@code null}
+     * @since 1.0.5
+     */
+    public static ContextAwareCompletableFuture<Object> anyOf(CompletableFuture<?>... cfs) {
+        return anyOf((ContextSnapshot) null, cfs);
+    }
+
+    /**
+     * Returns a new CompletableFuture that is completed when any of
+     * the given CompletableFutures complete, with the same result.
+     * Otherwise, if it completed exceptionally, the returned
+     * CompletableFuture also does so, with a CompletionException
+     * holding this exception as its cause.  If no CompletableFutures
+     * are provided, returns an incomplete CompletableFuture.
+     * <p>
+     * The specified {@linkplain ContextSnapshot} is applied to all
+     * following {@linkplain CompletionStage completion stages}.
+     *
+     * @param snapshot the context snapshot to apply to following completion stages
+     *                 (optional, specify {@code null} to take a new snapshot)
+     * @param cfs      the CompletableFutures
+     * @return a new CompletableFuture that is completed with the result or exception
+     * of any of the given CompletableFutures when one completes
+     * @throws NullPointerException if the array or any of its elements are {@code null}
+     * @since 1.0.5
+     */
+    public static ContextAwareCompletableFuture<Object> anyOf(ContextSnapshot snapshot, CompletableFuture<?>... cfs) {
+        final ContextSnapshotHolder holder = new ContextSnapshotHolder(snapshot);
+        return wrap(CompletableFuture.anyOf(cfs), holder, false);
     }
 
     private static <U> ContextAwareCompletableFuture<U> wrap(CompletableFuture<U> completableFuture, ContextSnapshotHolder holder, boolean takeNewSnapshot) {
