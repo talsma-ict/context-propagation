@@ -145,6 +145,36 @@ public final class ContextManagers {
         Timing.timed(System.nanoTime() - start, ContextManagers.class, "clearActiveContexts");
     }
 
+    /**
+     * Override the {@linkplain ClassLoader} used to lookup {@linkplain ContextManager contextmanagers}.
+     * <p>
+     * Normally, taking a snapshot uses the {@linkplain Thread#getContextClassLoader() Context ClassLoader} from the
+     * {@linkplain Thread#currentThread() current thread} to look up all {@linkplain ContextManager context managers}.
+     * It is possible to configure a fixed, single classloader in your application for looking up the context managers.
+     * <p>
+     * Using this method to specify a fixed classloader will only impact
+     * new {@linkplain ContextSnapshot context snapshots}. Existing snapshots will not be impacted.
+     * <p>
+     * <strong>Notes:</strong><br>
+     * <ul>
+     * <li>Please be aware that this configuration is global!
+     * <li>This will also impact the lookup of
+     * {@linkplain nl.talsmasoftware.context.observer.ContextObserver context observers}
+     * </ul>
+     *
+     * @param classLoader The single, fixed ClassLoader used for looking up context managers.
+     *                    Specify {@code null} to restore the default behaviour.
+     * @since 1.0.5
+     */
+    public static void useClassLoader(ClassLoader classLoader) {
+        Level loglevel = PriorityServiceLoader.classLoaderOverride == classLoader ? Level.FINEST : Level.FINE;
+        if (LOGGER.isLoggable(loglevel)) {
+            LOGGER.log(loglevel, "Setting override classloader for loading ContextManager and ContextObserver " +
+                    "instances to " + classLoader + " (was: " + PriorityServiceLoader.classLoaderOverride + ").");
+        }
+        PriorityServiceLoader.classLoaderOverride = classLoader;
+    }
+
     private static void clearContext(ContextManager manager, Context context) {
         final long start = System.nanoTime();
         final Class<? extends Context> contextType = context.getClass();

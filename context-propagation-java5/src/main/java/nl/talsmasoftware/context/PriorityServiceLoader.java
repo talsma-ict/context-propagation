@@ -43,6 +43,8 @@ public final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
     private static final String ENVIRONMENT_CACHING_VALUE = System.getenv(
             SYSTEMPROPERTY_CACHING.replace('.', '_').toUpperCase(Locale.ENGLISH));
 
+    // Set from ContextManagers.useClassLoader(); sometimes a single, fixed classloader may be necessary (e.g. #97)
+    static volatile ClassLoader classLoaderOverride = null;
     private final Class<SVC> serviceType;
     private final Map<ClassLoader, List<SVC>> cache = new WeakHashMap<ClassLoader, List<SVC>>();
 
@@ -53,11 +55,12 @@ public final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
 
     @SuppressWarnings("unchecked")
     public Iterator<SVC> iterator() {
-        final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-        List<SVC> services = cache.get(contextClassLoader);
+        final ClassLoader classLoader =
+                classLoaderOverride == null ? Thread.currentThread().getContextClassLoader() : classLoaderOverride;
+        List<SVC> services = cache.get(classLoader);
         if (services == null) {
-            services = findServices(contextClassLoader);
-            if (!isCachingDisabled()) cache.put(contextClassLoader, services);
+            services = findServices(classLoader);
+            if (!isCachingDisabled()) cache.put(classLoader, services);
         }
         return services.iterator();
     }
