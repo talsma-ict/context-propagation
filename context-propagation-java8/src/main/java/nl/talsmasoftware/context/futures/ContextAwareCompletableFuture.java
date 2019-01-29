@@ -158,6 +158,7 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * @param <U>             the function's return type
      * @return The new CompletableFuture that propagates the specified context snapshot
      * @see CompletableFuture#supplyAsync(Supplier, Executor)
+     * @since 1.0.4
      */
     public static <U> ContextAwareCompletableFuture<U> supplyAsync(
             Supplier<U> supplier, Executor executor, ContextSnapshot snapshot, boolean takeNewSnapshot) {
@@ -242,6 +243,7 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      *                        If {@code true}, a new snapshot is taken after each completion stage to propagate into the next.
      * @return The new CompletableFuture that propagates a snapshot of the current context
      * @see CompletableFuture#runAsync(Runnable, Executor)
+     * @since 1.0.4
      */
     public static ContextAwareCompletableFuture<Void> runAsync(
             Runnable runnable, Executor executor, ContextSnapshot snapshot, boolean takeNewSnapshot) {
