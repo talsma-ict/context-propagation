@@ -162,7 +162,7 @@ public final class ContextManagers {
      * {@linkplain nl.talsmasoftware.context.observer.ContextObserver context observers}
      * </ul>
      *
-     * @param classLoader The single, fixed ClassLoader used for looking up context managers.
+     * @param classLoader The single, fixed ClassLoader to use for finding context managers.
      *                    Specify {@code null} to restore the default behaviour.
      * @since 1.0.5
      */
