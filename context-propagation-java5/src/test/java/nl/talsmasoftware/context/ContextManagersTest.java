@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,12 @@ public class ContextManagersTest {
     @After
     public void resetContexts() {
         DummyContext.reset();
+    }
+
+    @Before
+    @After
+    public void resetContextClassLoader() {
+        ContextManagers.useClassLoader(null);
     }
 
     @Test
@@ -271,6 +277,29 @@ public class ContextManagersTest {
             // there should be no exception
         } finally {
             assertThat("Restore service file!", TMP_SERVICE_FILE.renameTo(SERVICE_FILE), is(true));
+        }
+    }
+
+    @Test
+    public void testConcurrentSnapshots_fixedClassLoader() throws ExecutionException, InterruptedException {
+        ContextManagers.useClassLoader(Thread.currentThread().getContextClassLoader());
+        int threadcount = 25;
+        ExecutorService threadpool = Executors.newFixedThreadPool(threadcount);
+        try {
+            List<Future<ContextSnapshot>> snapshots = new ArrayList<Future<ContextSnapshot>>(threadcount);
+            for (int i = 0; i < threadcount; i++) {
+                snapshots.add(threadpool.submit(new Callable<ContextSnapshot>() {
+                    public ContextSnapshot call() throws Exception {
+                        return ContextManagers.createContextSnapshot();
+                    }
+                }));
+            }
+
+            for (int i = 0; i < threadcount; i++) {
+                assertThat(snapshots.get(i).get(), is(notNullValue()));
+            }
+        } finally {
+            threadpool.shutdown();
         }
     }
 }
