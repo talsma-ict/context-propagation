@@ -36,10 +36,6 @@ you take a [_snapshot_](#context-snapshot) of **all** active contexts at once.
 - [ContextManager javadoc][contextmanager]
 - [ContextManagers javadoc][contextmanagers]
 
-## Creating your own context manager
-
-_(Work in progress)_
-
 # Context Snapshot
 
 A context snapshot is created by the [ContextManagers]' `createContextSnapshot()` method.
@@ -50,9 +46,18 @@ The values in this snapshot can be [_reactivated_](https://javadoc.io/page/nl.ta
 They stay active until the reactivation is closed again (or are overwritten by new values).  
 Closing the reactivated object is mandatory (from the thread where the reactivation was called).
 
-
 - [ContextSnapshot javadoc](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextSnapshot.html)
 - [ContextManagers javadoc](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextManagers.html)
+
+# Creating your own context manager
+
+1. Create a context manager
+_(Work in progress)_
+
+2. Register a custom context manager
+_(Work in progress)_
+
+
 
 
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation.svg
