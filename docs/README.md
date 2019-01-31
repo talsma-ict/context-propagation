@@ -4,11 +4,13 @@
 
 # Context propagation library
 
-Standardized context propagation in concurrent systems.
+Standard mechanism to _capture_ `ThreadLocal` snapshots 
+to _propagate_ into concurrent tasks by _reactivating_ in another thread.
 
-Provides a standardized way to create snapshots from various supported
-`ThreadLocal`-based `Context` types that can be reactivated in another
-thread.
+Provides various tools to automate the propagation, ensuring proper scoping and closing of reactivated context snapshots:
+- `ContextAwareExecutorService` that wraps any existing `ExecutorService`
+- `ContextAwareCompletableFuture` that propagates context snapshots into each successive `CompletionStage`
+   (e.g. _then.._ and _when..._ methods).
 
 ## How to use this library
 
