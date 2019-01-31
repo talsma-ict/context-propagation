@@ -87,10 +87,11 @@ by [creating your own context manager](../context-propagation-java5/README.md#cr
 
 ## Caching
 
-By default the `ContextManagers` class caches the context manager instances it finds per
-_context classloader_. Since the cache is per classloader, this should work satisfactory
-for applications with simple classloader hierarchies (e.g. _spring boot_, _dropwizard_ etc) 
-and complex hierarchies (JEE and the like).
+By default the `ContextManagers` class caches the context manager instances it finds
+per _classloader_.
+Since the cache is per classloader, this should work satisfactory
+for applications with simple classloader hierarchies (e.g. _dropwizard_) 
+and also for complex hierarchies (_spring boot_, _JEE_ and the like).
 
 ### Disable caching
 
