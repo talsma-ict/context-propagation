@@ -11,6 +11,20 @@ Provides various tools to automate the propagation, ensuring proper scoping and 
 - `ContextAwareExecutorService` that wraps any existing `ExecutorService`
 - `ContextAwareCompletableFuture` that propagates context snapshots into each successive `CompletionStage`
    (e.g. _then.._ and _when..._ methods).
+   
+# Terminology
+
+- **Context** A 'container' for values that have a 'global' value _per thread_.
+  Normally `ThreadLocal` based implementations.
+  An `AbstractThreadLocalContext` base class is provided that allows nested contexts 
+  and provides predictable behaviour for out-of-order closing.
+- **ContextManager** Manages the active context. 
+  Can initialize a new context and provides to the active context.
+- **ContextSnapshot** A snapshot contains the current value from _all_ known context managers.
+  These values can be _reactivated_ in another thread.
+  Reactivated snapshots **must be closed** to avoid leaking context.  
+  All _context aware_ utility classes in this library are tested 
+  to make sure they reactivate _and_ close snapshots in a safe way.
 
 ## How to use this library
 
