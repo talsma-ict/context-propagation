@@ -80,11 +80,9 @@ out of the box by this context-propagation library:
 - _Yours?_ Feel free to create an issue or pull-request
   if you believe there's a general context that was forgotten. 
 
-Adding your own `Context` type is not difficult.
-
 ## Custom contexts
 
-It is easy to add a custom `Context` type to be propagated
+Adding your own `Context` type is possible
 by [creating your own context manager](../context-propagation-java5/README.md#creating-your-own-context-manager).
 
 ## Caching
