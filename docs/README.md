@@ -14,13 +14,13 @@ Provides various tools to automate the propagation, ensuring proper scoping and 
    
 # Terminology
 
-- **Context** A 'container' for values that have a 'global' value _per thread_.
+- **Context:** A 'container' for values that have a 'global' value _per thread_.
   Normally `ThreadLocal` based implementations.
   An `AbstractThreadLocalContext` base class is provided that allows nested contexts 
   and provides predictable behaviour for out-of-order closing.
-- **ContextManager** Manages the active context. 
+- **ContextManager:** Manages the active context. 
   Can initialize a new context and provides to the active context.
-- **ContextSnapshot** A snapshot contains the current value from _all_ known context managers.
+- **ContextSnapshot:** A snapshot contains the current value from _all_ known context managers.
   These values can be _reactivated_ in another thread.
   Reactivated snapshots **must be closed** to avoid leaking context.  
   All _context aware_ utility classes in this library are tested 
