@@ -15,15 +15,18 @@ Provides various tools to automate the propagation, ensuring proper scoping and 
 ## Terminology
 
 ### Context
+
 A 'container' for values that have a 'global' value _per thread_.  
 An `AbstractThreadLocalContext` base class is provided that allows nested contexts 
 and provides predictable behaviour for out-of-order closing.
 
 ### ContextManager
+
 Manages the active context.  
 Can initialize a new context and provides to the active context.
 
 ### ContextSnapshot
+
 A snapshot contains the current value from _all_ known context managers.  
 These values can be _reactivated_ in another thread.  
 Reactivated snapshots **must be closed** to avoid leaking context.  
@@ -99,7 +102,7 @@ If however, you wish to disable caching of the context manager instances, you ca
 - the java system property `talsmasoftware.context.caching`, or
 - the environment variable `TALSMASOFTWARE_CONTEXT_CACHNG`
 
-to the values `false` or `0`.
+The values `false` or `0` will _disable_ caching.
 
 ## Performance metrics
 
@@ -109,15 +112,18 @@ For insight, the library tracks the overall time used creating and reactivating
 context snapshots along with time spent in each individual `ContextManager`.
 
 ### Logging performance
+
 On a development machine, you can get timing for each snapshot by turning on logging
 for `nl.talsmasoftware.context.Timing` at `FINEST` or `TRACE` level 
 (depending on your logger of choice).
 Please **do not** turn this on in production as the logging overhead will most likely
 have a noticable impact to the context management itself.
 
-### Dropwizard metrics
-If your project happens to use [dropwizard metrics](https://metrics.dropwizard.io/),
-adding the [context propagation metrics] module to your classpath will automatically 
+### Metrics reporting
+
+The [context propagation metrics] module supports for the excellent
+[dropwizard metrics](https://metrics.dropwizard.io/) library.  
+Adding `context propagation metrics` to your classpath will automatically 
 configure various timers in the default metric registry of your application.
 
 ## License
