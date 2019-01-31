@@ -63,44 +63,8 @@ Adding your own `Context` type is not difficult.
 
 ## Custom contexts
 
-It is easy to add a custom `Context` type to be propagated:
-
-1. Implement the `ContextManager` interface.  
-   Create a class with a [default constructor]
-   that implements _initializeNewContext_ and _getActiveContext_ methods.
-2. Create a service file called
-   `/META-INF/services/nl.talsmasoftware.context.ContextManager` 
-   containing the qualified class name of your `ContextManager` implementation.
-3. That's it. Now the result from your _getActiveContext_ method is propagated
-   into each snapshot created by the `ContextManagers.createSnapshot()` method.
-   This includes all usages of the `ContextAwareExecutorService`.
-
-An example of a custom context implementation:
-```java
-public class DummyContextManager implements ContextManager<String> {
-    public Context<String> initializeNewContext(String value) {
-        return new DummyContext(value);
-    }
-
-    public Context<String> getActiveContext() {
-        return DummyContext.current();
-    }
-    
-    public static Optional<String> currentValue() {
-        return Optional.ofNullable(DummyContext.current()).map(Context::getValue);
-    }
-    
-    private static final class DummyContext extends AbstractThreadLocalContext<String> {
-        private DummyContext(String newValue) {
-            super(newValue);
-        }
-        
-        private static Context<String> current() {
-            return AbstractThreadLocalContext.current(DummyContext.class);
-        }
-    }
-}
-```
+It is easy to add a custom `Context` type to be propagated
+by [creating your own context manager](../context-propagation-java5/README.md#creating-your-own-context-manager).
 
 ## Caching
 
