@@ -51,15 +51,15 @@ Closing the reactivated object is mandatory (from the thread where the reactivat
 
 # Creating your own context manager
 
-1. Create a context manager
+1. Create a context manager.  
 Implement the  `nl.talsmasoftware.context.ContextManager` interface.  
 Make sure your class has a public [default constructor](https://en.wikipedia.org/wiki/Nullary_constructor).
   
-2. Register a custom context manager
+2. Register your context manager.  
 Add a service file to your application called `/META-INF/services/nl.talsmasoftware.context.ContextManager`.
 It should contain the fully qualified classname of your implementation.
 
-3. Example of a dummy context manager:
+3. Example context manager implementation:
 ```java
 public class DummyContextManager implements ContextManager<String> {
     public Context<String> initializeNewContext(String value) {
