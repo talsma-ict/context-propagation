@@ -52,12 +52,39 @@ Closing the reactivated object is mandatory (from the thread where the reactivat
 # Creating your own context manager
 
 1. Create a context manager
-_(Work in progress)_
-
+Implement the  `nl.talsmasoftware.context.ContextManager` interface.  
+Make sure your class has a public [default constructor](https://en.wikipedia.org/wiki/Nullary_constructor).
+  
 2. Register a custom context manager
-_(Work in progress)_
+Add a service file to your application called `/META-INF/services/nl.talsmasoftware.context.ContextManager`.
+It should contain the fully qualified classname of your implementation.
 
+3. Example of a dummy context manager:
+```java
+public class DummyContextManager implements ContextManager<String> {
+    public Context<String> initializeNewContext(String value) {
+        return new DummyContext(value);
+    }
 
+    public Context<String> getActiveContext() {
+        return DummyContext.current();
+    }
+    
+    public static Optional<String> currentValue() {
+        return Optional.ofNullable(DummyContext.current()).map(Context::getValue);
+    }
+    
+    private static final class DummyContext extends AbstractThreadLocalContext<String> {
+        private DummyContext(String newValue) {
+            super(newValue);
+        }
+        
+        private static Context<String> current() {
+            return AbstractThreadLocalContext.current(DummyContext.class);
+        }
+    }
+}
+```
 
 
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation.svg
