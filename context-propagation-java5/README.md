@@ -3,8 +3,8 @@
 
 # Context propagation
 
-This context propagation library defines the _core concepts_ of propagating one or more
-contexts.
+The main `context-propagation` module implements the _core concepts_ 
+of propagating contexts.  
 The main use case is taking a [_snapshot_][contextsnapshot] 
 of [`ThreadLocal`][threadlocal] values from the calling thread 
 and _reactivating_ it in another thread.
