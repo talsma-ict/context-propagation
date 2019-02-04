@@ -65,6 +65,7 @@ Add a service file to your application called `/META-INF/services/nl.talsmasoftw
 It should contain the fully qualified classname of your implementation.
 
 ### Example context manager implementation
+
 ```java
 public class DummyContextManager implements ContextManager<String> {
     public Context<String> initializeNewContext(String value) {
