@@ -117,7 +117,7 @@ On a development machine, you can get timing for each snapshot by turning on log
 for `nl.talsmasoftware.context.Timing` at `FINEST` or `TRACE` level 
 (depending on your logger of choice).
 Please **do not** turn this on in production as the logging overhead will most likely
-have a noticable impact to the context management itself.
+have a noticable impact on your application.
 
 ### Metrics reporting
 
