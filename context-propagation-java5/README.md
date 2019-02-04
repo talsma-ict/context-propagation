@@ -61,10 +61,10 @@ Implement the  `nl.talsmasoftware.context.ContextManager` interface.
 Make sure your class has a public [default constructor](https://en.wikipedia.org/wiki/Nullary_constructor).
   
 2. Register your context manager.  
-Add a service file to your application called `/META-INF/services/nl.talsmasoftware.context.ContextManager`.
+Add a service file to your application called `/META-INF/services/nl.talsmasoftware.context.ContextManager`.  
 It should contain the fully qualified classname of your implementation.
 
-3. Example context manager implementation:
+### Example context manager implementation
 ```java
 public class DummyContextManager implements ContextManager<String> {
     public Context<String> initializeNewContext(String value) {
