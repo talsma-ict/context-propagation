@@ -11,7 +11,8 @@ and _reactivating_ it in another thread.
 
 ## Key concepts
 
-The `Context`, `Context Manager` and `Context Snapshot` terms are explained first.
+The terms [Context](#context), [Context Manager](#context-manager) 
+and [Context Snapshot](#context-snapshot) are crucial to understanding this library.
 
 ### Context
 
