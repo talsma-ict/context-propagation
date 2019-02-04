@@ -9,7 +9,11 @@ The main use case is taking a [_snapshot_][contextsnapshot]
 of [`ThreadLocal`][threadlocal] values from the calling thread 
 and _reactivating_ it in another thread.
 
-# Context
+## Key concepts
+
+The `Context`, `Context Manager` and `Context Snapshot` terms are explained first.
+
+### Context
 
 A context can be _anything_ that needs to be maintained on the 'current thread' level.
 
@@ -25,7 +29,7 @@ although technically these use cases are not appropriate.
 
 - [javadoc](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/Context.html)
 
-# Context Manager
+### Context Manager
 
 Manages contexts by initializing and maintaining an active context value.
 
@@ -36,7 +40,7 @@ you take a [_snapshot_](#context-snapshot) of **all** active contexts at once.
 - [ContextManager javadoc][contextmanager]
 - [ContextManagers javadoc][contextmanagers]
 
-# Context Snapshot
+### Context Snapshot
 
 A context snapshot is created by the [ContextManagers]' `createContextSnapshot()` method.
 The snapshot contains active context values from all known [ContextManager] implementations.
@@ -49,7 +53,7 @@ Closing the reactivated object is mandatory (from the thread where the reactivat
 - [ContextSnapshot javadoc](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextSnapshot.html)
 - [ContextManagers javadoc](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextManagers.html)
 
-# Creating your own context manager
+## Creating your own context manager
 
 1. Create a context manager.  
 Implement the  `nl.talsmasoftware.context.ContextManager` interface.  
