@@ -28,7 +28,7 @@ and restoring the 'previous' context state.
 It contains safeguards for concurrency and out-of-sequence closing of contexts, 
 although technically these use cases are not appropriate.
 
-- [javadoc](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/Context.html)
+- [Context javadoc][context]
 
 ### Context Manager
 
@@ -98,6 +98,7 @@ public class DummyContextManager implements ContextManager<String> {
   [javadoc]: https://www.javadoc.io/doc/nl.talsmasoftware.context/context-propagation 
 
   [threadlocal]: https://docs.oracle.com/javase/8/docs/api/java/lang/ThreadLocal.html
+  [context]: https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/Context.html
   [contextsnapshot]: https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextSnapshot.html
   [contextmanager]: https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextManager.html
   [contextmanagers]: https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextManagers.html
