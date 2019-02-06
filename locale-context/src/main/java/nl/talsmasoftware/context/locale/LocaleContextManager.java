@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,20 @@ public final class LocaleContextManager implements ContextManager<Locale> {
 
     /**
      * @return The {@code Locale} for the current thread, or {@code null} if no context was initialized.
+     * @see #getCurrentLocaleOrDefault()
      */
     public static Locale getCurrentLocale() {
         final LocaleContext current = LocaleContext.current();
         return current == null ? null : current.getValue();
+    }
+
+    /**
+     * @return The {@code Locale} for the current thread, or {@code Locale.getDefault()} if no context was initialized.
+     * @see Locale#getDefault()
+     */
+    public static Locale getCurrentLocaleOrDefault() {
+        final Locale current = getCurrentLocale();
+        return current != null ? current : Locale.getDefault();
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,17 +47,20 @@ public class LocaleContextManagerTest {
     private static final Locale ENGLISH = Locale.UK;
     private static final Locale GERMAN = Locale.GERMANY;
 
+    private static final Locale DEFAULT_LOCALE = Locale.getDefault();
     private static LocaleContextManager manager = new LocaleContextManager();
     private ExecutorService threadpool;
 
     @Before
     public void init() {
+        Locale.setDefault(DEFAULT_LOCALE);
         threadpool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
     }
 
     @After
     public void cleanup() {
         threadpool.shutdown();
+        Locale.setDefault(DEFAULT_LOCALE);
     }
 
     @Test
@@ -91,6 +94,25 @@ public class LocaleContextManagerTest {
             ctx1.close();
         }
         assertThat("Current context", manager.getActiveContext(), is(nullValue()));
+    }
+
+    @Test
+    public void testGetCurrentLocaleOrDefault() {
+        assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(DEFAULT_LOCALE));
+        Context<Locale> ctx1 = manager.initializeNewContext(GERMAN);
+        try {
+            assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(GERMAN));
+            Context<Locale> ctx2 = manager.initializeNewContext(null);
+            try {
+                assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(DEFAULT_LOCALE));
+            } finally {
+                ctx2.close();
+                assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(GERMAN));
+            }
+        } finally {
+            ctx1.close();
+            assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(DEFAULT_LOCALE));
+        }
     }
 
     @Test
