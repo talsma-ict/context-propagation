@@ -8,9 +8,9 @@ Library to propagate `ThreadLocal` snapshots by reactivating in another thread.
 
 Tools help automate propagation by capturing snapshots 
 and ensuring proper closing of reactivated context snapshots:
-- `ContextAwareExecutorService` that wraps any existing `ExecutorService`
-- `ContextAwareCompletableFuture` that propagates context snapshots 
-   into each successive `CompletionStage`.
+- [`ContextAwareExecutorService`][ContextAwareExecutorService] that wraps any existing `ExecutorService`
+- [`ContextAwareCompletableFuture`][ContextAwareCompletableFuture] that 
+  propagates context snapshots into each successive `CompletionStage`.
 
 ## Terminology
 
@@ -147,3 +147,6 @@ configure various timers in the default metric registry of your application.
   [opentracing span propagation]: ../opentracing-span-propagation
   [context propagation metrics]: ../context-propagation-metrics
   [default constructor]: https://en.wikipedia.org/wiki/Nullary_constructor
+  
+  [ContextAwareExecutorService]: https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/executors/ContextAwareExecutorService.html
+  [ContextAwareCompletableFuture]: ../context-propagation-java8#contextawarecompletablefuture
