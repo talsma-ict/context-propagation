@@ -2,8 +2,8 @@
 
 # Context propagation (Java 8)
 
-- Wrappers around the standard Java 8 functional interfaces to use with a context snapshot.
-- A `ContextAwareCompletableFuture` implementation.
+- Wrappers around the standard Java 8 [functional interfaces](#functional-interfaces) to use with a context snapshot.
+- A [`ContextAwareCompletableFuture`](#contextawarecompletablefuture) implementation.
 
 ## How to get this module
 
