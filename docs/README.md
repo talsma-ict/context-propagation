@@ -16,7 +16,7 @@ and ensuring proper closing of reactivated context snapshots:
 
 ### Context
 
-A 'container' for values that have a 'global' value _per thread_.  
+A context contains a value. There is one _active_ context _per thread_.  
 An `AbstractThreadLocalContext` base class is provided that allows nested contexts 
 and provides predictable behaviour for out-of-order closing.
 
