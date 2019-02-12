@@ -57,7 +57,7 @@ try (Context<Void> reactivation = snapshot.reactivate()) {
 If your background threads are managed by an `ExecutorService` acting as a threadpool,
 you can use the `ContextAwareExecutorService` instead of your usual threadpool.  
 This automatically takes a new context snapshot when submitting new work
-and reactivates this snapshot in the background threads.  
+and reactivates this snapshot in the background thread.  
 The `ContextAwareExecutorService` can wrap any `ExecutorService` for the actual thread execution:
 ```java
 // private static final ExecutorService THREADPOOL = Executors.newCachedThreadpool();
