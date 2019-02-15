@@ -112,6 +112,9 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
+                    <jdkToolchain>
+                        <version>1.8</version>
+                    </jdkToolchain>
                     <encoding>${project.build.sourceEncoding}</encoding>
                     <showDeprecation>true</showDeprecation>
                 </configuration>
@@ -166,7 +169,7 @@
                         </goals>
                         <configuration>
                             <jdkToolchain>
-                                <version>9</version>
+                                <version>[9,)</version>
                             </jdkToolchain>
                             <doclet>nl.talsmasoftware.umldoclet.UMLDoclet</doclet>
                             <docletArtifact>
