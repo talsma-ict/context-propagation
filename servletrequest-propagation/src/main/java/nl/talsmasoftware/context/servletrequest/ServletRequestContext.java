@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package nl.talsmasoftware.context.servletrequest;
 
 import nl.talsmasoftware.context.Context;
+import nl.talsmasoftware.context.observer.ContextObservers;
 
 import javax.servlet.ServletRequest;
 
@@ -33,6 +34,7 @@ final class ServletRequestContext implements Context<ServletRequest> {
     ServletRequestContext(ServletRequest servletRequest) {
         this.servletRequest = servletRequest;
         CONTEXT.set(this);
+        ContextObservers.onActivate(ServletRequestContextManager.class, servletRequest, null);
     }
 
     static Context<ServletRequest> current() {
@@ -44,8 +46,10 @@ final class ServletRequestContext implements Context<ServletRequest> {
     }
 
     public void close() {
+        final ServletRequest deactivated = servletRequest;
         servletRequest = null;
         CONTEXT.set(null);
+        ContextObservers.onDeactivate(ServletRequestContextManager.class, deactivated, null);
     }
 
     @Override

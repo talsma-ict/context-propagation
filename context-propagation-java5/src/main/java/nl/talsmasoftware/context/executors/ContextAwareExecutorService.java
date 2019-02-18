@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,16 +52,14 @@ public class ContextAwareExecutorService extends CallMappingExecutorService {
         final ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
         return new Callable<V>() {
             public V call() throws Exception {
+                Exception exception = null;
                 final Context<Void> context = snapshot.reactivate();
-                boolean done = false;
                 try {
-
-                    final V result = callable.call();
-                    done = true;
-                    return result;
-
+                    return callable.call();
+                } catch (Exception ex) {
+                    throw exception = ex;
                 } finally {
-                    tryClose(context, done);
+                    tryClose(context, exception);
                 }
             }
         };
@@ -70,21 +68,18 @@ public class ContextAwareExecutorService extends CallMappingExecutorService {
     /**
      * tryClose method to be called from a finally() block that properly manages close exceptions.
      *
-     * @param context     The context to be closed.
-     * @param callWasDone Whether or not the call was completed yet.
+     * @param context   context to be closed
+     * @param exception exception if any occurred
      */
-    private void tryClose(Context<?> context, boolean callWasDone) {
+    private void tryClose(Context<?> context, Exception exception) throws Exception {
         if (context != null) try {
             context.close();
         } catch (RuntimeException closeEx) {
-            if (callWasDone) { // Call was already done; we have to re-throw the close error.
-                throw closeEx;
+            if (exception != null) {
+                logger.log(Level.WARNING, "Exception closing context after failed operation: " + closeEx.getMessage(), closeEx);
+                throw exception;
             }
-            // Call was not yet done, i.e. an exception was thrown.
-            IllegalStateException exception = new IllegalStateException(
-                    "Exception restoring context after applied snapshot: " + closeEx.getMessage(), closeEx);
-            // Logging a warning is the best we can do; there is no SuppressedException in java 5.
-            logger.log(Level.WARNING, exception.getMessage(), exception);
+            throw closeEx;
         }
     }
 }

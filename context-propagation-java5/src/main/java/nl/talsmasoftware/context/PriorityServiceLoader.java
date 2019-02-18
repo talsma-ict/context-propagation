@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,41 +37,44 @@ import static java.util.Collections.unmodifiableList;
  * @param <SVC> The type of service to load.
  * @author Sjoerd Talsma
  */
-final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
+public final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
     private static final Logger LOGGER = Logger.getLogger(PriorityServiceLoader.class.getName());
     private static final String SYSTEMPROPERTY_CACHING = "talsmasoftware.context.caching";
     private static final String ENVIRONMENT_CACHING_VALUE = System.getenv(
             SYSTEMPROPERTY_CACHING.replace('.', '_').toUpperCase(Locale.ENGLISH));
 
+    // Set from ContextManagers.useClassLoader(); sometimes a single, fixed classloader may be necessary (e.g. #97)
+    static volatile ClassLoader classLoaderOverride = null;
     private final Class<SVC> serviceType;
     private final Map<ClassLoader, List<SVC>> cache = new WeakHashMap<ClassLoader, List<SVC>>();
 
-    PriorityServiceLoader(Class<SVC> serviceType) {
+    public PriorityServiceLoader(Class<SVC> serviceType) {
         if (serviceType == null) throw new NullPointerException("Service type is <null>.");
         this.serviceType = serviceType;
     }
 
     @SuppressWarnings("unchecked")
     public Iterator<SVC> iterator() {
-        final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-        List<SVC> services = cache.get(contextClassLoader);
+        final ClassLoader classLoader =
+                classLoaderOverride == null ? Thread.currentThread().getContextClassLoader() : classLoaderOverride;
+        List<SVC> services = cache.get(classLoader);
         if (services == null) {
-            services = findServices(contextClassLoader);
-            if (!isCachingDisabled()) cache.put(contextClassLoader, services);
+            services = findServices(classLoader);
+            if (!isCachingDisabled()) cache.put(classLoader, services);
         }
         return services.iterator();
-    }
-
-    private static boolean isCachingDisabled() {
-        final String cachingProperty = System.getProperty(SYSTEMPROPERTY_CACHING, ENVIRONMENT_CACHING_VALUE);
-        return "0".equals(cachingProperty) || "false".equalsIgnoreCase(cachingProperty);
     }
 
     /**
      * Removes the cache so the next call to {@linkplain #iterator()} will attempt to load the objects again.
      */
-    void clearCache() {
+    public void clearCache() {
         cache.clear();
+    }
+
+    private static boolean isCachingDisabled() {
+        final String cachingProperty = System.getProperty(SYSTEMPROPERTY_CACHING, ENVIRONMENT_CACHING_VALUE);
+        return "0".equals(cachingProperty) || "false".equalsIgnoreCase(cachingProperty);
     }
 
     private List<SVC> findServices(ClassLoader classLoader) {

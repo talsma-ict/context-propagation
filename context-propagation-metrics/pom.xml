@@ -24,7 +24,7 @@
     <parent>
         <groupId>nl.talsmasoftware.context</groupId>
         <artifactId>context-propagation-root</artifactId>
-        <version>1.0.3-SNAPSHOT</version>
+        <version>1.0.6-SNAPSHOT</version>
     </parent>
 
     <!-- Artifact identification -->

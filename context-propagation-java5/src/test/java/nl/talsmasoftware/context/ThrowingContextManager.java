@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext;
  * @author Sjoerd Talsma
  */
 public class ThrowingContextManager implements ContextManager<String> {
-    public static RuntimeException inConstructor = null, onInitialize = null, onGet = null;
+    public static RuntimeException inConstructor = null, onInitialize = null, onGet = null, onClose = null;
 
     public ThrowingContextManager() {
         if (inConstructor != null) try {
@@ -58,11 +58,21 @@ public class ThrowingContextManager implements ContextManager<String> {
 
     private final static class Ctx extends AbstractThreadLocalContext<String> {
         private Ctx(String newValue) {
-            super(newValue);
+            super(ThrowingContextManager.class, newValue);
         }
 
         private static Ctx current() {
             return current(Ctx.class);
+        }
+
+        @Override
+        public void close() {
+            if (onClose != null) try {
+                throw onClose;
+            } finally {
+                onClose = null;
+            }
+            super.close();
         }
     }
 }
