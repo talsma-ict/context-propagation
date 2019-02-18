@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,20 @@ package nl.talsmasoftware.context;
 /**
  * The contract for a ContextManager Service.
  * <p>
- * Concrete implementations can be registered by providing an implementation class with a default constructor,
- * along with a class declaration in a service file called:<br>
- * <code>"/META-INF/services/nl.talsmasoftware.context.ContextManager"</code>
- * <p>
+ * Implementations can be registered by providing a fully qualified class name in a service file called:<br>
+ * <code>"/META-INF/services/nl.talsmasoftware.context.ContextManager"</code><br>
  * That will take care of any active context being captured in {@link ContextSnapshot} instances
- * managed by the {@link ContextManagers} utility class.
+ * managed by the {@link ContextManagers} utility class.<br>
+ * <b>Note:</b> <em>Make sure your implementation has a default (no-argument) constructor.</em>
+ * <p>
+ * A context manager is required to notify
+ * registered {@linkplain nl.talsmasoftware.context.observer.ContextObserver ContextObserver}
+ * of context updates.
+ * Using the {@linkplain nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext AbstractThreadLocalContext}
+ * already fulfills this requirement.
+ * Other implementations can use the utility methods defined in
+ * {@linkplain nl.talsmasoftware.context.observer.ContextObservers} to locate the appropriate context observers
+ * to be notified.
  *
  * @author Sjoerd Talsma
  */

@@ -4,11 +4,35 @@
 
 # Context propagation library
 
-Standardized context propagation in concurrent systems.
+Library to propagate `ThreadLocal` snapshots by reactivating in another thread.
 
-Provides a standardized way to create snapshots from various supported
-`ThreadLocal`-based `Context` types that can be reactivated in another
-thread.
+Tools help automate propagation by capturing snapshots 
+and ensuring proper closing of reactivated context snapshots:
+- [`ContextAwareExecutorService`][ContextAwareExecutorService] that wraps any existing `ExecutorService`
+- [`ContextAwareCompletableFuture`][ContextAwareCompletableFuture] that 
+  propagates context snapshots into each successive `CompletionStage`.
+
+## Terminology
+
+### Context
+
+A context contains a value. There is one _active_ context _per thread_.  
+An `AbstractThreadLocalContext` base class is provided that allows nested contexts 
+and provides predictable behaviour for out-of-order closing.
+
+### ContextManager
+
+Manages the active context.  
+Can initialize a new context and provides to the active context.
+
+### ContextSnapshot
+
+A snapshot contains the current value from _all_ known context managers.  
+These values can be _reactivated_ in another thread.  
+Reactivated snapshots **must be closed** to avoid leaking context.  
+
+All _context aware_ utility classes in this library are tested 
+to make sure they reactivate _and_ close snapshots in a safe way.
 
 ## How to use this library
 
@@ -33,7 +57,7 @@ try (Context<Void> reactivation = snapshot.reactivate()) {
 If your background threads are managed by an `ExecutorService` acting as a threadpool,
 you can use the `ContextAwareExecutorService` instead of your usual threadpool.  
 This automatically takes a new context snapshot when submitting new work
-and reactivates this snapshot in the background threads.  
+and reactivates this snapshot in the background thread.  
 The `ContextAwareExecutorService` can wrap any `ExecutorService` for the actual thread execution:
 ```java
 // private static final ExecutorService THREADPOOL = Executors.newCachedThreadpool();
@@ -51,63 +75,26 @@ be available in the background thread as well.
 The following `ThreadLocal`-based contexts are currently supported 
 out of the box by this context-propagation library:
 
-- [ServletRequest contexts][servletrequest propagation]
 - [Slf4J MDC (Mapped Diagnostic Context)][mdc propagation]
-- [Locale context][locale context]
-- [Spring Security Context]
 - [OpenTracing Span contexts][opentracing span propagation]
+- [Spring Security Context]
+- [Locale context][locale context]
+- [ServletRequest contexts][servletrequest propagation]
 - _Yours?_ Feel free to create an issue or pull-request
   if you believe there's a general context that was forgotten. 
 
-Adding your own `Context` type is not difficult.
-
 ## Custom contexts
 
-It is easy to add a custom `Context` type to be propagated:
-
-1. Implement the `ContextManager` interface.  
-   Create a class with a [default constructor]
-   that implements _initializeNewContext_ and _getActiveContext_ methods.
-2. Create a service file called
-   `/META-INF/services/nl.talsmasoftware.context.ContextManager` 
-   containing the qualified class name of your `ContextManager` implementation.
-3. That's it. Now the result from your _getActiveContext_ method is propagated
-   into each snapshot created by the `ContextManagers.createSnapshot()` method.
-   This includes all usages of the `ContextAwareExecutorService`.
-
-An example of a custom context implementation:
-```java
-public class DummyContextManager implements ContextManager<String> {
-    public Context<String> initializeNewContext(String value) {
-        return new DummyContext(value);
-    }
-
-    public Context<String> getActiveContext() {
-        return DummyContext.current();
-    }
-    
-    public static Optional<String> currentValue() {
-        return Optional.ofNullable(DummyContext.current()).map(Context::getValue);
-    }
-    
-    private static final class DummyContext extends AbstractThreadLocalContext<String> {
-        private DummyContext(String newValue) {
-            super(newValue);
-        }
-        
-        private static Context<String> current() {
-            return AbstractThreadLocalContext.current(DummyContext.class);
-        }
-    }
-}
-```
+Adding your own `Context` type is possible
+by [creating your own context manager](../context-propagation-java5/README.md#creating-your-own-context-manager).
 
 ## Caching
 
-By default the `ContextManagers` class caches the context manager instances it finds per
-_context classloader_. Since the cache is per classloader, this should work satisfactory
-for applications with simple classloader hierarchies (e.g. _spring boot_, _dropwizard_ etc) 
-and complex hierarchies (JEE and the like).
+By default the `ContextManagers` class caches the context manager instances it finds
+per _classloader_.
+Since the cache is per classloader, this should work satisfactory
+for applications with simple classloader hierarchies (e.g. _dropwizard_) 
+and also for complex hierarchies (_spring boot_, _JEE_ and the like).
 
 ### Disable caching
 
@@ -115,7 +102,7 @@ If however, you wish to disable caching of the context manager instances, you ca
 - the java system property `talsmasoftware.context.caching`, or
 - the environment variable `TALSMASOFTWARE_CONTEXT_CACHNG`
 
-to the values `false` or `0`.
+The values `false` or `0` will _disable_ caching.
 
 ## Performance metrics
 
@@ -125,15 +112,18 @@ For insight, the library tracks the overall time used creating and reactivating
 context snapshots along with time spent in each individual `ContextManager`.
 
 ### Logging performance
+
 On a development machine, you can get timing for each snapshot by turning on logging
 for `nl.talsmasoftware.context.Timing` at `FINEST` or `TRACE` level 
 (depending on your logger of choice).
 Please **do not** turn this on in production as the logging overhead will most likely
-have a noticable impact to the context management itself.
+have a noticable impact on your application.
 
-### Dropwizard metrics
-If your project happens to use [dropwizard metrics](https://metrics.dropwizard.io/),
-adding the [context propagation metrics] module to your classpath will automatically 
+### Metrics reporting
+
+The [context propagation metrics] module supports for the excellent
+[dropwizard metrics](https://metrics.dropwizard.io/) library.  
+Adding `context propagation metrics` to your classpath will automatically 
 configure various timers in the default metric registry of your application.
 
 ## License
@@ -157,3 +147,6 @@ configure various timers in the default metric registry of your application.
   [opentracing span propagation]: ../opentracing-span-propagation
   [context propagation metrics]: ../context-propagation-metrics
   [default constructor]: https://en.wikipedia.org/wiki/Nullary_constructor
+  
+  [ContextAwareExecutorService]: https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/executors/ContextAwareExecutorService.html
+  [ContextAwareCompletableFuture]: ../context-propagation-java8#contextawarecompletablefuture

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,11 +52,11 @@ public class SupplierWithContext<T> extends WrapperWithContextAndConsumer<Suppli
                 LOGGER.log(Level.FINEST, "Delegating get method with {0} to {1}.", new Object[]{context, delegate()});
                 return nonNullDelegate().get();
             } finally {
-                consumer().ifPresent(consumer -> {
+                if (contextSnapshotConsumer != null) {
                     ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
                     LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                    consumer.accept(resultSnapshot);
-                });
+                    contextSnapshotConsumer.accept(resultSnapshot);
+                }
             }
         }
     }

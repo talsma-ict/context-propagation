@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,12 @@ import java.util.Collections;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static nl.talsmasoftware.context.Priorities.*;
+import static nl.talsmasoftware.context.Priorities.inheritedOne;
+import static nl.talsmasoftware.context.Priorities.minus3;
+import static nl.talsmasoftware.context.Priorities.minus5;
+import static nl.talsmasoftware.context.Priorities.noPriority;
+import static nl.talsmasoftware.context.Priorities.two;
+import static nl.talsmasoftware.context.Priorities.zero;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 

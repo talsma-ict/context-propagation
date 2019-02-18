@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ final class LocaleContext extends AbstractThreadLocalContext<Locale> implements 
      *                 (or <code>null</code> to register a new context with 'no value').
      */
     LocaleContext(Locale newValue) {
-        super(newValue);
+        super(LocaleContextManager.class, newValue);
     }
 
     /**

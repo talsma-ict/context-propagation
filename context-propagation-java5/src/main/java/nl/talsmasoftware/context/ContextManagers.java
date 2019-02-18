@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,9 @@ package nl.talsmasoftware.context;
 
 import nl.talsmasoftware.context.clearable.Clearable;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,29 +57,22 @@ public final class ContextManagers {
      * This snapshot is returned as a single object that can be temporarily
      * {@link ContextSnapshot#reactivate() reactivated}. Don't forget to {@link Context#close() close} the reactivated
      * context once you're done, preferably in a <code>try-with-resources</code> construct.
-     * <p>
-     * <strong>Note about propagation accross physical node boundaries:</strong>
-     * <em>ContextSnapshot instances can be serialized to and reactivated on another node under strict conditions:</em>
-     * <ol>
-     * <li><strong>All</strong> {@link Context#getValue() context values} <strong>must</strong> be serializable.</li>
-     * <li>All {@link ContextManager} implementations that contain
-     * {@link ContextManager#getActiveContext() active contexts} must be registered on the target node as well
-     * (but need not be serializable themselves).</li>
-     * </ol>
      *
      * @return A new snapshot that can be reactivated elsewhere (e.g. a background thread or even another node)
      * within a try-with-resources construct.
      */
     public static ContextSnapshot createContextSnapshot() {
         final long start = System.nanoTime();
-        final Map<String, Object> snapshot = new LinkedHashMap<String, Object>();
+        final List<ContextManager> managers = new LinkedList<ContextManager>();
+        final List<Object> values = new LinkedList<Object>();
         Long managerStart = null;
         for (ContextManager manager : CONTEXT_MANAGERS) {
             managerStart = System.nanoTime();
             try {
                 final Context activeContext = manager.getActiveContext();
                 if (activeContext != null) {
-                    snapshot.put(manager.getClass().getName(), activeContext.getValue());
+                    values.add(activeContext.getValue());
+                    managers.add(manager);
                     if (LOGGER.isLoggable(Level.FINEST)) {
                         LOGGER.finest("Active context of " + manager + " added to new snapshot: " + activeContext + ".");
                     }
@@ -101,7 +90,7 @@ public final class ContextManagers {
             NoContextManagersFound noContextManagersFound = new NoContextManagersFound();
             LOGGER.log(Level.INFO, noContextManagersFound.getMessage(), noContextManagersFound);
         }
-        ContextSnapshot result = new ContextSnapshotImpl(snapshot);
+        ContextSnapshot result = new ContextSnapshotImpl(managers, values);
         Timing.timed(System.nanoTime() - start, ContextManagers.class, "createContextSnapshot");
         return result;
     }
@@ -156,6 +145,36 @@ public final class ContextManagers {
         Timing.timed(System.nanoTime() - start, ContextManagers.class, "clearActiveContexts");
     }
 
+    /**
+     * Override the {@linkplain ClassLoader} used to lookup {@linkplain ContextManager contextmanagers}.
+     * <p>
+     * Normally, taking a snapshot uses the {@linkplain Thread#getContextClassLoader() Context ClassLoader} from the
+     * {@linkplain Thread#currentThread() current thread} to look up all {@linkplain ContextManager context managers}.
+     * It is possible to configure a fixed, single classloader in your application for looking up the context managers.
+     * <p>
+     * Using this method to specify a fixed classloader will only impact
+     * new {@linkplain ContextSnapshot context snapshots}. Existing snapshots will not be impacted.
+     * <p>
+     * <strong>Notes:</strong><br>
+     * <ul>
+     * <li>Please be aware that this configuration is global!
+     * <li>This will also impact the lookup of
+     * {@linkplain nl.talsmasoftware.context.observer.ContextObserver context observers}
+     * </ul>
+     *
+     * @param classLoader The single, fixed ClassLoader to use for finding context managers.
+     *                    Specify {@code null} to restore the default behaviour.
+     * @since 1.0.5
+     */
+    public static void useClassLoader(ClassLoader classLoader) {
+        Level loglevel = PriorityServiceLoader.classLoaderOverride == classLoader ? Level.FINEST : Level.FINE;
+        if (LOGGER.isLoggable(loglevel)) {
+            LOGGER.log(loglevel, "Setting override classloader for loading ContextManager and ContextObserver " +
+                    "instances to " + classLoader + " (was: " + PriorityServiceLoader.classLoaderOverride + ").");
+        }
+        PriorityServiceLoader.classLoaderOverride = classLoader;
+    }
+
     private static void clearContext(ContextManager manager, Context context) {
         final long start = System.nanoTime();
         final Class<? extends Context> contextType = context.getClass();
@@ -183,35 +202,23 @@ public final class ContextManagers {
     /**
      * Implementation of the <code>createContextSnapshot</code> functionality that can reactivate all values from the
      * snapshot in each corresponding {@link ContextManager}.
-     * <p>
-     * This class is only really {@link Serializable} if all captured {@link Context#getValue() values} are
-     * serializable as well. The {@link ContextManager} implementations do not need to be {@link Serializable}.
      */
-    private static final class ContextSnapshotImpl implements ContextSnapshot, Serializable {
-        private final Map<String, Object> snapshot;
+    private static final class ContextSnapshotImpl implements ContextSnapshot {
+        private static final ContextManager[] MANAGER_ARRAY = new ContextManager[0];
+        private final ContextManager[] managers;
+        private final Object[] values;
 
-        private ContextSnapshotImpl(Map<String, Object> snapshot) {
-            this.snapshot = snapshot;
+        private ContextSnapshotImpl(List<ContextManager> managers, List<Object> values) {
+            this.managers = managers.toArray(MANAGER_ARRAY);
+            this.values = values.toArray();
         }
 
         public Context<Void> reactivate() {
             final long start = System.nanoTime();
-            final Set<String> remainingContextManagers = new LinkedHashSet<String>(snapshot.keySet());
-            final List<Context<?>> reactivatedContexts = new ArrayList<Context<?>>(snapshot.size());
+            final List<Context<?>> reactivatedContexts = new ArrayList<Context<?>>(managers.length);
             try {
-                for (ContextManager contextManager : CONTEXT_MANAGERS) {
-                    String contextManagerName = contextManager.getClass().getName();
-                    if (remainingContextManagers.remove(contextManagerName)) {
-                        reactivatedContexts.add(reactivate(contextManager, snapshot.get(contextManagerName)));
-                    }
-                }
-
-                if (!remainingContextManagers.isEmpty()) { // Should not happen, print warnings!
-                    CONTEXT_MANAGERS.clearCache();
-                    for (String contextManagerName : remainingContextManagers) {
-                        LOGGER.log(Level.WARNING, "Context manager \"{0}\" not found in service loader! " +
-                                "Cannot reactivate: {1}", new Object[]{contextManagerName, snapshot.get(contextManagerName)});
-                    }
+                for (int i = 0; i < managers.length && i < values.length; i++) {
+                    reactivatedContexts.add(reactivate(managers[i], values[i]));
                 }
                 ReactivatedContext reactivatedContext = new ReactivatedContext(reactivatedContexts);
                 Timing.timed(System.nanoTime() - start, ContextSnapshot.class, "reactivate");
@@ -246,7 +253,7 @@ public final class ContextManagers {
 
         @Override
         public String toString() {
-            return "ContextSnapshot{size=" + snapshot.size() + '}';
+            return "ContextSnapshot{size=" + managers.length + '}';
         }
     }
 
@@ -299,8 +306,9 @@ public final class ContextManagers {
      */
     private static class NoContextManagersFound extends RuntimeException {
         private NoContextManagersFound() {
-            super("Context snapshot was created but no ContextManagers were found! Current thread: "
-                    + Thread.currentThread());
+            super("Context snapshot was created but no ContextManagers were found!"
+                    + " Thread=" + Thread.currentThread()
+                    + ", ContextClassLoader=" + Thread.currentThread().getContextClassLoader());
         }
     }
 }

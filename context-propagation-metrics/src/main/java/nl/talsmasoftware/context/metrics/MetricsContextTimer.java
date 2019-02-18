@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2018 Talsma ICT
+ * Copyright 2016-2019 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,14 +36,13 @@ import static java.util.Collections.singleton;
  * A {@link ContextTimer} implementation that locates an appropriate
  * {@link SharedMetricRegistries shared metric registry}.
  * Then it registers a new {@link Timer} for context switches and updates it.
- * <p>
  * <h3>Shared metric registry resolution</h3>
  * <p>
  * What an <em>appropriate</em> shared metric registry is, is rather complex and determined by the following rules:
  * <ol>
  * <li>First, if a {@code contextpropagation.metrics.registry} system property is defined,
  * the shared metric registry by that name will be used for all context related timers.</li>
- * <li>Alternatively, the environment property {@code CONTEXTPROPAGATION_METRICS_REGISTRY} service the same
+ * <li>Alternatively, the environment property {@code CONTEXTPROPAGATION_METRICS_REGISTRY} serves the same
  * purpose if the system property is not defined.</li>
  * <li>Next, if there is a {@link SharedMetricRegistries#tryGetDefault() default shared metric registry},
  * that one is used.</li>
@@ -107,10 +106,11 @@ public class MetricsContextTimer implements ContextTimer {
                 LOGGER.log(Level.FINE, "There are no shared metric registries yet, we'll define our own as \"{0}\".", registryName);
             } else if (registryNames.size() == 1) {
                 registryName = registryNames.iterator().next();
-                LOGGER.log(Level.FINE, "There are no shared metric registries yet, we'll define our own as \"{0}\".", registryName);
+                LOGGER.log(Level.FINE, "Using single shared registry \"{0}\".", registryName);
             } else {
                 List<MetricRegistry> sharedRegistries = new ArrayList<>(registryNames.size());
                 for (String name : registryNames) sharedRegistries.add(SharedMetricRegistries.getOrCreate(name));
+                LOGGER.log(Level.FINE, "Registering with multiple shared registries: {0}", registryNames);
                 return sharedRegistries;
             }
         }

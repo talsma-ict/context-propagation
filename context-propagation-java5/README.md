@@ -3,35 +3,90 @@
 
 # Context propagation
 
-This context propagation library defines the _core concepts_ of propagating one or more
-contexts.
+The main `context-propagation` module implements the _core concepts_ 
+of propagating contexts.  
 The main use case is taking a [_snapshot_][contextsnapshot] 
 of [`ThreadLocal`][threadlocal] values from the calling thread 
 and _reactivating_ it in another thread.
 
-# Context
+## Key concepts
+
+The terms [Context](#context), [Context Manager](#context-manager) 
+and [Context Snapshot](#context-snapshot) are crucial to understanding this library.
+
+### Context
 
 A context can be _anything_ that needs to be maintained on the 'current thread' level.
 
-Implementations are typically maintained within a static [ThreadLocal] variable.
-Contexts have a very simple life-cycle: they can be created and closed.
-A well-behaved Context restores the original thread-local state when it is closed.
+Implementations are typically maintained with a static [ThreadLocal] variable.
+Contexts have a life-cycle that is simply defined as: they can be created and closed, 
+within a single thread.
+A well-behaved Context restores the original value when it is closed.
 
-An abstract implementation is available that takes care of random-depth nested contexts 
+An abstract implementation is available that takes care of nested contexts 
 and restoring the 'previous' context state.
+It contains safeguards for concurrency and out-of-sequence closing of contexts, 
+although technically these use cases are not appropriate.
 
-- [javadoc](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/Context.html)
+- [Context javadoc][context]
 
-# Context Manager
+### Context Manager
 
-_(Work in progress)_
-- [javadoc](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextManager.html)
+Manages contexts by initializing and maintaining an active context value.
 
-# Context Snapshot
+Normally it is not necessary to interact directly with individual context managers.
+The `ContextManagers` utility class detects available context managers and lets 
+you take a [_snapshot_](#context-snapshot) of **all** active contexts at once.
 
-_(Work in progress)_
+- [ContextManager javadoc][contextmanager]
+- [ContextManagers javadoc][contextmanagers]
+
+### Context Snapshot
+
+A context snapshot is created by the [ContextManagers]' `createContextSnapshot()` method.
+The snapshot contains active context values from all known [ContextManager] implementations.
+Once created, the captured _values_ in such context snapshot will not change anymore, 
+even when the active context is later modified. 
+The values in this snapshot can be [_reactivated_](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextSnapshot.html#reactivate--) all at once in another thread. 
+They stay active until the reactivation is closed again (or are overwritten by new values).  
+Closing the reactivated object is mandatory (from the thread where the reactivation was called).
+
 - [ContextSnapshot javadoc](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextSnapshot.html)
 - [ContextManagers javadoc](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextManagers.html)
+
+## Creating your own context manager
+
+1. Create a context manager.  
+Implement the  `nl.talsmasoftware.context.ContextManager` interface.  
+Make sure your class has a public [default constructor](https://en.wikipedia.org/wiki/Nullary_constructor).
+  
+2. Register your context manager.  
+Add a service file to your application called `/META-INF/services/nl.talsmasoftware.context.ContextManager`.  
+It should contain the fully qualified classname of your implementation.
+
+### Example context manager implementation
+
+```java
+public class DummyContextManager implements ContextManager<String> {
+    public Context<String> initializeNewContext(String value) {
+        return new DummyContext(value);
+    }
+
+    public Context<String> getActiveContext() {
+        return DummyContext.current();
+    }
+    
+    private static final class DummyContext extends AbstractThreadLocalContext<String> {
+        private DummyContext(String newValue) {
+            super(newValue);
+        }
+        
+        private static Context<String> current() {
+            return AbstractThreadLocalContext.current(DummyContext.class);
+        }
+    }
+}
+```
 
 
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation.svg
@@ -40,6 +95,7 @@ _(Work in progress)_
   [javadoc]: https://www.javadoc.io/doc/nl.talsmasoftware.context/context-propagation 
 
   [threadlocal]: https://docs.oracle.com/javase/8/docs/api/java/lang/ThreadLocal.html
+  [context]: https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/Context.html
   [contextsnapshot]: https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextSnapshot.html
   [contextmanager]: https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextManager.html
   [contextmanagers]: https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextManagers.html
