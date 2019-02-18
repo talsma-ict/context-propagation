@@ -1773,7 +1773,6 @@ public class ContextAwareCompletableFutureTest {
         try (Context<String> ctx = manager.initializeNewContext("Movie theater")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> manager.initializeNewContext("Glass of beer"), null, null, true)
-                    .takeNewSnapshot()
                     .runAfterEither(
                             ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Paper cup"), null, null, true),
                             () -> {
@@ -1806,7 +1805,6 @@ public class ContextAwareCompletableFutureTest {
         try (Context<String> ctx = manager.initializeNewContext("Movie theater")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> manager.initializeNewContext("Glass of beer"), null, null, true)
-                    .takeNewSnapshot()
                     .runAfterEitherAsync(
                             ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Paper cup"), null, null, true),
                             () -> {
