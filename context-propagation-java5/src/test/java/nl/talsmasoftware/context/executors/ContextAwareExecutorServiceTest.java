@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.fail;
@@ -82,7 +83,7 @@ public class ContextAwareExecutorServiceTest {
     }
 
     @Test
-    public void testCloseException() throws ExecutionException, InterruptedException {
+    public void testCloseException() throws InterruptedException {
         throwingContextManager.initializeNewContext("The quick brown fox jumps over the lazy dog");
         ThrowingContextManager.onClose = new IllegalStateException("Sometimes we stare so long at a door that is closing " +
                 "that we see too late the one that is open. --Alexander Graham Bell");
@@ -93,6 +94,41 @@ public class ContextAwareExecutorServiceTest {
             fail("Exception expected");
         } catch (ExecutionException expected) {
             assertThat(expected.getCause().getMessage(), containsString("a door that is closing"));
+        }
+    }
+
+    @Test
+    public void testCallException() throws InterruptedException {
+        Future<String> dummy = executor.submit(new Callable<String>() {
+            public String call() {
+                throw new IllegalStateException("DOH!");
+            }
+        });
+
+        try {
+            dummy.get();
+            fail("Exception expected");
+        } catch (ExecutionException expected) {
+            assertThat(expected.getCause().getMessage(), is(equalTo("DOH!")));
+        }
+    }
+
+    @Test
+    public void testBothCallAndCloseException() throws InterruptedException {
+        throwingContextManager.initializeNewContext("The quick brown fox jumps over the lazy dog");
+        ThrowingContextManager.onClose = new IllegalStateException("Sometimes we stare so long at a door that is closing " +
+                "that we see too late the one that is open. --Alexander Graham Bell");
+        Future<String> dummy = executor.submit(new Callable<String>() {
+            public String call() {
+                throw new IllegalStateException("DOH!");
+            }
+        });
+
+        try {
+            dummy.get();
+            fail("Exception expected");
+        } catch (ExecutionException expected) {
+            assertThat(expected.getCause().getMessage(), is(equalTo("DOH!")));
         }
     }
 }

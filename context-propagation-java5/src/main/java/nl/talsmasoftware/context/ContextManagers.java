@@ -158,7 +158,7 @@ public final class ContextManagers {
      * <strong>Notes:</strong><br>
      * <ul>
      * <li>Please be aware that this configuration is global!
-     * <li>This will also impact the lookup of
+     * <li>This will also affect the lookup of
      * {@linkplain nl.talsmasoftware.context.observer.ContextObserver context observers}
      * </ul>
      *
