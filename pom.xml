@@ -169,20 +169,24 @@
                         </goals>
                         <configuration>
                             <jdkToolchain>
-                                <version>[9,)</version>
+                                <version>11</version>
                             </jdkToolchain>
                             <doclet>nl.talsmasoftware.umldoclet.UMLDoclet</doclet>
                             <docletArtifact>
                                 <groupId>nl.talsmasoftware</groupId>
                                 <artifactId>umldoclet</artifactId>
                                 <version>${umldoclet.version}</version>
+                                <!--<version>2.0.1-SNAPSHOT</version>-->
                             </docletArtifact>
+<!--
                             <additionalJOptions>
                                 <additionalJOption>-J-Dhttp.agent=maven-javadoc-plugin</additionalJOption>
                             </additionalJOptions>
-                            <links> <!-- These seem to fail due to a SSL handshake somehow.. -->
-                                <!-- https://stackoverflow.com/questions/33866209/linking-to-javadoc-io-using-javadoc-link-option -->
+-->
+                            <links>
+                                <link>https://docs.oracle.com/en/java/javase/11/docs/api</link>
                                 <link>https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest</link>
+                                <!--<link>https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest</link>-->
                                 <!--<link>https://static.javadoc.io/nl.talsmasoftware.context/context-propagation/1.0.2</link>-->
 <!--
                                 <link>https://javadoc.io/page/nl.talsmasoftware.context/context-propagation-java8/latest</link>
