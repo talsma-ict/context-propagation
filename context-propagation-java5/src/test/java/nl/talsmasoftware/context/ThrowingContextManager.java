@@ -23,7 +23,7 @@ import nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext;
  * @author Sjoerd Talsma
  */
 public class ThrowingContextManager implements ContextManager<String> {
-    public static RuntimeException inConstructor = null, onInitialize = null, onGet = null;
+    public static RuntimeException inConstructor = null, onInitialize = null, onGet = null, onClose = null;
 
     public ThrowingContextManager() {
         if (inConstructor != null) try {
@@ -63,6 +63,16 @@ public class ThrowingContextManager implements ContextManager<String> {
 
         private static Ctx current() {
             return current(Ctx.class);
+        }
+
+        @Override
+        public void close() {
+            if (onClose != null) try {
+                throw onClose;
+            } finally {
+                onClose = null;
+            }
+            super.close();
         }
     }
 }
