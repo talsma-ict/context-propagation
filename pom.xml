@@ -168,36 +168,57 @@
                             <goal>jar</goal>
                         </goals>
                         <configuration>
-                            <jdkToolchain>
-                                <version>11</version>
-                            </jdkToolchain>
                             <doclet>nl.talsmasoftware.umldoclet.UMLDoclet</doclet>
                             <docletArtifact>
                                 <groupId>nl.talsmasoftware</groupId>
                                 <artifactId>umldoclet</artifactId>
                                 <version>${umldoclet.version}</version>
-                                <!--<version>2.0.1-SNAPSHOT</version>-->
                             </docletArtifact>
-<!--
-                            <additionalJOptions>
-                                <additionalJOption>-J-Dhttp.agent=maven-javadoc-plugin</additionalJOption>
-                            </additionalJOptions>
--->
+                            <jdkToolchain>
+                                <version>11</version>
+                            </jdkToolchain>
                             <links>
                                 <link>https://docs.oracle.com/en/java/javase/11/docs/api</link>
-                                <link>https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest</link>
-                                <!--<link>https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest</link>-->
-                                <!--<link>https://static.javadoc.io/nl.talsmasoftware.context/context-propagation/1.0.2</link>-->
-<!--
-                                <link>https://javadoc.io/page/nl.talsmasoftware.context/context-propagation-java8/latest</link>
-                                <link>https://javadoc.io/page/nl.talsmasoftware.context/context-propagation-metrics/latest</link>
-                                <link>https://javadoc.io/page/nl.talsmasoftware.context/locale-context/latest</link>
-                                <link>https://javadoc.io/page/nl.talsmasoftware.context/mdc-propagation/latest</link>
-                                <link>https://javadoc.io/page/nl.talsmasoftware.context/opentracing-span-propagation/latest</link>
-                                <link>https://javadoc.io/page/nl.talsmasoftware.context/servletrequest-propagation/latest</link>
-                                <link>https://javadoc.io/page/nl.talsmasoftware.context/spring-security-context/latest</link>
--->
+                                <link>https://metrics.dropwizard.io/4.0.0/apidocs/</link>
                             </links>
+                            <offlineLinks>
+                                <offlineLink>
+                                    <url>https://javadoc.io/page/${project.groupId}/context-propagation/${project.version}</url>
+                                    <location>${project.basedir}/../context-propagation-java5/src/javadoc</location>
+                                </offlineLink>
+                                <offlineLink>
+                                    <url>https://javadoc.io/page/${project.groupId}/context-propagation-java8/${project.version}</url>
+                                    <location>${project.basedir}/../context-propagation-java8/src/javadoc</location>
+                                </offlineLink>
+                                <offlineLink>
+                                    <url>https://javadoc.io/page/${project.groupId}/context-propagation-metrics/${project.version}</url>
+                                    <location>${project.basedir}/../context-propagation-metrics/src/javadoc</location>
+                                </offlineLink>
+                                <offlineLink>
+                                    <url>https://javadoc.io/page/${project.groupId}/locale-context/${project.version}</url>
+                                    <location>${project.basedir}/../locale-context/src/javadoc</location>
+                                </offlineLink>
+                                <offlineLink>
+                                    <url>https://javadoc.io/page/${project.groupId}/mdc-propagation/${project.version}</url>
+                                    <location>${project.basedir}/../mdc-propagation/src/javadoc</location>
+                                </offlineLink>
+                                <offlineLink>
+                                    <url>https://javadoc.io/page/${project.groupId}/opentracing-span-propagation/${project.version}</url>
+                                    <location>${project.basedir}/../opentracing-span-propagation/src/javadoc</location>
+                                </offlineLink>
+                                <offlineLink>
+                                    <url>https://javadoc.io/page/${project.groupId}/opentracing-span-propagation/${project.version}</url>
+                                    <location>${project.basedir}/../opentracing-span-propagation/src/javadoc</location>
+                                </offlineLink>
+                                <offlineLink>
+                                    <url>https://javadoc.io/page/${project.groupId}/servletrequest-propagation/${project.version}</url>
+                                    <location>${project.basedir}/../servletrequest-propagation/src/javadoc</location>
+                                </offlineLink>
+                                <offlineLink>
+                                    <url>https://javadoc.io/page/${project.groupId}/spring-security-context/${project.version}</url>
+                                    <location>${project.basedir}/../spring-security-context/src/javadoc</location>
+                                </offlineLink>
+                            </offlineLinks>
                         </configuration>
                     </execution>
                 </executions>
