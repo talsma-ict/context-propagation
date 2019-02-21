@@ -52,4 +52,31 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven-javadoc-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-javadoc</id>
+                        <configuration>
+                            <offlineLinks>
+                                <offlineLink>
+                                    <url>https://javadoc.io/page/${project.groupId}/context-propagation/${project.version}</url>
+                                    <location>${project.basedir}/../context-propagation-java5/src/javadoc</location>
+                                </offlineLink>
+                                <offlineLink>
+                                    <url>https://javadoc.io/page/javax.servlet/javax.servlet-api/${servlet-api.version}</url>
+                                    <location>${project.basedir}/src/javadoc/servlet-api</location>
+                                </offlineLink>
+                            </offlineLinks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

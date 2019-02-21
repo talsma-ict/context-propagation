@@ -179,7 +179,8 @@
                             </jdkToolchain>
                             <links>
                                 <link>https://docs.oracle.com/en/java/javase/11/docs/api</link>
-                                <link>https://metrics.dropwizard.io/4.0.0/apidocs/</link>
+                                <link>https://metrics.dropwizard.io/4.0.0/apidocs</link>
+                                <link>https://www.slf4j.org/api</link>
                             </links>
                             <offlineLinks>
                                 <offlineLink>
