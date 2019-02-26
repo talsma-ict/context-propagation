@@ -35,7 +35,6 @@
         <maven.compiler.target>1.5</maven.compiler.target>
         <project.moduleName>${project.groupId}.springsecurity</project.moduleName>
         <root.basedir>${project.parent.basedir}</root.basedir>
-        <spring-security.version>5.1.4.RELEASE</spring-security.version>
     </properties>
 
     <dependencies>
@@ -50,5 +49,4 @@
             <version>${spring-security.version}</version>
         </dependency>
     </dependencies>
-
 </project>

@@ -84,6 +84,11 @@
         <project.moduleName>${project.groupId}.${project.artifactId}</project.moduleName>
         <root.basedir>${project.basedir}</root.basedir>
 
+        <metrics.version>4.0.5</metrics.version>
+        <opentracing-api.version>0.31.0</opentracing-api.version>
+        <spring-security.version>5.1.4.RELEASE</spring-security.version>
+        <servlet-api.version>4.0.1</servlet-api.version>
+
         <slf4j.version>1.7.26</slf4j.version>
         <junit.version>4.12</junit.version>
         <logback.version>1.2.3</logback.version>
@@ -187,45 +192,29 @@
                     </jdkToolchain>
                     <links>
                         <link>https://docs.oracle.com/en/java/javase/11/docs/api</link>
-                        <link>https://metrics.dropwizard.io/4.0.0/apidocs</link>
                         <link>https://www.slf4j.org/api</link>
+                        <link>https://metrics.dropwizard.io/4.0.0/apidocs</link>
                     </links>
                     <offlineLinks>
                         <offlineLink>
-                            <url>https://javadoc.io/page/${project.groupId}/context-propagation/${project.version}</url>
-                            <location>${root.basedir}/context-propagation-java5/src/javadoc</location>
+                            <url>https://javadoc.io/page/${project.groupId}/context-propagation-root/${project.version}</url>
+                            <location>${root.basedir}/.mvn/javadoc</location>
                         </offlineLink>
                         <offlineLink>
-                            <url>https://javadoc.io/page/${project.groupId}/context-propagation-java8/${project.version}</url>
-                            <location>${root.basedir}/context-propagation-java8/src/javadoc</location>
+                            <url>https://javadoc.io/page/io.opentracing/opentracing-api/${opentracing-api.version}</url>
+                            <location>${root.basedir}/.mvn/javadoc/opentracing-api</location>
                         </offlineLink>
                         <offlineLink>
-                            <url>https://javadoc.io/page/${project.groupId}/context-propagation-metrics/${project.version}</url>
-                            <location>${root.basedir}/context-propagation-metrics/src/javadoc</location>
+                            <url>https://javadoc.io/page/io.opentracing/opentracing-util/${opentracing-api.version}</url>
+                            <location>${root.basedir}/.mvn/javadoc/opentracing-util</location>
                         </offlineLink>
                         <offlineLink>
-                            <url>https://javadoc.io/page/${project.groupId}/locale-context/${project.version}</url>
-                            <location>${root.basedir}/locale-context/src/javadoc</location>
+                            <url>https://javadoc.io/page/org.springframework.security/spring-security-core/${spring-security.version}</url>
+                            <location>${root.basedir}/.mvn/javadoc/spring-security-core</location>
                         </offlineLink>
                         <offlineLink>
-                            <url>https://javadoc.io/page/${project.groupId}/mdc-propagation/${project.version}</url>
-                            <location>${root.basedir}/mdc-propagation/src/javadoc</location>
-                        </offlineLink>
-                        <offlineLink>
-                            <url>https://javadoc.io/page/${project.groupId}/opentracing-span-propagation/${project.version}</url>
-                            <location>${root.basedir}/opentracing-span-propagation/src/javadoc</location>
-                        </offlineLink>
-                        <offlineLink>
-                            <url>https://javadoc.io/page/${project.groupId}/opentracing-span-propagation/${project.version}</url>
-                            <location>${root.basedir}/opentracing-span-propagation/src/javadoc</location>
-                        </offlineLink>
-                        <offlineLink>
-                            <url>https://javadoc.io/page/${project.groupId}/servletrequest-propagation/${project.version}</url>
-                            <location>${root.basedir}/servletrequest-propagation/src/javadoc</location>
-                        </offlineLink>
-                        <offlineLink>
-                            <url>https://javadoc.io/page/${project.groupId}/spring-security-context/${project.version}</url>
-                            <location>${root.basedir}/spring-security-context/src/javadoc</location>
+                            <url>https://javadoc.io/page/javax.servlet/javax.servlet-api/${servlet-api.version}</url>
+                            <location>${root.basedir}/.mvn/javadoc/servlet-api</location>
                         </offlineLink>
                     </offlineLinks>
                 </configuration>

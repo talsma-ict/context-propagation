@@ -1,7 +1,0 @@
-nl.talsmasoftware.context
-nl.talsmasoftware.context.clearable
-nl.talsmasoftware.context.delegation
-nl.talsmasoftware.context.executors
-nl.talsmasoftware.context.observer
-nl.talsmasoftware.context.threadlocal
-nl.talsmasoftware.context.timing

@@ -35,7 +35,6 @@
         <maven.compiler.target>1.5</maven.compiler.target>
         <project.moduleName>${project.groupId}.servletrequest</project.moduleName>
         <root.basedir>${project.parent.basedir}</root.basedir>
-        <servlet-api.version>4.0.1</servlet-api.version>
     </properties>
 
     <dependencies>
@@ -52,26 +51,4 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>${maven-javadoc-plugin.version}</version>
-                <configuration>
-                    <offlineLinks>
-                        <offlineLink>
-                            <url>https://javadoc.io/page/${project.groupId}/context-propagation/${project.version}</url>
-                            <location>${root.basedir}/context-propagation-java5/src/javadoc</location>
-                        </offlineLink>
-                        <offlineLink>
-                            <url>https://javadoc.io/page/javax.servlet/javax.servlet-api/${servlet-api.version}</url>
-                            <location>${project.basedir}/src/javadoc/servlet-api</location>
-                        </offlineLink>
-                    </offlineLinks>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>
