@@ -71,27 +71,22 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>${maven-javadoc-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>generate-javadoc</id>
-                        <configuration>
-                            <offlineLinks>
-                                <offlineLink>
-                                    <url>https://javadoc.io/page/${project.groupId}/context-propagation/${project.version}</url>
-                                    <location>${project.basedir}/../context-propagation-java5/src/javadoc</location>
-                                </offlineLink>
-                                <offlineLink>
-                                    <url>https://javadoc.io/page/io.opentracing/opentracing-api/${opentracing-api.version}</url>
-                                    <location>${project.basedir}/src/javadoc/opentracing-api</location>
-                                </offlineLink>
-                                <offlineLink>
-                                    <url>https://javadoc.io/page/io.opentracing/opentracing-util/${opentracing-api.version}</url>
-                                    <location>${project.basedir}/src/javadoc/opentracing-util</location>
-                                </offlineLink>
-                            </offlineLinks>
-                        </configuration>
-                    </execution>
-                </executions>
+                <configuration>
+                    <offlineLinks>
+                        <offlineLink>
+                            <url>https://javadoc.io/page/${project.groupId}/context-propagation/${project.version}</url>
+                            <location>${root.basedir}/context-propagation-java5/src/javadoc</location>
+                        </offlineLink>
+                        <offlineLink>
+                            <url>https://javadoc.io/page/io.opentracing/opentracing-api/${opentracing-api.version}</url>
+                            <location>${project.basedir}/src/javadoc/opentracing-api</location>
+                        </offlineLink>
+                        <offlineLink>
+                            <url>https://javadoc.io/page/io.opentracing/opentracing-util/${opentracing-api.version}</url>
+                            <location>${project.basedir}/src/javadoc/opentracing-util</location>
+                        </offlineLink>
+                    </offlineLinks>
+                </configuration>
             </plugin>
         </plugins>
     </build>
