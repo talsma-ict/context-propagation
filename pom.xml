@@ -84,6 +84,11 @@
         <project.moduleName>${project.groupId}.${project.artifactId}</project.moduleName>
         <root.basedir>${project.basedir}</root.basedir>
 
+        <metrics.version>4.0.5</metrics.version>
+        <opentracing-api.version>0.31.0</opentracing-api.version>
+        <spring-security.version>5.1.4.RELEASE</spring-security.version>
+        <servlet-api.version>4.0.1</servlet-api.version>
+
         <slf4j.version>1.7.26</slf4j.version>
         <junit.version>4.12</junit.version>
         <logback.version>1.2.3</logback.version>
@@ -102,7 +107,7 @@
         <jacoco-maven-plugin.version>0.8.3</jacoco-maven-plugin.version>
         <coveralls-maven-plugin.version>4.3.0</coveralls-maven-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
-        <umldoclet.version>2.0.1</umldoclet.version>
+        <umldoclet.version>2.0.2</umldoclet.version>
     </properties>
 
     <build>
@@ -167,19 +172,52 @@
                         <goals>
                             <goal>jar</goal>
                         </goals>
-                        <configuration>
-                            <jdkToolchain>
-                                <version>[9,)</version>
-                            </jdkToolchain>
-                            <doclet>nl.talsmasoftware.umldoclet.UMLDoclet</doclet>
-                            <docletArtifact>
-                                <groupId>nl.talsmasoftware</groupId>
-                                <artifactId>umldoclet</artifactId>
-                                <version>${umldoclet.version}</version>
-                            </docletArtifact>
-                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>aggregate-javadoc</id>
+                        <goals>
+                            <goal>aggregate-jar</goal>
+                        </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <doclet>nl.talsmasoftware.umldoclet.UMLDoclet</doclet>
+                    <docletArtifact>
+                        <groupId>nl.talsmasoftware</groupId>
+                        <artifactId>umldoclet</artifactId>
+                        <version>${umldoclet.version}</version>
+                    </docletArtifact>
+                    <jdkToolchain>
+                        <version>11</version>
+                    </jdkToolchain>
+                    <links>
+                        <link>https://docs.oracle.com/en/java/javase/11/docs/api</link>
+                        <link>https://www.slf4j.org/api</link>
+                        <link>https://metrics.dropwizard.io/4.0.0/apidocs</link>
+                    </links>
+                    <offlineLinks>
+                        <offlineLink>
+                            <url>https://javadoc.io/page/${project.groupId}/context-propagation-root/${project.version}</url>
+                            <location>${root.basedir}/.mvn/javadoc</location>
+                        </offlineLink>
+                        <offlineLink>
+                            <url>https://javadoc.io/page/io.opentracing/opentracing-api/${opentracing-api.version}</url>
+                            <location>${root.basedir}/.mvn/javadoc/opentracing-api</location>
+                        </offlineLink>
+                        <offlineLink>
+                            <url>https://javadoc.io/page/io.opentracing/opentracing-util/${opentracing-api.version}</url>
+                            <location>${root.basedir}/.mvn/javadoc/opentracing-util</location>
+                        </offlineLink>
+                        <offlineLink>
+                            <url>https://javadoc.io/page/org.springframework.security/spring-security-core/${spring-security.version}</url>
+                            <location>${root.basedir}/.mvn/javadoc/spring-security-core</location>
+                        </offlineLink>
+                        <offlineLink>
+                            <url>https://javadoc.io/page/javax.servlet/javax.servlet-api/${servlet-api.version}</url>
+                            <location>${root.basedir}/.mvn/javadoc/servlet-api</location>
+                        </offlineLink>
+                    </offlineLinks>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>com.mycila</groupId>
@@ -341,6 +379,21 @@
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>snapshots</id>
+            <name>OSS Sonatype Snapshot Repository</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <profiles>
         <profile>
