@@ -48,6 +48,7 @@ deploy:
   file:
     - ./**/target/*$TRAVIS_TAG.jar
     - ./**/target/*-sources.jar
+    - ./**/target/*root-$TRAVIS_TAG-javadoc.jar
 #    - ./**/target/*.jar.asc
   skip_cleanup: true
   on:
