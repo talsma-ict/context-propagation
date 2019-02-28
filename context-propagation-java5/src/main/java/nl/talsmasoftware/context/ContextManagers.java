@@ -16,6 +16,7 @@
 package nl.talsmasoftware.context;
 
 import nl.talsmasoftware.context.clearable.Clearable;
+import nl.talsmasoftware.context.observer.ContextObserver;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -41,6 +42,12 @@ public final class ContextManagers {
      */
     private static final PriorityServiceLoader<ContextManager> CONTEXT_MANAGERS =
             new PriorityServiceLoader<ContextManager>(ContextManager.class);
+
+    /**
+     * The service loader that loads (and possibly caches) {@linkplain ContextManager} instances in prioritized order.
+     */
+    private static final PriorityServiceLoader<ContextObserver> CONTEXT_OBSERVERS =
+            new PriorityServiceLoader<ContextObserver>(ContextObserver.class);
 
     /**
      * Private constructor to avoid instantiation of this class.
@@ -143,6 +150,66 @@ public final class ContextManagers {
             LOGGER.log(Level.INFO, noContextManagersFound.getMessage(), noContextManagersFound);
         }
         Timing.timed(System.nanoTime() - start, ContextManagers.class, "clearActiveContexts");
+    }
+
+    /**
+     * Notifies all {@linkplain ContextObserver context observers} for the specified {@code contextManager}
+     * about the activated context value.
+     *
+     * @param contextManager        The context manager type that activated the context (required to observe).
+     * @param activatedContextValue The activated context value or {@code null} if no value was activated.
+     * @param previousContextValue  The previous context value or {@code null} if unknown or unsupported.
+     * @param <T>                   The type managed by the context manager.
+     * @since 1.0.6
+     */
+    @SuppressWarnings("unchecked") // If the observer tells us it can observe the values, we trust it.
+    public static <T> void onActivate(Class<? extends ContextManager<? super T>> contextManager,
+                                      T activatedContextValue,
+                                      T previousContextValue) {
+        if (contextManager != null) for (ContextObserver observer : CONTEXT_OBSERVERS) {
+            try {
+                final Class observedContext = observer.getObservedContextManager();
+                if (observedContext != null && observedContext.isAssignableFrom(contextManager)) {
+                    observer.onActivate(activatedContextValue, previousContextValue);
+                }
+            } catch (RuntimeException observationException) {
+                Logger.getLogger(observer.getClass().getName()).log(Level.WARNING,
+                        "Exception in " + observer.getClass().getSimpleName()
+                                + ".onActivate(" + activatedContextValue + ", " + previousContextValue
+                                + ") for " + contextManager.getSimpleName() + ": " + observationException.getMessage(),
+                        observationException);
+            }
+        }
+    }
+
+    /**
+     * Notifies all {@linkplain ContextObserver context observers} for the specified {@code contextManager}
+     * about the deactivated context value.
+     *
+     * @param contextManager          The context manager type that deactivated the context (required to observe).
+     * @param deactivatedContextValue The deactivated context value
+     * @param restoredContextValue    The restored context value or {@code null} if unknown or unsupported.
+     * @param <T>                     The type managed by the context manager.
+     * @since 1.0.6
+     */
+    @SuppressWarnings("unchecked") // If the observer tells us it can observe the values, we trust it.
+    public static <T> void onDeactivate(Class<? extends ContextManager<? super T>> contextManager,
+                                        T deactivatedContextValue,
+                                        T restoredContextValue) {
+        if (contextManager != null) for (ContextObserver observer : CONTEXT_OBSERVERS) {
+            try {
+                final Class observedContext = observer.getObservedContextManager();
+                if (observedContext != null && observedContext.isAssignableFrom(contextManager)) {
+                    observer.onDeactivate(deactivatedContextValue, restoredContextValue);
+                }
+            } catch (RuntimeException observationException) {
+                Logger.getLogger(observer.getClass().getName()).log(Level.WARNING,
+                        "Exception in " + observer.getClass().getSimpleName()
+                                + ".onDeactivate(" + deactivatedContextValue + ", " + deactivatedContextValue
+                                + ") for " + contextManager.getSimpleName() + ": " + observationException.getMessage(),
+                        observationException);
+            }
+        }
     }
 
     /**

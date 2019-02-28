@@ -41,6 +41,10 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.fail;
 
+/**
+ * @deprecated To test a deprecated class with less warnings, we deprecate the test as well
+ */
+@Deprecated
 public class ContextObserversTest {
 
     @Before

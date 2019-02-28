@@ -21,7 +21,7 @@ import io.opentracing.Span;
 import io.opentracing.util.GlobalTracer;
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManager;
-import nl.talsmasoftware.context.observer.ContextObservers;
+import nl.talsmasoftware.context.ContextManagers;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -89,7 +89,7 @@ public class SpanManager implements ContextManager<Span> {
         private SpanContext(Span span, Scope scope) {
             this.span = span;
             this.scope = scope;
-            ContextObservers.onActivate(SpanManager.class, span, null);
+            ContextManagers.onActivate(SpanManager.class, span, null);
         }
 
         @Override
@@ -103,7 +103,7 @@ public class SpanManager implements ContextManager<Span> {
                 if (scope != null) {
                     scope.close();
                 }
-                ContextObservers.onDeactivate(SpanManager.class, span, null);
+                ContextManagers.onDeactivate(SpanManager.class, span, null);
             }
         }
 

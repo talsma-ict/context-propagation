@@ -17,7 +17,7 @@ package nl.talsmasoftware.context.threadlocal;
 
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManager;
-import nl.talsmasoftware.context.observer.ContextObservers;
+import nl.talsmasoftware.context.ContextManagers;
 
 import java.lang.reflect.Modifier;
 import java.util.concurrent.ConcurrentHashMap;
@@ -97,7 +97,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
         this.value = newValue;
         this.sharedThreadLocalContext.set(this);
         logger.log(Level.FINEST, "Initialized new {0}.", this);
-        ContextObservers.onActivate(contextManagerType, value, parentContext == null ? null : parentContext.getValue());
+        ContextManagers.onActivate(contextManagerType, value, parentContext == null ? null : parentContext.getValue());
     }
 
     /**
@@ -149,7 +149,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
         final Context<T> restored = this.unwindIfNecessary(); // Remove this context created in the same thread.
         logger.log(Level.FINEST, "Closed {0}.", this);
         if (observe) {
-            ContextObservers.onDeactivate(contextManagerType, this.value, restored == null ? null : restored.getValue());
+            ContextManagers.onDeactivate(contextManagerType, this.value, restored == null ? null : restored.getValue());
         }
     }
 

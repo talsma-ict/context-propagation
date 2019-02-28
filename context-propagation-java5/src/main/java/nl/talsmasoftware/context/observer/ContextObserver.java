@@ -19,18 +19,21 @@ import nl.talsmasoftware.context.ContextManager;
 
 /**
  * Observe context updates for a particular class of {@linkplain ContextManager}.
+ *
  * <p>
  * Create your context observer by implementing this interface
  * and registering your class to the {@code ServiceLoader}
  * SPI by adding the fully qualified class name to the resource
  * {@code /META-INF/services/nl.talsmasoftware.context.observer.ContextObserver}.
+ *
  * <p>
  * It is the responsibility of the context implementor to update observers of
  * context updates. SPI lookup of appropriate observers is facilitated
- * by the {@linkplain ContextObservers#onActivate(Class, Object, Object)}
- * and {@linkplain ContextObservers#onDeactivate(Class, Object, Object)}
+ * by the {@linkplain nl.talsmasoftware.context.ContextManagers#onActivate(Class, Object, Object)}
+ * and {@linkplain nl.talsmasoftware.context.ContextManagers#onDeactivate(Class, Object, Object)}
  * utility methods.<br>
- * All subclasses of {@code AbstractThreadLocalContext} are already observable.
+ * All subclasses of {@linkplain nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext}
+ * are already observable.
  *
  * @author Sjoerd Talsma
  */
@@ -38,13 +41,16 @@ public interface ContextObserver<T> {
 
     /**
      * The observed context manager(s).
+     *
      * <p>
      * Context observers can indicate which type of context manager must be observed using this method.
      * For instance, returning {@code LocaleContextManager.class} here, updates for the {@code LocaleContext} will
      * be offered to this observer.
+     *
      * <p>
      * To observe <em>all</em> context updates, return the {@linkplain ContextManager} interface class itself,
      * since all context managers must implement it.
+     *
      * <p>
      * Return {@code null} to disable the observer.
      *
