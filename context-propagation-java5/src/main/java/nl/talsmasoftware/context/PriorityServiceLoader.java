@@ -37,7 +37,7 @@ import static java.util.Collections.unmodifiableList;
  * @param <SVC> The type of service to load.
  * @author Sjoerd Talsma
  */
-public final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
+final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
     private static final Logger LOGGER = Logger.getLogger(PriorityServiceLoader.class.getName());
     private static final String SYSTEMPROPERTY_CACHING = "talsmasoftware.context.caching";
     private static final String ENVIRONMENT_CACHING_VALUE = System.getenv(
@@ -48,7 +48,7 @@ public final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
     private final Class<SVC> serviceType;
     private final Map<ClassLoader, List<SVC>> cache = new WeakHashMap<ClassLoader, List<SVC>>();
 
-    public PriorityServiceLoader(Class<SVC> serviceType) {
+    PriorityServiceLoader(Class<SVC> serviceType) {
         if (serviceType == null) throw new NullPointerException("Service type is <null>.");
         this.serviceType = serviceType;
     }
@@ -66,9 +66,9 @@ public final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
     }
 
     /**
-     * Removes the cache so the next call to {@linkplain #iterator()} will attempt to load the objects again.
+     * Remove the cache so the next call to {@linkplain #iterator()} will attempt to load the objects again.
      */
-    public void clearCache() {
+    void clearCache() {
         cache.clear();
     }
 

@@ -13,22 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /**
- * The core concepts of the context-propagation library.
- * <br>
- * <dl>
- * <dt><a href="Context.html">Context</a>:</dt>
- * <dd>Defines a context as something with a value that can be closed.</dd>
- * <dt><a href="ContextManager.html">ContextManager</a>:</dt>
- * <dd>Interface defining required operations to manage contexts:
- * creating new contexts and obtaining 'current' contexts.</dd>
- * <dt><a href="ContextSnapshot.html">ContextSnapshot</a>:</dt>
- * <dd>A snapshot of one or more active contexts
- * that can be reactivated temporarily (until closed).</dd>
- * <dt><a href="ContextManagers.html">ContextManagers</a>:</dt>
- * <dd>Contains a static method to create a new snapshot
- * from registered ContextManager implementations.</dd>
- * </dl>
+ * Main package defining the core {@code context-propagation} concepts in this library
+ *
+ * <h2><a href="Context.html">Context</a></h2>
+ * <p>
+ * Defines a context as something with a value that can be closed.
+ *
+ * <h2><a href="ContextManager.html">ContextManager</a></h2>
+ * <p>
+ * Interface defining required operations to manage contexts:
+ * creating new contexts and obtaining 'current' contexts.
+ *
+ * <h2><a href="ContextSnapshot.html">ContextSnapshot</a></h2>
+ * <p>
+ * A snapshot of one or more active contexts
+ * that can be reactivated temporarily (until closed).
+ *
+ * <h2><a href="ContextManagers.html">ContextManagers</a></h2>
+ * <p>
+ * Contains a static method to create a new snapshot
+ * from registered ContextManager implementations.
  *
  * @author Sjoerd Talsma
  */
