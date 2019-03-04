@@ -15,6 +15,8 @@
  */
 package nl.talsmasoftware.context;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -28,50 +30,42 @@ public class NoContextManagersTest {
     private static final File SERVICE_FILE = new File(SERVICE_LOCATION + ContextManager.class.getName());
     private static final File TMP_SERVICE_FILE = new File(SERVICE_LOCATION + "tmp-ContextManager");
 
+    @Before
+    public void avoidContextManagersCache() {
+        ContextManagers.useClassLoader(new ClassLoader(Thread.currentThread().getContextClassLoader()) {
+        });
+        assertThat("Move service file", SERVICE_FILE.renameTo(TMP_SERVICE_FILE), is(true));
+    }
+
+    @After
+    public void resetDefaultClassLoader() {
+        ContextManagers.useClassLoader(null);
+        assertThat("Restore service file!", TMP_SERVICE_FILE.renameTo(SERVICE_FILE), is(true));
+    }
+
     @Test
     public void testReactivate_withoutContextManagers() {
         Context<String> ctx1 = new DummyContext("foo");
         ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
         ctx1.close();
 
-        assertThat("Move service file", SERVICE_FILE.renameTo(TMP_SERVICE_FILE), is(true));
-        try {
-
-            Context<Void> reactivated = snapshot.reactivate();
-
-            reactivated.close();
-
-        } finally {
-            assertThat("Restore service file!", TMP_SERVICE_FILE.renameTo(SERVICE_FILE), is(true));
-        }
+        Context<Void> reactivated = snapshot.reactivate();
+        reactivated.close();
     }
 
     @Test
     public void testCreateSnapshot_withoutContextManagers() {
-        assertThat("Move service file", SERVICE_FILE.renameTo(TMP_SERVICE_FILE), is(true));
-        try {
+        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        assertThat(snapshot, is(notNullValue()));
 
-            ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
-            assertThat(snapshot, is(notNullValue()));
-
-            Context<Void> reactivated = snapshot.reactivate();
-            assertThat(reactivated, is(notNullValue()));
-            reactivated.close();
-
-        } finally {
-            assertThat("Restore service file!", TMP_SERVICE_FILE.renameTo(SERVICE_FILE), is(true));
-        }
+        Context<Void> reactivated = snapshot.reactivate();
+        assertThat(reactivated, is(notNullValue()));
+        reactivated.close();
     }
 
     @Test
     public void testClearManagedContexts_withoutContextManagers() {
-        assertThat("Move service file", SERVICE_FILE.renameTo(TMP_SERVICE_FILE), is(true));
-        try {
-            ContextManagers.clearActiveContexts();
-            // there should be no exception
-        } finally {
-            assertThat("Restore service file!", TMP_SERVICE_FILE.renameTo(SERVICE_FILE), is(true));
-        }
+        ContextManagers.clearActiveContexts(); // there should be no exception
     }
 
 }
