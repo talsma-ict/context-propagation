@@ -16,7 +16,7 @@
 package nl.talsmasoftware.context.servletrequest;
 
 import nl.talsmasoftware.context.Context;
-import nl.talsmasoftware.context.observer.ContextObservers;
+import nl.talsmasoftware.context.ContextManagers;
 
 import javax.servlet.ServletRequest;
 
@@ -34,7 +34,7 @@ final class ServletRequestContext implements Context<ServletRequest> {
     ServletRequestContext(ServletRequest servletRequest) {
         this.servletRequest = servletRequest;
         CONTEXT.set(this);
-        ContextObservers.onActivate(ServletRequestContextManager.class, servletRequest, null);
+        ContextManagers.onActivate(ServletRequestContextManager.class, servletRequest, null);
     }
 
     static Context<ServletRequest> current() {
@@ -49,7 +49,7 @@ final class ServletRequestContext implements Context<ServletRequest> {
         final ServletRequest deactivated = servletRequest;
         servletRequest = null;
         CONTEXT.set(null);
-        ContextObservers.onDeactivate(ServletRequestContextManager.class, deactivated, null);
+        ContextManagers.onDeactivate(ServletRequestContextManager.class, deactivated, null);
     }
 
     @Override

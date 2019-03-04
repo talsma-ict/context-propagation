@@ -21,9 +21,9 @@ import org.hamcrest.Matcher;
 
 import java.util.Arrays;
 
-final class Observed {
+public final class Observed {
 
-    enum Action {
+    public enum Action {
         ACTIVATE, DEACTIVATE
     }
 

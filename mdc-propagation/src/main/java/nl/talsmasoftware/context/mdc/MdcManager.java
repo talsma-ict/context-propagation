@@ -17,8 +17,8 @@ package nl.talsmasoftware.context.mdc;
 
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManager;
+import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.clearable.Clearable;
-import nl.talsmasoftware.context.observer.ContextObservers;
 import org.slf4j.MDC;
 
 import java.util.Map;
@@ -88,7 +88,7 @@ public class MdcManager implements ContextManager<Map<String, String>> {
             this.previous = previous;
             this.value = value;
             this.closed = new AtomicBoolean(closed);
-            ContextObservers.onActivate(MdcManager.class, value, previous);
+            ContextManagers.onActivate(MdcManager.class, value, previous);
         }
 
         public Map<String, String> getValue() {
@@ -99,7 +99,7 @@ public class MdcManager implements ContextManager<Map<String, String>> {
             if (closed.compareAndSet(false, true)) {
                 if (previous == null) MDC.clear();
                 else MDC.setContextMap(previous);
-                ContextObservers.onDeactivate(MdcManager.class, value, previous);
+                ContextManagers.onDeactivate(MdcManager.class, value, previous);
             }
         }
 

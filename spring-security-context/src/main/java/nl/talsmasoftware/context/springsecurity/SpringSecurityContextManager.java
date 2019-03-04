@@ -16,8 +16,8 @@
 package nl.talsmasoftware.context.springsecurity;
 
 import nl.talsmasoftware.context.Context;
+import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.clearable.ClearableContextManager;
-import nl.talsmasoftware.context.observer.ContextObservers;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -76,7 +76,7 @@ public class SpringSecurityContextManager implements ClearableContextManager<Aut
             this.current = current;
             this.previous = previous;
             this.closed = new AtomicBoolean(alreadyClosed);
-            ContextObservers.onActivate(SpringSecurityContextManager.class, auth(current), auth(previous));
+            ContextManagers.onActivate(SpringSecurityContextManager.class, auth(current), auth(previous));
         }
 
         public Authentication getValue() {
@@ -86,7 +86,7 @@ public class SpringSecurityContextManager implements ClearableContextManager<Aut
         public void close() {
             if (closed.compareAndSet(false, true)) {
                 SecurityContextHolder.setContext(previous);
-                ContextObservers.onDeactivate(SpringSecurityContextManager.class, auth(current), auth(previous));
+                ContextManagers.onDeactivate(SpringSecurityContextManager.class, auth(current), auth(previous));
             }
         }
 
