@@ -17,6 +17,7 @@ package nl.talsmasoftware.context.observer;
 
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManager;
+import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.DummyContextManager;
 import nl.talsmasoftware.context.ThrowingContextManager;
 import org.hamcrest.Matchers;
@@ -35,16 +36,15 @@ import static nl.talsmasoftware.context.observer.SimpleContextObserver.observed;
 import static nl.talsmasoftware.context.observer.SimpleContextObserver.observedContextManager;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.fail;
 
-/**
- * @deprecated To test a deprecated class with less warnings, we deprecate the test as well
- */
-@Deprecated
+@SuppressWarnings("deprecation")
 public class ContextObserversTest {
 
     @Before
@@ -55,7 +55,7 @@ public class ContextObserversTest {
     }
 
     @Test
-    public void testUnsupportedConstructor() {
+    public void testUnsupportedConstructor() throws IllegalAccessException, InstantiationException {
         Constructor<?>[] constructors = ContextObservers.class.getDeclaredConstructors();
         assertThat("Number of constructors", constructors.length, is(1));
         assertThat("Constructor parameters", constructors[0].getParameterTypes().length, is(0));
@@ -63,10 +63,6 @@ public class ContextObserversTest {
         try {
             constructors[0].setAccessible(true);
             constructors[0].newInstance();
-            fail("InvocationTargetException expected.");
-        } catch (IllegalAccessException e) {
-            fail("InvocationTargetException expected.");
-        } catch (InstantiationException e) {
             fail("InvocationTargetException expected.");
         } catch (InvocationTargetException expected) {
             assertThat(expected.getCause(), is(instanceOf(UnsupportedOperationException.class)));
@@ -150,4 +146,31 @@ public class ContextObserversTest {
         assertThat(observed, not(hasItem(deactivated(is("Activated context")))));
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testOnActivate() {
+        observedContextManager = DummyContextManager.class;
+        Class reportedClass = ContextManager.class;
+        ContextManagers.onActivate(reportedClass, "activated value", "previous value");
+        assertThat(observed, is(empty()));
+
+        observedContextManager = ContextManager.class;
+        reportedClass = DummyContextManager.class;
+        ContextObservers.onActivate(reportedClass, "activated value", "previous value");
+        assertThat(observed, hasItem(activated(equalTo("activated value"))));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testOnDeactivate() {
+        observedContextManager = DummyContextManager.class;
+        Class reportedClass = ContextManager.class;
+        ContextObservers.onDeactivate(reportedClass, "deactivated value", "restored value");
+        assertThat(observed, is(empty()));
+
+        observedContextManager = ContextManager.class;
+        reportedClass = DummyContextManager.class;
+        ContextObservers.onDeactivate(reportedClass, "deactivated value", "restored value");
+        assertThat(observed, hasItem(deactivated(equalTo("deactivated value"))));
+    }
 }

@@ -26,7 +26,6 @@ import org.junit.Test;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -37,7 +36,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import static nl.talsmasoftware.context.observer.Observed.activated;
+import static nl.talsmasoftware.context.observer.Observed.deactivated;
+import static nl.talsmasoftware.context.observer.SimpleContextObserver.observed;
+import static nl.talsmasoftware.context.observer.SimpleContextObserver.observedContextManager;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -49,9 +55,6 @@ import static org.junit.Assert.fail;
  * @author Sjoerd Talsma
  */
 public class ContextManagersTest {
-    private static final String SERVICE_LOCATION = "target/test-classes/META-INF/services/";
-    private static final File SERVICE_FILE = new File(SERVICE_LOCATION + ContextManager.class.getName());
-    private static final File TMP_SERVICE_FILE = new File(SERVICE_LOCATION + "tmp-ContextManager");
 
     @BeforeClass
     public static void initLogback() {
@@ -79,6 +82,13 @@ public class ContextManagersTest {
     @After
     public void resetContextClassLoader() {
         ContextManagers.useClassLoader(null);
+    }
+
+    @Before
+    @After
+    public void clearObserved() {
+        observedContextManager = null;
+        observed.clear();
     }
 
     @Test
@@ -236,51 +246,6 @@ public class ContextManagersTest {
     }
 
     @Test
-    public void testReactivate_withoutContextManagers() {
-        Context<String> ctx1 = new DummyContext("foo");
-        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
-        ctx1.close();
-
-        assertThat("Move service file", SERVICE_FILE.renameTo(TMP_SERVICE_FILE), is(true));
-        try {
-
-            Context<Void> reactivated = snapshot.reactivate();
-            reactivated.close();
-
-        } finally {
-            assertThat("Restore service file!", TMP_SERVICE_FILE.renameTo(SERVICE_FILE), is(true));
-        }
-    }
-
-    @Test
-    public void testCreateSnapshot_withoutContextManagers() {
-        assertThat("Move service file", SERVICE_FILE.renameTo(TMP_SERVICE_FILE), is(true));
-        try {
-
-            ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
-            assertThat(snapshot, is(notNullValue()));
-
-            Context<Void> reactivated = snapshot.reactivate();
-            assertThat(reactivated, is(notNullValue()));
-            reactivated.close();
-
-        } finally {
-            assertThat("Restore service file!", TMP_SERVICE_FILE.renameTo(SERVICE_FILE), is(true));
-        }
-    }
-
-    @Test
-    public void testClearManagedContexts_withoutContextManagers() {
-        assertThat("Move service file", SERVICE_FILE.renameTo(TMP_SERVICE_FILE), is(true));
-        try {
-            ContextManagers.clearActiveContexts();
-            // there should be no exception
-        } finally {
-            assertThat("Restore service file!", TMP_SERVICE_FILE.renameTo(SERVICE_FILE), is(true));
-        }
-    }
-
-    @Test
     public void testConcurrentSnapshots_fixedClassLoader() throws ExecutionException, InterruptedException {
         ContextManagers.useClassLoader(Thread.currentThread().getContextClassLoader());
         int threadcount = 25;
@@ -301,5 +266,33 @@ public class ContextManagersTest {
         } finally {
             threadpool.shutdown();
         }
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testOnActivate() {
+        observedContextManager = DummyContextManager.class;
+        Class reportedClass = ContextManager.class;
+        ContextManagers.onActivate(reportedClass, "activated value", "previous value");
+        assertThat(observed, is(empty()));
+
+        observedContextManager = ContextManager.class;
+        reportedClass = DummyContextManager.class;
+        ContextManagers.onActivate(reportedClass, "activated value", "previous value");
+        assertThat(observed, hasItem(activated(equalTo("activated value"))));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testOnDeactivate() {
+        observedContextManager = DummyContextManager.class;
+        Class reportedClass = ContextManager.class;
+        ContextManagers.onDeactivate(reportedClass, "deactivated value", "restored value");
+        assertThat(observed, is(empty()));
+
+        observedContextManager = ContextManager.class;
+        reportedClass = DummyContextManager.class;
+        ContextManagers.onDeactivate(reportedClass, "deactivated value", "restored value");
+        assertThat(observed, hasItem(deactivated(equalTo("deactivated value"))));
     }
 }

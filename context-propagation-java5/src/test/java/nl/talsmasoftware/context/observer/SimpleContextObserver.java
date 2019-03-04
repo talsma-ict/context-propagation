@@ -21,9 +21,9 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SimpleContextObserver implements ContextObserver<Object> {
-    static Class<? extends ContextManager> observedContextManager = null;
+    public static Class<? extends ContextManager> observedContextManager = null;
 
-    static final List<Observed> observed = new CopyOnWriteArrayList<Observed>();
+    public static final List<Observed> observed = new CopyOnWriteArrayList<Observed>();
 
     @SuppressWarnings("unchecked")
     public Class<? extends ContextManager<Object>> getObservedContextManager() {
