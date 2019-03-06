@@ -28,8 +28,8 @@ import java.util.logging.Logger;
  *
  * @author Sjoerd Talsma
  */
-final class Timing {
-    private static final Logger LOGGER = Logger.getLogger(Timing.class.getName());
+final class Timers {
+    private static final Logger TIMING_LOGGER = Logger.getLogger("nl.talsmasoftware.context.Timing");
 
     /**
      * Singleton containing resolved ContextTimer delegates.
@@ -51,8 +51,8 @@ final class Timing {
         for (ContextTimer delegate : Singleton.INSTANCE.delegates) {
             delegate.update(type, method, durationNanos, TimeUnit.NANOSECONDS);
         }
-        if (LOGGER.isLoggable(Level.FINEST)) {
-            LOGGER.log(Level.FINEST, "{0}.{1}: {2,number}ns", new Object[]{type.getName(), method, durationNanos});
+        if (TIMING_LOGGER.isLoggable(Level.FINEST)) {
+            TIMING_LOGGER.log(Level.FINEST, "{0}.{1}: {2,number}ns", new Object[]{type.getName(), method, durationNanos});
         }
     }
 
