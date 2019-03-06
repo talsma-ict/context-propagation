@@ -26,15 +26,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 /**
- * Test for the package-protected Timing utility class.
+ * Test for the package-protected Timers utility class.
  *
  * @author Sjoerd Talsma
  */
-public class TimingTest {
+public class TimersTest {
 
     @Test
     public void testTimingDelegation() {
-        Timing.timed(TimeUnit.MILLISECONDS.toNanos(150), getClass(), "testTimingDelegation");
+        Timers.timed(TimeUnit.MILLISECONDS.toNanos(150), getClass(), "testTimingDelegation");
         assertThat(TestContextTimer.getLastTimedMillis(getClass(), "testTimingDelegation"), is(150L));
     }
 
