@@ -83,14 +83,14 @@ public final class ContextManagers {
                     if (LOGGER.isLoggable(Level.FINEST)) {
                         LOGGER.finest("Active context of " + manager + " added to new snapshot: " + activeContext + ".");
                     }
-                    Timing.timed(System.nanoTime() - managerStart, manager.getClass(), "getActiveContext");
+                    Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "getActiveContext");
                 } else if (LOGGER.isLoggable(Level.FINEST)) {
                     LOGGER.log(Level.FINEST, "There is no active context for " + manager + " in this snapshot.");
                 }
             } catch (RuntimeException rte) {
                 CONTEXT_MANAGERS.clearCache();
                 LOGGER.log(Level.WARNING, "Exception obtaining active context from " + manager + " for snapshot.", rte);
-                Timing.timed(System.nanoTime() - managerStart, manager.getClass(), "getActiveContext.exception");
+                Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "getActiveContext.exception");
             }
         }
         if (managerStart == null) {
@@ -98,7 +98,7 @@ public final class ContextManagers {
             LOGGER.log(Level.INFO, noContextManagersFound.getMessage(), noContextManagersFound);
         }
         ContextSnapshot result = new ContextSnapshotImpl(managers, values);
-        Timing.timed(System.nanoTime() - start, ContextManagers.class, "createContextSnapshot");
+        Timers.timed(System.nanoTime() - start, ContextManagers.class, "createContextSnapshot");
         return result;
     }
 
@@ -131,7 +131,7 @@ public final class ContextManagers {
                     if (LOGGER.isLoggable(Level.FINEST)) {
                         LOGGER.finest("Active context of " + manager + " was cleared.");
                     }
-                    Timing.timed(System.nanoTime() - managerStart, manager.getClass(), "clear");
+                    Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "clear");
                 } else {
                     Context activeContext = manager.getActiveContext();
                     if (activeContext != null) {
@@ -142,14 +142,14 @@ public final class ContextManagers {
                 }
             } catch (RuntimeException rte) {
                 LOGGER.log(Level.WARNING, "Exception clearing active context from " + manager + ".", rte);
-                Timing.timed(System.nanoTime() - managerStart, manager.getClass(), "clear.exception");
+                Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "clear.exception");
             }
         }
         if (managerStart == null) {
             NoContextManagersFound noContextManagersFound = new NoContextManagersFound();
             LOGGER.log(Level.INFO, noContextManagersFound.getMessage(), noContextManagersFound);
         }
-        Timing.timed(System.nanoTime() - start, ContextManagers.class, "clearActiveContexts");
+        Timers.timed(System.nanoTime() - start, ContextManagers.class, "clearActiveContexts");
     }
 
     /**
@@ -263,7 +263,7 @@ public final class ContextManagers {
                                 "and has not implemented the Clearable interface?");
             }
         }
-        Timing.timed(System.nanoTime() - start, contextType, "clear");
+        Timers.timed(System.nanoTime() - start, contextType, "clear");
     }
 
     /**
@@ -288,7 +288,7 @@ public final class ContextManagers {
                     reactivatedContexts.add(reactivate(managers[i], values[i]));
                 }
                 ReactivatedContext reactivatedContext = new ReactivatedContext(reactivatedContexts);
-                Timing.timed(System.nanoTime() - start, ContextSnapshot.class, "reactivate");
+                Timers.timed(System.nanoTime() - start, ContextSnapshot.class, "reactivate");
                 return reactivatedContext;
             } catch (RuntimeException reactivationException) {
                 CONTEXT_MANAGERS.clearCache();
@@ -314,7 +314,7 @@ public final class ContextManagers {
             if (LOGGER.isLoggable(Level.FINEST)) {
                 LOGGER.finest("Context reactivated from snapshot by " + contextManager + ": " + reactivated + ".");
             }
-            Timing.timed(System.nanoTime() - start, contextManager.getClass(), "initializeNewContext");
+            Timers.timed(System.nanoTime() - start, contextManager.getClass(), "initializeNewContext");
             return reactivated;
         }
 
