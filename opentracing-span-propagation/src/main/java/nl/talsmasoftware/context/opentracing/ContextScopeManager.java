@@ -59,25 +59,27 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
     /**
-     * Makes the given span the new active span.
+     * {@inheritDoc}
      *
-     * @param span              The span to become the active span.
-     * @param finishSpanOnClose Whether the span should automatically finish when closing the resulting scope.
-     * @return The new active scope (must be closed from the same thread).
+     * @param span The span to become the active span.
+     * @return a {@code Scope} instance to control the end of the active period for the {@link Span}.
+     * It is a programming error to neglect to call {@link Scope#close()} on the returned instance.
+     * @see #activeSpan()
      */
     @Override
-    public Scope activate(Span span, boolean finishSpanOnClose) {
-        return new ThreadLocalSpanContext(getClass(), span, finishSpanOnClose);
+    public Scope activate(Span span) {
+        return new ThreadLocalSpanContext(getClass(), span, false);
     }
 
     /**
-     * The currently active {@link Scope} containing the active span {@link Scope#span()}.
+     * {@inheritDoc}
      *
-     * @return the active scope, or {@code null} if none could be found.
+     * @return The active span or {@code null} if there is none.
      */
     @Override
-    public Scope active() {
-        return ThreadLocalSpanContext.current();
+    public Span activeSpan() {
+        ThreadLocalSpanContext activeScope = ThreadLocalSpanContext.current();
+        return activeScope == null ? null : activeScope.getValue();
     }
 
     /**
@@ -93,11 +95,36 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
     }
 
     /**
-     * @return The active span context (this is identical to the active scope).
+     * @return The active span context.
      * @see #active()
      */
     @Override
     public Context<Span> getActiveContext() {
+        return ThreadLocalSpanContext.current();
+    }
+
+    /**
+     * Makes the given span the new active span.
+     *
+     * @param span              The span to become the active span.
+     * @param finishSpanOnClose Whether the span should automatically finish when closing the resulting scope.
+     * @return The new active scope (must be closed from the same thread).
+     * @deprecated Use {@code activate(Span)} instead and finish explicitly.
+     */
+    @Override
+    @Deprecated
+    public Scope activate(Span span, boolean finishSpanOnClose) {
+        return new ThreadLocalSpanContext(getClass(), span, finishSpanOnClose);
+    }
+
+    /**
+     * The currently active {@link Scope} containing the active span {@link Scope#span()}.
+     *
+     * @return the active scope, or {@code null} if none could be found.
+     */
+    @Override
+    @Deprecated
+    public Scope active() {
         return ThreadLocalSpanContext.current();
     }
 
