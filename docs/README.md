@@ -1,6 +1,7 @@
 [![Build Status][ci-img]][ci]
 [![Coverage Status][coveralls-img]][coveralls]
 [![Maven Version][maven-img]][maven]
+[![Javadoc][javadoc-img]][javadoc]
 
 # Context propagation library
 
@@ -139,6 +140,9 @@ configure various timers in the default metric registry of your application.
   [release]: https://github.com/talsma-ict/context-propagation/releases
   [coveralls-img]: https://coveralls.io/repos/github/talsma-ict/context-propagation/badge.svg
   [coveralls]: https://coveralls.io/github/talsma-ict/context-propagation
+  [javadoc-img]: https://www.javadoc.io/badge/nl.talsmasoftware.context/context-propagation.svg
+  [javadoc]: https://www.javadoc.io/doc/nl.talsmasoftware.context/context-propagation-root
+
 
   [servletrequest propagation]: ../servletrequest-propagation
   [mdc propagation]: ../mdc-propagation
