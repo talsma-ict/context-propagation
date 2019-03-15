@@ -28,12 +28,12 @@
 
     <!-- Artifact identification -->
     <artifactId>context-propagation</artifactId>
-    <name>Context propagation (core, java-5)</name>
+    <name>Context propagation (core)</name>
     <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.source>1.5</maven.compiler.source>
-        <maven.compiler.target>1.5</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <project.moduleName>${project.groupId}</project.moduleName>
         <root.basedir>${project.parent.basedir}</root.basedir>
 

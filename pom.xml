@@ -36,7 +36,7 @@
 
     <modules>
         <module>context-propagation-bom</module>
-        <module>context-propagation-java5</module>
+        <module>context-propagation</module>
         <module>context-propagation-java8</module>
         <module>context-propagation-metrics</module>
         <module>locale-context</module>
