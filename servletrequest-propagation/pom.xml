@@ -33,8 +33,6 @@
     <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.source>1.5</maven.compiler.source>
-        <maven.compiler.target>1.5</maven.compiler.target>
         <project.moduleName>${project.groupId}.servletrequest</project.moduleName>
         <root.basedir>${project.parent.basedir}</root.basedir>
     </properties>
