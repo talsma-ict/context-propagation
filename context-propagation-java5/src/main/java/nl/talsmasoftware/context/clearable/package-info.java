@@ -25,7 +25,7 @@
  * <p>
  * In the case of {@linkplain nl.talsmasoftware.context.clearable.ClearableContextManager},
  * closing any context only applies to that single context,
- * while clearing a context manager is equivalent to closing <em>all</em> contexts in that
- * manager from the current thread.
+ * while {@linkplain nl.talsmasoftware.context.clearable.ClearableContextManager#clear()} is
+ * equivalent to closing the active context and <em>all</em> parents in the current thread.
  */
 package nl.talsmasoftware.context.clearable;
