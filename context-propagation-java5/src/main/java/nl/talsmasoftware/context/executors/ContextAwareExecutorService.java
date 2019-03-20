@@ -26,9 +26,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * An instance of an executor service that delegates to another executor service that makes a new
- * {@link ContextManagers#createContextSnapshot() context snapshot} whenever a task is scheduled
- * (both {@link Callable} and {@link Runnable} tasks are mapped).
+ * Executor service that wraps another executor service, making sure background tasks operates 'within'
+ * a context snapshot taken from the submitting thread.
+ *
+ * <p>
+ * The executor service will make sure to close the reactivated snapshot again after the code in the task is finished,
+ * even if it throws an exception.
+ *
+ * <p>
+ * Both {@link Callable} and {@link Runnable} tasks are mapped.
  *
  * @author Sjoerd Talsma
  */
