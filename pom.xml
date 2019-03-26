@@ -85,7 +85,7 @@
         <root.basedir>${project.basedir}</root.basedir>
 
         <metrics.version>4.0.5</metrics.version>
-        <opentracing-api.version>0.31.0</opentracing-api.version>
+        <opentracing-api.version>0.32.0</opentracing-api.version>
         <spring-security.version>5.1.4.RELEASE</spring-security.version>
         <servlet-api.version>4.0.1</servlet-api.version>
 
