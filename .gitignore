@@ -18,3 +18,5 @@ hs_err_pid*
 .idea/
 *.iml
 
+# Mac OSX metadata
+.DS_Store

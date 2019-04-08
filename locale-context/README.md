@@ -29,10 +29,8 @@ allowing a configured `Locale` to be propagated.
    ```
 4. Use the LocaleContext anywhere in your application:
   ```java
-  import nl.talsmasoftware.context.locale.LocaleContextManager;
   private void someMethod() {
-      Locale locale = Optional.ofNullable(LocaleContextManager.getCurrentLocale())
-              .orElseGet(Locale::getDefault);
+      Locale locale = LocaleContextManager.getCurrentLocaleOrDefault();
   } 
   ```
 
