@@ -22,28 +22,20 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Sjoerd Talsma
  */
-public class PredicateWithContextTest {
+public class FunctionWithContextTest {
 
     private ContextSnapshot snapshot;
     private Context<Void> context;
@@ -67,15 +59,15 @@ public class PredicateWithContextTest {
     }
 
     @Test
-    public void testTest() {
-        new PredicateWithContext<>(snapshot, input -> true).test("input");
+    public void testApply() {
+        new FunctionWithContext<>(snapshot, Function.identity()).apply("input");
         verify(snapshot).reactivate();
     }
 
     @Test
-    public void testTestWithoutSnapshot() {
+    public void testApplyWithoutSnapshot() {
         try {
-            new PredicateWithContext<>(null, input -> true);
+            new FunctionWithContext<>(null, Function.identity());
             fail("Exception expected");
         } catch (RuntimeException expected) {
             assertThat(expected, hasToString(containsString("No context snapshot provided")));
@@ -83,9 +75,9 @@ public class PredicateWithContextTest {
     }
 
     @Test
-    public void testTestWithoutSnapshotSupplier() {
+    public void testApplyWithoutSnapshotSupplier() {
         try {
-            new PredicateWithContext<>((Supplier<ContextSnapshot>) null, input -> true, context -> {
+            new FunctionWithContext<>((Supplier<ContextSnapshot>) null, Function.identity(), context -> {
             });
             fail("Exception expected");
         } catch (RuntimeException expected) {
@@ -94,16 +86,16 @@ public class PredicateWithContextTest {
     }
 
     @Test
-    public void testTestWithSnapshotConsumer() throws InterruptedException {
+    public void testApplyWithSnapshotConsumer() throws InterruptedException {
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
         DummyContextManager.setCurrentValue("Old value");
 
-        Thread t = new Thread(() -> new PredicateWithContext<>(snapshot,
+        Thread t = new Thread(() -> new FunctionWithContext<>(snapshot,
                 input -> {
                     DummyContextManager.setCurrentValue("New value");
-                    return true;
+                    return input;
                 },
-                snapshot -> snapshotHolder[0] = snapshot).test("input"));
+                snapshot -> snapshotHolder[0] = snapshot).apply("input"));
         t.start();
         t.join();
 
@@ -122,7 +114,7 @@ public class PredicateWithContextTest {
         final RuntimeException expectedException = new RuntimeException("Whoops!");
 
         try {
-            new PredicateWithContext<>(snapshot, throwing(expectedException)).test("input");
+            new FunctionWithContext<>(snapshot, throwing(expectedException)).apply("input");
             fail("Exception expected");
         } catch (RuntimeException rte) {
             assertThat(rte, is(sameInstance(expectedException)));
@@ -133,92 +125,56 @@ public class PredicateWithContextTest {
     }
 
     @Test
-    public void testAndOtherNull() {
+    public void testComposeWithNull() {
         try {
-            new PredicateWithContext<>(snapshot, input -> true).and(null);
+            new FunctionWithContext<>(snapshot, Function.identity()).compose(null);
             fail("Exception expected");
         } catch (NullPointerException expected) {
-            assertThat(expected, hasToString(containsString("'and' <null>")));
+            assertThat(expected, hasToString(containsString("before function <null>")));
         }
     }
 
     @Test
-    public void testAnd_singleContextSwitch() {
+    public void testComposeWith_singleContextSwitch() {
         when(snapshot.reactivate()).thenReturn(context);
-        Predicate<String> predicate = Objects::nonNull;
-        Predicate<String> and = String::isEmpty;
-
+        Function<Integer, Integer> before = i -> i * 10;
+        Function<Integer, Integer> function = i -> i + 3;
         AtomicInteger consumed = new AtomicInteger(0);
-        Predicate<String> combined = new PredicateWithContext<>(snapshot, predicate, snapshot -> consumed.incrementAndGet()).and(and);
 
-        assertThat(combined.test(""), is(true));
+        Function<Integer, Integer> composed = new FunctionWithContext<>(snapshot, function, snapshot -> consumed.incrementAndGet()).compose(before);
+
+        assertThat(composed.apply(2), is((2 * 10) + 3));
         verify(snapshot, times(1)).reactivate();
         verify(context, times(1)).close();
         assertThat(consumed.get(), is(1));
     }
 
     @Test
-    public void testAnd_shortCircuit() {
+    public void testAndThen_singleContextSwitch() {
         when(snapshot.reactivate()).thenReturn(context);
-        Predicate<String> predicate = Objects::nonNull;
-        @SuppressWarnings("unchecked")
-        Predicate<String> and = mock(Predicate.class);
-
+        Function<Integer, Integer> after = i -> i * 10;
+        Function<Integer, Integer> function = i -> i + 3;
         AtomicInteger consumed = new AtomicInteger(0);
-        Predicate<String> combined = new PredicateWithContext<>(snapshot, predicate, snapshot -> consumed.incrementAndGet()).and(and);
 
-        assertThat(combined.test(null), is(false));
-        verifyNoMoreInteractions(and);
+        Function<Integer, Integer> composed = new FunctionWithContext<>(snapshot, function, snapshot -> consumed.incrementAndGet()).andThen(after);
 
+        assertThat(composed.apply(2), is((2 + 3) * 10));
         verify(snapshot, times(1)).reactivate();
         verify(context, times(1)).close();
         assertThat(consumed.get(), is(1));
     }
 
     @Test
-    public void testOrOtherNull() {
+    public void testAndThenWithNull() {
         try {
-            new PredicateWithContext<>(snapshot, input -> true).or(null);
+            new FunctionWithContext<>(snapshot, Function.identity()).andThen(null);
             fail("Exception expected");
         } catch (NullPointerException expected) {
-            assertThat(expected, hasToString(containsString("'or' <null>")));
+            assertThat(expected, hasToString(containsString("after function <null>")));
         }
     }
 
-    @Test
-    public void tesOr_singleContextSwitch() {
-        when(snapshot.reactivate()).thenReturn(context);
-        Predicate<String> predicate = Objects::isNull;
-        Predicate<String> or = String::isEmpty;
-
-        AtomicInteger consumed = new AtomicInteger(0);
-        Predicate<String> combined = new PredicateWithContext<>(snapshot, predicate, snapshot -> consumed.incrementAndGet()).or(or);
-
-        assertThat(combined.test(""), is(true));
-        verify(snapshot, times(1)).reactivate();
-        verify(context, times(1)).close();
-        assertThat(consumed.get(), is(1));
-    }
-
-    @Test
-    public void testOr_shortCircuit() {
-        when(snapshot.reactivate()).thenReturn(context);
-        Predicate<String> predicate = Objects::isNull;
-        @SuppressWarnings("unchecked")
-        Predicate<String> or = mock(Predicate.class);
-
-        AtomicInteger consumed = new AtomicInteger(0);
-        Predicate<String> combined = new PredicateWithContext<>(snapshot, predicate, snapshot -> consumed.incrementAndGet()).or(or);
-
-        assertThat(combined.test(null), is(true));
-        verifyNoMoreInteractions(or);
-
-        verify(snapshot, times(1)).reactivate();
-        verify(context, times(1)).close();
-        assertThat(consumed.get(), is(1));
-    }
-
-    private static <T> Predicate<T> throwing(RuntimeException rte) {
+    private static <IN, OUT> Function<IN, OUT> throwing(RuntimeException rte) {
         return input -> {
             throw rte;
         };

@@ -24,21 +24,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.oneOf;
-import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.*;
 
 /**
  * @author Sjoerd Talsma

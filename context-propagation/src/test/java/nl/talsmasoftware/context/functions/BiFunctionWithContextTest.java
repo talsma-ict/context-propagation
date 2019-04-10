@@ -23,23 +23,20 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Sjoerd Talsma
  */
-public class RunnableWithContextTest {
+public class BiFunctionWithContextTest {
 
     private ContextSnapshot snapshot;
     private Context<Void> context;
@@ -63,17 +60,15 @@ public class RunnableWithContextTest {
     }
 
     @Test
-    public void testRun() {
-        new RunnableWithContext(snapshot, () -> {
-        }).run();
+    public void testApply() {
+        new BiFunctionWithContext<>(snapshot, (a, b) -> b).apply("input1", "input2");
         verify(snapshot).reactivate();
     }
 
     @Test
-    public void testRunWithoutSnapshot() {
+    public void testApplyWithoutSnapshot() {
         try {
-            new RunnableWithContext(null, () -> {
-            });
+            new BiFunctionWithContext<>(null, (a, b) -> b);
             fail("Exception expected");
         } catch (RuntimeException expected) {
             assertThat(expected, hasToString(containsString("No context snapshot provided")));
@@ -81,10 +76,10 @@ public class RunnableWithContextTest {
     }
 
     @Test
-    public void testRunWithoutSnapshotSupplier() {
+    public void testApplyWithoutSnapshotSupplier() {
         try {
-            new RunnableWithContext((Supplier<ContextSnapshot>) null, () -> {
-            }, null);
+            new BiFunctionWithContext<>((Supplier<ContextSnapshot>) null, (a, b) -> b, context -> {
+            });
             fail("Exception expected");
         } catch (RuntimeException expected) {
             assertThat(expected, hasToString(containsString("No context snapshot supplier provided")));
@@ -92,13 +87,16 @@ public class RunnableWithContextTest {
     }
 
     @Test
-    public void testRunWithSnapshotConsumer() throws InterruptedException {
+    public void testApplyWithSnapshotConsumer() throws InterruptedException {
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
         DummyContextManager.setCurrentValue("Old value");
 
-        Thread t = new Thread(new RunnableWithContext(snapshot,
-                () -> DummyContextManager.setCurrentValue("New value"),
-                snapshot -> snapshotHolder[0] = snapshot));
+        Thread t = new Thread(() -> new BiFunctionWithContext<>(snapshot,
+                (input1, input2) -> {
+                    DummyContextManager.setCurrentValue("New value");
+                    return input2;
+                },
+                snapshot -> snapshotHolder[0] = snapshot).apply("input1", "input2"));
         t.start();
         t.join();
 
@@ -106,6 +104,7 @@ public class RunnableWithContextTest {
         try (Context<Void> reactivation = snapshotHolder[0].reactivate()) {
             assertThat(DummyContextManager.currentValue(), is(Optional.of("New value")));
         }
+        assertThat(DummyContextManager.currentValue(), is(Optional.of("Old value")));
 
         verify(snapshot).reactivate();
     }
@@ -116,7 +115,7 @@ public class RunnableWithContextTest {
         final RuntimeException expectedException = new RuntimeException("Whoops!");
 
         try {
-            new RunnableWithContext(snapshot, throwing(expectedException)).run();
+            new BiFunctionWithContext<>(snapshot, throwing(expectedException)).apply("input1", "input2");
             fail("Exception expected");
         } catch (RuntimeException rte) {
             assertThat(rte, is(sameInstance(expectedException)));
@@ -126,8 +125,45 @@ public class RunnableWithContextTest {
         verify(context).close();
     }
 
-    private static Runnable throwing(RuntimeException rte) {
-        return () -> {
+    @Test
+    public void testAndThenNull() {
+        try {
+            new BiFunctionWithContext<>(snapshot, (a, b) -> b).andThen(null);
+            fail("Exception expected");
+        } catch (NullPointerException expected) {
+            assertThat(expected, hasToString(containsString("after function <null>")));
+        }
+    }
+
+    @Test
+    public void testAndThen_singleContextSwitch() {
+        when(snapshot.reactivate()).thenReturn(context);
+        Function<Integer, Integer> after = i -> i + 100;
+        BiFunction<Integer, Integer, Integer> function = (a, b) -> a * 10 + b * 5;
+        AtomicInteger consumed = new AtomicInteger(0);
+
+        BiFunction<Integer, Integer, Integer> composed =
+                new BiFunctionWithContext<>(snapshot, function, snapshot -> consumed.incrementAndGet())
+                        .andThen(after);
+
+        assertThat(composed.apply(2, 3), is(20 + 15 + 100));
+        verify(snapshot, times(1)).reactivate();
+        verify(context, times(1)).close();
+        assertThat(consumed.get(), is(1));
+    }
+
+    @Test
+    public void testAndThenWithNull() {
+        try {
+            new FunctionWithContext<>(snapshot, Function.identity()).andThen(null);
+            fail("Exception expected");
+        } catch (NullPointerException expected) {
+            assertThat(expected, hasToString(containsString("after function <null>")));
+        }
+    }
+
+    private static <IN1, IN2, OUT> BiFunction<IN1, IN2, OUT> throwing(RuntimeException rte) {
+        return (input1, input2) -> {
             throw rte;
         };
     }

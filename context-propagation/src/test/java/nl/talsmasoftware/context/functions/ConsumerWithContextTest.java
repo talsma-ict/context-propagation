@@ -30,23 +30,18 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
-import static java.lang.String.format;
 import static nl.talsmasoftware.context.DummyContextManager.currentValue;
 import static nl.talsmasoftware.context.DummyContextManager.setCurrentValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Sjoerd Talsma
  */
-public class BiConsumerWithContextTest {
+public class ConsumerWithContextTest {
     private ExecutorService unawareThreadpool;
     private ContextSnapshot snapshot;
     private Context<Void> context;
@@ -81,14 +76,10 @@ public class BiConsumerWithContextTest {
     }
 
     @Test
-    public void testAcceptNulls() {
-        Object[] accepted = new Object[2];
-        new BiConsumerWithContext<>(snapshot, (a, b) -> {
-            accepted[0] = a;
-            accepted[1] = b;
-        }).accept(null, null);
+    public void testAcceptNull() {
+        Object[] accepted = new Object[1];
+        new ConsumerWithContext<>(snapshot, val -> accepted[0] = val).accept(null);
         assertThat(accepted[0], is(nullValue()));
-        assertThat(accepted[1], is(nullValue()));
         verify(snapshot).reactivate();
     }
 
@@ -97,18 +88,17 @@ public class BiConsumerWithContextTest {
         setCurrentValue("Old value");
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
 
-        BiConsumer<String, String> consumer = new BiConsumerWithContext<>(
+        ConsumerWithContext<String> consumer = new ConsumerWithContext<>(
                 ContextManagers.createContextSnapshot(),
-                (a, b) -> {
+                val -> {
                     assertThat("Context must propagate into thread", currentValue(), is(Optional.of("Old value")));
-                    String newValue = format("%s %s", a, b);
-                    setCurrentValue(newValue);
-                    assertThat("Context changed in background thread", currentValue(), is(Optional.of(newValue)));
+                    setCurrentValue(val);
+                    assertThat("Context changed in background thread", currentValue(), is(Optional.of(val)));
                     trySleep(250);
                 },
                 s -> snapshotHolder[0] = s);
 
-        Thread t = new Thread(() -> consumer.accept("New", "value"));
+        Thread t = new Thread(() -> consumer.accept("New value"));
         t.start();
         assertThat("Setting context in other thread musn't impact caller", currentValue(), is(Optional.of("Old value")));
         t.join(); // Block and trigger assertions
@@ -130,20 +120,19 @@ public class BiConsumerWithContextTest {
         setCurrentValue("Old value");
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
 
-        BiConsumer<String, String> consumer = new BiConsumerWithContext<String, String>(
+        Consumer<String> consumer = new ConsumerWithContext<String>(
                 ContextManagers.createContextSnapshot(),
-                (a, b) -> setCurrentValue(a + " " + b + ", " + currentValue().orElse("NO VALUE")),
+                val -> setCurrentValue(val + ", " + currentValue().orElse("NO VALUE")),
                 s -> snapshotHolder[0] = s)
-                .andThen((a, b) -> setCurrentValue(a.toUpperCase() + " " + b.toLowerCase() + ", " + currentValue()
-                        .orElse("NO VALUE")));
+                .andThen(val -> setCurrentValue(val.toUpperCase() + ", " + currentValue().orElse("NO VALUE")));
 
-        Thread t = new Thread(() -> consumer.accept("New", "value"));
+        Thread t = new Thread(() -> consumer.accept("New value"));
         t.start();
         t.join();
 
         assertThat(currentValue(), is(Optional.of("Old value")));
         try (Context<Void> reactivated = snapshotHolder[0].reactivate()) {
-            assertThat(currentValue(), is(Optional.of("NEW value, New value, Old value")));
+            assertThat(currentValue(), is(Optional.of("NEW VALUE, New value, Old value")));
         }
     }
 

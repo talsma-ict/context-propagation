@@ -22,30 +22,21 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Sjoerd Talsma
  */
-public class BinaryOperatorWithContextTest {
+public class PredicateWithContextTest {
 
     private ContextSnapshot snapshot;
     private Context<Void> context;
@@ -69,15 +60,15 @@ public class BinaryOperatorWithContextTest {
     }
 
     @Test
-    public void testApply() {
-        new BinaryOperatorWithContext<>(snapshot, (a, b) -> b).apply("input1", "input2");
+    public void testTest() {
+        new PredicateWithContext<>(snapshot, input -> true).test("input");
         verify(snapshot).reactivate();
     }
 
     @Test
-    public void testApplyWithoutSnapshot() {
+    public void testTestWithoutSnapshot() {
         try {
-            new BinaryOperatorWithContext<>(null, (a, b) -> b);
+            new PredicateWithContext<>(null, input -> true);
             fail("Exception expected");
         } catch (RuntimeException expected) {
             assertThat(expected, hasToString(containsString("No context snapshot provided")));
@@ -85,9 +76,9 @@ public class BinaryOperatorWithContextTest {
     }
 
     @Test
-    public void testApplyWithoutSnapshotSupplier() {
+    public void testTestWithoutSnapshotSupplier() {
         try {
-            new BinaryOperatorWithContext<>((Supplier<ContextSnapshot>) null, (a, b) -> b, context -> {
+            new PredicateWithContext<>((Supplier<ContextSnapshot>) null, input -> true, context -> {
             });
             fail("Exception expected");
         } catch (RuntimeException expected) {
@@ -96,16 +87,16 @@ public class BinaryOperatorWithContextTest {
     }
 
     @Test
-    public void testApplyWithSnapshotConsumer() throws InterruptedException {
+    public void testTestWithSnapshotConsumer() throws InterruptedException {
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
         DummyContextManager.setCurrentValue("Old value");
 
-        Thread t = new Thread(() -> new BinaryOperatorWithContext<>(snapshot,
-                (input1, input2) -> {
+        Thread t = new Thread(() -> new PredicateWithContext<>(snapshot,
+                input -> {
                     DummyContextManager.setCurrentValue("New value");
-                    return input2;
+                    return true;
                 },
-                snapshot -> snapshotHolder[0] = snapshot).apply("input1", "input2"));
+                snapshot -> snapshotHolder[0] = snapshot).test("input"));
         t.start();
         t.join();
 
@@ -124,8 +115,7 @@ public class BinaryOperatorWithContextTest {
         final RuntimeException expectedException = new RuntimeException("Whoops!");
 
         try {
-            new BinaryOperatorWithContext<String>(() -> snapshot, throwing(expectedException), null) {
-            }.apply("input1", "input2");
+            new PredicateWithContext<>(snapshot, throwing(expectedException)).test("input");
             fail("Exception expected");
         } catch (RuntimeException rte) {
             assertThat(rte, is(sameInstance(expectedException)));
@@ -136,44 +126,93 @@ public class BinaryOperatorWithContextTest {
     }
 
     @Test
-    public void testAndThenNull() {
+    public void testAndOtherNull() {
         try {
-            new BinaryOperatorWithContext<>(snapshot, (a, b) -> b).andThen(null);
+            new PredicateWithContext<>(snapshot, input -> true).and(null);
             fail("Exception expected");
         } catch (NullPointerException expected) {
-            assertThat(expected, hasToString(containsString("after function <null>")));
+            assertThat(expected, hasToString(containsString("'and' <null>")));
         }
     }
 
     @Test
-    public void testAndThen_singleContextSwitch() {
+    public void testAnd_singleContextSwitch() {
         when(snapshot.reactivate()).thenReturn(context);
-        UnaryOperator<Integer> after = i -> i + 100;
-        BinaryOperator<Integer> function = (a, b) -> a * 10 + b * 5;
+        Predicate<String> predicate = Objects::nonNull;
+        Predicate<String> and = String::isEmpty;
+
         AtomicInteger consumed = new AtomicInteger(0);
+        Predicate<String> combined = new PredicateWithContext<>(snapshot, predicate, snapshot -> consumed.incrementAndGet()).and(and);
 
-        BiFunction<Integer, Integer, Integer> composed =
-                new BinaryOperatorWithContext<>(snapshot, function, snapshot -> consumed.incrementAndGet())
-                        .andThen(after);
-
-        assertThat(composed.apply(2, 3), is(20 + 15 + 100));
+        assertThat(combined.test(""), is(true));
         verify(snapshot, times(1)).reactivate();
         verify(context, times(1)).close();
         assertThat(consumed.get(), is(1));
     }
 
     @Test
-    public void testAndThenWithNull() {
+    public void testAnd_shortCircuit() {
+        when(snapshot.reactivate()).thenReturn(context);
+        Predicate<String> predicate = Objects::nonNull;
+        @SuppressWarnings("unchecked")
+        Predicate<String> and = mock(Predicate.class);
+
+        AtomicInteger consumed = new AtomicInteger(0);
+        Predicate<String> combined = new PredicateWithContext<>(snapshot, predicate, snapshot -> consumed.incrementAndGet()).and(and);
+
+        assertThat(combined.test(null), is(false));
+        verifyNoMoreInteractions(and);
+
+        verify(snapshot, times(1)).reactivate();
+        verify(context, times(1)).close();
+        assertThat(consumed.get(), is(1));
+    }
+
+    @Test
+    public void testOrOtherNull() {
         try {
-            new FunctionWithContext<>(snapshot, Function.identity()).andThen(null);
+            new PredicateWithContext<>(snapshot, input -> true).or(null);
             fail("Exception expected");
         } catch (NullPointerException expected) {
-            assertThat(expected, hasToString(containsString("after function <null>")));
+            assertThat(expected, hasToString(containsString("'or' <null>")));
         }
     }
 
-    private static <T> BinaryOperator<T> throwing(RuntimeException rte) {
-        return (input1, input2) -> {
+    @Test
+    public void tesOr_singleContextSwitch() {
+        when(snapshot.reactivate()).thenReturn(context);
+        Predicate<String> predicate = Objects::isNull;
+        Predicate<String> or = String::isEmpty;
+
+        AtomicInteger consumed = new AtomicInteger(0);
+        Predicate<String> combined = new PredicateWithContext<>(snapshot, predicate, snapshot -> consumed.incrementAndGet()).or(or);
+
+        assertThat(combined.test(""), is(true));
+        verify(snapshot, times(1)).reactivate();
+        verify(context, times(1)).close();
+        assertThat(consumed.get(), is(1));
+    }
+
+    @Test
+    public void testOr_shortCircuit() {
+        when(snapshot.reactivate()).thenReturn(context);
+        Predicate<String> predicate = Objects::isNull;
+        @SuppressWarnings("unchecked")
+        Predicate<String> or = mock(Predicate.class);
+
+        AtomicInteger consumed = new AtomicInteger(0);
+        Predicate<String> combined = new PredicateWithContext<>(snapshot, predicate, snapshot -> consumed.incrementAndGet()).or(or);
+
+        assertThat(combined.test(null), is(true));
+        verifyNoMoreInteractions(or);
+
+        verify(snapshot, times(1)).reactivate();
+        verify(context, times(1)).close();
+        assertThat(consumed.get(), is(1));
+    }
+
+    private static <T> Predicate<T> throwing(RuntimeException rte) {
+        return input -> {
             throw rte;
         };
     }
