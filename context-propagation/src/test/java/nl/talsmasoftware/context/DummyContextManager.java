@@ -15,6 +15,8 @@
  */
 package nl.talsmasoftware.context;
 
+import java.util.Optional;
+
 /**
  * Trivial manager around the {@link DummyContext} implementation to be registered as service provider.
  *
@@ -23,11 +25,32 @@ package nl.talsmasoftware.context;
 public class DummyContextManager implements ContextManager<String> {
 
     public Context<String> initializeNewContext(String value) {
-        return new DummyContext(value);
+        return setCurrentValue(value);
     }
 
     public Context<String> getActiveContext() {
         return DummyContext.current();
+    }
+
+    public static Optional<String> currentValue() {
+        return Optional.ofNullable(DummyContext.currentValue());
+    }
+
+    /**
+     * For easier testing
+     *
+     * @param value The new value to be set (can be null)
+     * @return A context to optionally be closed
+     */
+    public static Context<String> setCurrentValue(String value) {
+        return new DummyContext(value);
+    }
+
+    /**
+     * For easier testing
+     */
+    public static void clear() {
+        DummyContext.reset();
     }
 
     @Override
