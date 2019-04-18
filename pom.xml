@@ -44,6 +44,7 @@
         <module>servletrequest-propagation</module>
         <module>spring-security-context</module>
         <module>opentracing-span-propagation</module>
+        <module>compatibility/tests/legacy-java8-module-tests</module>
     </modules>
 
     <licenses>
