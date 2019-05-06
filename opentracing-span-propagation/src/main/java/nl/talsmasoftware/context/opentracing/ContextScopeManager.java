@@ -70,14 +70,25 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
         return new ThreadLocalSpanContext(getClass(), span, finishSpanOnClose);
     }
 
+    @Override
+    public Scope activate(Span span) {
+        return new ThreadLocalSpanContext(getClass(), span, false);
+    }
+
     /**
-     * The currently active {@link Scope} containing the active span {@link Scope#span()}.
+     * The currently active {@link Scope} containing the {@linkplain #activeSpan() active span}.
      *
      * @return the active scope, or {@code null} if none could be found.
      */
     @Override
     public Scope active() {
         return ThreadLocalSpanContext.current();
+    }
+
+    @Override
+    public Span activeSpan() {
+        Context<Span> current = ThreadLocalSpanContext.current();
+        return current == null ? null : current.getValue();
     }
 
     /**

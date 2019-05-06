@@ -48,7 +48,7 @@ public class SpanManager implements ContextManager<Span> {
     }
 
     /**
-     * {@linkplain ScopeManager#activate(Span, boolean) Activates} the given {@linkplain Span span}.
+     * {@linkplain io.opentracing.ScopeManager#activate(Span) Activates} the given {@linkplain Span span}.
      * <p>
      * {@linkplain Context#close() Closing} the returned {@link Context} will also close the
      * corresponding {@link Scope} as it was also activated by us.<br>
