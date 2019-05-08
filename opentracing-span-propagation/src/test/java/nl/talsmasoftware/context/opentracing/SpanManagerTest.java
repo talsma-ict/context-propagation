@@ -86,16 +86,16 @@ public class SpanManagerTest {
     private static final Callable<String> GET_BAGGAGE_ITEM = new Callable<String>() {
         @Override
         public String call() {
-            Scope activeScope = GlobalTracer.get().scopeManager().active();
-            Span activeSpan = activeScope == null ? null : activeScope.span();
+            Span activeSpan = GlobalTracer.get().scopeManager().activeSpan();
             return activeSpan == null ? "no-active-span" : activeSpan.getBaggageItem("baggage-item");
         }
     };
 
     @Test
     public void testSingleSnapshotInBackgroundThread() throws Exception {
-        Scope outerScope = mockTracer.buildSpan("first-op").startActive(true);
-        outerScope.span().setBaggageItem("baggage-item", "in-outer-span");
+        Span outerSpan = mockTracer.buildSpan("first-op").start();
+        Scope outerScope = mockTracer.scopeManager().activate(outerSpan);
+        outerSpan.setBaggageItem("baggage-item", "in-outer-span");
 
         // sanity-check: outerSpan should be the active span..
         assertThat("sanity-check", GET_BAGGAGE_ITEM.call(), equalTo("in-outer-span"));
@@ -103,17 +103,18 @@ public class SpanManagerTest {
         // The active span reference should propagate to the background thread and therefore return the baggage.
         Future<String> backgroundBaggage = threadpool.submit(GET_BAGGAGE_ITEM);
         assertThat("background baggage", backgroundBaggage.get(), equalTo("in-outer-span"));
-        assertThat("span finished?", mockTracer.finishedSpans(), not(hasItem((MockSpan) outerScope.span())));
+        assertThat("span finished?", mockTracer.finishedSpans(), not(hasItem((MockSpan) outerSpan)));
 
         outerScope.close();
-        assertThat("span finished?", mockTracer.finishedSpans(), hasItem((MockSpan) outerScope.span()));
+        assertThat("span finished?", mockTracer.finishedSpans(), not(hasItem((MockSpan) outerSpan)));
         assertThat("baggage of active span", GET_BAGGAGE_ITEM.call(), equalTo("no-active-span"));
     }
 
     @Test
     public void testFinishSpanFromBlockingBackgroundThread() throws Exception {
-        Scope outerScope = mockTracer.buildSpan("first-op").startActive(false);
-        outerScope.span().setBaggageItem("baggage-item", "in-outer-span");
+        Span outerSpan = mockTracer.buildSpan("first-op").start();
+        Scope outerScope = mockTracer.scopeManager().activate(outerSpan);
+        outerSpan.setBaggageItem("baggage-item", "in-outer-span");
 
         // sanity-check: outerSpan should be the active span..
         assertThat("sanity-check", GET_BAGGAGE_ITEM.call(), equalTo("in-outer-span"));
@@ -127,30 +128,31 @@ public class SpanManagerTest {
                 try {
                     return GET_BAGGAGE_ITEM.call();
                 } finally {
-                    GlobalTracer.get().scopeManager().active().span().finish();
+                    GlobalTracer.get().scopeManager().activeSpan().finish();
                     lock.unlock();
                 }
             }
         });
 
         assertThat("background thread blocked", blockingBackgroundBaggage.isDone(), is(false));
-        assertThat("span finished?", mockTracer.finishedSpans(), not(hasItem((MockSpan) outerScope.span())));
+        assertThat("span finished?", mockTracer.finishedSpans(), not(hasItem((MockSpan) outerSpan)));
 
         // Close outer span (it shouldn't finish until the background thread finishes).
         outerScope.close();
 
-        assertThat("span finished?", mockTracer.finishedSpans(), not(hasItem((MockSpan) outerScope.span())));
+        assertThat("span finished?", mockTracer.finishedSpans(), not(hasItem((MockSpan) outerSpan)));
 
         // Let the blocking thread finish and check that the span gets closed.
         lock.unlock();
         assertThat("unblocked baggage", blockingBackgroundBaggage.get(), equalTo("in-outer-span"));
-        assertThat("span finished?", mockTracer.finishedSpans(), hasItem((MockSpan) outerScope.span()));
+        assertThat("span finished?", mockTracer.finishedSpans(), hasItem((MockSpan) outerSpan));
     }
 
     @Test
     public void testLonglivedChildSpanFromBackgroundThread() throws Exception {
-        Scope parent = mockTracer.buildSpan("first-op").startActive(true);
-        parent.span().setBaggageItem("baggage-item", "in-outer-span");
+        Span parentSpan = mockTracer.buildSpan("first-op").start();
+        Scope parent = mockTracer.activateSpan(parentSpan);
+        parentSpan.setBaggageItem("baggage-item", "in-outer-span");
 
         // sanity-check: outerSpan should be the active span..
         assertThat("sanity-check", GET_BAGGAGE_ITEM.call(), equalTo("in-outer-span"));
@@ -161,33 +163,36 @@ public class SpanManagerTest {
         final AtomicReference<Span> childSpanRef = new AtomicReference<Span>();
         Future<String> blockingBackgroundBaggage = threadpool.submit(new Callable<String>() {
             public String call() throws Exception {
-                Scope child = GlobalTracer.get().buildSpan("child-op").startActive(true);
-                childSpanRef.set(child.span());
+                Span childSpan = GlobalTracer.get().buildSpan("child-op").start();
+                Scope child = GlobalTracer.get().activateSpan(childSpan);
+                childSpanRef.set(childSpan);
                 try {
-                    child.span().setBaggageItem("baggage-item", "in-child-span");
-                    assertThat("active-span", SCOPE_MANAGER.active().span(), is(sameInstance(child.span())));
+                    childSpan.setBaggageItem("baggage-item", "in-child-span");
+                    assertThat("active-span", SCOPE_MANAGER.activeSpan(), is(sameInstance(childSpan)));
                     if (!lock.tryLock(5, TimeUnit.MINUTES)) throw new IllegalStateException("Couldn't obtain lock!");
-                    assertThat("active-span", SCOPE_MANAGER.active().span(), is(sameInstance(child.span())));
+                    assertThat("active-span", SCOPE_MANAGER.activeSpan(), is(sameInstance(childSpan)));
                     return GET_BAGGAGE_ITEM.call();
                 } finally {
                     child.close();
+                    childSpan.finish();
                     lock.unlock();
                 }
             }
         });
 
         assertThat("background thread blocked", blockingBackgroundBaggage.isDone(), is(false));
-        assertThat("parent span finished?", mockTracer.finishedSpans(), not(hasItem((MockSpan) parent.span())));
+        assertThat("parent span finished?", mockTracer.finishedSpans(), not(hasItem((MockSpan) parentSpan)));
         assertThat("child span finished?", mockTracer.finishedSpans(), not(hasItem((MockSpan) childSpanRef.get())));
 
         // Close outer span (child shouldn't finish until the background thread finishes, the outer span will).
         assertThat(GET_BAGGAGE_ITEM.call(), is("in-outer-span"));
-        assertThat("active-span", SCOPE_MANAGER.active().span(), is(sameInstance(parent.span())));
+        assertThat("active-span", SCOPE_MANAGER.activeSpan(), is(sameInstance(parentSpan)));
         parent.close();
-        assertThat("active-span", SCOPE_MANAGER.active(), is(nullValue()));
+        parentSpan.finish();
+        assertThat("active-span", SCOPE_MANAGER.activeSpan(), is(nullValue()));
         assertThat(GET_BAGGAGE_ITEM.call(), is("no-active-span"));
 
-        assertThat("parent span finished?", mockTracer.finishedSpans(), hasItem((MockSpan) parent.span()));
+        assertThat("parent span finished?", mockTracer.finishedSpans(), hasItem((MockSpan) parentSpan));
         assertThat("child span finished?", mockTracer.finishedSpans(), not(hasItem((MockSpan) childSpanRef.get())));
 
         // So the outer span actually closed sooner than its child, because that got propagated to the (blocked)
@@ -196,7 +201,7 @@ public class SpanManagerTest {
         // Let the blocking thread finish and check that the span gets closed.
         lock.unlock();
         assertThat("unblocked baggage", blockingBackgroundBaggage.get(), equalTo("in-child-span"));
-        assertThat("active-span", GlobalTracer.get().scopeManager().active(), is(nullValue()));
+        assertThat("active-span", GlobalTracer.get().scopeManager().activeSpan(), is(nullValue()));
         assertThat("child span finished?", mockTracer.finishedSpans(), hasItem((MockSpan) childSpanRef.get()));
     }
 
@@ -205,14 +210,15 @@ public class SpanManagerTest {
     public void testDeprecatedClassStillWorks() {
         ContextManager<Span> deprecatedManager = new OpentracingSpanManager();
 
-        Scope parent = mockTracer.buildSpan("first-op").startActive(true);
-        Span newSpan = mockTracer.buildSpan("second-span").startManual();
-        assertThat(deprecatedManager.getActiveContext().getValue(), is(equalTo(parent.span())));
+        Span parentSpan = mockTracer.buildSpan("first-op").start();
+        Scope parent = mockTracer.activateSpan(parentSpan);
+        Span newSpan = mockTracer.buildSpan("second-span").start();
+        assertThat(deprecatedManager.getActiveContext().getValue(), is(equalTo(parentSpan)));
 
         Context<Span> newContext = deprecatedManager.initializeNewContext(newSpan);
-        assertThat(SCOPE_MANAGER.active().span(), is(equalTo(newSpan)));
+        assertThat(SCOPE_MANAGER.activeSpan(), is(equalTo(newSpan)));
         newContext.close();
-        assertThat(SCOPE_MANAGER.active().span(), not(equalTo(newSpan)));
+        assertThat(SCOPE_MANAGER.activeSpan(), not(equalTo(newSpan)));
 
         newContext.close();
         newContext.close();
@@ -221,7 +227,7 @@ public class SpanManagerTest {
     @Test
     public void testClearingAllContexts() {
         Span span = mockTracer.buildSpan("test-span").start();
-        Scope scope = mockTracer.scopeManager().activate(span, false);
+        Scope scope = mockTracer.scopeManager().activate(span);
         assertThat(new SpanManager().getActiveContext().getValue(), is(sameInstance(span)));
 
         ContextManagers.clearActiveContexts();
@@ -239,7 +245,7 @@ public class SpanManagerTest {
         Span span = mockTracer.buildSpan("test-span").start();
         assertThat(new SpanManager().getActiveContext(), nullValue());
 
-        Scope scope = mockTracer.scopeManager().activate(span, false);
+        Scope scope = mockTracer.scopeManager().activate(span);
         Context<Span> spanContext = new SpanManager().getActiveContext();
         assertThat(spanContext, hasToString("SpanContext{" + span + "}"));
 

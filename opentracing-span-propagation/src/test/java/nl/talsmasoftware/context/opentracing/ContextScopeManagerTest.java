@@ -72,8 +72,10 @@ public class ContextScopeManagerTest {
     @Test
     public void testObservedSpans() {
         assertThat(ContextScopeManagerObserver.observed, is(empty()));
-        Scope parent = GlobalTracer.get().buildSpan("parent").startActive(true);
-        Scope inner = GlobalTracer.get().buildSpan("inner").startActive(true);
+        Span parentSpan = GlobalTracer.get().buildSpan("parent").start();
+        Scope parent = GlobalTracer.get().activateSpan(parentSpan);
+        Span innerSpan = GlobalTracer.get().buildSpan("inner").start();
+        Scope inner = GlobalTracer.get().activateSpan(innerSpan);
         inner.close();
         parent.close();
 
@@ -88,17 +90,21 @@ public class ContextScopeManagerTest {
     @Test
     public void testConcurrency() throws InterruptedException {
         List<Thread> threads = new ArrayList<Thread>();
-        final Scope parent = GlobalTracer.get().buildSpan("parent").startActive(true);
+        final Span parentSpan = GlobalTracer.get().buildSpan("parent").start();
+        final Scope parent = GlobalTracer.get().activateSpan(parentSpan);
         final CountDownLatch latch1 = new CountDownLatch(10), latch2 = new CountDownLatch(10);
         for (int i = 0; i < 10; i++) {
             final int nr = i;
             threads.add(new Thread() {
                 @Override
                 public void run() {
-                    Scope inner = GlobalTracer.get().buildSpan("inner" + nr).asChildOf(parent.span()).startActive(true);
+                    Span innerSpan = GlobalTracer.get().buildSpan("inner" + nr).asChildOf(parentSpan).start();
+                    Scope inner = GlobalTracer.get().activateSpan(innerSpan);
                     waitFor(latch1);
+                    innerSpan.finish();
                     inner.close();
                     waitFor(latch2);
+                    parentSpan.finish();
                     parent.close();
                 }
             });
@@ -107,7 +113,7 @@ public class ContextScopeManagerTest {
                 activated(withOperationName("parent"))
         ));
 
-        assertThat(GlobalTracer.get().activeSpan(), equalTo(parent.span()));
+        assertThat(GlobalTracer.get().activeSpan(), equalTo(parentSpan));
         for (Thread t : threads) t.start();
         for (Thread t : threads) t.join();
         assertThat(GlobalTracer.get().activeSpan(), is(nullValue()));
@@ -142,7 +148,7 @@ public class ContextScopeManagerTest {
         Span span = GlobalTracer.get().buildSpan("span").start();
         Context<Span> context = scopeManager.initializeNewContext(span);
         assertThat(scopeManager.getActiveContext().getValue(), is(span));
-        assertThat(scopeManager.active().span(), is(span));
+        assertThat(scopeManager.activeSpan(), is(span));
         assertThat(GlobalTracer.get().activeSpan(), is(span));
         context.close();
         span.finish();
@@ -155,10 +161,12 @@ public class ContextScopeManagerTest {
 
     @Test
     public void testPredictableOutOfOrderClosing() {
-        Scope first = GlobalTracer.get().buildSpan("first").startActive(true);
-        Scope second = GlobalTracer.get().buildSpan("second").startActive(true);
+        Span firstSpan = GlobalTracer.get().buildSpan("first").start();
+        Scope first = GlobalTracer.get().activateSpan(firstSpan);
+        Span secondSpan = GlobalTracer.get().buildSpan("second").start();
+        Scope second = GlobalTracer.get().activateSpan(secondSpan);
         first.close();
-        assertThat(GlobalTracer.get().activeSpan(), is(second.span()));
+        assertThat(GlobalTracer.get().activeSpan(), is(secondSpan));
         second.close();
         assertThat(GlobalTracer.get().activeSpan(), is(nullValue())); // first was already closed
     }
