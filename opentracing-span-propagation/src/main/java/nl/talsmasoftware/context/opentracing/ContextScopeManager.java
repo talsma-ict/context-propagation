@@ -64,8 +64,9 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
      * @param span              The span to become the active span.
      * @param finishSpanOnClose Whether the span should automatically finish when closing the resulting scope.
      * @return The new active scope (must be closed from the same thread).
+     * @deprecated This is no longer part of the OpenTracing API as of {@code 0.33.0}
      */
-    @Override
+    @Deprecated
     public Scope activate(Span span, boolean finishSpanOnClose) {
         return new ThreadLocalSpanContext(getClass(), span, finishSpanOnClose);
     }
@@ -79,8 +80,9 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
      * The currently active {@link Scope} containing the {@linkplain #activeSpan() active span}.
      *
      * @return the active scope, or {@code null} if none could be found.
+     * @deprecated This is no longer part of the OpenTracing API as of {@code 0.33.0}
      */
-    @Override
+    @Deprecated
     public Scope active() {
         return ThreadLocalSpanContext.current();
     }
@@ -96,7 +98,7 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
      *
      * @param value The span to activate.
      * @return The new active 'Scope'.
-     * @see #activate(Span, boolean)
+     * @see #activate(Span)
      */
     @Override
     public Context<Span> initializeNewContext(Span value) {
@@ -105,7 +107,6 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
 
     /**
      * @return The active span context (this is identical to the active scope).
-     * @see #active()
      */
     @Override
     public Context<Span> getActiveContext() {
@@ -131,7 +132,10 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
             return current(ThreadLocalSpanContext.class);
         }
 
-        @Override
+        /**
+         * @deprecated This is no longer part of the OpenTracing API as of {@code 0.33.0}
+         */
+        @Deprecated
         public Span span() {
             return value;
         }
