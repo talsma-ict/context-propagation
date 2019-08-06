@@ -24,7 +24,7 @@ and provides predictable behaviour for out-of-order closing.
 ### ContextManager
 
 Manages the active context.  
-Can initialize a new context and provides to the active context.
+Can initialize a new context and provides access to the active context.
 
 ### ContextSnapshot
 
