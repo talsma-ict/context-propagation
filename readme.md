@@ -87,7 +87,7 @@ out of the box by this context-propagation library:
 ## Custom contexts
 
 Adding your own `Context` type is possible
-by [creating your own context manager](../context-propagation-java5/README.md#creating-your-own-context-manager).
+by [creating your own context manager](context-propagation-java5/README.md#creating-your-own-context-manager).
 
 ## Caching
 
@@ -129,7 +129,7 @@ configure various timers in the default metric registry of your application.
 
 ## License
 
-[Apache 2.0 license](../LICENSE)
+[Apache 2.0 license](LICENSE)
 
 
   [ci-img]: https://travis-ci.org/talsma-ict/context-propagation.svg?branch=develop
@@ -144,13 +144,13 @@ configure various timers in the default metric registry of your application.
   [javadoc]: https://www.javadoc.io/doc/nl.talsmasoftware.context/context-propagation-root
 
 
-  [servletrequest propagation]: ../servletrequest-propagation
-  [mdc propagation]: ../mdc-propagation
-  [locale context]: ../locale-context
-  [spring security context]: ../spring-security-context
-  [opentracing span propagation]: ../opentracing-span-propagation
-  [context propagation metrics]: ../context-propagation-metrics
+  [servletrequest propagation]: servletrequest-propagation
+  [mdc propagation]: mdc-propagation
+  [locale context]: locale-context
+  [spring security context]: spring-security-context
+  [opentracing span propagation]: opentracing-span-propagation
+  [context propagation metrics]: context-propagation-metrics
   [default constructor]: https://en.wikipedia.org/wiki/Nullary_constructor
   
   [ContextAwareExecutorService]: https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/executors/ContextAwareExecutorService.html
-  [ContextAwareCompletableFuture]: ../context-propagation-java8#contextawarecompletablefuture
+  [ContextAwareCompletableFuture]: context-propagation-java8#contextawarecompletablefuture
