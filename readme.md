@@ -55,21 +55,19 @@ try (Context<Void> reactivation = snapshot.reactivate()) {
 
 ### Threadpools and ExecutorService
 
-If your background threads are managed by an `ExecutorService` acting as a threadpool,
-you can use the `ContextAwareExecutorService` instead of your usual threadpool.  
-This automatically takes a new context snapshot when submitting new work
-and reactivates this snapshot in the background thread.  
-The `ContextAwareExecutorService` can wrap any `ExecutorService` for the actual thread execution:
+If your background threads are managed by an ExecutorService,
+you can use our _context aware_ ExecutorService instead of your usual threadpool.
+
+When submitting new work, this automatically takes a context snapshot
+to reactivate in the background thread.  
+After the background thread finishes the snapshot is closed,
+ensuring no ThreadLocal values leak into the thread pool.
+
+The `ContextAwareExecutorService` can wrap any ExecutorService for the actual thread execution:
 ```java
-// private static final ExecutorService THREADPOOL = Executors.newCachedThreadpool();
 private static final ExecutorService THREADPOOL = 
         new ContextAwareExecutorService(Executors.newCachedThreadpool());
 ```
-
-It will automatically create a snapshot and reactivate it in the 
-background thread when started.  
-The ThreadLocal values from the calling thread will therefore 
-be available in the background thread as well.
 
 ## Supported contexts
 
