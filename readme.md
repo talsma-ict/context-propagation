@@ -5,7 +5,7 @@
 
 # Context propagation library
 
-Library to propagate `ThreadLocal` snapshots by reactivating in another thread.
+Propagate a snapshot of one or more `ThreadLocal` values into another thread.
 
 Tools help automate propagation by capturing snapshots 
 and ensuring proper closing of reactivated context snapshots:
