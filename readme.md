@@ -7,11 +7,14 @@
 
 Propagate a snapshot of one or more `ThreadLocal` values into another thread.
 
-Tools help automate propagation by capturing snapshots 
-and ensuring proper closing of reactivated context snapshots:
-- [`ContextAwareExecutorService`][ContextAwareExecutorService] that wraps any existing `ExecutorService`
-- [`ContextAwareCompletableFuture`][ContextAwareCompletableFuture] that 
-  propagates context snapshots into each successive `CompletionStage`.
+This library enables automatic propagation of several well-known ThreadLocal contexts 
+by capturing a snapshot, reactivating it in another thread and ensuring proper 
+cleanup after execution finishes:
+
+- [`ContextAwareExecutorService`][ContextAwareExecutorService] 
+  wrapping any existing `ExecutorService`.
+- [`ContextAwareCompletableFuture`][ContextAwareCompletableFuture] 
+  propagating context snapshots into each successive `CompletionStage`.
 
 ## Terminology
 
