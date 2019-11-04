@@ -20,14 +20,18 @@ cleanup after execution finishes:
 
 ### Context
 
-A context contains a value. There is one _active_ context _per thread_.  
-An `AbstractThreadLocalContext` base class is provided that allows nested contexts 
-and provides predictable behaviour for out-of-order closing.
+Abstraction containing a value in the context of a _thread_. 
+The most common implementation in Java is a ThreadLocal value.
+The library provies an `AbstractThreadLocalContext` base class 
+that features nesting values and predictable behaviour for out-of-order closing.
+
+For each context type, there can only be one _active_ context per thread at any time.
 
 ### ContextManager
 
-Manages the active context.  
-Can initialize a new context and provides access to the active context.
+Manages a context.
+The ContextManager API can activate a new context value and 
+provides access to the active context value.
 
 ### ContextSnapshot
 
