@@ -89,7 +89,7 @@
         <spring-security.version>5.1.5.RELEASE</spring-security.version>
         <servlet-api.version>4.0.1</servlet-api.version>
 
-        <slf4j.version>1.7.28</slf4j.version>
+        <slf4j.version>1.7.29</slf4j.version>
         <junit.version>4.12</junit.version>
         <logback.version>1.2.3</logback.version>
         <hamcrest.version>2.2</hamcrest.version>
