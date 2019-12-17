@@ -96,6 +96,24 @@
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>context-propagation-micrometer</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>context-propagation-micrometer</artifactId>
+                <version>${project.version}</version>
+                <classifier>javadoc</classifier>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>context-propagation-micrometer</artifactId>
+                <version>${project.version}</version>
+                <classifier>sources</classifier>
+            </dependency>
+
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>mdc-propagation</artifactId>
                 <version>${project.version}</version>
             </dependency>
