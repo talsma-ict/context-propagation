@@ -25,7 +25,7 @@
     <!-- Artifact identification -->
     <groupId>nl.talsmasoftware.context</groupId>
     <artifactId>context-propagation-root</artifactId>
-    <version>1.0.8-SNAPSHOT</version>
+    <version>1.0.8</version>
     <packaging>pom</packaging>
 
     <!-- Project information -->
