@@ -217,6 +217,10 @@
                             <url>https://javadoc.io/page/javax.servlet/javax.servlet-api/${servlet-api.version}</url>
                             <location>${root.basedir}/.mvn/javadoc/servlet-api</location>
                         </offlineLink>
+                        <offlineLink>
+                            <url>https://www.javadoc.io/page/io.micrometer/micrometer-core/1.3.2</url>
+                            <location>${root.basedir}/.mvn/javadoc/micrometer-core</location>
+                        </offlineLink>
                     </offlineLinks>
                 </configuration>
             </plugin>
