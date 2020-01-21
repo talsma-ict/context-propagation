@@ -106,7 +106,7 @@ and also for complex hierarchies (_spring boot_, _JEE_ and the like).
 
 If however, you wish to disable caching of the context manager instances, you can set either:
 - the java system property `talsmasoftware.context.caching`, or
-- the environment variable `TALSMASOFTWARE_CONTEXT_CACHNG`
+- the environment variable `TALSMASOFTWARE_CONTEXT_CACHING`
 
 The values `false` or `0` will _disable_ caching.
 
