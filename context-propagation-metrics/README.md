@@ -24,6 +24,6 @@ That will add `Timer` metrics to the default shared `MetricRegistry`.
 For more details on the _metrics_ library, please [see its documentation][metrics].
 
 
-  [maven-img]: https://img.shields.io/maven-metadata/v/http/central.maven.org/maven2/nl/talsmasoftware/context/context-propagation/maven-metadata.xml.svg
+  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation
   [maven]: http://mvnrepository.com/artifact/nl.talsmasoftware.context/context-propagation-metrics
   [metrics]: https://metrics.dropwizard.io/
