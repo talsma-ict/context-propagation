@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Talsma ICT
+ * Copyright 2016-2020 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import io.micrometer.core.instrument.Timer;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
 
@@ -34,13 +34,13 @@ import static org.hamcrest.number.IsCloseTo.closeTo;
 public class MicrometerContextTimerTest {
     SimpleMeterRegistry registry;
 
-    @Before
+    @BeforeEach
     public void setupRegistry() {
         registry = new SimpleMeterRegistry();
         Metrics.addRegistry(registry);
     }
 
-    @After
+    @AfterEach
     public void shutdownRegistry() {
         Metrics.removeRegistry(registry);
         registry.clear();

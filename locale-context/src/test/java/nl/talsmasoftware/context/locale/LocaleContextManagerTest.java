@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Talsma ICT
+ * Copyright 2016-2020 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package nl.talsmasoftware.context.locale;
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Locale;
 import java.util.concurrent.Callable;
@@ -51,13 +51,13 @@ public class LocaleContextManagerTest {
     private static LocaleContextManager manager = new LocaleContextManager();
     private ExecutorService threadpool;
 
-    @Before
+    @BeforeEach
     public void init() {
         Locale.setDefault(DEFAULT_LOCALE);
         threadpool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
     }
 
-    @After
+    @AfterEach
     public void cleanup() {
         threadpool.shutdown();
         Locale.setDefault(DEFAULT_LOCALE);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Talsma ICT
+ * Copyright 2016-2020 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@ package nl.talsmasoftware.context;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
@@ -49,14 +49,15 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 /**
  * @author Sjoerd Talsma
  */
 public class ContextManagersTest {
 
-    @BeforeClass
+    @BeforeAll
     public static void initLogback() {
         if (!SLF4JBridgeHandler.isInstalled()) {
             /* Initialize SLF4J bridge. This re-routes logging through java.util.logging to SLF4J. */
@@ -67,25 +68,25 @@ public class ContextManagersTest {
         ((Logger) LoggerFactory.getLogger(ContextManagers.class)).setLevel(Level.ALL);
     }
 
-    @AfterClass
+    @AfterAll
     public static void restoreLoglevel() {
         ((Logger) LoggerFactory.getLogger(ContextManagers.class)).setLevel(null);
     }
 
-    @Before
-    @After
+    @BeforeEach
+    @AfterEach
     public void resetContexts() {
         DummyContext.reset();
     }
 
-    @Before
-    @After
+    @BeforeEach
+    @AfterEach
     public void resetContextClassLoader() {
         ContextManagers.useClassLoader(null);
     }
 
-    @Before
-    @After
+    @BeforeEach
+    @AfterEach
     public void clearObserved() {
         observedContextManager = null;
         observed.clear();

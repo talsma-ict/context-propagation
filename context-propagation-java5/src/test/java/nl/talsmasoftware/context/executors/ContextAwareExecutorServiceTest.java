@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Talsma ICT
+ * Copyright 2016-2020 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.DummyContextManager;
 import nl.talsmasoftware.context.ThrowingContextManager;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -34,7 +34,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ContextAwareExecutorServiceTest {
     private static DummyContextManager dummyContextManager = new DummyContextManager();
@@ -49,20 +49,20 @@ public class ContextAwareExecutorServiceTest {
 
     private ContextAwareExecutorService executor;
 
-    @Before
+    @BeforeEach
     public void setupExecutor() {
         executor = new ContextAwareExecutorService(Executors.newCachedThreadPool());
     }
 
-    @After
+    @AfterEach
     public void tearDownExecutor() throws InterruptedException {
         executor.shutdown();
         executor.awaitTermination(1, TimeUnit.MINUTES);
         executor = null;
     }
 
-    @Before
-    @After
+    @BeforeEach
+    @AfterEach
     public void clearActiveContexts() {
         ContextManagers.clearActiveContexts();
     }

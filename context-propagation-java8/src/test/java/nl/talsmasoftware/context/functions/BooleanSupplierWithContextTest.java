@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Talsma ICT
+ * Copyright 2016-2020 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,9 @@ import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.DummyContextManager;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -36,7 +36,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Sjoerd Talsma
@@ -45,19 +45,19 @@ public class BooleanSupplierWithContextTest {
 
     private ExecutorService unawareThreadpool;
 
-    @Before
-    @After
+    @BeforeEach
+    @AfterEach
     public void clearDummyContext() {
         DummyContextManager.clear();
     }
 
-    @Before
+    @BeforeEach
     @SuppressWarnings("unchecked")
     public void setUp() {
         unawareThreadpool = Executors.newCachedThreadPool();
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws InterruptedException {
         unawareThreadpool.shutdown();
         unawareThreadpool.awaitTermination(5, TimeUnit.SECONDS);

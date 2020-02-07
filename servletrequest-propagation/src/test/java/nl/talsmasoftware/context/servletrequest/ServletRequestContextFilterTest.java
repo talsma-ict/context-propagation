@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Talsma ICT
+ * Copyright 2016-2020 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 package nl.talsmasoftware.context.servletrequest;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.FilterChain;
@@ -46,7 +46,7 @@ public class ServletRequestContextFilterTest {
     ServletResponse mockResponse;
     FilterConfig mockConfig;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         mockRequest = mock(ServletRequest.class);
         mockResponse = mock(ServletResponse.class);
@@ -56,7 +56,7 @@ public class ServletRequestContextFilterTest {
         subject.init(mockConfig);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         subject.destroy();
         verifyNoMoreInteractions(mockRequest, mockResponse, mockConfig);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Talsma ICT
+ * Copyright 2016-2020 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,9 @@ import io.opentracing.util.GlobalTracerTestUtil;
 import io.opentracing.util.ThreadLocalScopeManager;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -58,14 +58,14 @@ public class Issue30Test {
 
     MockTracer mockTracer;
 
-    @Before
+    @BeforeEach
     public void registerMockGlobalTracer() {
         GlobalTracerTestUtil.resetGlobalTracer();
         assertThat("Pre-existing GlobalTracer", GlobalTracer.isRegistered(), is(false));
         GlobalTracer.register(mockTracer = new MockTracer(SCOPE_MANAGER));
     }
 
-    @After
+    @AfterEach
     public void cleanup() {
         GlobalTracerTestUtil.resetGlobalTracer();
     }

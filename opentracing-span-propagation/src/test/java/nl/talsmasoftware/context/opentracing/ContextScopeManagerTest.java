@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Talsma ICT
+ * Copyright 2016-2020 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,9 @@ import io.opentracing.util.GlobalTracerTestUtil;
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,13 +45,14 @@ import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class ContextScopeManagerTest {
     MockTracer mockTracer;
     ContextScopeManager scopeManager;
     ExecutorService threadpool;
 
-    @Before
+    @BeforeEach
     public void registerMockGlobalTracer() {
         GlobalTracerTestUtil.resetGlobalTracer();
         assertThat("Pre-existing GlobalTracer", GlobalTracer.isRegistered(), is(false));
@@ -61,7 +61,7 @@ public class ContextScopeManagerTest {
         threadpool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
     }
 
-    @After
+    @AfterEach
     public void cleanup() {
         threadpool.shutdown();
         ContextManagers.clearActiveContexts();
@@ -177,7 +177,7 @@ public class ContextScopeManagerTest {
             latch.await(5, TimeUnit.SECONDS);
         } catch (InterruptedException ie) {
             Thread.currentThread().interrupt();
-            Assert.fail("Interrupted during test..");
+            fail("Interrupted during test..");
         }
     }
 }

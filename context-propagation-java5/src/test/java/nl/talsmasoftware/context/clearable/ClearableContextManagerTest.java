@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Talsma ICT
+ * Copyright 2016-2020 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import nl.talsmasoftware.context.ContextManager;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.DummyContextManager;
 import nl.talsmasoftware.context.ThrowingContextManager;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
@@ -43,7 +43,7 @@ public class ClearableContextManagerTest {
     private static ContextManager<String> AUTO_INITIALIZING = new AutoInitializingContextManager();
     private static ContextManager<String> MANAGER_OF_ABSTRACTTLC = new DummyContextManager();
 
-    @BeforeClass
+    @BeforeAll
     public static void initLogback() {
         if (!SLF4JBridgeHandler.isInstalled()) {
             /* Initialize SLF4J bridge. This re-routes logging through java.util.logging to SLF4J. */
