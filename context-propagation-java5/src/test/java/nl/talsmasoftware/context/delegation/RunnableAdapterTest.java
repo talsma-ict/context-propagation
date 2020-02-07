@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Talsma ICT
+ * Copyright 2016-2020 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package nl.talsmasoftware.context.delegation;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.util.concurrent.Callable;
 
@@ -27,7 +28,8 @@ import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -43,20 +45,24 @@ public class RunnableAdapterTest {
     Callable<Object> delegate;
     RunnableAdapter subject;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         delegate = mock(Callable.class);
         subject = new RunnableAdapter(delegate);
     }
 
-    @After
+    @AfterEach
     public void noMoreInteractions() {
         verifyNoMoreInteractions(delegate);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testNullConstructor() {
-        new RunnableAdapter(null);
+        assertThrows(IllegalArgumentException.class, new Executable() {
+            public void execute() {
+                new RunnableAdapter(null);
+            }
+        });
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Talsma ICT
+ * Copyright 2016-2020 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package nl.talsmasoftware.context.futures;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.DummyContextManager;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -37,8 +37,8 @@ public class FailedFutureTest {
     private static final BiFunction<String, Throwable, String> addActiveContextValue =
             (value, ex) -> (ex == null ? value : ex.getMessage()) + ", " + manager.getActiveContext().getValue();
 
-    @Before
-    @After
+    @BeforeEach
+    @AfterEach
     public void clearDummyContext() {
         DummyContextManager.clear();
     }

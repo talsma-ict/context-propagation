@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Talsma ICT
+ * Copyright 2016-2020 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@ package nl.talsmasoftware.context.functions;
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.DummyContextManager;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -46,13 +46,13 @@ public class SupplierWithContextTest {
     private ContextSnapshot snapshot;
     private Context<Void> context;
 
-    @Before
-    @After
+    @BeforeEach
+    @AfterEach
     public void clearDummyContext() {
         DummyContextManager.clear();
     }
 
-    @Before
+    @BeforeEach
     @SuppressWarnings("unchecked")
     public void setUp() {
         unawareThreadpool = Executors.newCachedThreadPool();
@@ -60,7 +60,7 @@ public class SupplierWithContextTest {
         context = mock(Context.class);
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws InterruptedException {
         verifyNoMoreInteractions(snapshot, context);
         unawareThreadpool.shutdown();
@@ -85,7 +85,7 @@ public class SupplierWithContextTest {
                 DummyContextManager.setCurrentValue("New value");
             }
         }, s -> snapshotHolder[0] = s);
-        
+
         Future<Optional<String>> future = unawareThreadpool.submit(supplier::get);
         assertThat(future.get(), is(Optional.empty()));
 

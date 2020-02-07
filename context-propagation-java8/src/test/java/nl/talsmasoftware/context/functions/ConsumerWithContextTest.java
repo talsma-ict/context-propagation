@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Talsma ICT
+ * Copyright 2016-2020 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.DummyContextManager;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
@@ -50,7 +50,7 @@ public class ConsumerWithContextTest {
     private ContextSnapshot snapshot;
     private Context<Void> context;
 
-    @BeforeClass
+    @BeforeAll
     public static void initLogback() {
         /* Initialize SLF4J bridge. This re-routes logging through java.util.logging to SLF4J. */
         java.util.logging.LogManager.getLogManager().reset();
@@ -58,13 +58,13 @@ public class ConsumerWithContextTest {
         LoggerFactory.getILoggerFactory();
     }
 
-    @Before
-    @After
+    @BeforeEach
+    @AfterEach
     public void clearDummyContext() {
         DummyContextManager.clear();
     }
 
-    @Before
+    @BeforeEach
     @SuppressWarnings("unchecked")
     public void setUp() {
         unawareThreadpool = Executors.newCachedThreadPool();
@@ -72,7 +72,7 @@ public class ConsumerWithContextTest {
         context = mock(Context.class);
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws InterruptedException {
         verifyNoMoreInteractions(snapshot, context);
         unawareThreadpool.shutdown();

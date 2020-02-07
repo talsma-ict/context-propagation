@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Talsma ICT
+ * Copyright 2016-2020 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 package nl.talsmasoftware.context.delegation;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.List;
@@ -38,7 +38,7 @@ import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
@@ -65,13 +65,13 @@ public class DelegatingExecutorServiceTest {
     ExecutorService delegate;
     DelegatingExecutorService subject;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         delegate = mock(ExecutorService.class);
         subject = new TestDelegatingExecutorService(delegate);
     }
 
-    @After
+    @AfterEach
     public void noMoreInteractions() {
         verifyNoMoreInteractions(delegate);
     }
