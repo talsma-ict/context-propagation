@@ -1,4 +1,4 @@
-sudo: false
+os: linux
 dist: trusty
 git:
   depth: false
@@ -43,13 +43,13 @@ after_success:
 deploy:
   provider: releases
   name: Release $TRAVIS_TAG
-  api_key: $GH_TOKEN
+  token: $GH_TOKEN
   file_glob: true
   file:
     - ./**/target/*$TRAVIS_TAG.jar
     - ./**/target/*-sources.jar
     - ./**/target/*root-$TRAVIS_TAG-javadoc.jar
 #    - ./**/target/*.jar.asc
-  skip_cleanup: true
+  cleanup: false
   on:
     tags: true
