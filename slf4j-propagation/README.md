@@ -1,10 +1,10 @@
 [![Maven Version][maven-img]][maven] 
 
-# Slf4J MDC propagation library
+# SLF4J MDC propagation library
 
 Adding the `slf4j-propagation` jar to your classpath
-is all that is needed to let the [Mapped Diagnostic Context (MDC)][MDC] 
-from the [Simple Logging Facade for Java (SLF4J)][Slf4J] 
+is all that is needed to let the [Mapped Diagnostic Context (MDC)][mdc] 
+from the [Simple Logging Facade for Java (SLF4J)][slf4j] 
 be automatically included into the `ContextSnapshot`.
 
 ## How to use this library

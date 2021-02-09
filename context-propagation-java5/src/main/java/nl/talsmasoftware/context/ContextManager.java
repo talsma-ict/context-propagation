@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Talsma ICT
+ * Copyright 2016-2021 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ package nl.talsmasoftware.context;
  * and {@linkplain ContextManagers#onDeactivate(Class, Object, Object)} methods
  * to notify the appropriate context observers.
  *
+ * @param <T> type of the context value
  * @author Sjoerd Talsma
  */
 public interface ContextManager<T> {
@@ -46,7 +47,7 @@ public interface ContextManager<T> {
      *
      * @param value The value to initialize a new context for.
      * @return The new <em>active</em> context containing the specified value
-     * which should be closed by the caller at the end of its lifecycle.
+     * which should be closed by the caller at the end of its lifecycle from the same thread.
      */
     Context<T> initializeNewContext(T value);
 

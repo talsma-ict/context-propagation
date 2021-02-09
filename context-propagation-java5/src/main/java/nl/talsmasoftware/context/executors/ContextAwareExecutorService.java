@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Talsma ICT
+ * Copyright 2016-2021 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ import java.util.logging.Logger;
  * @author Sjoerd Talsma
  */
 public class ContextAwareExecutorService extends CallMappingExecutorService {
-    private final Logger logger = Logger.getLogger(getClass().getName());
+    private static final Logger logger = Logger.getLogger(ContextAwareExecutorService.class.getName());
 
     public ContextAwareExecutorService(ExecutorService delegate) {
         super(delegate);
@@ -77,7 +77,7 @@ public class ContextAwareExecutorService extends CallMappingExecutorService {
      * @param context   context to be closed
      * @param exception exception if any occurred
      */
-    private void tryClose(Context<?> context, Exception exception) throws Exception {
+    private static void tryClose(Context<?> context, Exception exception) throws Exception {
         if (context != null) try {
             context.close();
         } catch (RuntimeException closeEx) {

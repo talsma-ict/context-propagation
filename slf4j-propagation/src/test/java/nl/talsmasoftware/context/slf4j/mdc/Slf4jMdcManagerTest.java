@@ -52,7 +52,6 @@ public class Slf4jMdcManagerTest {
     @AfterEach
     public void shutdownThreadpool() {
         threadpool.shutdown();
-        threadpool = null;
     }
 
     @BeforeEach
@@ -112,7 +111,6 @@ public class Slf4jMdcManagerTest {
 
     @Test
     public void testClearActiveContexts() {
-        Slf4jMdcManager mgr = new Slf4jMdcManager();
         MDC.put("dummy", "value");
         // Test no-op for MdcManager
         ContextManagers.clearActiveContexts();

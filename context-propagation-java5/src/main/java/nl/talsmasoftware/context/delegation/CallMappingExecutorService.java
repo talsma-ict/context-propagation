@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Talsma ICT
+ * Copyright 2016-2021 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ public abstract class CallMappingExecutorService extends DelegatingExecutorServi
      * @return The mapped callable object.
      * @see #map(Callable)
      */
+    @Override
     protected final <V> Callable<V> wrap(Callable<V> callable) {
         return map(callable);
     }
