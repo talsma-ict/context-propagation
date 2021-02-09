@@ -132,6 +132,24 @@
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>log4j2-propagation</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>log4j2-propagation</artifactId>
+                <version>${project.version}</version>
+                <classifier>javadoc</classifier>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>log4j2-propagation</artifactId>
+                <version>${project.version}</version>
+                <classifier>sources</classifier>
+            </dependency>
+
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>locale-context</artifactId>
                 <version>${project.version}</version>
             </dependency>

@@ -82,6 +82,7 @@ The following `ThreadLocal`-based contexts are currently supported
 out of the box by this context-propagation library:
 
 - [SLF4J MDC (Mapped Diagnostic Context)][slf4j mdc propagation]
+- [Log4j 2 Thread Context][log4j2 thread context propagation]
 - [OpenTracing Span contexts][opentracing span propagation]
 - [Spring Security Context]
 - [Locale context][locale context]
@@ -168,6 +169,7 @@ configure various timers in the global default metric registry of your applicati
 
   [servletrequest propagation]: servletrequest-propagation
   [slf4j mdc propagation]: slf4j-propagation
+  [log4j2 thread context propagation]: log4j2-propagation
   [locale context]: locale-context
   [spring security context]: spring-security-context
   [opentracing span propagation]: opentracing-span-propagation
