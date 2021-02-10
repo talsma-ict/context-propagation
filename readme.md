@@ -140,7 +140,7 @@ configure various timers in the default metric registry of your application.
   [ci-img]: https://travis-ci.org/talsma-ict/context-propagation.svg?branch=develop
   [ci]: https://travis-ci.org/talsma-ict/context-propagation
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation
-  [maven]: http://mvnrepository.com/artifact/nl.talsmasoftware.context
+  [maven]: https://search.maven.org/search?q=g:nl.talsmasoftware.context
   [release-img]: https://img.shields.io/github/release/talsma-ict/context-propagation.svg
   [release]: https://github.com/talsma-ict/context-propagation/releases
   [coveralls-img]: https://coveralls.io/repos/github/talsma-ict/context-propagation/badge.svg

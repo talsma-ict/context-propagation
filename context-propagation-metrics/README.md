@@ -16,7 +16,7 @@ All you need to do is add it to your classpath:
   <dependency>
       <groupId>nl.talsmasoftware.context</groupId>
       <artifactId>context-propagation-metrics</artifactId>
-      <version>[see maven badge above]</version>
+      <version>[see Maven badge above]</version>
   </dependency>
   ```  
 
@@ -25,5 +25,5 @@ For more details on the _metrics_ library, please [see its documentation][metric
 
 
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation
-  [maven]: http://mvnrepository.com/artifact/nl.talsmasoftware.context/context-propagation-metrics
+  [maven]: https://search.maven.org/artifact/nl.talsmasoftware.context/context-propagation-metrics
   [metrics]: https://metrics.dropwizard.io/
