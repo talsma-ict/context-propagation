@@ -137,8 +137,8 @@ configure various timers in the default metric registry of your application.
 [Apache 2.0 license](LICENSE)
 
 
-  [ci-img]: https://travis-ci.org/talsma-ict/context-propagation.svg?branch=develop
-  [ci]: https://travis-ci.org/talsma-ict/context-propagation
+  [ci-img]: https://travis-ci.com/talsma-ict/context-propagation.svg?branch=develop
+  [ci]: https://travis-ci.com/github/talsma-ict/context-propagation
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation
   [maven]: https://search.maven.org/search?q=g:nl.talsmasoftware.context
   [release-img]: https://img.shields.io/github/release/talsma-ict/context-propagation.svg
