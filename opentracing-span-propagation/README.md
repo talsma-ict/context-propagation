@@ -32,7 +32,7 @@ The `ContextAwareExecutorService` and other propagation utilities in this librar
 conform to this constraint.
 
 
-  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation
+  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/opentracing-span-propagation
   [maven]: https://search.maven.org/artifact/nl.talsmasoftware.context/opentracing-span-propagation
   [opentracing-img]: https://img.shields.io/badge/OpenTracing-enabled-blue.svg
   [opentracing]: https://opentracing.io/

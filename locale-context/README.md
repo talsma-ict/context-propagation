@@ -35,5 +35,5 @@ allowing a configured `Locale` to be propagated.
   ```
 
 
-  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation
+  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/locale-context
   [maven]: https://search.maven.org/artifact/nl.talsmasoftware.context/locale-context

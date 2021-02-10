@@ -27,7 +27,7 @@ The `ContextAwareExecutorService` automatically propagates the full [MDC] conten
 into all executed tasks this way.
 
 
-  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation
+  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/mdc-propagation
   [maven]: https://search.maven.org/artifact/nl.talsmasoftware.context/mdc-propagation
 
   [slf4j]: https://www.slf4j.org/
