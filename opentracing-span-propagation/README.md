@@ -14,7 +14,7 @@ Add it to your classpath.
 <dependency>
     <groupId>nl.talsmasoftware.context</groupId>
     <artifactId>opentracing-span-propagation</artifactId>
-    <version>[see maven badge above]</version>
+    <version>[see Maven badge above]</version>
 </dependency>
 ```
 
@@ -32,7 +32,7 @@ The `ContextAwareExecutorService` and other propagation utilities in this librar
 conform to this constraint.
 
 
-  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation
-  [maven]: http://mvnrepository.com/artifact/nl.talsmasoftware.context/opentracing-span-propagation
+  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/opentracing-span-propagation
+  [maven]: https://search.maven.org/artifact/nl.talsmasoftware.context/opentracing-span-propagation
   [opentracing-img]: https://img.shields.io/badge/OpenTracing-enabled-blue.svg
-  [opentracing]: http://opentracing.io
+  [opentracing]: https://opentracing.io/

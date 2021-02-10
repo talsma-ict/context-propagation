@@ -13,7 +13,7 @@ allowing a configured `Locale` to be propagated.
   <dependency>
       <groupId>nl.talsmasoftware.context</groupId>
       <artifactId>locale-context</artifactId>
-      <version>[see maven badge above]</version>
+      <version>[see Maven badge above]</version>
   </dependency>
   ```  
 2. Make sure to use the `ContextAwareExecutorService` as your threadpool.
@@ -35,5 +35,5 @@ allowing a configured `Locale` to be propagated.
   ```
 
 
-  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation
-  [maven]: http://mvnrepository.com/artifact/nl.talsmasoftware.context/locale-context
+  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/locale-context
+  [maven]: https://search.maven.org/artifact/nl.talsmasoftware.context/locale-context

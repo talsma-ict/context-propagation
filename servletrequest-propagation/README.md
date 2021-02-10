@@ -14,7 +14,7 @@ if the `ServletRequestContextFilter` was applied to the inbound request.
   <dependency>
       <groupId>nl.talsmasoftware.context</groupId>
       <artifactId>servletrequest-propagation</artifactId>
-      <version>[see maven badge above]</version>
+      <version>[see Maven badge above]</version>
   </dependency>
   ```
 
@@ -27,5 +27,5 @@ snapshot created by the `ContextManagers.createSnapshot()` method.
 This includes all usages of the `ContextAwareExecutorService`.
 
 
-  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation
-  [maven]: http://mvnrepository.com/artifact/nl.talsmasoftware.context/servletrequest-propagation
+  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/servletrequest-propagation
+  [maven]: https://search.maven.org/artifact/nl.talsmasoftware.context/servletrequest-propagation

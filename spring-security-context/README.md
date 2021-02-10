@@ -15,7 +15,7 @@ Add it to your classpath.
 <dependency>
     <groupId>nl.talsmasoftware.context</groupId>
     <artifactId>spring-security-context</artifactId>
-    <version>[see maven badge above]</version>
+    <version>[see Maven badge above]</version>
 </dependency>
 ```
 
@@ -28,7 +28,7 @@ The `ContextAwareExecutorService` automatically propagates the active
 [spring security] `Authentication` into all executed tasks this way.
 
 
-  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation
-  [maven]: http://mvnrepository.com/artifact/nl.talsmasoftware.context/spring-security-context
+  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/spring-security-context
+  [maven]: https://search.maven.org/artifact/nl.talsmasoftware.context/spring-security-context
   [spring security]: https://projects.spring.io/spring-security/
-  [security context]: https://docs.spring.io/spring-security/site/docs/current/api/index.html?org/springframework/security/core/context/SecurityContext.html
+  [security context]: https://docs.spring.io/spring-security/site/docs/current/api/org/springframework/security/core/context/SecurityContext.html

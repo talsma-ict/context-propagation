@@ -30,4 +30,4 @@ but makes sure that dependencies to any `context propagation` module
 will all be of the declared version, including transitive dependencies.
 
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation-bom.svg
-  [maven]: http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22nl.talsmasoftware.context%22%20AND%20a%3A%22context-propagation-bom%22
+  [maven]: https://search.maven.org/artifact/nl.talsmasoftware.context/context-propagation-bom

@@ -90,7 +90,7 @@ public class DummyContextManager implements ContextManager<String> {
 
 
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation.svg
-  [maven]: http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22nl.talsmasoftware.context%22%20AND%20a%3A%22context-propagation%22
+  [maven]: https://search.maven.org/artifact/nl.talsmasoftware.context/context-propagation
   [javadoc-img]: https://www.javadoc.io/badge/nl.talsmasoftware.context/context-propagation.svg
   [javadoc]: https://www.javadoc.io/doc/nl.talsmasoftware.context/context-propagation 
 

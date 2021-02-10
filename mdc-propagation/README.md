@@ -14,7 +14,7 @@ Add it to your classpath.
 <dependency>
     <groupId>nl.talsmasoftware.context</groupId>
     <artifactId>mdc-propagation</artifactId>
-    <version>[see maven badge above]</version>
+    <version>[see Maven badge above]</version>
 </dependency>
 ```
 
@@ -27,8 +27,8 @@ The `ContextAwareExecutorService` automatically propagates the full [MDC] conten
 into all executed tasks this way.
 
 
-  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation
-  [maven]: http://mvnrepository.com/artifact/nl.talsmasoftware.context/mdc-propagation
+  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/mdc-propagation
+  [maven]: https://search.maven.org/artifact/nl.talsmasoftware.context/mdc-propagation
 
   [slf4j]: https://www.slf4j.org/
   [mdc]: https://www.slf4j.org/api/org/slf4j/MDC.html
