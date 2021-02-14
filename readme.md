@@ -110,6 +110,18 @@ If however, you wish to disable caching of the context manager instances, you ca
 
 The values `false` or `0` will _disable_ caching.
 
+## Building jars with dependencies
+
+When using a build tool or plugin to create an 'uber-jar', i.e. a jar file with all
+the classes of its dependencies included, you have to make sure that the service
+provider configuration files under `META-INF/services` are either preserved or
+merged. Otherwise Java's `ServiceLoader` will not be able to find the context
+implementations of this library.
+
+In case your are using the Maven Shade Plugin, you can use the
+[`ServicesResourceTransformer`](https://maven.apache.org/plugins/maven-shade-plugin/examples/resource-transformers.html#ServicesResourceTransformer)
+for this task.
+
 ## Performance metrics
 
 No library is 'free' with regards to performance.
