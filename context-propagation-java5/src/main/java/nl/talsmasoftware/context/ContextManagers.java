@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Talsma ICT
+ * Copyright 2016-2021 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -342,7 +342,9 @@ public final class ContextManagers {
 
         public void close() {
             RuntimeException closeException = null;
-            for (Context<?> reactivated : this.reactivated) {
+            // close in reverse order of reactivation
+            for (int i = this.reactivated.size() - 1; i >= 0; i--) {
+                Context<?> reactivated = this.reactivated.get(i);
                 if (reactivated != null) try {
                     reactivated.close();
                 } catch (RuntimeException rte) {
