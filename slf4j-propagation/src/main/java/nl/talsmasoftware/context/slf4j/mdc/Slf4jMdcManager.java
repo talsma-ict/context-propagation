@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Talsma ICT
+ * Copyright 2016-2021 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.mdc;
+package nl.talsmasoftware.context.slf4j.mdc;
 
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManager;
@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @author Sjoerd Talsma
  */
-public class MdcManager implements ContextManager<Map<String, String>> {
+public class Slf4jMdcManager implements ContextManager<Map<String, String>> {
 
     /**
      * Initializes a new MDC context populated by the specified values.
@@ -59,7 +59,7 @@ public class MdcManager implements ContextManager<Map<String, String>> {
         final Map<String, String> previous = MDC.getCopyOfContextMap();
         if (mdcValues == null) MDC.clear();
         else MDC.setContextMap(mdcValues);
-        return new MdcContext(previous, mdcValues, false);
+        return new Slf4jMdcContext(previous, mdcValues, false);
     }
 
     /**
@@ -72,7 +72,7 @@ public class MdcManager implements ContextManager<Map<String, String>> {
      */
     public Context<Map<String, String>> getActiveContext() {
         // Return fresh context that is 'already-closed'. Therefore it doesn't need a previous mdc.
-        return new MdcContext(null, MDC.getCopyOfContextMap(), true);
+        return new Slf4jMdcContext(null, MDC.getCopyOfContextMap(), true);
     }
 
     @Override
@@ -80,15 +80,15 @@ public class MdcManager implements ContextManager<Map<String, String>> {
         return getClass().getSimpleName();
     }
 
-    private static final class MdcContext implements Context<Map<String, String>>, Clearable {
+    private static final class Slf4jMdcContext implements Context<Map<String, String>>, Clearable {
         private final Map<String, String> previous, value;
         private final AtomicBoolean closed;
 
-        private MdcContext(Map<String, String> previous, Map<String, String> value, boolean closed) {
+        private Slf4jMdcContext(Map<String, String> previous, Map<String, String> value, boolean closed) {
             this.previous = previous;
             this.value = value;
             this.closed = new AtomicBoolean(closed);
-            ContextManagers.onActivate(MdcManager.class, value, previous);
+            ContextManagers.onActivate(Slf4jMdcManager.class, value, previous);
         }
 
         public Map<String, String> getValue() {
@@ -99,7 +99,7 @@ public class MdcManager implements ContextManager<Map<String, String>> {
             if (closed.compareAndSet(false, true)) {
                 if (previous == null) MDC.clear();
                 else MDC.setContextMap(previous);
-                ContextManagers.onDeactivate(MdcManager.class, value, previous);
+                ContextManagers.onDeactivate(Slf4jMdcManager.class, value, previous);
             }
         }
 
@@ -109,7 +109,7 @@ public class MdcManager implements ContextManager<Map<String, String>> {
 
         @Override
         public String toString() {
-            return closed.get() ? "MdcContext{closed}" : "MdcContext" + (value == null ? "{}" : value);
+            return closed.get() ? "Slf4jMdcContext{closed}" : "Slf4jMdcContext" + (value == null ? "{}" : value);
         }
 
     }

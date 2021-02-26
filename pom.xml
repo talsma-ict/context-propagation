@@ -41,8 +41,8 @@
         <module>context-propagation-metrics</module>
         <module>context-propagation-micrometer</module>
         <module>locale-context</module>
-        <module>mdc-propagation</module>
         <module>servletrequest-propagation</module>
+        <module>slf4j-propagation</module>
         <module>spring-security-context</module>
         <module>opentracing-span-propagation</module>
         <module>relocation</module>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2019 Talsma ICT
+ * Copyright 2016-2021 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
- * Propagate the {@link org.slf4j.MDC Slf4J MDC} content from one thread to another.
- *
- * <p>
- * This context manager maintains no threadlocal state of its own,
- * instead it propagates the
- * existing {@linkplain org.slf4j.MDC#getCopyOfContextMap() MDC context map}
- * into each {@linkplain nl.talsmasoftware.context.ContextSnapshot context snapshot}
- * to be applied again when the snapshot
- * is {@linkplain nl.talsmasoftware.context.ContextSnapshot#reactivate() reactivated}
- * in another thread.
+ * @deprecated This package was renamed to {@code nl.talsmasoftware.context.slf4j.mdc}
  */
 package nl.talsmasoftware.context.mdc;

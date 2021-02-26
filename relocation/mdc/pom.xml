@@ -22,26 +22,24 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>nl.talsmasoftware.context</groupId>
-        <artifactId>context-propagation-root</artifactId>
+        <artifactId>context-propagation-relocation</artifactId>
         <version>1.0.9-SNAPSHOT</version>
     </parent>
 
     <!-- Artifact identification -->
-    <artifactId>context-propagation-relocation</artifactId>
+    <artifactId>mdc-propagation</artifactId>
     <packaging>pom</packaging>
 
     <!-- Project information -->
-    <name>Relocation</name>
-
-    <modules>
-        <module>old-root</module>
-        <module>java5</module>
-        <module>java8</module>
-        <module>mdc</module>
-    </modules>
+    <name>Relocation (mdc)</name>
 
     <properties>
-        <root.basedir>${project.parent.basedir}</root.basedir>
+        <root.basedir>${project.parent.basedir}/..</root.basedir>
     </properties>
 
+    <distributionManagement>
+        <relocation>
+            <artifactId>slf4j-propagation</artifactId>
+        </relocation>
+    </distributionManagement>
 </project>
