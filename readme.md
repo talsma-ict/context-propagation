@@ -162,7 +162,7 @@ configure various timers in the default metric registry of your application.
 
 
   [servletrequest propagation]: servletrequest-propagation
-  [mdc propagation]: mdc-propagation
+  [mdc propagation]: slf4j-propagation
   [locale context]: locale-context
   [spring security context]: spring-security-context
   [opentracing span propagation]: opentracing-span-propagation

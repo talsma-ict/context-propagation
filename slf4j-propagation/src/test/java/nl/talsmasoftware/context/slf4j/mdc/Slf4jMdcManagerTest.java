@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 Talsma ICT
+ * Copyright 2016-2021 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.mdc;
+package nl.talsmasoftware.context.slf4j.mdc;
 
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
@@ -36,11 +36,11 @@ import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 
 /**
- * Unit test for the {@link MdcManager}.
+ * Unit test for the {@link Slf4jMdcManager}.
  *
  * @author Sjoerd Talsma
  */
-public class MdcManagerTest {
+public class Slf4jMdcManagerTest {
 
     ExecutorService threadpool;
 
@@ -92,19 +92,19 @@ public class MdcManagerTest {
     }
 
     @Test
-    public void testMdcManagerToString() {
-        assertThat(new MdcManager(), hasToString("MdcManager"));
+    public void testSlf4jMdcManagerToString() {
+        assertThat(new Slf4jMdcManager(), hasToString("Slf4jMdcManager"));
     }
 
     @Test
-    public void testMdcContextToString() {
-        MdcManager mgr = new MdcManager();
+    public void testSlf4jMdcContextToString() {
+        Slf4jMdcManager mgr = new Slf4jMdcManager();
         MDC.put("dummy", "value");
         Map<String, String> mdc = MDC.getCopyOfContextMap();
-        assertThat(mgr.getActiveContext(), hasToString("MdcContext{closed}"));
+        assertThat(mgr.getActiveContext(), hasToString("Slf4jMdcContext{closed}"));
         Context<Map<String, String>> ctx = mgr.initializeNewContext(mdc);
         try {
-            assertThat(ctx, hasToString("MdcContext" + mdc));
+            assertThat(ctx, hasToString("Slf4jMdcContext" + mdc));
         } finally {
             ctx.close();
         }
@@ -112,7 +112,7 @@ public class MdcManagerTest {
 
     @Test
     public void testClearActiveContexts() {
-        MdcManager mgr = new MdcManager();
+        Slf4jMdcManager mgr = new Slf4jMdcManager();
         MDC.put("dummy", "value");
         // Test no-op for MdcManager
         ContextManagers.clearActiveContexts();
