@@ -22,8 +22,9 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>nl.talsmasoftware.context</groupId>
-        <artifactId>context-propagation-relocation</artifactId>
+        <artifactId>context-propagation-root</artifactId>
         <version>1.0.9-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <!-- Artifact identification -->
@@ -34,7 +35,7 @@
     <name>Relocation (mdc)</name>
 
     <properties>
-        <root.basedir>${project.parent.basedir}/..</root.basedir>
+        <root.basedir>${project.parent.basedir}</root.basedir>
     </properties>
 
     <distributionManagement>

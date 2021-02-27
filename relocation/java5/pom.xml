@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright 2016-2019 Talsma ICT
+    Copyright 2016-2021 Talsma ICT
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -22,8 +22,9 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>nl.talsmasoftware.context</groupId>
-        <artifactId>context-propagation-relocation</artifactId>
+        <artifactId>context-propagation-root</artifactId>
         <version>1.0.9-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <!-- Artifact identification -->
@@ -35,7 +36,7 @@
     <name>Relocation (core, java-5)</name>
 
     <properties>
-        <root.basedir>${project.parent.basedir}/..</root.basedir>
+        <root.basedir>${project.parent.basedir}</root.basedir>
     </properties>
 
     <distributionManagement>
