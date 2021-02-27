@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright 2016-2019 Talsma ICT
+    Copyright 2016-2021 Talsma ICT
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -114,18 +114,18 @@
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>mdc-propagation</artifactId>
+                <artifactId>slf4j-propagation</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>mdc-propagation</artifactId>
+                <artifactId>slf4j-propagation</artifactId>
                 <version>${project.version}</version>
                 <classifier>javadoc</classifier>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>mdc-propagation</artifactId>
+                <artifactId>slf4j-propagation</artifactId>
                 <version>${project.version}</version>
                 <classifier>sources</classifier>
             </dependency>
