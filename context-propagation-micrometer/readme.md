@@ -2,7 +2,7 @@
 
 # Micrometer instrumentation for context-propagation
 
-This module provides [micrometer] `Timer` instrumentation for:
+This module provides [Micrometer] `Timer` instrumentation for:
  - all context snapshots that are created with `ContextManagers.createContextSnapshot()` 
  - all context snapshots that are reactivated with `ContextSnapshot.reactivate()`
  - for each specific `ContextManager`:
@@ -22,7 +22,7 @@ All you need to do is add it to your classpath:
 
 That will add `Timer` metrics to the global composite registry
 as used by the `io.micrometer.core.instrument.Metrics` utility class.
-For more details on the _micrometer_ library, please [see its documentation][micrometer].
+For more details on the _Micrometer_ library, please [see its documentation][micrometer].
 
 
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation-micrometer

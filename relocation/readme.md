@@ -1,10 +1,10 @@
 # Relocation
 
-This directory contains [maven relocation](https://maven.apache.org/guides/mini/guide-relocation.html) poms
-for modules that were once published in maven central, 
+This directory contains [Maven relocation](https://maven.apache.org/guides/mini/guide-relocation.html) POMs
+for modules that were once published in Maven Central, 
 but whose _artifactId_ have either been renamed or moved to another _groupId_.
 
-The published _relocation_ pom files will serve as a redirect for dependent
+The published _relocation_ POM files will serve as a redirect for dependent
 projects to the new location of these resources.
 
 ## Overview
