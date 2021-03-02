@@ -139,10 +139,15 @@ have a noticable impact on your application.
 
 ### Metrics reporting
 
-The [context propagation metrics] module supports for the excellent
-[dropwizard metrics](https://metrics.dropwizard.io/) library.  
-Adding `context propagation metrics` to your classpath will automatically 
-configure various timers in the default metric registry of your application.
+The [context propagation metrics] module uses the excellent
+[dropwizard metrics](https://metrics.dropwizard.io/) library to
+instrument Timers for context propagation.
+
+Similarly, the [context propagation Micrometer] module adds [Micrometer] 
+instrumentation Timers for the context propagation.
+
+Adding either of these modules to your classpath will automatically
+configure various timers in the global default metric registry of your application.
 
 ## License
 
@@ -167,7 +172,9 @@ configure various timers in the default metric registry of your application.
   [spring security context]: spring-security-context
   [opentracing span propagation]: opentracing-span-propagation
   [context propagation metrics]: context-propagation-metrics
+  [context propagation micrometer]: context-propagation-micrometer
   [default constructor]: https://en.wikipedia.org/wiki/Nullary_constructor
+  [micrometer]: https://micrometer.io
   
   [ContextAwareExecutorService]: https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/executors/ContextAwareExecutorService.html
   [ContextAwareCompletableFuture]: context-propagation-java8#contextawarecompletablefuture
