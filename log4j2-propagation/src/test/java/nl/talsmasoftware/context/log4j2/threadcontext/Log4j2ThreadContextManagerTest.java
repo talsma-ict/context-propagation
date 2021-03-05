@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.log4j2;
+package nl.talsmasoftware.context.log4j2.threadcontext;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasToString;
@@ -45,9 +45,9 @@ import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
 
 /**
- * Unit test for the {@link ThreadContextManager}.
+ * Unit test for the {@link Log4j2ThreadContextManager}.
  */
-class ThreadContextManagerTest {
+class Log4j2ThreadContextManagerTest {
 
     /** Underlying executor of {@link #threadpool}; not context-aware */
     ExecutorService rawThreadpool;
@@ -89,13 +89,13 @@ class ThreadContextManagerTest {
 
     @Test
     void testProvider() {
-        assertSame(ThreadContextManager.INSTANCE, ThreadContextManager.provider());
+        assertSame(Log4j2ThreadContextManager.INSTANCE, Log4j2ThreadContextManager.provider());
 
         // Verify that no-arg constructor, used by ServiceLoader, works
         assertDoesNotThrow(new Executable() {
             @SuppressWarnings("deprecation")
             public void execute() {
-                new ThreadContextManager();
+                new Log4j2ThreadContextManager();
             }
         });
     }
@@ -104,13 +104,13 @@ class ThreadContextManagerTest {
     void testInitializeNewContext_null() {
         assertThrows(NullPointerException.class, new Executable() {
             public void execute() {
-                ThreadContextManager.INSTANCE.initializeNewContext(null);
+                Log4j2ThreadContextManager.INSTANCE.initializeNewContext(null);
             }
         });
     }
 
     /**
-     * Verify that calling {@code close()} on the result of {@link ThreadContextManager#getActiveContext()}
+     * Verify that calling {@code close()} on the result of {@link Log4j2ThreadContextManager#getActiveContext()}
      * has no effect because it is managed by Log4j 2.
      */
     @Test
@@ -121,7 +121,7 @@ class ThreadContextManagerTest {
         ThreadContext.push("stack2");
 
         // Should have no effect
-        ThreadContextManager.INSTANCE.getActiveContext().close();
+        Log4j2ThreadContextManager.INSTANCE.getActiveContext().close();
 
         Map<String, String> expectedMap = new HashMap<String, String>();
         expectedMap.put("map1", "value1");
@@ -239,7 +239,7 @@ class ThreadContextManagerTest {
 
     @Test
     void testToString() {
-        assertThat(ThreadContextManager.INSTANCE.toString(), hasToString("ThreadContextManager"));
+        assertThat(Log4j2ThreadContextManager.INSTANCE.toString(), hasToString("Log4j2ThreadContextManager"));
     }
 
     @Test
@@ -247,11 +247,11 @@ class ThreadContextManagerTest {
         ThreadContext.put("map1", "value1");
         ThreadContext.push("stack1");
 
-        ThreadContextData data = ThreadContextData.fromCurrentThreadContext();
+        Log4j2ThreadContextData data = Log4j2ThreadContextData.fromCurrentThreadContext();
 
-        ThreadContextManager mgr = ThreadContextManager.INSTANCE;
+        Log4j2ThreadContextManager mgr = Log4j2ThreadContextManager.INSTANCE;
         assertThat(mgr.getActiveContext(), hasToString("ThreadContextContext{closed}"));
-        Context<ThreadContextData> ctx = mgr.initializeNewContext(data);
+        Context<Log4j2ThreadContextData> ctx = mgr.initializeNewContext(data);
         try {
             assertThat(ctx, hasToString("ThreadContextContext{" + data + "}"));
         } finally {

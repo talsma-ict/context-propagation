@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.log4j2;
+package nl.talsmasoftware.context.log4j2.threadcontext;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasToString;
@@ -32,7 +32,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-class ThreadContextDataTest {
+class Log4j2ThreadContextDataTest {
     @BeforeEach
     @AfterEach
     void clearThreadContext() {
@@ -46,7 +46,7 @@ class ThreadContextDataTest {
         ThreadContext.push("stack1");
         ThreadContext.push("stack2");
 
-        ThreadContextData data = ThreadContextData.fromCurrentThreadContext();
+        Log4j2ThreadContextData data = Log4j2ThreadContextData.fromCurrentThreadContext();
 
         Map<String, String> expectedMap = new HashMap<String, String>();
         expectedMap.put("map1", "value1");
@@ -62,7 +62,7 @@ class ThreadContextDataTest {
         assertEquals(0, ThreadContext.getDepth());
         assertTrue(ThreadContext.isEmpty());
 
-        ThreadContextData data = ThreadContextData.fromCurrentThreadContext();
+        Log4j2ThreadContextData data = Log4j2ThreadContextData.fromCurrentThreadContext();
         assertTrue(data.getContextMap().isEmpty());
         assertTrue(data.getContextStack().isEmpty());
 
@@ -77,7 +77,7 @@ class ThreadContextDataTest {
         assertEquals(0, ThreadContext.getDepth());
         assertTrue(ThreadContext.isEmpty());
 
-        ThreadContextData data = ThreadContextData.fromCurrentThreadContext();
+        Log4j2ThreadContextData data = Log4j2ThreadContextData.fromCurrentThreadContext();
 
         ThreadContext.put("map1", "value1");
         ThreadContext.put("map2", "value2");
@@ -101,7 +101,7 @@ class ThreadContextDataTest {
     }
 
     /**
-     * Verify that {@link ThreadContextData} is a snapshot and not affected
+     * Verify that {@link Log4j2ThreadContextData} is a snapshot and not affected
      * by subsequent modification of {@link ThreadContext}.
      */
     @Test
@@ -111,7 +111,7 @@ class ThreadContextDataTest {
         ThreadContext.push("stack1");
         ThreadContext.push("stack2");
 
-        ThreadContextData data = ThreadContextData.fromCurrentThreadContext();
+        Log4j2ThreadContextData data = Log4j2ThreadContextData.fromCurrentThreadContext();
 
         // Should not affect snapshot
         ThreadContext.put("map3", "value3");
@@ -133,7 +133,7 @@ class ThreadContextDataTest {
         ThreadContext.push("stack1");
         ThreadContext.push("stack2");
 
-        ThreadContextData data = ThreadContextData.fromCurrentThreadContext();
+        Log4j2ThreadContextData data = Log4j2ThreadContextData.fromCurrentThreadContext();
         final Map<String, String> contextMap = data.getContextMap();
         final List<String> contextStack = data.getContextStack();
 
@@ -175,14 +175,14 @@ class ThreadContextDataTest {
         ThreadContext.push("stack1");
         ThreadContext.push("stack2");
 
-        ThreadContextData data = ThreadContextData.fromCurrentThreadContext();
-        String expectedString = "ThreadContextData{map=" + data.getContextMap()
+        Log4j2ThreadContextData data = Log4j2ThreadContextData.fromCurrentThreadContext();
+        String expectedString = "Log4j2ThreadContextData{map=" + data.getContextMap()
             + ",stack=" + data.getContextStack() + "}";
         assertThat(data, hasToString(expectedString));
     }
 
     /**
-     * Verify that {@link ThreadContextData#applyToCurrentThread(ThreadContextData, boolean)}
+     * Verify that {@link Log4j2ThreadContextData#applyToCurrentThread(Log4j2ThreadContextData, boolean)}
      * with {@code overwrite=false} appends data to existing one, only overwriting existing
      * one in case of conflict.
      */
@@ -193,14 +193,14 @@ class ThreadContextDataTest {
         ThreadContext.push("stack1");
         ThreadContext.push("stack2");
 
-        ThreadContextData data = ThreadContextData.fromCurrentThreadContext();
+        Log4j2ThreadContextData data = Log4j2ThreadContextData.fromCurrentThreadContext();
 
         ThreadContext.clearAll();
         ThreadContext.put("map1", "old-value1");
         ThreadContext.put("map3", "old-value3");
         ThreadContext.push("stack3");
 
-        ThreadContextData.applyToCurrentThread(data, false);
+        Log4j2ThreadContextData.applyToCurrentThread(data, false);
 
         Map<String, String> expectedMap = new HashMap<String, String>();
         expectedMap.put("map1", "value1"); // old-value1 should have been overwritten
@@ -213,7 +213,7 @@ class ThreadContextDataTest {
     }
 
     /**
-     * Verify that {@link ThreadContextData#applyToCurrentThread(ThreadContextData, boolean)}
+     * Verify that {@link Log4j2ThreadContextData#applyToCurrentThread(Log4j2ThreadContextData, boolean)}
      * with {@code overwrite=true} overwrites all existing data.
      */
     @Test
@@ -223,14 +223,14 @@ class ThreadContextDataTest {
         ThreadContext.push("stack1");
         ThreadContext.push("stack2");
 
-        ThreadContextData data = ThreadContextData.fromCurrentThreadContext();
+        Log4j2ThreadContextData data = Log4j2ThreadContextData.fromCurrentThreadContext();
 
         ThreadContext.clearAll();
         ThreadContext.put("map1", "old-value1");
         ThreadContext.put("map3", "old-value3");
         ThreadContext.push("stack3");
 
-        ThreadContextData.applyToCurrentThread(data, true);
+        Log4j2ThreadContextData.applyToCurrentThread(data, true);
 
         Map<String, String> expectedMap = new HashMap<String, String>();
         expectedMap.put("map1", "value1");
@@ -242,7 +242,7 @@ class ThreadContextDataTest {
     }
 
     /**
-     * Verify that {@link ThreadContextData#applyToCurrentThread(ThreadContextData, boolean)}
+     * Verify that {@link Log4j2ThreadContextData#applyToCurrentThread(Log4j2ThreadContextData, boolean)}
      * with {@code data=null,overwrite=false} has no effect.
      */
     @Test
@@ -253,7 +253,7 @@ class ThreadContextDataTest {
         ThreadContext.push("stack2");
 
         // Should have no effect
-        ThreadContextData.applyToCurrentThread(null, false);
+        Log4j2ThreadContextData.applyToCurrentThread(null, false);
 
         Map<String, String> expectedMap = new HashMap<String, String>();
         expectedMap.put("map1", "value1");
@@ -265,7 +265,7 @@ class ThreadContextDataTest {
     }
 
     /**
-     * Verify that {@link ThreadContextData#applyToCurrentThread(ThreadContextData, boolean)}
+     * Verify that {@link Log4j2ThreadContextData#applyToCurrentThread(Log4j2ThreadContextData, boolean)}
      * with {@code data=null,overwrite=true} clears thread context.
      */
     @Test
@@ -276,7 +276,7 @@ class ThreadContextDataTest {
         ThreadContext.push("stack2");
 
         // Should clear existing context
-        ThreadContextData.applyToCurrentThread(null, true);
+        Log4j2ThreadContextData.applyToCurrentThread(null, true);
 
         assertTrue(ThreadContext.isEmpty());
         assertEquals(0, ThreadContext.getDepth());

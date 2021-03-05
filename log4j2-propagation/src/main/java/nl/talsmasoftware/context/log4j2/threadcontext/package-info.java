@@ -18,4 +18,4 @@
  * Propagate the {@linkplain org.apache.logging.log4j.ThreadContext Log4j 2 ThreadContext}
  * data from one thread to another.
  */
-package nl.talsmasoftware.context.log4j2;
+package nl.talsmasoftware.context.log4j2.threadcontext;

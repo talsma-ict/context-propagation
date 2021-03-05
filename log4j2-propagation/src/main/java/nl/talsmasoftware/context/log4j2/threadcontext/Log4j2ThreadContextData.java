@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.log4j2;
+package nl.talsmasoftware.context.log4j2.threadcontext;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,10 +22,10 @@ import java.util.Map;
 import org.apache.logging.log4j.ThreadContext;
 
 /**
- * Represents a snapshot of the data of the Log4j 2 {@link ThreadContext} of a
+ * Snapshot of the data from the Log4j 2 {@link ThreadContext} of a
  * specific thread at a certain point in the past.
  */
-public class ThreadContextData {
+public class Log4j2ThreadContextData {
     private final Map<String, String> contextMap;
     private final List<String> contextStack;
 
@@ -35,7 +35,7 @@ public class ThreadContextData {
      * @param data data to apply, may be {@code null}
      * @param overwrite whether all existing data should overwritten
      */
-    static void applyToCurrentThread(ThreadContextData data, boolean overwrite) {
+    static void applyToCurrentThread(Log4j2ThreadContextData data, boolean overwrite) {
         if (overwrite) {
             ThreadContext.clearAll();
         }
@@ -58,7 +58,7 @@ public class ThreadContextData {
         }
     }
 
-    private ThreadContextData(Map<String, String> contextMap, List<String> contextStack) {
+    private Log4j2ThreadContextData(Map<String, String> contextMap, List<String> contextStack) {
         this.contextMap = Collections.unmodifiableMap(contextMap);
         this.contextStack = Collections.unmodifiableList(contextStack);
     }
@@ -68,9 +68,9 @@ public class ThreadContextData {
      *
      * @return data representing the {@code ThreadContext} of the current thread
      */
-    static ThreadContextData fromCurrentThreadContext() {
+    static Log4j2ThreadContextData fromCurrentThreadContext() {
         // Get a copy of context map and context stack
-        return new ThreadContextData(ThreadContext.getContext(), ThreadContext.getImmutableStack().asList());
+        return new Log4j2ThreadContextData(ThreadContext.getContext(), ThreadContext.getImmutableStack().asList());
     }
 
     /**
@@ -96,7 +96,7 @@ public class ThreadContextData {
 
     @Override
     public String toString() {
-        return "ThreadContextData{"
+        return "Log4j2ThreadContextData{"
             + "map=" + contextMap
             + ",stack=" + contextStack
             + '}';

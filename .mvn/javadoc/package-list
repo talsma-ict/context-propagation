@@ -11,7 +11,7 @@ nl.talsmasoftware.context.metrics
 nl.talsmasoftware.context.locale
 nl.talsmasoftware.context.mdc
 nl.talsmasoftware.context.slf4j.mdc
-nl.talsmasoftware.context.log4j2
+nl.talsmasoftware.context.log4j2.threadcontext
 nl.talsmasoftware.context.opentracing
 nl.talsmasoftware.context.servletrequest
 nl.talsmasoftware.context.springsecurity
