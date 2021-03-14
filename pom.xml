@@ -256,8 +256,6 @@
                     <excludes>
                         <exclude>.gitignore</exclude>
                         <exclude>.github/**</exclude>
-                        <exclude>.travis/**</exclude>
-                        <exclude>.travis.yml</exclude>
                         <exclude>.mvn/**</exclude>
                         <exclude>mvnw*</exclude>
                         <exclude>etc/header.txt</exclude>
