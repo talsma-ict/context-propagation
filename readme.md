@@ -92,7 +92,7 @@ out of the box by this context-propagation library:
 ## Custom contexts
 
 Adding your own `Context` type is possible
-by [creating your own context manager](context-propagation-java5/README.md#creating-your-own-context-manager).
+by [creating your own context manager](context-propagation/README.md#creating-your-own-context-manager).
 
 ## Caching
 
