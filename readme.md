@@ -1,4 +1,4 @@
-[![Build Status][ci-img]][ci]
+[![CI Build][ci-img]][ci]
 [![Coverage Status][coveralls-img]][coveralls]
 [![Maven Version][maven-img]][maven]
 [![Javadoc][javadoc-img]][javadoc]
@@ -92,7 +92,7 @@ out of the box by this context-propagation library:
 ## Custom contexts
 
 Adding your own `Context` type is possible
-by [creating your own context manager](context-propagation-java5/README.md#creating-your-own-context-manager).
+by [creating your own context manager](context-propagation/README.md#creating-your-own-context-manager).
 
 ## Caching
 
@@ -154,8 +154,8 @@ configure various timers in the global default metric registry of your applicati
 [Apache 2.0 license](LICENSE)
 
 
-  [ci-img]: https://travis-ci.com/talsma-ict/context-propagation.svg?branch=develop
-  [ci]: https://travis-ci.com/github/talsma-ict/context-propagation
+  [ci-img]: https://github.com/talsma-ict/context-propagation/actions/workflows/ci-build.yml/badge.svg
+  [ci]: https://github.com/talsma-ict/context-propagation/actions/workflows/ci-build.yml
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation
   [maven]: https://search.maven.org/search?q=g:nl.talsmasoftware.context
   [release-img]: https://img.shields.io/github/release/talsma-ict/context-propagation.svg

@@ -36,7 +36,7 @@
 
     <modules>
         <module>context-propagation-bom</module>
-        <module>context-propagation-java5</module>
+        <module>context-propagation</module>
         <module>context-propagation-java8</module>
         <module>context-propagation-metrics</module>
         <module>context-propagation-micrometer</module>
@@ -255,8 +255,7 @@
                     </mapping>
                     <excludes>
                         <exclude>.gitignore</exclude>
-                        <exclude>.travis/**</exclude>
-                        <exclude>.travis.yml</exclude>
+                        <exclude>.github/**</exclude>
                         <exclude>.mvn/**</exclude>
                         <exclude>mvnw*</exclude>
                         <exclude>etc/header.txt</exclude>
@@ -425,6 +424,8 @@
                                 <configuration>
                                     <gpgArguments>
                                         <gpgArgument>--batch</gpgArgument>
+                                        <gpgArgument>--pinentry-mode</gpgArgument>
+                                        <gpgArgument>loopback</gpgArgument>
                                     </gpgArguments>
                                 </configuration>
                             </execution>
