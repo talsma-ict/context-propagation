@@ -3,6 +3,7 @@ name: CI build
 # Run this workflow every time a new commit pushed to your repository
 on:
   push:
+    branches: [ '**' ]
     tags-ignore: [ '**' ]
   pull_request:
     types: [ opened, synchronize, reopened ]
