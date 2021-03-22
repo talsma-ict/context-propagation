@@ -65,9 +65,9 @@ jobs:
     name: "Release"
     runs-on: ubuntu-latest
     needs: build
-    if: env.GH_TOKEN != null
     env:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
+    if: env.GH_TOKEN != null
     steps:
       - name: Check out code
         uses: actions/checkout@v2
