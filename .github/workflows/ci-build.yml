@@ -65,12 +65,15 @@ jobs:
     name: "Release"
     runs-on: ubuntu-latest
     needs: build
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
+    if: env.GH_TOKEN != null
     steps:
       - name: Check out code
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ env.GH_TOKEN }}
       - name: Set up CI git user
         run: |
           git config user.name "Talsma CI"
