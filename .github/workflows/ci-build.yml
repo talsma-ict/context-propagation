@@ -18,9 +18,13 @@ jobs:
         with:
           fetch-depth: 0
       - name: Setup GPG
+        env:
+          GPG_SECRET_KEYS: ${{ secrets.GPG_SECRET_KEYS }}
+          GPG_OWNERTRUST: ${{ secrets.GPG_OWNERTRUST }}
+        if: env.GPG_SECRET_KEYS != null && env.GPG_OWNERTRUST != null
         run: |
-          cat <(echo -e "${{ secrets.GPG_SECRET_KEYS }}") | base64 --decode | gpg --batch --import
-          cat <(echo -e "${{ secrets.GPG_OWNERTRUST }}") | base64 --decode | gpg --batch --import-ownertrust
+          cat <(echo -e "${{ env.GPG_SECRET_KEYS }}") | base64 --decode | gpg --batch --import
+          cat <(echo -e "${{ env.GPG_OWNERTRUST }}") | base64 --decode | gpg --batch --import-ownertrust
       - name: Setup Graphviz
         run: sudo apt-get install graphviz
       - name: Set up JDK 8 for compilation
@@ -52,7 +56,10 @@ jobs:
           SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
       - name: Publish test coverage
-        run: ./mvnw --batch-mode -DrepoToken=${{ secrets.COVERALLS_REPO_TOKEN }} jacoco:report coveralls:report
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        if: env.COVERALLS_REPO_TOKEN != null
+        run: ./mvnw --batch-mode -DrepoToken=${{ env.COVERALLS_REPO_TOKEN }} jacoco:report coveralls:report
 
   release:
     name: "Release"
