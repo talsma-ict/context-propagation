@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
- * Propagate the {@link org.slf4j.MDC Slf4J MDC} content from one thread to another.
+ * Propagate the {@linkplain org.slf4j.MDC SLF4J MDC} content from one thread to another.
  *
  * <p>
  * This context manager maintains no threadlocal state of its own,

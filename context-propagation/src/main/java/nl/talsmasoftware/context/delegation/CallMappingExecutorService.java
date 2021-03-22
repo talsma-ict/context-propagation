@@ -55,6 +55,7 @@ public abstract class CallMappingExecutorService extends DelegatingExecutorServi
      * @return The mapped callable object.
      * @see #map(Callable)
      */
+    @Override
     protected final <V> Callable<V> wrap(Callable<V> callable) {
         return map(callable);
     }

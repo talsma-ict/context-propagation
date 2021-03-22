@@ -34,6 +34,8 @@ import java.util.logging.Logger;
  * @author Sjoerd Talsma
  */
 public abstract class AbstractThreadLocalContext<T> implements Context<T> {
+    private static final Logger LOGGER = Logger.getLogger(AbstractThreadLocalContext.class.getName());
+
     private static final AtomicBoolean DEPRECATED_CONSTRUCTOR_WARNING = new AtomicBoolean(true);
     /**
      * The constant of ThreadLocal context instances per subclass name so different types don't get mixed.
@@ -43,7 +45,6 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
 
     @SuppressWarnings("unchecked")
     private final ThreadLocal<AbstractThreadLocalContext<T>> sharedThreadLocalContext = threadLocalInstanceOf((Class) getClass());
-    private final Logger logger = Logger.getLogger(getClass().getName());
     private final AtomicBoolean closed = new AtomicBoolean(false);
     private final Class<? extends ContextManager<? super T>> contextManagerType;
 
@@ -73,7 +74,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
     @Deprecated
     protected AbstractThreadLocalContext(T newValue) {
         this(null, newValue);
-        logger.log(DEPRECATED_CONSTRUCTOR_WARNING.compareAndSet(true, false) ? Level.WARNING : Level.FINE,
+        LOGGER.log(DEPRECATED_CONSTRUCTOR_WARNING.compareAndSet(true, false) ? Level.WARNING : Level.FINE,
                 "Initialized new {0} without context manager type. " +
                         "This makes it impossible to register ContextObservers for it. " +
                         "Please fix {1} by specifying a ContextManager type " +
@@ -96,7 +97,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
         this.parentContext = sharedThreadLocalContext.get();
         this.value = newValue;
         this.sharedThreadLocalContext.set(this);
-        logger.log(Level.FINEST, "Initialized new {0}.", this);
+        LOGGER.log(Level.FINEST, "Initialized new {0}.", this);
         ContextManagers.onActivate(contextManagerType, value, parentContext == null ? null : parentContext.getValue());
     }
 
@@ -147,7 +148,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
     public void close() {
         final boolean observe = closed.compareAndSet(false, true);
         final Context<T> restored = this.unwindIfNecessary(); // Remove this context created in the same thread.
-        logger.log(Level.FINEST, "Closed {0}.", this);
+        LOGGER.log(Level.FINEST, "Closed {0}.", this);
         if (observe) {
             ContextManagers.onDeactivate(contextManagerType, this.value, restored == null ? null : restored.getValue());
         }
@@ -159,6 +160,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
      *
      * @return String representing this context class and either the current value or the fact that it was closed.
      */
+    @Override
     public String toString() {
         return getClass().getSimpleName() + (isClosed() ? "{closed}" : "{value=" + value + '}');
     }

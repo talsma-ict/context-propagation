@@ -81,7 +81,7 @@ private static final ExecutorService THREADPOOL =
 The following `ThreadLocal`-based contexts are currently supported 
 out of the box by this context-propagation library:
 
-- [Slf4J MDC (Mapped Diagnostic Context)][mdc propagation]
+- [SLF4J MDC (Mapped Diagnostic Context)][slf4j mdc propagation]
 - [OpenTracing Span contexts][opentracing span propagation]
 - [Spring Security Context]
 - [Locale context][locale context]
@@ -167,14 +167,13 @@ configure various timers in the global default metric registry of your applicati
 
 
   [servletrequest propagation]: servletrequest-propagation
-  [mdc propagation]: slf4j-propagation
+  [slf4j mdc propagation]: slf4j-propagation
   [locale context]: locale-context
   [spring security context]: spring-security-context
   [opentracing span propagation]: opentracing-span-propagation
   [context propagation metrics]: context-propagation-metrics
   [context propagation micrometer]: context-propagation-micrometer
-  [default constructor]: https://en.wikipedia.org/wiki/Nullary_constructor
   [micrometer]: https://micrometer.io
   
-  [ContextAwareExecutorService]: https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/executors/ContextAwareExecutorService.html
+  [ContextAwareExecutorService]: https://javadoc.io/doc/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/executors/ContextAwareExecutorService.html
   [ContextAwareCompletableFuture]: context-propagation-java8#contextawarecompletablefuture

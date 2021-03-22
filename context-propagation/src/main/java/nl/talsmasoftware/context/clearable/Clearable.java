@@ -16,7 +16,7 @@
 package nl.talsmasoftware.context.clearable;
 
 /**
- * Interface that marks an to be 'clearable'.
+ * Interface that marks an object to be 'clearable'.
  * <p>
  * Context managers that support clearing the active context for the current thread
  * should implement the {@link Clearable} interface.
@@ -26,6 +26,7 @@ package nl.talsmasoftware.context.clearable;
  * This operation is intended to only be used when re-using threads (e.g. when returning them to a thread-pool).
  *
  * @author Sjoerd Talsma
+ * @see ClearableContextManager
  */
 public interface Clearable {
 

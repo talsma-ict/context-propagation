@@ -25,9 +25,9 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Manager to propagate the {@link MDC} content from one thread to another.
+ * Manager to propagate the SLF4J {@link MDC} content from one thread to another.
  * <p>
- * As {@link MDC} already manages its own threadlocal state,
+ * As {@link MDC} already manages its own thread-local state,
  * getting the active context is 100% delegated to the MDC.<br>
  * This means that closing the resulting context from {@link #getActiveContext()} will have no side-effects,
  * as it is not ours to manage.

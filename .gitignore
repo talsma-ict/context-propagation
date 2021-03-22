@@ -1,5 +1,4 @@
-# Build / maven artifacts
-*.class
+# Build / Maven artifacts
 target/
 pom.xml.versionsBackup
 
@@ -11,10 +10,14 @@ pom.xml.versionsBackup
 *.war
 *.ear
 
-# virtual machine crash logs, see https://www.java.com/en/download/help/error_hotspot.html
+# Virtual machine crash logs, see https://www.java.com/en/download/help/error_hotspot.html
 hs_err_pid*
 
 # IntelliJ project files
 .idea/
 *.iml
 
+# Eclipse project files
+.settings/
+.classpath
+.project

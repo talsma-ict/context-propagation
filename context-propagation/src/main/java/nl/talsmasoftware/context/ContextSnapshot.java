@@ -49,7 +49,7 @@ public interface ContextSnapshot {
      * Using the {@linkplain nl.talsmasoftware.context.executors.ContextAwareExecutorService ContextAwareExecutorService}
      * is a safe way to propagate context snapshots without having to worry about closing them.
      *
-     * @return A new reactivationcontext with the snapshot values that will be valid until closed
+     * @return A new reactivation context with the snapshot values that will be valid until closed
      * (or new values are registered).
      */
     Context<Void> reactivate();
