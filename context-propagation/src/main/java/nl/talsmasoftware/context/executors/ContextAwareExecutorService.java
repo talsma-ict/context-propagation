@@ -39,7 +39,7 @@ import java.util.logging.Logger;
  * @author Sjoerd Talsma
  */
 public class ContextAwareExecutorService extends CallMappingExecutorService {
-    private static final Logger logger = Logger.getLogger(ContextAwareExecutorService.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(ContextAwareExecutorService.class.getName());
 
     public ContextAwareExecutorService(ExecutorService delegate) {
         super(delegate);
@@ -82,7 +82,7 @@ public class ContextAwareExecutorService extends CallMappingExecutorService {
             context.close();
         } catch (RuntimeException closeEx) {
             if (exception != null) {
-                logger.log(Level.WARNING, "Exception closing context after failed operation: " + closeEx.getMessage(), closeEx);
+                LOGGER.log(Level.WARNING, "Exception closing context after failed operation: " + closeEx.getMessage(), closeEx);
                 throw exception;
             }
             throw closeEx;
