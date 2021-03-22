@@ -67,28 +67,32 @@ jobs:
     needs: build
     env:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
-    if: env.GH_TOKEN != null
     steps:
       - name: Check out code
+        if: env.GH_TOKEN != null
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
           token: ${{ env.GH_TOKEN }}
       - name: Set up CI git user
+        if: env.GH_TOKEN != null
         run: |
           git config user.name "Talsma CI"
           git config user.email "ci-user@talsma-ict.nl"
       - name: Set up JDK
+        if: env.GH_TOKEN != null
         uses: actions/setup-java@v1
         with:
           java-version: 11
       - name: Set up maven cache
+        if: env.GH_TOKEN != null
         uses: actions/cache@v2
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-m2-repo-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2-repo-
       - name: Perform optional release
+        if: env.GH_TOKEN != null
         run: .github/scripts/release.sh
         shell: bash
         env:
