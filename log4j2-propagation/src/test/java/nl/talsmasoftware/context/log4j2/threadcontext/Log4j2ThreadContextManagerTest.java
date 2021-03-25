@@ -15,13 +15,15 @@
  */
 package nl.talsmasoftware.context.log4j2.threadcontext;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasToString;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import nl.talsmasoftware.context.Context;
+import nl.talsmasoftware.context.ContextManagers;
+import nl.talsmasoftware.context.ContextSnapshot;
+import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
+import org.apache.logging.log4j.ThreadContext;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,25 +35,26 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.apache.logging.log4j.ThreadContext;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
-
-import nl.talsmasoftware.context.Context;
-import nl.talsmasoftware.context.ContextManagers;
-import nl.talsmasoftware.context.ContextSnapshot;
-import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasToString;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Unit test for the {@link Log4j2ThreadContextManager}.
  */
 class Log4j2ThreadContextManagerTest {
 
-    /** Underlying executor of {@link #threadpool}; not context-aware */
+    /**
+     * Underlying executor of {@link #threadpool}; not context-aware
+     */
     ExecutorService rawThreadpool;
-    /** Context-aware executor */
+    /**
+     * Context-aware executor
+     */
     ExecutorService threadpool;
 
     @BeforeEach
@@ -79,6 +82,7 @@ class Log4j2ThreadContextManagerTest {
             }
         };
     }
+
     private static Callable<String> createGetStackValue(final int index) {
         return new Callable<String>() {
             public String call() {
@@ -247,9 +251,10 @@ class Log4j2ThreadContextManagerTest {
         ThreadContext.put("map1", "value1");
         ThreadContext.push("stack1");
 
-        Log4j2ThreadContextData data = Log4j2ThreadContextData.fromCurrentThreadContext();
+        Log4j2ThreadContextData data = new Log4j2ThreadContextData(ThreadContext.getContext(), ThreadContext.getImmutableStack().asList());
 
         Log4j2ThreadContextManager mgr = Log4j2ThreadContextManager.INSTANCE;
+
         assertThat(mgr.getActiveContext(), hasToString("ThreadContextContext{closed}"));
         Context<Log4j2ThreadContextData> ctx = mgr.initializeNewContext(data);
         try {

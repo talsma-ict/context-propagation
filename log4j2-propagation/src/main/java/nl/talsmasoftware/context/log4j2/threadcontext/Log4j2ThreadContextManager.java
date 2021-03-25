@@ -82,9 +82,8 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
     /**
      * Creates a new context manager.
      *
-     * @deprecated
-     *      This constructor only exists for usage by {@code ServiceLoader}. The singleton instance
-     *      obtained from {@link #INSTANCE} should be used instead.
+     * @deprecated This constructor only exists for usage by {@code ServiceLoader}. The singleton instance
+     * obtained from {@link #INSTANCE} should be used instead.
      */
     @Deprecated
     public Log4j2ThreadContextManager() {
@@ -105,9 +104,40 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
         }
 
         // Capture current ThreadContext as 'previous' and make the given data the 'new current' ThreadContext
-        Log4j2ThreadContextData previous = Log4j2ThreadContextData.fromCurrentThreadContext();
-        Log4j2ThreadContextData.applyToCurrentThread(value, false); // Add ThreadContext data on top of existing
+        Log4j2ThreadContextData previous = captureLog4j2ThreadContextDataFromCurrentThread();
+        applyLog4j2ThreadContextDataToCurrentThread(value, false); // Add ThreadContext data on top of existing
         return new ThreadContextContext(previous, value, false);
+    }
+
+    /**
+     * Applies the data to the current thread.
+     *
+     * @param data      data to apply, may be {@code null}
+     * @param overwrite whether all existing data should be overwritten
+     */
+    private static void applyLog4j2ThreadContextDataToCurrentThread(Log4j2ThreadContextData data, boolean overwrite) {
+        if (overwrite) {
+            ThreadContext.clearAll();
+        }
+        if (data != null) {
+            ThreadContext.putAll(data.getContextMap());
+
+            // There is currently no method for pushing a collection, therefore have to
+            // push one by one
+            for (String element : data.getContextStack()) {
+                ThreadContext.push(element);
+            }
+        }
+    }
+
+    /**
+     * Captures the {@code ThreadContext} data of the current thread.
+     *
+     * @return data representing the {@code ThreadContext} of the current thread
+     */
+    private static Log4j2ThreadContextData captureLog4j2ThreadContextDataFromCurrentThread() {
+        // Get a copy of context map and context stack
+        return new Log4j2ThreadContextData(ThreadContext.getContext(), ThreadContext.getImmutableStack().asList());
     }
 
     /**
@@ -120,14 +150,14 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
      */
     public Context<Log4j2ThreadContextData> getActiveContext() {
         // Return fresh context that is 'already-closed'. Therefore it doesn't need previous ThreadContext data
-        return new ThreadContextContext(null, Log4j2ThreadContextData.fromCurrentThreadContext(), true);
+        return new ThreadContextContext(null, captureLog4j2ThreadContextDataFromCurrentThread(), true);
     }
 
     /**
      * Clears the current Log4j 2 {@code ThreadContext} of the calling thread.
      */
     public void clear() {
-        Log4j2ThreadContextData.applyToCurrentThread(null, true);
+        applyLog4j2ThreadContextDataToCurrentThread(null, true);
     }
 
     @Override
@@ -152,7 +182,7 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
 
         public void close() {
             if (closed.compareAndSet(false, true)) {
-                Log4j2ThreadContextData.applyToCurrentThread(previous, true); // Restore previous; overwrite current ThreadContext
+                applyLog4j2ThreadContextDataToCurrentThread(previous, true); // Restore previous; overwrite current ThreadContext
                 ContextManagers.onDeactivate(Log4j2ThreadContextManager.class, value, previous);
             }
         }
