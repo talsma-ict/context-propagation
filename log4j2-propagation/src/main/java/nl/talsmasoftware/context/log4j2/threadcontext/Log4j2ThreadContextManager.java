@@ -15,15 +15,13 @@
  */
 package nl.talsmasoftware.context.log4j2.threadcontext;
 
-import java.util.ServiceLoader;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.apache.logging.log4j.CloseableThreadContext;
-import org.apache.logging.log4j.ThreadContext;
-
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.clearable.ClearableContextManager;
+import org.apache.logging.log4j.CloseableThreadContext;
+import org.apache.logging.log4j.ThreadContext;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Manager to propagate the Log4j 2 {@link ThreadContext} data from one thread to another.
@@ -56,7 +54,7 @@ import nl.talsmasoftware.context.clearable.ClearableContextManager;
  * prefer using this library to cover all use cases.
  * <p>
  * As with all manager implementations of this library there is usually no need to directly
- * interact with the manager classes. Instead Java's {@link ServiceLoader} makes sure they
+ * interact with the manager classes. Instead Java's {@code ServiceLoader} makes sure they
  * are loaded as services. If an instance of this class is needed nonetheless it can be obtained
  * through the field {@link #INSTANCE}.
  *
@@ -71,7 +69,7 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
     /**
      * Returns the singleton instance.
      * <p>
-     * This method mainly exists for usage by {@link ServiceLoader}. The singleton instance
+     * This method mainly exists for usage by {@code ServiceLoader}. The singleton instance
      * can also directly be obtained from {@link #INSTANCE}.
      *
      * @return {@link #INSTANCE}
@@ -85,7 +83,7 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
      * Creates a new context manager.
      *
      * @deprecated
-     *      This constructor only exists for usage by {@link ServiceLoader}. The singleton instance
+     *      This constructor only exists for usage by {@code ServiceLoader}. The singleton instance
      *      obtained from {@link #INSTANCE} should be used instead.
      */
     @Deprecated
