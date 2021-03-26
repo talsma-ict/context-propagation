@@ -94,7 +94,7 @@
         <spring-security.version>5.1.5.RELEASE</spring-security.version>
         <servlet-api.version>4.0.1</servlet-api.version>
         <slf4j.version>1.7.30</slf4j.version>
-        <log4j2.version>2.14.0</log4j2.version>
+        <log4j2.version>2.14.1</log4j2.version>
 
         <junit.version>5.7.1</junit.version>
         <logback.version>1.2.3</logback.version>
