@@ -25,13 +25,23 @@ import java.util.Map;
  * Snapshot of the data from the Log4j 2 {@link ThreadContext} of a
  * specific thread at a certain point in the past.
  */
-public class Log4j2ThreadContextData {
+public class Log4j2ThreadContextSnapshot {
     private final Map<String, String> contextMap;
     private final List<String> contextStack;
 
-    Log4j2ThreadContextData(Map<String, String> contextMap, List<String> contextStack) {
+    private Log4j2ThreadContextSnapshot(Map<String, String> contextMap, List<String> contextStack) {
         this.contextMap = Collections.unmodifiableMap(contextMap);
         this.contextStack = Collections.unmodifiableList(contextStack);
+    }
+
+    /**
+     * Captures a snapshot of the {@code ThreadContext} data from the current thread.
+     *
+     * @return Log4j2 ThreadContest snapshot from the current thread.
+     */
+    public static Log4j2ThreadContextSnapshot captureFromCurrentThread() {
+        // Get a copy of context map and context stack
+        return new Log4j2ThreadContextSnapshot(ThreadContext.getContext(), ThreadContext.getImmutableStack().asList());
     }
 
     /**

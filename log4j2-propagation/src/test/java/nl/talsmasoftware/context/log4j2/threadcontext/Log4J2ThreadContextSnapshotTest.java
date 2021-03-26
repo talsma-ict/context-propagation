@@ -18,17 +18,11 @@ package nl.talsmasoftware.context.log4j2.threadcontext;
 import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class Log4j2ThreadContextDataTest {
+class Log4J2ThreadContextSnapshotTest {
     @BeforeEach
     @AfterEach
     void clearThreadContext() {
@@ -103,7 +97,7 @@ class Log4j2ThreadContextDataTest {
 */
 
     /**
-     * Verify that {@link Log4j2ThreadContextData} is a snapshot and not affected
+     * Verify that {@link Log4j2ThreadContextSnapshot} is a snapshot and not affected
      * by subsequent modification of {@link ThreadContext}.
      */
 /*
@@ -190,7 +184,7 @@ class Log4j2ThreadContextDataTest {
 */
 
     /**
-     * Verify that {@link Log4j2ThreadContextData#applyToCurrentThread(Log4j2ThreadContextData, boolean)}
+     * Verify that {@link Log4j2ThreadContextSnapshot#applyToCurrentThread(Log4j2ThreadContextSnapshot, boolean)}
      * with {@code overwrite=false} appends data to existing one, only overwriting existing
      * one in case of conflict.
      */
@@ -223,7 +217,7 @@ class Log4j2ThreadContextDataTest {
 */
 
     /**
-     * Verify that {@link Log4j2ThreadContextData#applyToCurrentThread(Log4j2ThreadContextData, boolean)}
+     * Verify that {@link Log4j2ThreadContextSnapshot#applyToCurrentThread(Log4j2ThreadContextSnapshot, boolean)}
      * with {@code overwrite=true} overwrites all existing data.
      */
 /*
@@ -254,7 +248,7 @@ class Log4j2ThreadContextDataTest {
 */
 
     /**
-     * Verify that {@link Log4j2ThreadContextData#applyToCurrentThread(Log4j2ThreadContextData, boolean)}
+     * Verify that {@link Log4j2ThreadContextSnapshot#applyToCurrentThread(Log4j2ThreadContextSnapshot, boolean)}
      * with {@code data=null,overwrite=false} has no effect.
      */
 /*
@@ -279,7 +273,7 @@ class Log4j2ThreadContextDataTest {
 */
 
     /**
-     * Verify that {@link Log4j2ThreadContextData#applyToCurrentThread(Log4j2ThreadContextData, boolean)}
+     * Verify that {@link Log4j2ThreadContextSnapshot#applyToCurrentThread(Log4j2ThreadContextSnapshot, boolean)}
      * with {@code data=null,overwrite=true} clears thread context.
      */
 /*

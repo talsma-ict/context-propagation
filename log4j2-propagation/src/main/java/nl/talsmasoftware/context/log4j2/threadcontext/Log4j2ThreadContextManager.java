@@ -34,11 +34,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Methods of this manager may have no effect when the {@code ThreadContext} has been disabled
  * (see <a href="https://logging.apache.org/log4j/2.x/manual/thread-context.html#Configuration">Log4j 2 manual</a>).
  * <p>
- * Initializing a new context through {@link #initializeNewContext(Log4j2ThreadContextData)} will
+ * Initializing a new context through {@link #initializeNewContext(Log4j2ThreadContextSnapshot)} will
  * add the context data on top of the existing one, if any: {@code ThreadContext} stack values
  * are pushed on top of the existing stack; map entries are added to the existing map, only
  * replacing existing ones in case of a map key conflict.<br>
- * Closing a context returned from {@link #initializeNewContext(Log4j2ThreadContextData)} will reset
+ * Closing a context returned from {@link #initializeNewContext(Log4j2ThreadContextSnapshot)} will reset
  * the {@code ThreadContext} to the values it had before the context was created.<br>
  * This means that closing nested contexts out-of-order will probably result in an undesirable state.<br>
  * It is therefore strongly advised to use Java's {@code try-with-resources} statement to ensure proper
@@ -60,7 +60,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @see <a href="https://logging.apache.org/log4j/2.x/manual/thread-context.html">Log4j 2 Thread Context manual</a>
  */
-public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j2ThreadContextData> {
+public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j2ThreadContextSnapshot> {
     /**
      * Singleton instance of this class.
      */
@@ -98,13 +98,13 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
      * @return The new <em>active</em> context containing the specified value
      * which should be closed by the caller at the end of its lifecycle from the same thread.
      */
-    public Context<Log4j2ThreadContextData> initializeNewContext(final Log4j2ThreadContextData value) {
+    public Context<Log4j2ThreadContextSnapshot> initializeNewContext(final Log4j2ThreadContextSnapshot value) {
         if (value == null) {
             throw new NullPointerException("value must not be null");
         }
 
         // Capture current ThreadContext as 'previous' and make the given data the 'new current' ThreadContext
-        Log4j2ThreadContextData previous = captureLog4j2ThreadContextDataFromCurrentThread();
+        Log4j2ThreadContextSnapshot previous = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
         applyLog4j2ThreadContextDataToCurrentThread(value, false); // Add ThreadContext data on top of existing
         return new ThreadContextContext(previous, value, false);
     }
@@ -115,7 +115,7 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
      * @param data      data to apply, may be {@code null}
      * @param overwrite whether all existing data should be overwritten
      */
-    private static void applyLog4j2ThreadContextDataToCurrentThread(Log4j2ThreadContextData data, boolean overwrite) {
+    private static void applyLog4j2ThreadContextDataToCurrentThread(Log4j2ThreadContextSnapshot data, boolean overwrite) {
         if (overwrite) {
             ThreadContext.clearAll();
         }
@@ -131,16 +131,6 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
     }
 
     /**
-     * Captures the {@code ThreadContext} data of the current thread.
-     *
-     * @return data representing the {@code ThreadContext} of the current thread
-     */
-    private static Log4j2ThreadContextData captureLog4j2ThreadContextDataFromCurrentThread() {
-        // Get a copy of context map and context stack
-        return new Log4j2ThreadContextData(ThreadContext.getContext(), ThreadContext.getImmutableStack().asList());
-    }
-
-    /**
      * Returns a context consisting of the active Log4j 2 {@link ThreadContext} data from the current thread.
      * <p>
      * <strong>Please note:</strong> <em>Because these values are managed by Log4j 2 itself and not
@@ -148,9 +138,9 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
      *
      * @return Context containing the active Log4j 2 {@code ThreadContext} data
      */
-    public Context<Log4j2ThreadContextData> getActiveContext() {
+    public Context<Log4j2ThreadContextSnapshot> getActiveContext() {
         // Return fresh context that is 'already-closed'. Therefore it doesn't need previous ThreadContext data
-        return new ThreadContextContext(null, captureLog4j2ThreadContextDataFromCurrentThread(), true);
+        return new ThreadContextContext(null, Log4j2ThreadContextSnapshot.captureFromCurrentThread(), true);
     }
 
     /**
@@ -165,18 +155,18 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
         return getClass().getSimpleName();
     }
 
-    private static final class ThreadContextContext implements Context<Log4j2ThreadContextData> {
-        private final Log4j2ThreadContextData previous, value;
+    private static final class ThreadContextContext implements Context<Log4j2ThreadContextSnapshot> {
+        private final Log4j2ThreadContextSnapshot previous, value;
         private final AtomicBoolean closed;
 
-        private ThreadContextContext(Log4j2ThreadContextData previous, Log4j2ThreadContextData value, boolean closed) {
+        private ThreadContextContext(Log4j2ThreadContextSnapshot previous, Log4j2ThreadContextSnapshot value, boolean closed) {
             this.previous = previous;
             this.value = value;
             this.closed = new AtomicBoolean(closed);
             ContextManagers.onActivate(Log4j2ThreadContextManager.class, value, previous);
         }
 
-        public Log4j2ThreadContextData getValue() {
+        public Log4j2ThreadContextSnapshot getValue() {
             return value;
         }
 

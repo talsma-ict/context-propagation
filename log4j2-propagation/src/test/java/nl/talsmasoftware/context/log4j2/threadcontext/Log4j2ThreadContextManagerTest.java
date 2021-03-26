@@ -251,12 +251,12 @@ class Log4j2ThreadContextManagerTest {
         ThreadContext.put("map1", "value1");
         ThreadContext.push("stack1");
 
-        Log4j2ThreadContextData data = new Log4j2ThreadContextData(ThreadContext.getContext(), ThreadContext.getImmutableStack().asList());
+        Log4j2ThreadContextSnapshot data = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
 
         Log4j2ThreadContextManager mgr = Log4j2ThreadContextManager.INSTANCE;
 
         assertThat(mgr.getActiveContext(), hasToString("ThreadContextContext{closed}"));
-        Context<Log4j2ThreadContextData> ctx = mgr.initializeNewContext(data);
+        Context<Log4j2ThreadContextSnapshot> ctx = mgr.initializeNewContext(data);
         try {
             assertThat(ctx, hasToString("ThreadContextContext{" + data + "}"));
         } finally {
