@@ -90,6 +90,18 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
     }
 
     /**
+     * Returns a context consisting of the active Log4j 2 {@link ThreadContext} data from the current thread.
+     * <p>
+     * <strong>Please note:</strong> <em>Because these values are managed by Log4j 2 itself and not
+     * by this library, closing the resulting context has no effect.</em>
+     *
+     * @return Context containing the active Log4j 2 {@code ThreadContext} data
+     */
+    public Context<Log4j2ThreadContextSnapshot> getActiveContext() {
+        return new ReadonlyLog4j2ThreadContextimplements(Log4j2ThreadContextSnapshot.captureFromCurrentThread());
+    }
+
+    /**
      * Initializes a new context for the Log4j 2 {@link ThreadContext} of the current thread.
      * The data of the context is applied on top of existing data (if any) only replacing
      * conflicting {@code ThreadContext} map entries but keeping all other existing data.
@@ -106,7 +118,7 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
         // Capture current ThreadContext as 'previous' and make the given data the 'new current' ThreadContext
         Log4j2ThreadContextSnapshot previous = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
         applyLog4j2ThreadContextDataToCurrentThread(value, false); // Add ThreadContext data on top of existing
-        return new ThreadContextContext(previous, value, false);
+        return new ManagedLog4j2ThreadContext(previous, value, false);
     }
 
     /**
@@ -131,23 +143,10 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
     }
 
     /**
-     * Returns a context consisting of the active Log4j 2 {@link ThreadContext} data from the current thread.
-     * <p>
-     * <strong>Please note:</strong> <em>Because these values are managed by Log4j 2 itself and not
-     * by this library, closing the resulting context has no effect.</em>
-     *
-     * @return Context containing the active Log4j 2 {@code ThreadContext} data
-     */
-    public Context<Log4j2ThreadContextSnapshot> getActiveContext() {
-        // Return fresh context that is 'already-closed'. Therefore it doesn't need previous ThreadContext data
-        return new ThreadContextContext(null, Log4j2ThreadContextSnapshot.captureFromCurrentThread(), true);
-    }
-
-    /**
      * Clears the current Log4j 2 {@code ThreadContext} of the calling thread.
      */
     public void clear() {
-        applyLog4j2ThreadContextDataToCurrentThread(null, true);
+        ThreadContext.clearAll();
     }
 
     @Override
@@ -155,11 +154,27 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
         return getClass().getSimpleName();
     }
 
-    private static final class ThreadContextContext implements Context<Log4j2ThreadContextSnapshot> {
+    private static final class ReadonlyLog4j2ThreadContextimplements implements Context<Log4j2ThreadContextSnapshot> {
+        private final Log4j2ThreadContextSnapshot snapshot;
+
+        private ReadonlyLog4j2ThreadContextimplements(Log4j2ThreadContextSnapshot snapshot) {
+            this.snapshot = snapshot;
+        }
+
+        public Log4j2ThreadContextSnapshot getValue() {
+            return snapshot;
+        }
+
+        public void close() {
+            // No-op. We don't manage the Log4j2 ThreadContext, so we shouldn't close it either.
+        }
+    }
+
+    private static final class ManagedLog4j2ThreadContext implements Context<Log4j2ThreadContextSnapshot> {
         private final Log4j2ThreadContextSnapshot previous, value;
         private final AtomicBoolean closed;
 
-        private ThreadContextContext(Log4j2ThreadContextSnapshot previous, Log4j2ThreadContextSnapshot value, boolean closed) {
+        private ManagedLog4j2ThreadContext(Log4j2ThreadContextSnapshot previous, Log4j2ThreadContextSnapshot value, boolean closed) {
             this.previous = previous;
             this.value = value;
             this.closed = new AtomicBoolean(closed);
