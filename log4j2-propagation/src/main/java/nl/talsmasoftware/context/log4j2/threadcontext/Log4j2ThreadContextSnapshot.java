@@ -67,9 +67,8 @@ public class Log4j2ThreadContextSnapshot {
 
     @Override
     public String toString() {
-        return "Log4j2ThreadContextData{"
-                + "map=" + contextMap
-                + ",stack=" + contextStack
-                + '}';
+        return getClass().getSimpleName() +
+                "{contextMap=" + contextMap
+                + ", contextStack=" + contextStack + '}';
     }
 }

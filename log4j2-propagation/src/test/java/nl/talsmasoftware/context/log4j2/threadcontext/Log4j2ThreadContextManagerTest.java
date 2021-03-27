@@ -36,12 +36,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasToString;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Unit test for the {@link Log4j2ThreadContextManager}.
@@ -51,11 +52,11 @@ class Log4j2ThreadContextManagerTest {
     /**
      * Underlying executor of {@link #threadpool}; not context-aware
      */
-    ExecutorService rawThreadpool;
+    private ExecutorService rawThreadpool;
     /**
      * Context-aware executor
      */
-    ExecutorService threadpool;
+    private ExecutorService threadpool;
 
     @BeforeEach
     void setupThreadpool() {
@@ -93,29 +94,30 @@ class Log4j2ThreadContextManagerTest {
 
     @Test
     void testProvider() {
-        assertSame(Log4j2ThreadContextManager.INSTANCE, Log4j2ThreadContextManager.provider());
+        Log4j2ThreadContextManager first = Log4j2ThreadContextManager.provider();
+        Log4j2ThreadContextManager second = Log4j2ThreadContextManager.provider();
+        assertThat(second, sameInstance(first));
+    }
 
-        // Verify that no-arg constructor, used by ServiceLoader, works
-        assertDoesNotThrow(new Executable() {
-            @SuppressWarnings("deprecation")
-            public void execute() {
-                new Log4j2ThreadContextManager();
-            }
-        });
+    @Test
+    @Deprecated
+    void testDefaultConstructor() {
+        assertThat(new Log4j2ThreadContextManager(), not(sameInstance(Log4j2ThreadContextManager.provider())));
     }
 
     @Test
     void testInitializeNewContext_null() {
-        assertThrows(NullPointerException.class, new Executable() {
+        NullPointerException expected = assertThrows(NullPointerException.class, new Executable() {
             public void execute() {
-                Log4j2ThreadContextManager.INSTANCE.initializeNewContext(null);
+                Log4j2ThreadContextManager.provider().initializeNewContext(null);
             }
         });
+        assertThat(expected.getMessage(), notNullValue());
     }
 
     /**
      * Verify that calling {@code close()} on the result of {@link Log4j2ThreadContextManager#getActiveContext()}
-     * has no effect because it is managed by Log4j 2.
+     * has no effect because it is managed by Log4j2.
      */
     @Test
     void testGetActiveContext_close() {
@@ -125,26 +127,26 @@ class Log4j2ThreadContextManagerTest {
         ThreadContext.push("stack2");
 
         // Should have no effect
-        Log4j2ThreadContextManager.INSTANCE.getActiveContext().close();
+        Log4j2ThreadContextManager.provider().getActiveContext().close();
 
         Map<String, String> expectedMap = new HashMap<String, String>();
         expectedMap.put("map1", "value1");
         expectedMap.put("map2", "value2");
-        assertEquals(expectedMap, ThreadContext.getContext());
+        assertThat(ThreadContext.getContext(), equalTo(expectedMap));
 
         List<String> expectedStack = Arrays.asList("stack1", "stack2");
-        assertEquals(expectedStack, ThreadContext.getImmutableStack().asList());
+        assertThat(ThreadContext.getImmutableStack().asList(), equalTo(expectedStack));
     }
 
     @Test
-    void test_ThreadContextPropagation() throws ExecutionException, InterruptedException {
+    void testThreadContextPropagation() throws ExecutionException, InterruptedException {
         String mapKey = "map1";
         ThreadContext.put(mapKey, "value1");
         ThreadContext.push("stack1");
         Future<String> mapValue = threadpool.submit(createGetMapValue(mapKey));
-        assertEquals("value1", mapValue.get());
+        assertThat(mapValue.get(), equalTo("value1"));
         Future<String> stackValue = threadpool.submit(createGetStackValue(0));
-        assertEquals("stack1", stackValue.get());
+        assertThat(stackValue.get(), equalTo("stack1"));
     }
 
     /**
@@ -167,16 +169,16 @@ class Log4j2ThreadContextManagerTest {
         ThreadContext.put("map3", "value3");
         ThreadContext.push("stack2");
         Future<String> mapValue1 = threadpool.submit(createGetMapValue("map1"));
-        assertEquals("value1", mapValue1.get()); // Was overwritten
+        assertThat(mapValue1.get(), equalTo("value1")); // Was overwritten
         Future<String> mapValue2 = threadpool.submit(createGetMapValue("map2"));
-        assertEquals("old-value2", mapValue2.get());
+        assertThat(mapValue2.get(), equalTo("old-value2"));
         Future<String> mapValue3 = threadpool.submit(createGetMapValue("map3"));
-        assertEquals("value3", mapValue3.get());
+        assertThat(mapValue3.get(), equalTo("value3"));
 
         Future<String> stackValue1 = threadpool.submit(createGetStackValue(0));
-        assertEquals("stack1", stackValue1.get());
+        assertThat(stackValue1.get(), equalTo("stack1"));
         Future<String> stackValue2 = threadpool.submit(createGetStackValue(1));
-        assertEquals("stack2", stackValue2.get());
+        assertThat(stackValue2.get(), equalTo("stack2"));
 
         // After clearing context in current thread, worker thread should
         // still have its previous context; empty thread context should
@@ -184,24 +186,24 @@ class Log4j2ThreadContextManagerTest {
         ThreadContext.clearAll();
 
         mapValue1 = threadpool.submit(createGetMapValue("map1"));
-        assertEquals("old-value1", mapValue1.get());
+        assertThat(mapValue1.get(), equalTo("old-value1"));
         mapValue2 = threadpool.submit(createGetMapValue("map2"));
-        assertEquals("old-value2", mapValue2.get());
+        assertThat(mapValue2.get(), equalTo("old-value2"));
         Future<Integer> mapSize = threadpool.submit(new Callable<Integer>() {
             public Integer call() {
                 return ThreadContext.getContext().size();
             }
         });
-        assertEquals(2, mapSize.get());
+        assertThat(mapSize.get(), is(2));
 
         stackValue1 = threadpool.submit(createGetStackValue(0));
-        assertEquals("stack1", stackValue1.get());
+        assertThat(stackValue1.get(), equalTo("stack1"));
         Future<Integer> stackSize = threadpool.submit(new Callable<Integer>() {
             public Integer call() {
                 return ThreadContext.getDepth();
             }
         });
-        assertEquals(1, stackSize.get());
+        assertThat(stackSize.get(), is(1));
     }
 
     @Test
@@ -211,54 +213,54 @@ class Log4j2ThreadContextManagerTest {
         ThreadContext.push("stack1");
 
         ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
-        assertEquals("value1", ThreadContext.get(mapKey1), "New snapshot shouldn't manipulate ThreadContext map");
-        assertEquals(1, ThreadContext.getContext().size());
-        assertEquals("stack1", ThreadContext.peek(), "New snapshot shouldn't manipulate ThreadContext stack");
-        assertEquals(1, ThreadContext.getDepth());
+        assertThat("New snapshot shouldn't manipulate ThreadContext map", ThreadContext.get(mapKey1), equalTo("value1"));
+        assertThat(ThreadContext.getContext().size(), is(1));
+        assertThat("New snapshot shouldn't manipulate ThreadContext stack", ThreadContext.peek(), equalTo("stack1"));
+        assertThat(ThreadContext.getDepth(), is(1));
 
         ThreadContext.put(mapKey1, "value1-new");
-        assertEquals("value1-new", ThreadContext.get(mapKey1), "Sanity check: ThreadContext map changed");
+        assertThat("Sanity check: ThreadContext map changed", ThreadContext.get(mapKey1), equalTo("value1-new"));
         ThreadContext.push("stack2");
-        assertEquals("stack2", ThreadContext.peek(), "Sanity check: ThreadContext stack changed");
+        assertThat("Sanity check: ThreadContext stack changed", ThreadContext.peek(), equalTo("stack2"));
 
         String mapKey2 = "map2";
         ThreadContext.put(mapKey2, "value2");
 
         Context<Void> reactivation = snapshot.reactivate();
-        assertEquals("value1", ThreadContext.get(mapKey1), "ThreadContext changed by reactivation");
-        assertEquals("value2", ThreadContext.get(mapKey2), "Existing ThreadContext data should not have been cleared");
-        assertEquals(2, ThreadContext.getContext().size());
+        assertThat("ThreadContext changed by reactivation", ThreadContext.get(mapKey1), equalTo("value1"));
+        assertThat("Existing ThreadContext data should not have been cleared", ThreadContext.get(mapKey2), equalTo("value2"));
+        assertThat(ThreadContext.getContext().size(), is(2));
 
         List<String> expectedStack = Arrays.asList("stack1", "stack2", "stack1");
-        assertEquals(expectedStack, ThreadContext.getImmutableStack().asList(), "Stack value should have been pushed on existing stack");
+        assertThat("Stack value should have been pushed on existing stack", ThreadContext.getImmutableStack().asList(), equalTo(expectedStack));
 
         reactivation.close();
-        assertEquals("value1-new", ThreadContext.get(mapKey1), "ThreadContext restored");
-        assertEquals("value2", ThreadContext.get(mapKey2), "Existing ThreadContext data should not have been cleared");
-        assertEquals(2, ThreadContext.getContext().size());
+        assertThat("ThreadContext restored", ThreadContext.get(mapKey1), equalTo("value1-new"));
+        assertThat("Existing ThreadContext data should not have been cleared", ThreadContext.get(mapKey2), equalTo("value2"));
+        assertThat(ThreadContext.getContext().size(), is(2));
 
         expectedStack = Arrays.asList("stack1", "stack2");
-        assertEquals(expectedStack, ThreadContext.getImmutableStack().asList(), "Last stack value should have been removed again");
+        assertThat("Last stack value should have been removed again", ThreadContext.getImmutableStack().asList(), equalTo(expectedStack));
     }
 
     @Test
     void testToString() {
-        assertThat(Log4j2ThreadContextManager.INSTANCE.toString(), hasToString("Log4j2ThreadContextManager"));
+        assertThat(Log4j2ThreadContextManager.provider(), hasToString("Log4j2ThreadContextManager"));
     }
 
     @Test
     void testContextToString() {
-        ThreadContext.put("map1", "value1");
+        ThreadContext.put("key1", "value1");
         ThreadContext.push("stack1");
 
         Log4j2ThreadContextSnapshot data = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
 
-        Log4j2ThreadContextManager mgr = Log4j2ThreadContextManager.INSTANCE;
+        final Log4j2ThreadContextManager mgr = Log4j2ThreadContextManager.provider();
 
-        assertThat(mgr.getActiveContext(), hasToString("ThreadContextContext{closed}"));
+        assertThat(mgr.getActiveContext(), hasToString("ReadonlyLog4j2ThreadContext{" + data + "}"));
         Context<Log4j2ThreadContextSnapshot> ctx = mgr.initializeNewContext(data);
         try {
-            assertThat(ctx, hasToString("ThreadContextContext{" + data + "}"));
+            assertThat(ctx, hasToString("ManagedLog4j2ThreadContext{" + data + "}"));
         } finally {
             ctx.close();
         }
@@ -268,8 +270,10 @@ class Log4j2ThreadContextManagerTest {
     void testClearActiveContexts() {
         ThreadContext.put("map1", "value1");
         ThreadContext.push("stack1");
+
         ContextManagers.clearActiveContexts();
-        assertTrue(ThreadContext.isEmpty());
-        assertEquals(0, ThreadContext.getDepth());
+
+        assertThat(ThreadContext.isEmpty(), is(true));
+        assertThat(ThreadContext.getDepth(), is(0));
     }
 }

@@ -56,7 +56,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * As with all manager implementations of this library there is usually no need to directly
  * interact with the manager classes. Instead Java's {@code ServiceLoader} makes sure they
  * are loaded as services. If an instance of this class is needed nonetheless it can be obtained
- * through the field {@link #INSTANCE}.
+ * through the {@link #provider()} method.
  *
  * @see <a href="https://logging.apache.org/log4j/2.x/manual/thread-context.html">Log4j 2 Thread Context manual</a>
  */
@@ -64,17 +64,15 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
     /**
      * Singleton instance of this class.
      */
-    public static final Log4j2ThreadContextManager INSTANCE = new Log4j2ThreadContextManager();
+    private static final Log4j2ThreadContextManager INSTANCE = new Log4j2ThreadContextManager();
 
     /**
-     * Returns the singleton instance.
+     * Returns the singleton instance of the {@linkplain Log4j2ThreadContextManager}.
      * <p>
-     * This method mainly exists for usage by {@code ServiceLoader}. The singleton instance
-     * can also directly be obtained from {@link #INSTANCE}.
+     * The ServiceLoader supports a static {@code provider()} method to resolve services since Java 9.
      *
-     * @return {@link #INSTANCE}
+     * @return The Log4j2 ThreadContext manager.
      */
-    // ServiceLoader supports "provider" method since Java 9
     public static Log4j2ThreadContextManager provider() {
         return INSTANCE;
     }
@@ -82,8 +80,9 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
     /**
      * Creates a new context manager.
      *
+     * @see #provider()
      * @deprecated This constructor only exists for usage by {@code ServiceLoader}. The singleton instance
-     * obtained from {@link #INSTANCE} should be used instead.
+     * obtained from {@link #provider()} should be used to avoid unnecessary instantiations.
      */
     @Deprecated
     public Log4j2ThreadContextManager() {
@@ -98,7 +97,7 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
      * @return Context containing the active Log4j 2 {@code ThreadContext} data
      */
     public Context<Log4j2ThreadContextSnapshot> getActiveContext() {
-        return new ReadonlyLog4j2ThreadContextimplements(Log4j2ThreadContextSnapshot.captureFromCurrentThread());
+        return new ReadonlyLog4j2ThreadContext(Log4j2ThreadContextSnapshot.captureFromCurrentThread());
     }
 
     /**
@@ -154,10 +153,10 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
         return getClass().getSimpleName();
     }
 
-    private static final class ReadonlyLog4j2ThreadContextimplements implements Context<Log4j2ThreadContextSnapshot> {
+    private static final class ReadonlyLog4j2ThreadContext implements Context<Log4j2ThreadContextSnapshot> {
         private final Log4j2ThreadContextSnapshot snapshot;
 
-        private ReadonlyLog4j2ThreadContextimplements(Log4j2ThreadContextSnapshot snapshot) {
+        private ReadonlyLog4j2ThreadContext(Log4j2ThreadContextSnapshot snapshot) {
             this.snapshot = snapshot;
         }
 
@@ -167,6 +166,11 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
 
         public void close() {
             // No-op. We don't manage the Log4j2 ThreadContext, so we shouldn't close it either.
+        }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + '{' + snapshot + '}';
         }
     }
 
@@ -194,7 +198,7 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
 
         @Override
         public String toString() {
-            return closed.get() ? "ThreadContextContext{closed}" : "ThreadContextContext{" + value + '}';
+            return getClass().getSimpleName() + '{' + (closed.get() ? "closed" : value) + '}';
         }
     }
 }
