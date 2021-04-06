@@ -30,6 +30,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -67,19 +68,18 @@ class Log4J2ThreadContextSnapshotTest {
         assertThat(snapshot.getContextMap(), is(anEmptyMap()));
         assertThat(snapshot.getContextStack(), is(empty()));
 
-//        // Applying empty snapshot should have no effect
-//        data.applyToCurrentThread();
-//        assertEquals(0, ThreadContext.getDepth());
-//        assertTrue(ThreadContext.isEmpty());
+        // Applying empty snapshot should have no effect
+        snapshot.applyToCurrentThread();
+        assertThat(ThreadContext.getDepth(), is(0));
+        assertThat(ThreadContext.isEmpty(), is(true));
     }
 
-/*
     @Test
     void testFromCurrentThreadContext_empty_apply() {
-        assertEquals(0, ThreadContext.getDepth());
-        assertTrue(ThreadContext.isEmpty());
+        assertThat(ThreadContext.getDepth(), is(0));
+        assertThat(ThreadContext.isEmpty(), is(true));
 
-        Log4j2ThreadContextData data = Log4j2ThreadContextData.fromCurrentThreadContext();
+        Log4j2ThreadContextSnapshot snapshot = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
 
         ThreadContext.put("map1", "value1");
         ThreadContext.put("map2", "value2");
@@ -87,21 +87,20 @@ class Log4J2ThreadContextSnapshotTest {
         ThreadContext.push("stack2");
 
         // Modification of ThreadContext should not have affected snapshot
-        assertTrue(data.getContextMap().isEmpty());
-        assertTrue(data.getContextStack().isEmpty());
+        assertThat(snapshot.getContextMap(), anEmptyMap());
+        assertThat(snapshot.getContextStack(), empty());
 
         // Applying empty context on top of existing one should have no effect
-        data.applyToCurrentThread();
+        snapshot.applyToCurrentThread();
 
         Map<String, String> expectedMap = new HashMap<String, String>();
         expectedMap.put("map1", "value1");
         expectedMap.put("map2", "value2");
-        assertEquals(expectedMap, ThreadContext.getContext());
+        assertThat(ThreadContext.getContext(), equalTo(expectedMap));
 
         List<String> expectedStack = Arrays.asList("stack1", "stack2");
-        assertEquals(expectedStack, ThreadContext.getImmutableStack().asList());
+        assertThat(ThreadContext.getImmutableStack().asList(), equalTo(expectedStack));
     }
-*/
 
     /**
      * Verify that {@link Log4j2ThreadContextSnapshot} is a snapshot and not affected
@@ -171,7 +170,6 @@ class Log4J2ThreadContextSnapshotTest {
         assertThat(contextStack, equalTo(expectedStack));
     }
 
-/*
     @Test
     void testToString() {
         ThreadContext.put("map1", "value1");
@@ -179,19 +177,16 @@ class Log4J2ThreadContextSnapshotTest {
         ThreadContext.push("stack1");
         ThreadContext.push("stack2");
 
-        Log4j2ThreadContextData data = Log4j2ThreadContextData.fromCurrentThreadContext();
-        String expectedString = "Log4j2ThreadContextData{map=" + data.getContextMap()
-            + ",stack=" + data.getContextStack() + "}";
-        assertThat(data, hasToString(expectedString));
+        Log4j2ThreadContextSnapshot snapshot = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
+        String expectedString = "Log4j2ThreadContextSnapshot{contextMap=" + snapshot.getContextMap()
+                + ", contextStack=" + snapshot.getContextStack() + "}";
+        assertThat(snapshot, hasToString(expectedString));
     }
-*/
 
     /**
-     * Verify that {@link Log4j2ThreadContextSnapshot#applyToCurrentThread(Log4j2ThreadContextSnapshot, boolean)}
-     * with {@code overwrite=false} appends data to existing one, only overwriting existing
-     * one in case of conflict.
+     * Verify that {@link Log4j2ThreadContextSnapshot#applyToCurrentThread()}
+     * appends data to existing one, only overwriting existing one in case of conflict.
      */
-/*
     @Test
     void testApplyToCurrentThread() {
         ThreadContext.put("map1", "value1");
@@ -199,99 +194,22 @@ class Log4J2ThreadContextSnapshotTest {
         ThreadContext.push("stack1");
         ThreadContext.push("stack2");
 
-        Log4j2ThreadContextData data = Log4j2ThreadContextData.fromCurrentThreadContext();
+        Log4j2ThreadContextSnapshot snapshot = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
 
         ThreadContext.clearAll();
         ThreadContext.put("map1", "old-value1");
         ThreadContext.put("map3", "old-value3");
         ThreadContext.push("stack3");
 
-        Log4j2ThreadContextData.applyToCurrentThread(data, false);
+        snapshot.applyToCurrentThread();
 
         Map<String, String> expectedMap = new HashMap<String, String>();
         expectedMap.put("map1", "value1"); // old-value1 should have been overwritten
         expectedMap.put("map2", "value2");
         expectedMap.put("map3", "old-value3");
-        assertEquals(expectedMap, ThreadContext.getContext());
+        assertThat(ThreadContext.getContext(), equalTo(expectedMap));
 
         List<String> expectedStack = Arrays.asList("stack3", "stack1", "stack2");
-        assertEquals(expectedStack, ThreadContext.getImmutableStack().asList());
+        assertThat(ThreadContext.getImmutableStack().asList(), equalTo(expectedStack));
     }
-*/
-
-    /**
-     * Verify that {@link Log4j2ThreadContextSnapshot#applyToCurrentThread(Log4j2ThreadContextSnapshot, boolean)}
-     * with {@code overwrite=true} overwrites all existing data.
-     */
-/*
-    @Test
-    void testApplyToCurrentThread_overwrite() {
-        ThreadContext.put("map1", "value1");
-        ThreadContext.put("map2", "value2");
-        ThreadContext.push("stack1");
-        ThreadContext.push("stack2");
-
-        Log4j2ThreadContextData data = Log4j2ThreadContextData.fromCurrentThreadContext();
-
-        ThreadContext.clearAll();
-        ThreadContext.put("map1", "old-value1");
-        ThreadContext.put("map3", "old-value3");
-        ThreadContext.push("stack3");
-
-        Log4j2ThreadContextData.applyToCurrentThread(data, true);
-
-        Map<String, String> expectedMap = new HashMap<String, String>();
-        expectedMap.put("map1", "value1");
-        expectedMap.put("map2", "value2");
-        assertEquals(expectedMap, ThreadContext.getContext());
-
-        List<String> expectedStack = Arrays.asList("stack1", "stack2");
-        assertEquals(expectedStack, ThreadContext.getImmutableStack().asList());
-    }
-*/
-
-    /**
-     * Verify that {@link Log4j2ThreadContextSnapshot#applyToCurrentThread(Log4j2ThreadContextSnapshot, boolean)}
-     * with {@code data=null,overwrite=false} has no effect.
-     */
-/*
-    @Test
-    void testApplyToCurrentThread_null() {
-        ThreadContext.put("map1", "value1");
-        ThreadContext.put("map2", "value2");
-        ThreadContext.push("stack1");
-        ThreadContext.push("stack2");
-
-        // Should have no effect
-        Log4j2ThreadContextData.applyToCurrentThread(null, false);
-
-        Map<String, String> expectedMap = new HashMap<String, String>();
-        expectedMap.put("map1", "value1");
-        expectedMap.put("map2", "value2");
-        assertEquals(expectedMap, ThreadContext.getContext());
-
-        List<String> expectedStack = Arrays.asList("stack1", "stack2");
-        assertEquals(expectedStack, ThreadContext.getImmutableStack().asList());
-    }
-*/
-
-    /**
-     * Verify that {@link Log4j2ThreadContextSnapshot#applyToCurrentThread(Log4j2ThreadContextSnapshot, boolean)}
-     * with {@code data=null,overwrite=true} clears thread context.
-     */
-/*
-    @Test
-    void testApplyToCurrentThread_null_overwrite() {
-        ThreadContext.put("map1", "value1");
-        ThreadContext.put("map2", "value2");
-        ThreadContext.push("stack1");
-        ThreadContext.push("stack2");
-
-        // Should clear existing context
-        Log4j2ThreadContextData.applyToCurrentThread(null, true);
-
-        assertTrue(ThreadContext.isEmpty());
-        assertEquals(0, ThreadContext.getDepth());
-    }
-*/
 }
