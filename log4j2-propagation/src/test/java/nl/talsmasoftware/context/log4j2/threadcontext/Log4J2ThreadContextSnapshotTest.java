@@ -66,7 +66,7 @@ class Log4J2ThreadContextSnapshotTest {
         Log4j2ThreadContextSnapshot snapshot = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
         assertThat(snapshot.getContextMap(), is(anEmptyMap()));
         assertThat(snapshot.getContextStack(), is(empty()));
-//
+
 //        // Applying empty snapshot should have no effect
 //        data.applyToCurrentThread();
 //        assertEquals(0, ThreadContext.getDepth());

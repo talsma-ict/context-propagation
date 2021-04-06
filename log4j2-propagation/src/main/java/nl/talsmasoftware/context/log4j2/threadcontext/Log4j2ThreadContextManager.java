@@ -115,30 +115,9 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
         }
 
         // Capture current ThreadContext as 'previous' and make the given data the 'new current' ThreadContext
-        Log4j2ThreadContextSnapshot previous = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
-        applyLog4j2ThreadContextDataToCurrentThread(value, false); // Add ThreadContext data on top of existing
+        final Log4j2ThreadContextSnapshot previous = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
+        value.applyToCurrentThread(); // Add ThreadContext data on top of existing
         return new ManagedLog4j2ThreadContext(previous, value, false);
-    }
-
-    /**
-     * Applies the data to the current thread.
-     *
-     * @param data      data to apply, may be {@code null}
-     * @param overwrite whether all existing data should be overwritten
-     */
-    private static void applyLog4j2ThreadContextDataToCurrentThread(Log4j2ThreadContextSnapshot data, boolean overwrite) {
-        if (overwrite) {
-            ThreadContext.clearAll();
-        }
-        if (data != null) {
-            ThreadContext.putAll(data.getContextMap());
-
-            // There is currently no method for pushing a collection, therefore have to
-            // push one by one
-            for (String element : data.getContextStack()) {
-                ThreadContext.push(element);
-            }
-        }
     }
 
     /**
@@ -191,7 +170,9 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
 
         public void close() {
             if (closed.compareAndSet(false, true)) {
-                applyLog4j2ThreadContextDataToCurrentThread(previous, true); // Restore previous; overwrite current ThreadContext
+                // Restore previous; overwrite current ThreadContext
+                ThreadContext.clearAll();
+                previous.applyToCurrentThread();
                 ContextManagers.onDeactivate(Log4j2ThreadContextManager.class, value, previous);
             }
         }

@@ -263,6 +263,7 @@ class Log4j2ThreadContextManagerTest {
             assertThat(ctx, hasToString("ManagedLog4j2ThreadContext{" + data + "}"));
         } finally {
             ctx.close();
+            assertThat(ctx, hasToString("ManagedLog4j2ThreadContext{closed}"));
         }
     }
 

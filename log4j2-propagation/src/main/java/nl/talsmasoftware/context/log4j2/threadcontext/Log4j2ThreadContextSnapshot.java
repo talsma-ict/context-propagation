@@ -45,8 +45,25 @@ public class Log4j2ThreadContextSnapshot {
     }
 
     /**
-     * Returns an unmodifiable view of the {@code ThreadContext} map contained
-     * in this snapshot.
+     * Apply the Log4j2 ThreadContext snapshot data to the current thread.
+     * <p>
+     * This method does <strong>not</strong> clear the current {@linkplain ThreadContext} values before applying
+     * this context. If you want that to happen, please call {@linkplain ThreadContext#clearAll()} before applying
+     * the snapshot.
+     *
+     * @see ThreadContext#clearAll()
+     */
+    public void applyToCurrentThread() {
+        ThreadContext.putAll(this.contextMap);
+
+        // There is currently no method for pushing a collection, therefore we have to push one by one
+        for (String element : this.contextStack) {
+            ThreadContext.push(element);
+        }
+    }
+
+    /**
+     * Returns an unmodifiable view of the {@code ThreadContext} map contained in this snapshot.
      *
      * @return {@code ThreadContext} map contained in this snapshot
      */
