@@ -17,21 +17,18 @@ package nl.talsmasoftware.context.log4j2.threadcontext;
 
 import org.apache.logging.log4j.ThreadContext;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 /**
- * Snapshot of the data from the Log4j 2 {@link ThreadContext} of a
- * specific thread at a certain point in the past.
+ * Snapshot of the data from the Log4j 2 {@link ThreadContext} of a specific thread at a certain point in the past.
  */
 public class Log4j2ThreadContextSnapshot {
     private final Map<String, String> contextMap;
-    private final List<String> contextStack;
+    private final ThreadContext.ContextStack contextStack;
 
-    private Log4j2ThreadContextSnapshot(Map<String, String> contextMap, List<String> contextStack) {
-        this.contextMap = Collections.unmodifiableMap(contextMap);
-        this.contextStack = Collections.unmodifiableList(contextStack);
+    private Log4j2ThreadContextSnapshot(Map<String, String> contextMap, ThreadContext.ContextStack contextStack) {
+        this.contextMap = contextMap;
+        this.contextStack = contextStack;
     }
 
     /**
@@ -41,7 +38,7 @@ public class Log4j2ThreadContextSnapshot {
      */
     public static Log4j2ThreadContextSnapshot captureFromCurrentThread() {
         // Get a copy of context map and context stack
-        return new Log4j2ThreadContextSnapshot(ThreadContext.getContext(), ThreadContext.getImmutableStack().asList());
+        return new Log4j2ThreadContextSnapshot(ThreadContext.getImmutableContext(), ThreadContext.getImmutableStack());
     }
 
     /**
@@ -55,8 +52,6 @@ public class Log4j2ThreadContextSnapshot {
      */
     public void applyToCurrentThread() {
         ThreadContext.putAll(this.contextMap);
-
-        // There is currently no method for pushing a collection, therefore we have to push one by one
         for (String element : this.contextStack) {
             ThreadContext.push(element);
         }
@@ -78,7 +73,7 @@ public class Log4j2ThreadContextSnapshot {
      *
      * @return {@code ThreadContext} stack contained in this snapshot
      */
-    public List<String> getContextStack() {
+    public ThreadContext.ContextStack getContextStack() {
         return contextStack;
     }
 

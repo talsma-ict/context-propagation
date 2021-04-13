@@ -27,9 +27,11 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.aMapWithSize;
 import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -56,7 +58,7 @@ class Log4J2ThreadContextSnapshotTest {
         assertThat(snapshot.getContextMap(), equalTo(expectedMap));
 
         List<String> expectedStack = Arrays.asList("stack1", "stack2");
-        assertThat(snapshot.getContextStack(), equalTo(expectedStack));
+        assertThat(snapshot.getContextStack().asList(), equalTo(expectedStack));
     }
 
     @Test
@@ -125,7 +127,7 @@ class Log4J2ThreadContextSnapshotTest {
         assertThat(snapshot.getContextMap(), equalTo(expectedMap));
 
         List<String> expectedStack = Arrays.asList("stack1", "stack2");
-        assertThat(snapshot.getContextStack(), equalTo(expectedStack));
+        assertThat(snapshot.getContextStack().asList(), equalTo(expectedStack));
     }
 
     @Test
@@ -137,7 +139,7 @@ class Log4J2ThreadContextSnapshotTest {
 
         Log4j2ThreadContextSnapshot snapshot = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
         final Map<String, String> contextMap = snapshot.getContextMap();
-        final List<String> contextStack = snapshot.getContextStack();
+        final ThreadContext.ContextStack contextStack = snapshot.getContextStack();
 
         assertThrows(UnsupportedOperationException.class, new Executable() {
             public void execute() {
@@ -167,7 +169,7 @@ class Log4J2ThreadContextSnapshotTest {
         assertThat(contextMap, equalTo(expectedMap));
 
         List<String> expectedStack = Arrays.asList("stack1", "stack2");
-        assertThat(contextStack, equalTo(expectedStack));
+        assertThat(contextStack.asList(), equalTo(expectedStack));
     }
 
     @Test
@@ -211,5 +213,38 @@ class Log4J2ThreadContextSnapshotTest {
 
         List<String> expectedStack = Arrays.asList("stack3", "stack1", "stack2");
         assertThat(ThreadContext.getImmutableStack().asList(), equalTo(expectedStack));
+    }
+
+    @Test
+    void testImmutableContextMap() {
+        ThreadContext.put("key1", "value1");
+        ThreadContext.put("key2", "value2");
+        final Log4j2ThreadContextSnapshot snapshot = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
+
+        assertThrows(UnsupportedOperationException.class, new Executable() {
+            public void execute() {
+                snapshot.getContextMap().put("key3", "value3");
+            }
+        });
+        assertThat(snapshot.getContextMap(), aMapWithSize(2));
+    }
+
+    @Test
+    void testImmutableContextStack() {
+        ThreadContext.push("stack1");
+        ThreadContext.push("stack2");
+        final Log4j2ThreadContextSnapshot snapshot = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
+
+        assertThrows(UnsupportedOperationException.class, new Executable() {
+            public void execute() {
+                snapshot.getContextStack().pop();
+            }
+        });
+        assertThrows(UnsupportedOperationException.class, new Executable() {
+            public void execute() {
+                snapshot.getContextStack().push("stack3");
+            }
+        });
+        assertThat(snapshot.getContextStack(), hasItems("stack1", "stack2"));
     }
 }
