@@ -77,7 +77,7 @@ class Log4J2ThreadContextSnapshotTest {
     }
 
     @Test
-    void testFromCurrentThreadContext_empty_apply() {
+    void testCaptureFromCurrentThread_empty_apply() {
         assertThat(ThreadContext.getDepth(), is(0));
         assertThat(ThreadContext.isEmpty(), is(true));
 
@@ -109,7 +109,7 @@ class Log4J2ThreadContextSnapshotTest {
      * by subsequent modification of {@link ThreadContext}.
      */
     @Test
-    void testFromCurrentThreadContext_modification() {
+    void testCaptureFromCurrentThread_modification() {
         ThreadContext.put("map1", "value1");
         ThreadContext.put("map2", "value2");
         ThreadContext.push("stack1");
@@ -128,48 +128,6 @@ class Log4J2ThreadContextSnapshotTest {
 
         List<String> expectedStack = Arrays.asList("stack1", "stack2");
         assertThat(snapshot.getContextStack().asList(), equalTo(expectedStack));
-    }
-
-    @Test
-    void test_umodifiableViews() {
-        ThreadContext.put("map1", "value1");
-        ThreadContext.put("map2", "value2");
-        ThreadContext.push("stack1");
-        ThreadContext.push("stack2");
-
-        Log4j2ThreadContextSnapshot snapshot = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
-        final Map<String, String> contextMap = snapshot.getContextMap();
-        final ThreadContext.ContextStack contextStack = snapshot.getContextStack();
-
-        assertThrows(UnsupportedOperationException.class, new Executable() {
-            public void execute() {
-                contextMap.clear();
-            }
-        });
-        assertThrows(UnsupportedOperationException.class, new Executable() {
-            public void execute() {
-                contextMap.put("map3", "value3");
-            }
-        });
-        assertThrows(UnsupportedOperationException.class, new Executable() {
-            public void execute() {
-                contextStack.clear();
-            }
-        });
-        assertThrows(UnsupportedOperationException.class, new Executable() {
-            public void execute() {
-                contextStack.add("stack3");
-            }
-        });
-
-        // Modification attempts should not have had any effect
-        Map<String, String> expectedMap = new HashMap<String, String>();
-        expectedMap.put("map1", "value1");
-        expectedMap.put("map2", "value2");
-        assertThat(contextMap, equalTo(expectedMap));
-
-        List<String> expectedStack = Arrays.asList("stack1", "stack2");
-        assertThat(contextStack.asList(), equalTo(expectedStack));
     }
 
     @Test

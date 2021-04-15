@@ -34,7 +34,7 @@ public class Log4j2ThreadContextSnapshot {
     /**
      * Captures a snapshot of the {@code ThreadContext} data from the current thread.
      *
-     * @return Log4j2 ThreadContest snapshot from the current thread.
+     * @return Log4j 2 {@code ThreadContext} snapshot from the current thread.
      */
     public static Log4j2ThreadContextSnapshot captureFromCurrentThread() {
         // Get a copy of context map and context stack
@@ -42,7 +42,7 @@ public class Log4j2ThreadContextSnapshot {
     }
 
     /**
-     * Apply the Log4j2 ThreadContext snapshot data to the current thread.
+     * Apply the Log4j 2 {@code ThreadContext} snapshot data to the current thread.
      * <p>
      * This method does <strong>not</strong> clear the current {@linkplain ThreadContext} values before applying
      * this context. If you want that to happen, please call {@linkplain ThreadContext#clearAll()} before applying

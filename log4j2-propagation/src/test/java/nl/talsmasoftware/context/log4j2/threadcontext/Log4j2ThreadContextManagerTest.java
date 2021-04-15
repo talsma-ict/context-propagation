@@ -100,7 +100,7 @@ class Log4j2ThreadContextManagerTest {
     }
 
     @Test
-    @Deprecated
+    @SuppressWarnings("deprecation")
     void testDefaultConstructor() {
         assertThat(new Log4j2ThreadContextManager(), not(sameInstance(Log4j2ThreadContextManager.provider())));
     }
@@ -139,7 +139,7 @@ class Log4j2ThreadContextManagerTest {
     }
 
     @Test
-    void testThreadContextPropagation() throws ExecutionException, InterruptedException {
+    void testPropagationOfThreadContextValues() throws ExecutionException, InterruptedException {
         String mapKey = "map1";
         ThreadContext.put(mapKey, "value1");
         ThreadContext.push("stack1");
@@ -154,7 +154,7 @@ class Log4j2ThreadContextManagerTest {
      * in case of conflict.
      */
     @Test
-    void test_ThreadContextPropagation_existing() throws ExecutionException, InterruptedException {
+    void testPropagationOfThreadContextIntoThreadWithPreExistingValues() throws ExecutionException, InterruptedException {
         // Pretend there exists already data for the thread which was for example
         // initialized when the thread was constructed
         rawThreadpool.submit(new Runnable() {
@@ -207,7 +207,7 @@ class Log4j2ThreadContextManagerTest {
     }
 
     @Test
-    void test_SnapshotRestoration() {
+    void testSnapshotRestorationAfterClosingReactivatedSnapshot() {
         String mapKey1 = "map1";
         ThreadContext.put(mapKey1, "value1");
         ThreadContext.push("stack1");
