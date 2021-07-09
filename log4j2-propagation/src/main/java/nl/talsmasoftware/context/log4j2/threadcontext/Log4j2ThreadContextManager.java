@@ -67,11 +67,11 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
     private static final Log4j2ThreadContextManager INSTANCE = new Log4j2ThreadContextManager();
 
     /**
-     * Returns the singleton instance of the {@linkplain Log4j2ThreadContextManager}.
+     * Returns the singleton instance of the {@code Log4j2ThreadContextManager}.
      * <p>
      * The ServiceLoader supports a static {@code provider()} method to resolve services since Java 9.
      *
-     * @return The Log4j2 ThreadContext manager.
+     * @return The Log4j 2 {@code ThreadContext} manager.
      */
     public static Log4j2ThreadContextManager provider() {
         return INSTANCE;
@@ -117,7 +117,7 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
         // Capture current ThreadContext as 'previous' and make the given data the 'new current' ThreadContext
         final Log4j2ThreadContextSnapshot previous = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
         value.applyToCurrentThread(); // Add ThreadContext data on top of existing
-        return new ManagedLog4j2ThreadContext(previous, value, false);
+        return new ManagedLog4j2ThreadContext(previous, value);
     }
 
     /**
@@ -144,7 +144,7 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
         }
 
         public void close() {
-            // No-op. We don't manage the Log4j2 ThreadContext, so we shouldn't close it either.
+            // No-op. We don't manage the Log4j 2 ThreadContext, so we shouldn't close it either.
         }
 
         @Override
@@ -157,10 +157,10 @@ public class Log4j2ThreadContextManager implements ClearableContextManager<Log4j
         private final Log4j2ThreadContextSnapshot previous, value;
         private final AtomicBoolean closed;
 
-        private ManagedLog4j2ThreadContext(Log4j2ThreadContextSnapshot previous, Log4j2ThreadContextSnapshot value, boolean closed) {
+        private ManagedLog4j2ThreadContext(Log4j2ThreadContextSnapshot previous, Log4j2ThreadContextSnapshot value) {
             this.previous = previous;
             this.value = value;
-            this.closed = new AtomicBoolean(closed);
+            this.closed = new AtomicBoolean(false);
             ContextManagers.onActivate(Log4j2ThreadContextManager.class, value, previous);
         }
 
