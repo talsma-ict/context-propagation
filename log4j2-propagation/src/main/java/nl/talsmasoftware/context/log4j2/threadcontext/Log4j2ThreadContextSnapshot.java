@@ -44,8 +44,8 @@ public class Log4j2ThreadContextSnapshot {
     /**
      * Apply the Log4j 2 {@code ThreadContext} snapshot data to the current thread.
      * <p>
-     * This method does <strong>not</strong> clear the current {@linkplain ThreadContext} values before applying
-     * this context. If you want that to happen, please call {@linkplain ThreadContext#clearAll()} before applying
+     * This method does <strong>not</strong> clear the current {@code ThreadContext} values before applying
+     * this context. If you want that to happen, please call {@link ThreadContext#clearAll()} before applying
      * the snapshot.
      *
      * @see ThreadContext#clearAll()
@@ -68,8 +68,7 @@ public class Log4j2ThreadContextSnapshot {
 
     /**
      * Returns an unmodifiable view of the {@code ThreadContext} stack contained
-     * in this snapshot. The elements are ordered from least recently added at
-     * the beginning of the list to most recently added at the end.
+     * in this snapshot.
      *
      * @return {@code ThreadContext} stack contained in this snapshot
      */
