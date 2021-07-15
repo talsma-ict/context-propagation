@@ -36,7 +36,7 @@
         <project.moduleName>${project.groupId}.metrics</project.moduleName>
         <root.basedir>${project.parent.basedir}</root.basedir>
 
-        <micrometer.version>1.7.1</micrometer.version>
+        <micrometer.version>1.7.2</micrometer.version>
     </properties>
 
     <dependencies>
