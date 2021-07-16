@@ -46,10 +46,6 @@
         <module>slf4j-propagation</module>
         <module>spring-security-context</module>
         <module>opentracing-span-propagation</module>
-        <module>relocation/old-root</module>
-        <module>relocation/java5</module>
-        <module>relocation/java8</module>
-        <module>relocation/mdc</module>
     </modules>
 
     <licenses>
@@ -326,6 +322,7 @@
                 </configuration>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-scm-plugin</artifactId>
                 <version>${maven-scm-plugin.version}</version>
                 <configuration>
