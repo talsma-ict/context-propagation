@@ -19,10 +19,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.talsmasoftware.context</groupId>
+        <artifactId>context-propagation-root</artifactId>
+        <version>1.0.10-SNAPSHOT</version>
+    </parent>
 
-    <groupId>nl.talsmasoftware.context</groupId>
     <artifactId>context-propagation-bom</artifactId>
-    <version>1.0.10-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Context propagation (bill-of-materials)</name>
@@ -31,6 +34,10 @@
         This only contains 'opinionated' versions
         so modules of this library and crucial transitive jars.
     </description>
+
+    <properties>
+        <root.basedir>${project.parent.basedir}</root.basedir>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -222,22 +229,4 @@
         </dependencies>
     </dependencyManagement>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.eluder.coveralls</groupId>
-                <artifactId>coveralls-maven-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>
