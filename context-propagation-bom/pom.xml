@@ -19,24 +19,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>nl.talsmasoftware.context</groupId>
-        <artifactId>context-propagation-root</artifactId>
-        <version>1.0.10-SNAPSHOT</version>
-    </parent>
 
+    <groupId>nl.talsmasoftware.context</groupId>
     <artifactId>context-propagation-bom</artifactId>
+    <version>1.0.10-SNAPSHOT</version>
     <packaging>pom</packaging>
+
     <name>Context propagation (bill-of-materials)</name>
     <description>
         Bill of Materials with exported module versions.
         This only contains 'opinionated' versions
         so modules of this library and crucial transitive jars.
     </description>
-
-    <properties>
-        <root.basedir>${project.parent.basedir}</root.basedir>
-    </properties>
 
     <dependencyManagement>
         <dependencies>
@@ -227,15 +221,5 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <dependencies>
-        <dependency> <!-- Declare UML doclet version as provided dependency in the BOM to get dependabot notifications -->
-            <groupId>nl.talsmasoftware</groupId>
-            <artifactId>umldoclet</artifactId>
-            <version>${umldoclet.version}</version>
-            <scope>provided</scope>
-            <optional>true</optional>
-        </dependency>
-    </dependencies>
 
 </project>
