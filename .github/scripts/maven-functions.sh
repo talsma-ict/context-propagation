@@ -24,7 +24,7 @@ get_maven_version() {
 }
 
 set_maven_version() {
-    local plugin="org.codehaus.mojo:versions-maven-plugin:2.7"
+    local plugin="org.codehaus.mojo:versions-maven-plugin:2.8.1"
     $(maven_command) --batch-mode "${plugin}:set" "${plugin}:commit" -DnewVersion="${1}" -DprocessAllModules=true >/dev/null || fatal "Could not set project version to ${1}!"
 }
 
