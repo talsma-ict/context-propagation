@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 Talsma ICT
+ * Copyright 2016-2021 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,8 @@ import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.DummyContextManager;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
-import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -35,12 +32,8 @@ import java.util.function.Consumer;
 import static nl.talsmasoftware.context.DummyContextManager.currentValue;
 import static nl.talsmasoftware.context.DummyContextManager.setCurrentValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Sjoerd Talsma
@@ -50,13 +43,17 @@ public class ConsumerWithContextTest {
     private ContextSnapshot snapshot;
     private Context<Void> context;
 
+/*
     @BeforeAll
     public static void initLogback() {
-        /* Initialize SLF4J bridge. This re-routes logging through java.util.logging to SLF4J. */
+        */
+/* Initialize SLF4J bridge. This re-routes logging through java.util.logging to SLF4J. *//*
+
         java.util.logging.LogManager.getLogManager().reset();
         SLF4JBridgeHandler.install();
         LoggerFactory.getILoggerFactory();
     }
+*/
 
     @BeforeEach
     @AfterEach
