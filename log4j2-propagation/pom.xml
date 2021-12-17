@@ -31,9 +31,6 @@
     <packaging>jar</packaging>
 
     <properties>
-        <!-- Latest Log4j 2 versions require Java >= 8; however this project might also support older versions -->
-        <maven.compiler.source>1.5</maven.compiler.source>
-        <maven.compiler.target>1.5</maven.compiler.target>
         <project.moduleName>${project.groupId}.log4j2</project.moduleName>
         <root.basedir>${project.parent.basedir}</root.basedir>
     </properties>
