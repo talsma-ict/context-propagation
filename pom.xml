@@ -84,6 +84,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.moduleName>${project.groupId}.${project.artifactId}</project.moduleName>
         <root.basedir>${project.basedir}</root.basedir>
+        <project.compiler.argument></project.compiler.argument>
 
         <metrics.version>4.2.7</metrics.version>
         <opentracing-api.version>0.33.0</opentracing-api.version>
@@ -125,6 +126,7 @@
                     </jdkToolchain>
                     <encoding>${project.build.sourceEncoding}</encoding>
                     <showDeprecation>true</showDeprecation>
+                    <compilerArgument>${project.compiler.argument}</compilerArgument>
                 </configuration>
             </plugin>
             <plugin>
