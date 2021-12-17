@@ -33,10 +33,12 @@
     <packaging>jar</packaging>
 
     <properties>
-        <maven.compiler.source>1.5</maven.compiler.source>
-        <maven.compiler.target>1.5</maven.compiler.target>
         <project.moduleName>${project.groupId}.servletrequest</project.moduleName>
         <root.basedir>${project.parent.basedir}</root.basedir>
+        <maven.compiler.source>1.5</maven.compiler.source>
+        <maven.compiler.target>1.5</maven.compiler.target>
+        <!-- Suppress java version deprecation warnings -->
+        <project.compiler.argument>-Xlint:-options</project.compiler.argument>
     </properties>
 
     <dependencies>
