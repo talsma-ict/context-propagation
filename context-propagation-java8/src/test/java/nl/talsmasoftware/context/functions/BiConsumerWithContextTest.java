@@ -44,18 +44,6 @@ public class BiConsumerWithContextTest {
     private ContextSnapshot snapshot;
     private Context<Void> context;
 
-/*
-    @BeforeAll
-    public static void initLogback() {
-        */
-/* Initialize SLF4J bridge. This re-routes logging through java.util.logging to SLF4J. *//*
-
-        java.util.logging.LogManager.getLogManager().reset();
-        SLF4JBridgeHandler.install();
-        LoggerFactory.getILoggerFactory();
-    }
-*/
-
     @BeforeEach
     @AfterEach
     public void clearDummyContext() {

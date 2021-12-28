@@ -40,28 +40,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class ContextManagersTest {
 
-/*
-    @BeforeAll
-    public static void initLogback() {
-        if (!SLF4JBridgeHandler.isInstalled()) {
-            */
-/* Initialize SLF4J bridge. This re-routes logging through java.util.logging to SLF4J. *//*
-
-            java.util.logging.LogManager.getLogManager().reset();
-            SLF4JBridgeHandler.install();
-            LoggerFactory.getILoggerFactory();
-        }
-        ((Logger) LoggerFactory.getLogger(ContextManagers.class)).setLevel(Level.ALL);
-    }
-*/
-
-/*
-    @AfterAll
-    public static void restoreLoglevel() {
-        ((Logger) LoggerFactory.getLogger(ContextManagers.class)).setLevel(null);
-    }
-*/
-
     @BeforeEach
     @AfterEach
     public void resetContexts() {

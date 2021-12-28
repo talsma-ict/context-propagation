@@ -35,17 +35,6 @@ public class ClearableContextManagerTest {
     private static ContextManager<String> AUTO_INITIALIZING = new AutoInitializingContextManager();
     private static ContextManager<String> MANAGER_OF_ABSTRACTTLC = new DummyContextManager();
 
-//    @BeforeAll
-//    public static void initLogback() {
-//        if (!SLF4JBridgeHandler.isInstalled()) {
-//            /* Initialize SLF4J bridge. This re-routes logging through java.util.logging to SLF4J. */
-//            java.util.logging.LogManager.getLogManager().reset();
-//            SLF4JBridgeHandler.install();
-//            LoggerFactory.getILoggerFactory();
-//        }
-//        ((Logger) LoggerFactory.getLogger(ContextManagers.class)).setLevel(Level.ALL);
-//    }
-
     @Test
     public void testClearActiveContexts_byManager() {
         assertThat(CLEARABLE, is(instanceOf(Clearable.class)));
