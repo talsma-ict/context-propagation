@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2023 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,8 +104,6 @@ public class ContextScopeManagerTest {
                     innerSpan.finish();
                     inner.close();
                     waitFor(latch2);
-                    parentSpan.finish();
-                    parent.close();
                 }
             });
         }
@@ -116,6 +114,8 @@ public class ContextScopeManagerTest {
         assertThat(GlobalTracer.get().activeSpan(), equalTo(parentSpan));
         for (Thread t : threads) t.start();
         for (Thread t : threads) t.join();
+        parentSpan.finish();
+        parent.close();
         assertThat(GlobalTracer.get().activeSpan(), is(nullValue()));
         assertThat(ContextScopeManagerObserver.observed, contains(
                 activated(withOperationName("parent")),
