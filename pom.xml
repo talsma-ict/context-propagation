@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright 2016-2022 Talsma ICT
+    Copyright 2016-2023 Talsma ICT
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -92,7 +92,7 @@
         <spring-security.version>5.7.3</spring-security.version>
         <servlet-api.version>4.0.1</servlet-api.version>
         <slf4j.version>1.7.36</slf4j.version>
-        <log4j2.version>2.19.0</log4j2.version>
+        <log4j2.version>2.20.0</log4j2.version>
 
         <junit.version>5.9.1</junit.version>
         <logback.version>1.2.11</logback.version>
