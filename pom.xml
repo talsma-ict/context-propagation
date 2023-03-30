@@ -85,7 +85,7 @@
         <project.moduleName>${project.groupId}.${project.artifactId}</project.moduleName>
         <root.basedir>${project.basedir}</root.basedir>
         <!-- Allow Java 5 bytecode modules to suppress java version deprecation warnings -->
-        <project.compiler.argument></project.compiler.argument>
+        <project.compiler.argument/>
 
         <metrics.version>4.2.12</metrics.version>
         <opentracing-api.version>0.33.0</opentracing-api.version>
@@ -95,7 +95,7 @@
         <log4j2.version>2.20.0</log4j2.version>
 
         <junit.version>5.9.1</junit.version>
-        <logback.version>1.2.11</logback.version>
+        <logback.version>1.4.6</logback.version>
         <hamcrest.version>2.2</hamcrest.version>
         <mockito.version>1.10.19</mockito.version>
 
