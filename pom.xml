@@ -87,7 +87,7 @@
         <!-- Allow Java 5 bytecode modules to suppress java version deprecation warnings -->
         <project.compiler.argument/>
 
-        <metrics.version>4.2.12</metrics.version>
+        <metrics.version>4.2.18</metrics.version>
         <opentracing-api.version>0.33.0</opentracing-api.version>
         <spring-security.version>5.7.3</spring-security.version>
         <servlet-api.version>4.0.1</servlet-api.version>
