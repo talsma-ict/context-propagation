@@ -92,7 +92,7 @@
         <spring-security.version>5.7.3</spring-security.version>
         <servlet-api.version>4.0.1</servlet-api.version>
         <slf4j.version>2.0.9</slf4j.version>
-        <log4j2.version>2.20.0</log4j2.version>
+        <log4j2.version>2.21.0</log4j2.version>
 
         <junit.version>5.9.2</junit.version>
         <logback.version>1.4.11</logback.version>
