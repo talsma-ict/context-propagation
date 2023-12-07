@@ -208,7 +208,7 @@
                     <links>
                         <link>https://docs.oracle.com/en/java/javase/11/docs/api</link>
                         <link>https://www.slf4j.org/api</link>
-                        <link>https://logging.apache.org/log4j/2.x/log4j-api/apidocs</link>
+                        <link>https://logging.apache.org/log4j/2.x/javadoc/log4j-api</link>
                         <link>https://metrics.dropwizard.io/4.0.0/apidocs</link>
                     </links>
                     <offlineLinks>
