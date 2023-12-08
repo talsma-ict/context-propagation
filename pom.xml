@@ -88,28 +88,28 @@
         <!-- Allow Java 5 bytecode modules to provide compiler arguments to suppress java version deprecation warnings -->
         <project.compiler.argument/>
 
-        <metrics.version>4.2.18</metrics.version>
+        <metrics.version>4.2.23</metrics.version>
         <opentracing-api.version>0.33.0</opentracing-api.version>
         <spring-security.version>6.2.0</spring-security.version>
         <servlet-api.version>4.0.1</servlet-api.version>
-        <slf4j.version>2.0.7</slf4j.version>
-        <log4j2.version>2.20.0</log4j2.version>
+        <slf4j.version>2.0.9</slf4j.version>
+        <log4j2.version>2.22.0</log4j2.version>
 
-        <junit.version>5.9.2</junit.version>
-        <logback.version>1.4.8</logback.version>
+        <junit.version>5.10.1</junit.version>
+        <logback.version>1.4.14</logback.version>
         <hamcrest.version>2.2</hamcrest.version>
         <mockito.version>1.10.19</mockito.version>
 
         <maven-toolchains-plugin.version>3.1.0</maven-toolchains-plugin.version>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-        <maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
-        <maven-failsafe-plugin.version>3.1.2</maven-failsafe-plugin.version>
+        <maven-surefire-plugin.version>3.2.2</maven-surefire-plugin.version>
+        <maven-failsafe-plugin.version>3.2.2</maven-failsafe-plugin.version>
         <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
         <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
         <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
         <maven-gpg-plugin.version>3.1.0</maven-gpg-plugin.version>
         <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
-        <license-maven-plugin.version>4.1</license-maven-plugin.version>
+        <license-maven-plugin.version>4.3</license-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.9</jacoco-maven-plugin.version>
         <coveralls-maven-plugin.version>4.3.0</coveralls-maven-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
