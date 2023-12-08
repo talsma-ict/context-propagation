@@ -14,4 +14,4 @@ nl.talsmasoftware.context.slf4j.mdc
 nl.talsmasoftware.context.log4j2.threadcontext
 nl.talsmasoftware.context.opentracing
 nl.talsmasoftware.context.servletrequest
-nl.talsmasoftware.context.springsecurity
+nl.talsmasoftware.context.springsecurity.v5

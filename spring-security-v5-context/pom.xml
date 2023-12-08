@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright 2016-2022 Talsma ICT
+    Copyright 2016-2023 Talsma ICT
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@
     </parent>
 
     <!-- Artifact identification -->
-    <artifactId>spring-security-context</artifactId>
-    <name>Propagation of Spring Security Context</name>
+    <artifactId>spring-security-v5-context</artifactId>
+    <name>Propagation of Spring Security (v5) Context</name>
     <packaging>jar</packaging>
 
     <properties>
@@ -35,6 +35,7 @@
         <root.basedir>${project.parent.basedir}</root.basedir>
         <maven.compiler.source>1.5</maven.compiler.source>
         <maven.compiler.target>1.5</maven.compiler.target>
+
         <!-- Suppress java version deprecation warnings -->
         <project.compiler.argument>-Xlint:-options</project.compiler.argument>
     </properties>
@@ -48,7 +49,7 @@
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
-            <version>${spring-security.version}</version>
+            <version>${spring-security-v5.version}</version>
         </dependency>
     </dependencies>
 </project>

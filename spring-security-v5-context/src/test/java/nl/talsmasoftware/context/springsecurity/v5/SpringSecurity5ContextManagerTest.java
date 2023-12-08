@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2023 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.springsecurity;
+package nl.talsmasoftware.context.springsecurity.v5;
 
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
@@ -39,11 +39,11 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
 /**
- * Unit test for the {@link SpringSecurityContextManager}.
+ * Unit test for the {@link SpringSecurity5ContextManager}.
  *
  * @author Sjoerd Talsma
  */
-public class SpringSecurityContextManagerTest {
+public class SpringSecurity5ContextManagerTest {
 
     ExecutorService threadpool;
 
@@ -79,7 +79,7 @@ public class SpringSecurityContextManagerTest {
 
     @Test
     public void testWithoutAnyAuthentication() {
-        assertThat(new SpringSecurityContextManager().getActiveContext().getValue(), is(nullValue()));
+        assertThat(new SpringSecurity5ContextManager().getActiveContext().getValue(), is(nullValue()));
     }
 
     @Test
@@ -115,19 +115,19 @@ public class SpringSecurityContextManagerTest {
     @Test
     public void testClosingCurrentAuthenticationContext() {
         setAuthentication("Vincent Vega");
-        assertThat(new SpringSecurityContextManager().getActiveContext().getValue().getName(), is("Vincent Vega"));
+        assertThat(new SpringSecurity5ContextManager().getActiveContext().getValue().getName(), is("Vincent Vega"));
 
-        new SpringSecurityContextManager().getActiveContext().close(); // Not ours to manage!
-        assertThat(new SpringSecurityContextManager().getActiveContext().getValue().getName(), is("Vincent Vega"));
+        new SpringSecurity5ContextManager().getActiveContext().close(); // Not ours to manage!
+        assertThat(new SpringSecurity5ContextManager().getActiveContext().getValue().getName(), is("Vincent Vega"));
     }
 
     @Test
     public void testClearableImplementation() {
         setAuthentication("Vincent Vega");
-        assertThat(new SpringSecurityContextManager().getActiveContext().getValue().getName(), is("Vincent Vega"));
+        assertThat(new SpringSecurity5ContextManager().getActiveContext().getValue().getName(), is("Vincent Vega"));
 
         ContextManagers.clearActiveContexts();
-        assertThat(new SpringSecurityContextManager().getActiveContext().getValue(), is(nullValue()));
+        assertThat(new SpringSecurity5ContextManager().getActiveContext().getValue(), is(nullValue()));
     }
 
 }

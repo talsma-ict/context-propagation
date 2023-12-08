@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2023 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.springsecurity;
+package nl.talsmasoftware.context.springsecurity.v5;
 
 import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @author Sjoerd Talsma
  */
-public class SpringSecurityContextManager implements ClearableContextManager<Authentication> {
+public class SpringSecurity5ContextManager implements ClearableContextManager<Authentication> {
 
     /**
      * Creates a new Spring {@linkplain SecurityContext} and sets the {@linkplain Authentication value} in it.
@@ -76,7 +76,7 @@ public class SpringSecurityContextManager implements ClearableContextManager<Aut
             this.current = current;
             this.previous = previous;
             this.closed = new AtomicBoolean(alreadyClosed);
-            ContextManagers.onActivate(SpringSecurityContextManager.class, auth(current), auth(previous));
+            ContextManagers.onActivate(SpringSecurity5ContextManager.class, auth(current), auth(previous));
         }
 
         public Authentication getValue() {
@@ -86,7 +86,7 @@ public class SpringSecurityContextManager implements ClearableContextManager<Aut
         public void close() {
             if (closed.compareAndSet(false, true)) {
                 SecurityContextHolder.setContext(previous);
-                ContextManagers.onDeactivate(SpringSecurityContextManager.class, auth(current), auth(previous));
+                ContextManagers.onDeactivate(SpringSecurity5ContextManager.class, auth(current), auth(previous));
             }
         }
 

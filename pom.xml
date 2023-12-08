@@ -44,7 +44,7 @@
         <module>log4j2-propagation</module>
         <module>servletrequest-propagation</module>
         <module>slf4j-propagation</module>
-        <module>spring-security-context</module>
+        <module>spring-security-v5-context</module>
         <module>opentracing-span-propagation</module>
     </modules>
 
@@ -89,7 +89,7 @@
 
         <metrics.version>4.2.23</metrics.version>
         <opentracing-api.version>0.33.0</opentracing-api.version>
-        <spring-security.version>5.7.3</spring-security.version>
+        <spring-security-v5.version>5.7.3</spring-security-v5.version>
         <servlet-api.version>4.0.1</servlet-api.version>
         <slf4j.version>2.0.9</slf4j.version>
         <log4j2.version>2.22.0</log4j2.version>
@@ -225,8 +225,8 @@
                             <location>${root.basedir}/.mvn/javadoc/opentracing-util</location>
                         </offlineLink>
                         <offlineLink>
-                            <url>https://javadoc.io/page/org.springframework.security/spring-security-core/${spring-security.version}</url>
-                            <location>${root.basedir}/.mvn/javadoc/spring-security-core</location>
+                            <url>https://javadoc.io/page/org.springframework.security/spring-security-core/${spring-security-v5.version}</url>
+                            <location>${root.basedir}/.mvn/javadoc/spring-security-v5-core</location>
                         </offlineLink>
                         <offlineLink>
                             <url>https://javadoc.io/page/javax.servlet/javax.servlet-api/${servlet-api.version}</url>
