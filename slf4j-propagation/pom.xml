@@ -67,7 +67,8 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <jdkToolchain>
-                        <version>11</version>
+                        <!-- Tests use logback which requires JDK 11 -->
+                        <version>[11,)</version>
                     </jdkToolchain>
                 </configuration>
             </plugin>
