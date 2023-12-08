@@ -33,8 +33,8 @@
     <properties>
         <project.moduleName>${project.groupId}.springsecurity</project.moduleName>
         <root.basedir>${project.parent.basedir}</root.basedir>
-        <!-- Suppress java version deprecation warnings -->
-        <project.compiler.argument>-Xlint:-options</project.compiler.argument>
+        <project.jdk.version>[17,)</project.jdk.version>
+        <maven.compiler.release>17</maven.compiler.release>
     </properties>
 
     <dependencies>
@@ -49,18 +49,4 @@
             <version>${spring-security.version}</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <jdkToolchain>
-                        <version>17</version>
-                    </jdkToolchain>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>
