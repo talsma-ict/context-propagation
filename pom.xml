@@ -92,7 +92,7 @@
         <opentracing-api.version>0.33.0</opentracing-api.version>
         <spring-security.version>6.2.1</spring-security.version>
         <servlet-api.version>4.0.1</servlet-api.version>
-        <slf4j.version>2.0.9</slf4j.version>
+        <slf4j.version>2.0.10</slf4j.version>
         <log4j2.version>2.22.1</log4j2.version>
 
         <junit.version>5.10.1</junit.version>
