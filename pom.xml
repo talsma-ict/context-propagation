@@ -277,26 +277,30 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <header>${root.basedir}/.mvn/license/header.txt</header>
-                    <properties>
-                        <owner>${project.organization.name}</owner>
-                    </properties>
+                    <licenseSets>
+                        <licenseSet>
+                            <header>${root.basedir}/.mvn/license/header.txt</header>
+                            <excludes>
+                                <exclude>.gitignore</exclude>
+                                <exclude>.github/**</exclude>
+                                <exclude>.mvn/**</exclude>
+                                <exclude>mvnw*</exclude>
+                                <exclude>etc/header.txt</exclude>
+                                <exclude>**/.idea/**</exclude>
+                                <exclude>LICENSE</exclude>
+                                <exclude>**/*.md</exclude>
+                                <exclude>src/test/resources/**</exclude>
+                                <exclude>src/main/resources/**</exclude>
+                            </excludes>
+                        </licenseSet>
+                    </licenseSets>
                     <mapping>
                         <java>SLASHSTAR_STYLE</java>
                     </mapping>
-                    <excludes>
-                        <exclude>.gitignore</exclude>
-                        <exclude>.github/**</exclude>
-                        <exclude>.mvn/**</exclude>
-                        <exclude>mvnw*</exclude>
-                        <exclude>etc/header.txt</exclude>
-                        <exclude>**/.idea/**</exclude>
-                        <exclude>LICENSE</exclude>
-                        <exclude>**/*.md</exclude>
-                        <exclude>src/test/resources/**</exclude>
-                        <exclude>src/main/resources/**</exclude>
-                    </excludes>
                     <strictCheck>true</strictCheck>
+                    <properties>
+                        <owner>${project.organization.name}</owner>
+                    </properties>
                 </configuration>
                 <dependencies>
                     <dependency>
