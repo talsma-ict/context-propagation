@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,29 +33,33 @@ import java.util.logging.Logger;
 import static java.util.Collections.singleton;
 
 /**
- * A {@link ContextTimer} implementation that locates an appropriate
- * {@link SharedMetricRegistries shared metric registry}.
- * Then it registers a new {@link Timer} for context switches and updates it.
- * <h3>Shared metric registry resolution</h3>
+ * A {@link ContextTimer} that locates an appropriate
+ * {@link SharedMetricRegistries shared metric registry}.<br/>
+ * It registers a new {@link Timer} for context switches and updates it for each context switch.
  * <p>
- * What an <em>appropriate</em> shared metric registry is, is rather complex and determined by the following rules:
- * <ol>
- * <li>First, if a {@code contextpropagation.metrics.registry} system property is defined,
- * the shared metric registry by that name will be used for all context related timers.</li>
- * <li>Alternatively, the environment property {@code CONTEXTPROPAGATION_METRICS_REGISTRY} serves the same
- * purpose if the system property is not defined.</li>
- * <li>Next, if there is a {@link SharedMetricRegistries#tryGetDefault() default shared metric registry},
- * that one is used.</li>
- * <li>Otherwise:
- * <ul>
- * <li>If there is exactly one shared registry, that one is used instead of the default.</li>
- * <li>If there are no shared registries yet, a new one is created by the name {@code "ContextPropagationMetrics"}.</li>
- * <li>Otherwise we cannot sensibly choose and try to register new timers to <em>all</em> shared registries.</li>
- * </ul>
- * </li>
- * </ol>
+ * <dl>
+ *     <dt>Shared metric registry resolution</dt>
+ *     <dd>
+ *         <ol>
+ *             <li>First, if a {@code contextpropagation.metrics.registry} system property is defined,
+ *             the shared metric registry by that name will be used for all context related timers.</li>
+ *             <li>Alternatively, the environment property {@code CONTEXTPROPAGATION_METRICS_REGISTRY} serves the same
+ *             purpose if the system property is not defined.</li>
+ *             <li>Next, if there is a default shared registry defined
+ *             by {@link SharedMetricRegistries#tryGetDefault()}, that one is used.</li>
+ *             <li>Otherwise:
+ *             <ul>
+ *                 <li>If there is exactly one shared registry, that one is used instead of the default.</li>
+ *                 <li>If there are no shared registries yet, a new one is created by the name
+ *                 {@code "ContextPropagationMetrics"}.</li>
+ *                 <li>Otherwise we cannot sensibly choose and try to register new timers
+ *                 to <em>all</em> shared registries.</li>
+ *             </ul></li>
+ *         </ol>
+ *     </dd>
+ * </dl>
  * <p>
- * Timers, once created, will <strong>not</strong> be retroactively registered to other shared registries.
+ * Timers are created once and will not be retroactively registered to other shared registries.
  *
  * @author Sjoerd Talsma
  */
