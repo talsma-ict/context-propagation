@@ -96,7 +96,7 @@
         <log4j2.version>2.23.0</log4j2.version>
 
         <junit.version>5.10.2</junit.version>
-        <logback.version>1.5.0</logback.version>
+        <logback.version>1.5.1</logback.version>
         <hamcrest.version>2.2</hamcrest.version>
         <mockito.version>1.10.19</mockito.version>
 
