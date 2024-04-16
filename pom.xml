@@ -90,7 +90,7 @@
 
         <metrics.version>4.2.25</metrics.version>
         <opentracing-api.version>0.33.0</opentracing-api.version>
-        <spring-security.version>6.2.3</spring-security.version>
+        <spring-security.version>6.2.4</spring-security.version>
         <servlet-api.version>4.0.1</servlet-api.version>
         <slf4j.version>2.0.13</slf4j.version>
         <log4j2.version>2.23.1</log4j2.version>
