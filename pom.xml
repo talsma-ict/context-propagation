@@ -200,6 +200,16 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven-javadoc-plugin.version}</version>
+                <configuration>
+                    <jdkToolchain>
+                        <version>21</version>
+                    </jdkToolchain>
+                </configuration>
+            </plugin>
             <!--
                         <plugin>
                             <groupId>org.apache.maven.plugins</groupId>
