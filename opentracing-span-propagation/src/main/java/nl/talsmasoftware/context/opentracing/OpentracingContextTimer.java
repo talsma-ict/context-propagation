@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,11 +62,11 @@ public class OpentracingContextTimer implements ContextTimer {
 
     private static boolean reportContextSwitchesFor(Class<?> type) {
         boolean enableTracing = false;
-        final String prop = System.getProperty(SYS_ENABLED, ENV_ENABLED);
-        if ("1".equals(prop) || "true".equalsIgnoreCase(prop) || "enabled".equalsIgnoreCase(prop)) {
-            // Only report spans for entire snapshots, not individual context managers
-            // Could be made configurable if somebody ever asks for it..
-            enableTracing = ContextManagers.class.equals(type) || ContextSnapshot.class.equals(type);
+        // Only report spans for entire snapshots, not individual context managers
+        // Could be made configurable if somebody ever asks for it..
+        if (ContextManagers.class.equals(type) || ContextSnapshot.class.equals(type)) {
+            final String prop = System.getProperty(SYS_ENABLED, ENV_ENABLED);
+            enableTracing = "1".equals(prop) || "true".equalsIgnoreCase(prop) || "enabled".equalsIgnoreCase(prop);
         }
         return enableTracing;
     }
