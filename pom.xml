@@ -113,7 +113,7 @@
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
         <coveralls-maven-plugin.version>4.3.0</coveralls-maven-plugin.version>
         <nexus-staging-maven-plugin.version>1.7.0</nexus-staging-maven-plugin.version>
-        <umldoclet.version>2.0.15</umldoclet.version>
+        <umldoclet.version>2.2.0</umldoclet.version>
     </properties>
 
     <build>
@@ -204,10 +204,37 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>${maven-javadoc-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>aggregate-javadoc</id>
+                        <inherited>false</inherited>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>aggregate-jar</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>module-javadoc</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
                     <jdkToolchain>
                         <version>21</version>
                     </jdkToolchain>
+                    <doclet>nl.talsmasoftware.umldoclet.UMLDoclet</doclet>
+                    <docletArtifact>
+                        <groupId>nl.talsmasoftware</groupId>
+                        <artifactId>umldoclet</artifactId>
+                        <version>${umldoclet.version}</version>
+                    </docletArtifact>
+                    <additionalOptions>
+                        <additionalOption>--create-puml-files</additionalOption>
+                    </additionalOptions>
+                    <debug>true</debug><!-- keep options, packages and argfile -->
                 </configuration>
             </plugin>
             <!--
