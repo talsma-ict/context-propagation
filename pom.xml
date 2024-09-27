@@ -109,7 +109,7 @@
         <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
         <maven-gpg-plugin.version>3.2.6</maven-gpg-plugin.version>
         <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
-        <license-maven-plugin.version>4.5</license-maven-plugin.version>
+        <license-maven-plugin.version>4.6</license-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
         <coveralls-maven-plugin.version>4.3.0</coveralls-maven-plugin.version>
         <nexus-staging-maven-plugin.version>1.7.0</nexus-staging-maven-plugin.version>
