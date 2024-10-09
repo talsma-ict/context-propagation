@@ -225,6 +225,7 @@
                     <jdkToolchain>
                         <version>21</version>
                     </jdkToolchain>
+<!--
                     <doclet>nl.talsmasoftware.umldoclet.UMLDoclet</doclet>
                     <docletArtifact>
                         <groupId>nl.talsmasoftware</groupId>
@@ -232,8 +233,9 @@
                         <version>${umldoclet.version}</version>
                     </docletArtifact>
                     <additionalOptions>
-                        <additionalOption>--create-puml-files</additionalOption>
+                        <additionalOption>-createPumlFiles</additionalOption>
                     </additionalOptions>
+-->
                     <debug>true</debug><!-- keep options, packages and argfile -->
                 </configuration>
             </plugin>
