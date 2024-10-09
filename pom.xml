@@ -80,7 +80,7 @@
     <properties>
         <root.basedir>${project.basedir}</root.basedir>
         <project.moduleName>${project.groupId}.${project.artifactId}</project.moduleName>
-        <project.jdk.version>1.8</project.jdk.version>
+        <project.jdk.version>8</project.jdk.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
