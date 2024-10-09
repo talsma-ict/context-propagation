@@ -30,6 +30,8 @@ build_and_publish_artifacts() {
 # MAIN
 #----------------------
 
+cat ~/.m2/toolchains.xml
+
 [ -n "${VERSION:-}" ] || VERSION="$(get_version)"
 [ -n "${GIT_BRANCH:-}" ] || GIT_BRANCH="$(find_remote_branch)"
 
