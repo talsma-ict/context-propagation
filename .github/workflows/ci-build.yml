@@ -33,6 +33,9 @@ jobs:
           java-version: |
             8
             21
+          mvn-toolchain-id: |
+            jdk8
+            jdk21
           cache: 'maven'
       - name: Perform build
         run: .github/scripts/build.sh
