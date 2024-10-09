@@ -113,7 +113,7 @@
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
         <coveralls-maven-plugin.version>4.3.0</coveralls-maven-plugin.version>
         <nexus-staging-maven-plugin.version>1.7.0</nexus-staging-maven-plugin.version>
-        <umldoclet.version>2.0.15</umldoclet.version>
+        <umldoclet.version>2.2.0</umldoclet.version>
     </properties>
 
     <build>
@@ -200,70 +200,73 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-javadoc-plugin</artifactId>
-                            <version>${maven-javadoc-plugin.version}</version>
-                            <executions>
-                                <execution>
-                                    <id>generate-javadoc</id>
-                                    <goals>
-                                        <goal>jar</goal>
-                                    </goals>
-                                </execution>
-                                <execution>
-                                    <id>aggregate-javadoc</id>
-                                    <goals>
-                                        <goal>aggregate-jar</goal>
-                                    </goals>
-                                </execution>
-                            </executions>
-                            <configuration>
-                                <doclet>nl.talsmasoftware.umldoclet.UMLDoclet</doclet>
-                                <docletArtifact>
-                                    <groupId>nl.talsmasoftware</groupId>
-                                    <artifactId>umldoclet</artifactId>
-                                    <version>${umldoclet.version}</version>
-                                </docletArtifact>
-                                <jdkToolchain>
-                                    <version>11</version>
-                                </jdkToolchain>
-                                <links>
-                                    <link>https://docs.oracle.com/en/java/javase/11/docs/api</link>
-                                    <link>https://www.slf4j.org/api</link>
-                                    <link>https://logging.apache.org/log4j/2.x/log4j-api/apidocs</link>
-                                    <link>https://metrics.dropwizard.io/4.0.0/apidocs</link>
-                                </links>
-                                <offlineLinks>
-                                    <offlineLink>
-                                        <url>https://javadoc.io/page/${project.groupId}/context-propagation-root/${project.version}</url>
-                                        <location>${root.basedir}/.mvn/javadoc</location>
-                                    </offlineLink>
-                                    <offlineLink>
-                                        <url>https://javadoc.io/page/io.opentracing/opentracing-api/${opentracing-api.version}</url>
-                                        <location>${root.basedir}/.mvn/javadoc/opentracing-api</location>
-                                    </offlineLink>
-                                    <offlineLink>
-                                        <url>https://javadoc.io/page/io.opentracing/opentracing-util/${opentracing-api.version}</url>
-                                        <location>${root.basedir}/.mvn/javadoc/opentracing-util</location>
-                                    </offlineLink>
-                                    <offlineLink>
-                                        <url>https://javadoc.io/page/org.springframework.security/spring-security-core/${spring-security.version}</url>
-                                        <location>${root.basedir}/.mvn/javadoc/spring-security-core</location>
-                                    </offlineLink>
-                                    <offlineLink>
-                                        <url>https://javadoc.io/page/javax.servlet/javax.servlet-api/${servlet-api.version}</url>
-                                        <location>${root.basedir}/.mvn/javadoc/servlet-api</location>
-                                    </offlineLink>
-                                    <offlineLink>
-                                        <url>https://www.javadoc.io/page/io.micrometer/micrometer-core/1.3.2</url>
-                                        <location>${root.basedir}/.mvn/javadoc/micrometer-core</location>
-                                    </offlineLink>
-                                </offlineLinks>
-                            </configuration>
-                        </plugin>
-            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>${maven-javadoc-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>aggregate-javadoc</id>
+                        <inherited>false</inherited>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>aggregate-jar</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>module-javadoc</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <jdkToolchain>
+                        <version>21</version>
+                    </jdkToolchain>
+                    <doclet>nl.talsmasoftware.umldoclet.UMLDoclet</doclet>
+                    <docletArtifact>
+                        <groupId>nl.talsmasoftware</groupId>
+                        <artifactId>umldoclet</artifactId>
+                        <version>${umldoclet.version}</version>
+                    </docletArtifact>
+                    <links>
+                        <link>https://www.slf4j.org/api</link>
+                        <link>https://logging.apache.org/log4j/2.x/log4j-api/apidocs</link>
+                        <link>https://metrics.dropwizard.io/4.0.0/apidocs</link>
+                    </links>
+                    <offlineLinks>
+                        <offlineLink>
+                            <url>https://javadoc.io/page/${project.groupId}/context-propagation-root/${project.version}</url>
+                            <location>${root.basedir}/.mvn/javadoc</location>
+                        </offlineLink>
+                        <offlineLink>
+                            <url>https://javadoc.io/page/io.opentracing/opentracing-api/${opentracing-api.version}</url>
+                            <location>${root.basedir}/.mvn/javadoc/opentracing-api</location>
+                        </offlineLink>
+                        <offlineLink>
+                            <url>https://javadoc.io/page/io.opentracing/opentracing-util/${opentracing-api.version}</url>
+                            <location>${root.basedir}/.mvn/javadoc/opentracing-util</location>
+                        </offlineLink>
+                        <offlineLink>
+                            <url>https://javadoc.io/page/org.springframework.security/spring-security-core/${spring-security.version}</url>
+                            <location>${root.basedir}/.mvn/javadoc/spring-security-core</location>
+                        </offlineLink>
+                        <offlineLink>
+                            <url>https://javadoc.io/page/javax.servlet/javax.servlet-api/${servlet-api.version}</url>
+                            <location>${root.basedir}/.mvn/javadoc/servlet-api</location>
+                        </offlineLink>
+                        <offlineLink>
+                            <url>https://www.javadoc.io/page/io.micrometer/micrometer-core/1.3.2</url>
+                            <location>${root.basedir}/.mvn/javadoc/micrometer-core</location>
+                        </offlineLink>
+                    </offlineLinks>
+                    <additionalOptions>
+                        <additionalOption>-createPumlFiles</additionalOption>
+                    </additionalOptions>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
