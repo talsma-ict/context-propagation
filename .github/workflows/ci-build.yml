@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Setup GPG
@@ -40,7 +40,7 @@ jobs:
           distribution: 'zulu'
           java-version: 21
       - name: Setup maven cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-m2-repo-${{ hashFiles('**/pom.xml') }}
@@ -72,7 +72,7 @@ jobs:
     steps:
       - name: Check out code
         if: env.GH_TOKEN != null
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ env.GH_TOKEN }}
@@ -89,7 +89,7 @@ jobs:
           java-version: 21
       - name: Set up maven cache
         if: env.GH_TOKEN != null
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-m2-repo-${{ hashFiles('**/pom.xml') }}
