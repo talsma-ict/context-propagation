@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright 2016-2022 Talsma ICT
+    Copyright 2016-2024 Talsma ICT
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@
         <maven.compiler.target>1.5</maven.compiler.target>
         <!-- Suppress java version deprecation warnings -->
         <project.compiler.argument>-Xlint:-options</project.compiler.argument>
+        <project.javadoc.version>8</project.javadoc.version>
     </properties>
 
     <dependencies>

@@ -81,6 +81,7 @@
         <root.basedir>${project.basedir}</root.basedir>
         <project.moduleName>${project.groupId}.${project.artifactId}</project.moduleName>
         <project.jdk.version>8</project.jdk.version>
+        <project.javadoc.version>21</project.javadoc.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -105,7 +106,7 @@
         <maven-surefire-plugin.version>3.5.1</maven-surefire-plugin.version>
         <maven-failsafe-plugin.version>3.5.1</maven-failsafe-plugin.version>
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
-        <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
+        <maven-javadoc-plugin.version>3.10.1</maven-javadoc-plugin.version>
         <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
         <maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
         <maven-release-plugin.version>3.1.1</maven-release-plugin.version>
@@ -142,11 +143,6 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-<!--
-                    <jdkToolchain>
-                        <version>1.8</version>
-                    </jdkToolchain>
--->
                     <encoding>${project.build.sourceEncoding}</encoding>
                     <showDeprecation>true</showDeprecation>
                     <compilerArgument>${project.compiler.argument}</compilerArgument>
@@ -212,6 +208,17 @@
                         <goals>
                             <goal>aggregate-jar</goal>
                         </goals>
+                        <configuration>
+                            <doclet>nl.talsmasoftware.umldoclet.UMLDoclet</doclet>
+                            <docletArtifact>
+                                <groupId>nl.talsmasoftware</groupId>
+                                <artifactId>umldoclet</artifactId>
+                                <version>${umldoclet.version}</version>
+                            </docletArtifact>
+                            <additionalOptions>
+                                <additionalOption>-createPumlFiles</additionalOption>
+                            </additionalOptions>
+                        </configuration>
                     </execution>
                     <execution>
                         <id>module-javadoc</id>
@@ -223,17 +230,10 @@
                 </executions>
                 <configuration>
                     <jdkToolchain>
-                        <version>21</version>
+                        <version>${project.javadoc.version}</version>
                     </jdkToolchain>
-                    <doclet>nl.talsmasoftware.umldoclet.UMLDoclet</doclet>
-                    <docletArtifact>
-                        <groupId>nl.talsmasoftware</groupId>
-                        <artifactId>umldoclet</artifactId>
-                        <version>${umldoclet.version}</version>
-                    </docletArtifact>
                     <links>
                         <link>https://www.slf4j.org/api</link>
-                        <link>https://logging.apache.org/log4j/2.x/log4j-api/apidocs</link>
                         <link>https://metrics.dropwizard.io/4.0.0/apidocs</link>
                     </links>
                     <offlineLinks>
@@ -262,9 +262,6 @@
                             <location>${root.basedir}/.mvn/javadoc/micrometer-core</location>
                         </offlineLink>
                     </offlineLinks>
-                    <additionalOptions>
-                        <additionalOption>-createPumlFiles</additionalOption>
-                    </additionalOptions>
                 </configuration>
             </plugin>
             <plugin>
