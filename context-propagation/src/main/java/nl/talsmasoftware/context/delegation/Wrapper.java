@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public abstract class Wrapper<T> {
     }
 
     /**
-     * Acessor to provide a guaranteed non-<code>null</code> delegate instance for use within delegation method
+     * Accessor to provide a guaranteed non-<code>null</code> delegate instance for use within delegation method
      * implementations.
      *
      * @return The delegate for this wrapper (guaranteed to be non-<code>null</code>).

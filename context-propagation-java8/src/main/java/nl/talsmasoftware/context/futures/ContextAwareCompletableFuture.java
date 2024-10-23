@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
     private final ContextSnapshotHolder snapshotHolder;
 
     /**
-     * Whether or not to take a new snapshot after each completion stage.
+     * Whether to take a new snapshot after each completion stage.
      */
     private final boolean takeNewSnapshot;
 
@@ -152,7 +152,7 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * @param executor        the executor to use for asynchronous execution
      * @param snapshot        a snapshot of the context to be propagated in the supplier function
      *                        and all successive calls of this completable future
-     * @param takeNewSnapshot whether or not a new ContextSnapshot should be taken after the supplier function is done.
+     * @param takeNewSnapshot whether a new ContextSnapshot should be taken after the supplier function is done.
      *                        If {@code false}, the snapshot from the caller propagate to all following completion stages.
      *                        If {@code true}, a new snapshot is taken after each completion stage to propagate into the next.
      * @param <U>             the function's return type
@@ -238,7 +238,7 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * @param runnable        the action to run before completing the returned CompletableFuture
      * @param executor        the executor to use for asynchronous execution
      * @param snapshot        the context snapshot to apply to the runnable action
-     * @param takeNewSnapshot whether or not a new ContextSnapshot should be taken after the supplier function is done.
+     * @param takeNewSnapshot whether a new ContextSnapshot should be taken after the supplier function is done.
      *                        If {@code false}, the snapshot from the caller propagate to all following completion stages.
      *                        If {@code true}, a new snapshot is taken after each completion stage to propagate into the next.
      * @return The new CompletableFuture that propagates a snapshot of the current context
@@ -513,7 +513,7 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * may update contextual values.<br>
      * <strong>Warning:</strong> <em>This may result in unnecessary context snapshots being taken.</em>
      *
-     * @param takeSnapshot whether or not new context snapshots must be taken after each completion stage.
+     * @param takeSnapshot whether new context snapshots must be taken after each completion stage.
      * @return A context-aware completable future where context changes also propagate accross completion stages
      * if {@code takeSnapshot} is {@code true}.
      * @see CompletionStage
@@ -651,63 +651,81 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
     @Override
     @SuppressWarnings("unchecked")
     public <U> ContextAwareCompletableFuture<U> applyToEither(CompletionStage<? extends T> other, Function<? super T, U> fn) {
-        return wrap(super.applyToEither(other, new FunctionWithContext(snapshotHolder, fn, resultSnapshotConsumer()) {
-        }), snapshotHolder, takeNewSnapshot);
+        // Don't gamble which completion stage might win, create a new holder for the resulting function instead.
+        final ContextSnapshotHolder newHolder = new ContextSnapshotHolder(snapshotHolder.get());
+        return wrap(super.applyToEither(other, new FunctionWithContext(newHolder, fn, takeNewSnapshot ? newHolder : null) {
+        }), newHolder, takeNewSnapshot);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <U> ContextAwareCompletableFuture<U> applyToEitherAsync(CompletionStage<? extends T> other, Function<? super T, U> fn) {
-        return wrap(super.applyToEitherAsync(other, new FunctionWithContext(snapshotHolder, fn, resultSnapshotConsumer()) {
-        }), snapshotHolder, takeNewSnapshot);
+        // Don't gamble which completion stage might win, create a new holder for the resulting function instead.
+        final ContextSnapshotHolder newHolder = new ContextSnapshotHolder(snapshotHolder.get());
+        return wrap(super.applyToEitherAsync(other, new FunctionWithContext(newHolder, fn, takeNewSnapshot ? newHolder : null) {
+        }), newHolder, takeNewSnapshot);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <U> ContextAwareCompletableFuture<U> applyToEitherAsync(
             CompletionStage<? extends T> other, Function<? super T, U> fn, Executor executor) {
-        return wrap(super.applyToEitherAsync(other, new FunctionWithContext(snapshotHolder, fn, resultSnapshotConsumer()) {
-        }, executor), snapshotHolder, takeNewSnapshot);
+        // Don't gamble which completion stage might win, create a new holder for the resulting function instead.
+        final ContextSnapshotHolder newHolder = new ContextSnapshotHolder(snapshotHolder.get());
+        return wrap(super.applyToEitherAsync(other, new FunctionWithContext(newHolder, fn, takeNewSnapshot ? newHolder : null) {
+        }, executor), newHolder, takeNewSnapshot);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public ContextAwareCompletableFuture<Void> acceptEither(CompletionStage<? extends T> other, Consumer<? super T> action) {
-        return wrap(super.acceptEither(other, new ConsumerWithContext(snapshotHolder, action, resultSnapshotConsumer()) {
-        }), snapshotHolder, takeNewSnapshot);
+        // Don't gamble which completion stage might win, create a new holder for the resulting function instead.
+        final ContextSnapshotHolder newHolder = new ContextSnapshotHolder(snapshotHolder.get());
+        return wrap(super.acceptEither(other, new ConsumerWithContext(newHolder, action, takeNewSnapshot ? newHolder : null) {
+        }), newHolder, takeNewSnapshot);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public ContextAwareCompletableFuture<Void> acceptEitherAsync(CompletionStage<? extends T> other, Consumer<? super T> action) {
-        return wrap(super.acceptEitherAsync(other, new ConsumerWithContext(snapshotHolder, action, resultSnapshotConsumer()) {
-        }), snapshotHolder, takeNewSnapshot);
+        // Don't gamble which completion stage might win, create a new holder for the resulting function instead.
+        final ContextSnapshotHolder newHolder = new ContextSnapshotHolder(snapshotHolder.get());
+        return wrap(super.acceptEitherAsync(other, new ConsumerWithContext(newHolder, action, takeNewSnapshot ? newHolder : null) {
+        }), newHolder, takeNewSnapshot);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public ContextAwareCompletableFuture<Void> acceptEitherAsync(
             CompletionStage<? extends T> other, Consumer<? super T> action, Executor executor) {
-        return wrap(super.acceptEitherAsync(other, new ConsumerWithContext(snapshotHolder, action, resultSnapshotConsumer()) {
-        }, executor), snapshotHolder, takeNewSnapshot);
+        // Don't gamble which completion stage might win, create a new holder for the resulting function instead.
+        final ContextSnapshotHolder newHolder = new ContextSnapshotHolder(snapshotHolder.get());
+        return wrap(super.acceptEitherAsync(other, new ConsumerWithContext(newHolder, action, takeNewSnapshot ? newHolder : null) {
+        }, executor), newHolder, takeNewSnapshot);
     }
 
     @Override
     public ContextAwareCompletableFuture<Void> runAfterEither(CompletionStage<?> other, Runnable action) {
-        return wrap(super.runAfterEither(other, new RunnableWithContext(snapshotHolder, action, resultSnapshotConsumer()) {
-        }), snapshotHolder, takeNewSnapshot);
+        // Don't gamble which completion stage might win, create a new holder for the resulting function instead.
+        final ContextSnapshotHolder newHolder = new ContextSnapshotHolder(snapshotHolder.get());
+        return wrap(super.runAfterEither(other, new RunnableWithContext(newHolder, action, takeNewSnapshot ? newHolder : null) {
+        }), newHolder, takeNewSnapshot);
     }
 
     @Override
     public ContextAwareCompletableFuture<Void> runAfterEitherAsync(CompletionStage<?> other, Runnable action) {
-        return wrap(super.runAfterEitherAsync(other, new RunnableWithContext(snapshotHolder, action, resultSnapshotConsumer()) {
-        }), snapshotHolder, takeNewSnapshot);
+        // Don't gamble which completion stage might win, create a new holder for the resulting function instead.
+        final ContextSnapshotHolder newHolder = new ContextSnapshotHolder(snapshotHolder.get());
+        return wrap(super.runAfterEitherAsync(other, new RunnableWithContext(newHolder, action, takeNewSnapshot ? newHolder : null) {
+        }), newHolder, takeNewSnapshot);
     }
 
     @Override
     public ContextAwareCompletableFuture<Void> runAfterEitherAsync(CompletionStage<?> other, Runnable action, Executor executor) {
-        return wrap(super.runAfterEitherAsync(other, new RunnableWithContext(snapshotHolder, action, resultSnapshotConsumer()) {
-        }, executor), snapshotHolder, takeNewSnapshot);
+        // Don't gamble which completion stage might win, create a new holder for the resulting function instead.
+        final ContextSnapshotHolder newHolder = new ContextSnapshotHolder(snapshotHolder.get());
+        return wrap(super.runAfterEitherAsync(other, new RunnableWithContext(newHolder, action, takeNewSnapshot ? newHolder : null) {
+        }, executor), newHolder, takeNewSnapshot);
     }
 
     @Override
