@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ final class ContextSnapshotHolder implements Consumer<ContextSnapshot>, Supplier
      *                 Optional, if {@code null} the holder will initialize with a new snapshot.
      */
     ContextSnapshotHolder(ContextSnapshot snapshot) {
-        this.accept(snapshot == null ? ContextManagers.createContextSnapshot() : snapshot);
+        this.snapshot = (snapshot == null ? ContextManagers.createContextSnapshot() : snapshot);
     }
 
     /**
