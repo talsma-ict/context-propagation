@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,5 +26,7 @@
  * closing any context only applies to that single context,
  * while {@linkplain nl.talsmasoftware.context.clearable.ClearableContextManager#clear()} is
  * equivalent to closing the active context and <em>all</em> parents in the current thread.
+ *
+ * @deprecated This package will be removed. Method clear() will be added to the ContextManager interface.
  */
 package nl.talsmasoftware.context.clearable;
