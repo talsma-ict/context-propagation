@@ -33,7 +33,9 @@ import java.io.Closeable;
  *
  * @param <T> type of the context value
  * @author Sjoerd Talsma
+ * @deprecated Moved to nl.talsmasoftware.context.api package.
  */
+@Deprecated
 public interface Context<T> extends Closeable {
 
     /**

@@ -41,6 +41,7 @@ import java.io.Closeable;
  * {@link Reactivation#close()}.
  *
  * @author Sjoerd Talsma
+ * @since 1.1.0
  */
 public interface ContextSnapshot extends nl.talsmasoftware.context.ContextSnapshot {
 
