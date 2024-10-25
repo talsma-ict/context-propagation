@@ -28,8 +28,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Utility class to allow concurrent systems to {@link #createContextSnapshot() take snapshots of all contexts} from
- * known {@link ContextManager ContextManager} implementations.
+ * Core implementation to allow {@link #createContextSnapshot() taking a snapshot of all contexts}.
+ *
  * <p>
  * Such a {@link ContextSnapshot snapshot} can be passed to a background task to allow the context to be
  * {@link ContextSnapshot#reactivate() reactivated} in that background thread, until it gets
@@ -172,7 +172,7 @@ public final class ContextManagers {
      * @param observedContextManagerType The context manager type to observe.
      * @param <T>                        Type of the value in the context.
      * @return {@code true} if the observer was registered.
-     * @since 1.0.12
+     * @since 1.1.0
      */
     public static <T> boolean registerContextObserver(ContextObserver<? super T> contextObserver, Class<ContextManager<T>> observedContextManagerType) {
         if (contextObserver == null) {
@@ -206,11 +206,11 @@ public final class ContextManagers {
     }
 
     /**
-     * Unregisters an observer for any context.
+     * Unregister an observer for any context.
      *
      * @param contextObserver The previously registered context observer.
      * @return {@code true} if the observer was unregistered.
-     * @since 1.0.12
+     * @since 1.1.0
      */
     public static boolean unregisterContextObserver(ContextObserver<?> contextObserver) {
         boolean unregistered = false;
@@ -254,7 +254,7 @@ public final class ContextManagers {
     }
 
     /**
-     * Notifies all {@linkplain ContextObserver context observers} for the specified {@code contextManager}
+     * Notify all {@linkplain ContextObserver context observers} for the specified {@code contextManager}
      * about the activated context value.
      *
      * @param contextManager        The context manager type that activated the context (required to observe).
@@ -290,7 +290,7 @@ public final class ContextManagers {
     }
 
     /**
-     * Notifies all {@linkplain ContextObserver context observers} for the specified {@code contextManager}
+     * Notify all {@linkplain ContextObserver context observers} for the specified {@code contextManager}
      * about the deactivated context value.
      *
      * @param contextManager          The context manager type that deactivated the context (required to observe).

@@ -16,20 +16,19 @@
 package nl.talsmasoftware.context.api;
 
 import nl.talsmasoftware.context.ContextManager;
-import nl.talsmasoftware.context.ContextManagers;
 
 /**
  * Observe context updates for a particular {@linkplain ContextManager}.
  *
  * <p>
- * Create your context observer and register / unregister it at the {@link ContextManagers} class.
+ * Context observers can be registered / unregistered with the {@code ContextManagers} class.
  *
  * <p>
  * <strong>Implementation note:</strong> A correct {@link Object#equals(Object)} implementation is required
  * for reliable registration functionality.
  *
  * @author Sjoerd Talsma
- * @since 1.0.12
+ * @since 1.1.0
  */
 public interface ContextObserver<T> {
 
