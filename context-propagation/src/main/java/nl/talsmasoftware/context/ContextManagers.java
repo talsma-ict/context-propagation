@@ -16,6 +16,7 @@
 package nl.talsmasoftware.context;
 
 import nl.talsmasoftware.context.api.ContextObserver;
+import nl.talsmasoftware.context.api.ContextSnapshot.Reactivation;
 import nl.talsmasoftware.context.clearable.Clearable;
 
 import java.util.ArrayList;
@@ -80,7 +81,7 @@ public final class ContextManagers {
      * @return A new snapshot that can be reactivated elsewhere (e.g. a background thread or even another node)
      * within a try-with-resources construct.
      */
-    public static ContextSnapshot createContextSnapshot() {
+    public static nl.talsmasoftware.context.api.ContextSnapshot createContextSnapshot() {
         final long start = System.nanoTime();
         final List<ContextManager> managers = new LinkedList<ContextManager>();
         final List<Object> values = new LinkedList<Object>();
@@ -109,7 +110,7 @@ public final class ContextManagers {
             NoContextManagersFound noContextManagersFound = new NoContextManagersFound();
             LOGGER.log(Level.INFO, noContextManagersFound.getMessage(), noContextManagersFound);
         }
-        ContextSnapshot result = new ContextSnapshotImpl(managers, values);
+        ContextSnapshotImpl result = new ContextSnapshotImpl(managers, values);
         Timers.timed(System.nanoTime() - start, ContextManagers.class, "createContextSnapshot");
         return result;
     }
@@ -385,7 +386,7 @@ public final class ContextManagers {
      * Implementation of the <code>createContextSnapshot</code> functionality that can reactivate all values from the
      * snapshot in each corresponding {@link ContextManager}.
      */
-    private static final class ContextSnapshotImpl implements ContextSnapshot {
+    private static final class ContextSnapshotImpl implements nl.talsmasoftware.context.api.ContextSnapshot {
         private static final ContextManager[] MANAGER_ARRAY = new ContextManager[0];
         private final ContextManager[] managers;
         private final Object[] values;
@@ -395,16 +396,16 @@ public final class ContextManagers {
             this.values = values.toArray();
         }
 
-        public Context<Void> reactivate() {
+        public Reactivation reactivate() {
             final long start = System.nanoTime();
             final List<Context<?>> reactivatedContexts = new ArrayList<Context<?>>(managers.length);
             try {
                 for (int i = 0; i < managers.length && i < values.length; i++) {
                     reactivatedContexts.add(reactivate(managers[i], values[i]));
                 }
-                ReactivatedContext reactivatedContext = new ReactivatedContext(reactivatedContexts);
-                Timers.timed(System.nanoTime() - start, ContextSnapshot.class, "reactivate");
-                return reactivatedContext;
+                ReactivationImpl reactivation = new ReactivationImpl(reactivatedContexts);
+                Timers.timed(System.nanoTime() - start, nl.talsmasoftware.context.api.ContextSnapshot.class, "reactivate");
+                return reactivation;
             } catch (RuntimeException reactivationException) {
                 CONTEXT_MANAGERS.clearCache();
                 for (Context alreadyReactivated : reactivatedContexts) {
@@ -444,10 +445,10 @@ public final class ContextManagers {
      * when it is closed itself.<br>
      * This context contains no meaningful value in itself and purely exists to close the reactivated contexts.
      */
-    private static final class ReactivatedContext implements Context<Void> {
+    private static final class ReactivationImpl implements Reactivation {
         private final List<Context<?>> reactivated;
 
-        private ReactivatedContext(List<Context<?>> reactivated) {
+        private ReactivationImpl(List<Context<?>> reactivated) {
             this.reactivated = reactivated;
         }
 
