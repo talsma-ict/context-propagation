@@ -3,6 +3,14 @@
 [![Maven Version][maven-img]][maven]
 [![Javadoc][javadoc-img]][javadoc]
 
+> [!IMPORTANT]
+> This is  the development branch for the v2 version of this library.
+> All breaking changes and improvements to the library go in this branch
+> - Java version bumped to Java8 mimimum
+> - `ContextManager.getActiveContext()` replaced by `getActiveContextValue()`.
+> - `ContextManager.clear()` will require an implementation.
+> - All `@Deprecated(forRemoval=true)` is to be removed.
+
 # Context propagation library
 
 Propagate a snapshot of one or more `ThreadLocal` values into another thread.
