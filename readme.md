@@ -5,9 +5,9 @@
 
 > [!IMPORTANT]
 > Main focus of the 'v2' version is simplification of this library.
-> In the past, many features have been added to the library. Some features introduced more complexity than technically needed.
-> Due to the fact that we use semantic versioning and therefore can't break functionality for the sake of simplicity
-> we must take advantage of the next major version to do some api redesign that will allow simpler implementations.
+> In the past, many features were added to the library. Some introduced more complexity than technically needed.  
+> Due to semantic versioning we can't break functionality for the sake of simplicity. 
+> So for v2 we must redesign some api elements that allow simpler implementation, reducing complexity.
 > 
 > This is  the development branch for the v2 version of this library.
 > All breaking changes to the library must go in this branch.
