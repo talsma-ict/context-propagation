@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,9 @@ import static java.lang.Math.abs;
  * The order of objects with equal (implicit) priority is undefined.
  *
  * @author Sjoerd Talsma
+ * @deprecated We will switch to plain ServiceLoader in next major version to reduce complexity.
  */
+@Deprecated
 final class PriorityComparator implements Comparator<Object> {
     private static final int UNDEFINED_PRIORITY = Integer.MAX_VALUE;
 

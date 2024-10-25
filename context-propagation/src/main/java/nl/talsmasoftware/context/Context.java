@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import java.io.Closeable;
  * available that can be extended, that takes care of random-depth nested contexts and restoring the 'previous'
  * context state.
  *
+ * @param <T> type of the context value
  * @author Sjoerd Talsma
  */
 public interface Context<T> extends Closeable {

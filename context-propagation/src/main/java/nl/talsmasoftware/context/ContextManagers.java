@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,15 @@
  */
 package nl.talsmasoftware.context;
 
+import nl.talsmasoftware.context.api.ContextObserver;
 import nl.talsmasoftware.context.clearable.Clearable;
-import nl.talsmasoftware.context.observer.ContextObserver;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,10 +47,19 @@ public final class ContextManagers {
             new PriorityServiceLoader<ContextManager>(ContextManager.class);
 
     /**
-     * The service loader that loads (and possibly caches) {@linkplain ContextManager} instances in prioritized order.
+     * Registered observers.
      */
-    private static final PriorityServiceLoader<ContextObserver> CONTEXT_OBSERVERS =
-            new PriorityServiceLoader<ContextObserver>(ContextObserver.class);
+    private static final CopyOnWriteArrayList<ObservableContextManager> OBSERVERS =
+            new CopyOnWriteArrayList<ObservableContextManager>();
+
+    /**
+     * The service loader that loads (and possibly caches) {@linkplain ContextManager} instances in prioritized order.
+     *
+     * @deprecated To be replaced by explicitly registered {@link #OBSERVERS}
+     */
+    @Deprecated
+    private static final PriorityServiceLoader<nl.talsmasoftware.context.observer.ContextObserver> CONTEXT_OBSERVERS =
+            new PriorityServiceLoader<nl.talsmasoftware.context.observer.ContextObserver>(nl.talsmasoftware.context.observer.ContextObserver.class);
 
     /**
      * Private constructor to avoid instantiation of this class.
@@ -73,7 +85,7 @@ public final class ContextManagers {
         final List<ContextManager> managers = new LinkedList<ContextManager>();
         final List<Object> values = new LinkedList<Object>();
         Long managerStart = null;
-        for (ContextManager manager : CONTEXT_MANAGERS) {
+        for (ContextManager manager : getContextManagers()) {
             managerStart = System.nanoTime();
             try {
                 final Context activeContext = manager.getActiveContext();
@@ -123,9 +135,10 @@ public final class ContextManagers {
     public static void clearActiveContexts() {
         final long start = System.nanoTime();
         Long managerStart = null;
-        for (ContextManager manager : CONTEXT_MANAGERS) {
+        for (ContextManager manager : getContextManagers()) {
             managerStart = System.nanoTime();
             try {
+                // TODO add ContextObserver.onClear()
                 if (manager instanceof Clearable) {
                     ((Clearable) manager).clear();
                     if (LOGGER.isLoggable(Level.FINEST)) {
@@ -153,63 +166,61 @@ public final class ContextManagers {
     }
 
     /**
-     * Notifies all {@linkplain ContextObserver context observers} for the specified {@code contextManager}
-     * about the activated context value.
+     * Register an observer for contexts managed by the specified ContextManager type.
      *
-     * @param contextManager        The context manager type that activated the context (required to observe).
-     * @param activatedContextValue The activated context value or {@code null} if no value was activated.
-     * @param previousContextValue  The previous context value or {@code null} if unknown or unsupported.
-     * @param <T>                   The type managed by the context manager.
-     * @since 1.0.6
+     * @param contextObserver            The observer to register.
+     * @param observedContextManagerType The context manager type to observe.
+     * @param <T>                        Type of the value in the context.
+     * @return {@code true} if the observer was registered.
+     * @since 1.0.12
      */
-    @SuppressWarnings("unchecked") // If the observer tells us it can observe the values, we trust it.
-    public static <T> void onActivate(Class<? extends ContextManager<? super T>> contextManager,
-                                      T activatedContextValue,
-                                      T previousContextValue) {
-        if (contextManager != null) for (ContextObserver observer : CONTEXT_OBSERVERS) {
-            try {
-                final Class observedContext = observer.getObservedContextManager();
-                if (observedContext != null && observedContext.isAssignableFrom(contextManager)) {
-                    observer.onActivate(activatedContextValue, previousContextValue);
-                }
-            } catch (RuntimeException observationException) {
-                Logger.getLogger(observer.getClass().getName()).log(Level.WARNING,
-                        "Exception in " + observer.getClass().getSimpleName()
-                                + ".onActivate(" + activatedContextValue + ", " + previousContextValue
-                                + ") for " + contextManager.getSimpleName() + ": " + observationException.getMessage(),
-                        observationException);
+    public static <T> boolean registerContextObserver(ContextObserver<? super T> contextObserver, Class<ContextManager<T>> observedContextManagerType) {
+        if (contextObserver == null) {
+            throw new NullPointerException("Context observer must not be null.");
+        } else if (observedContextManagerType == null) {
+            throw new NullPointerException("Observed ContextManager type must not be null.");
+        }
+
+        // Find ContextManager to register.
+        ContextManager contextManager = null;
+        for (ContextManager manager : getContextManagers()) {
+            if (observedContextManagerType.isInstance(manager)) {
+                contextManager = manager;
+                break;
             }
         }
+        if (contextManager == null) {
+            LOGGER.warning("Trying to register observer to missing ContextManager type: " + observedContextManagerType + ".");
+            return false;
+        }
+
+        // Register new observer by wrapping the context manager.
+        ObservableContextManager<T> newObserver = new ObservableContextManager<T>(contextManager, (List) Arrays.asList(contextObserver));
+        if (OBSERVERS.addIfAbsent(newObserver)) {
+            return true;
+        }
+
+        // There is already an existing ObservableContextManager, add the observer to it.
+        ObservableContextManager existing = OBSERVERS.get(OBSERVERS.indexOf(newObserver));
+        return existing.observers.addIfAbsent(contextObserver);
     }
 
     /**
-     * Notifies all {@linkplain ContextObserver context observers} for the specified {@code contextManager}
-     * about the deactivated context value.
+     * Unregisters an observer for any context.
      *
-     * @param contextManager          The context manager type that deactivated the context (required to observe).
-     * @param deactivatedContextValue The deactivated context value
-     * @param restoredContextValue    The restored context value or {@code null} if unknown or unsupported.
-     * @param <T>                     The type managed by the context manager.
-     * @since 1.0.6
+     * @param contextObserver The previously registered context observer.
+     * @return {@code true} if the observer was unregistered.
+     * @since 1.0.12
      */
-    @SuppressWarnings("unchecked") // If the observer tells us it can observe the values, we trust it.
-    public static <T> void onDeactivate(Class<? extends ContextManager<? super T>> contextManager,
-                                        T deactivatedContextValue,
-                                        T restoredContextValue) {
-        if (contextManager != null) for (ContextObserver observer : CONTEXT_OBSERVERS) {
-            try {
-                final Class observedContext = observer.getObservedContextManager();
-                if (observedContext != null && observedContext.isAssignableFrom(contextManager)) {
-                    observer.onDeactivate(deactivatedContextValue, restoredContextValue);
-                }
-            } catch (RuntimeException observationException) {
-                Logger.getLogger(observer.getClass().getName()).log(Level.WARNING,
-                        "Exception in " + observer.getClass().getSimpleName()
-                                + ".onDeactivate(" + deactivatedContextValue + ", " + deactivatedContextValue
-                                + ") for " + contextManager.getSimpleName() + ": " + observationException.getMessage(),
-                        observationException);
+    public static boolean unregisterContextObserver(ContextObserver<?> contextObserver) {
+        boolean unregistered = false;
+        for (ObservableContextManager observer : OBSERVERS) {
+            unregistered |= observer.observers.remove(contextObserver);
+            if (observer.observers.isEmpty()) {
+                OBSERVERS.remove(observer);
             }
         }
+        return unregistered;
     }
 
     /**
@@ -240,6 +251,110 @@ public final class ContextManagers {
                     "instances to " + classLoader + " (was: " + PriorityServiceLoader.classLoaderOverride + ").");
         }
         PriorityServiceLoader.classLoaderOverride = classLoader;
+    }
+
+    /**
+     * Notifies all {@linkplain ContextObserver context observers} for the specified {@code contextManager}
+     * about the activated context value.
+     *
+     * @param contextManager        The context manager type that activated the context (required to observe).
+     * @param activatedContextValue The activated context value or {@code null} if no value was activated.
+     * @param previousContextValue  The previous context value or {@code null} if unknown or unsupported.
+     * @param <T>                   The type managed by the context manager.
+     * @since 1.0.6
+     * @deprecated To be replaced by explicit observer registration method (TODO)
+     */
+    @Deprecated
+    @SuppressWarnings("unchecked") // If the observer tells us it can observe the values, we trust it.
+    public static <T> void onActivate(Class<? extends ContextManager<? super T>> contextManager,
+                                      T activatedContextValue,
+                                      T previousContextValue) {
+        if (contextManager != null) {
+            for (nl.talsmasoftware.context.observer.ContextObserver observer : CONTEXT_OBSERVERS) {
+                try {
+                    final Class observedContext = observer.getObservedContextManager();
+                    // TODO unwrap ObservableContextManager.type and/or skip
+                    if (observedContext != null && observedContext.isAssignableFrom(contextManager)) {
+                        observer.onActivate(activatedContextValue, previousContextValue);
+                        // TODO log warning about deprecated mechanism
+                    }
+                } catch (RuntimeException observationException) {
+                    Logger.getLogger(observer.getClass().getName()).log(Level.WARNING,
+                            "Exception in " + observer.getClass().getSimpleName()
+                                    + ".onActivate(" + activatedContextValue + ", " + previousContextValue
+                                    + ") for " + contextManager.getSimpleName() + ": " + observationException.getMessage(),
+                            observationException);
+                }
+            }
+        }
+    }
+
+    /**
+     * Notifies all {@linkplain ContextObserver context observers} for the specified {@code contextManager}
+     * about the deactivated context value.
+     *
+     * @param contextManager          The context manager type that deactivated the context (required to observe).
+     * @param deactivatedContextValue The deactivated context value
+     * @param restoredContextValue    The restored context value or {@code null} if unknown or unsupported.
+     * @param <T>                     The type managed by the context manager.
+     * @since 1.0.6
+     * @deprecated To be replaced by explicit observer registration method (TODO)
+     */
+    @Deprecated
+    @SuppressWarnings("unchecked") // If the observer tells us it can observe the values, we trust it.
+    public static <T> void onDeactivate(Class<? extends ContextManager<? super T>> contextManager,
+                                        T deactivatedContextValue,
+                                        T restoredContextValue) {
+        if (contextManager != null) {
+            for (nl.talsmasoftware.context.observer.ContextObserver observer : CONTEXT_OBSERVERS) {
+                try {
+                    final Class observedContext = observer.getObservedContextManager();
+                    // TODO unwrap ObservableContextManager.type and/or skip
+                    if (observedContext != null && observedContext.isAssignableFrom(contextManager)) {
+                        observer.onDeactivate(deactivatedContextValue, restoredContextValue);
+                        // TODO log warning about deprecated mechanism
+                    }
+                } catch (RuntimeException observationException) {
+                    Logger.getLogger(observer.getClass().getName()).log(Level.WARNING,
+                            "Exception in " + observer.getClass().getSimpleName()
+                                    + ".onDeactivate(" + deactivatedContextValue + ", " + deactivatedContextValue
+                                    + ") for " + contextManager.getSimpleName() + ": " + observationException.getMessage(),
+                            observationException);
+                }
+            }
+        }
+    }
+
+    private static Iterable<ContextManager> getContextManagers() {
+        // TODO change to stream implementation when java 8
+        return OBSERVERS.isEmpty() ? CONTEXT_MANAGERS : new Iterable<ContextManager>() {
+            public Iterator<ContextManager> iterator() {
+                return new Iterator<ContextManager>() {
+                    private final Iterator<ContextManager> delegate = CONTEXT_MANAGERS.iterator();
+
+                    public boolean hasNext() {
+                        return delegate.hasNext();
+                    }
+
+                    public ContextManager next() {
+                        ContextManager contextManager = delegate.next();
+                        if (!(contextManager instanceof ObservableContextManager)) {
+                            for (ObservableContextManager observableContextManager : OBSERVERS) {
+                                if (observableContextManager.delegate.equals(contextManager)) {
+                                    CONTEXT_MANAGERS.replaceInCache(contextManager, observableContextManager);
+                                    return observableContextManager;
+                                }
+                            }
+                        }
+                        return contextManager;
+                    }
+
+                    public void remove() {
+                        delegate.remove();
+                    }
+                };
+            }
+        };
     }
 
     private static void clearContext(ContextManager manager, Context context) {
@@ -367,6 +482,79 @@ public final class ContextManagers {
             exception.addSuppressed(toSuppress);
         } catch (LinkageError le) {
             LOGGER.log(Level.WARNING, message, toSuppress);
+        }
+    }
+
+    private static final class ObservableContextManager<T> implements ContextManager<T> {
+        private final ContextManager<T> delegate;
+        private final CopyOnWriteArrayList<ContextObserver<? super T>> observers;
+
+        private ObservableContextManager(ContextManager<T> delegate, List<ContextObserver<? super T>> observers) {
+            this.delegate = delegate;
+            this.observers = new CopyOnWriteArrayList<ContextObserver<? super T>>(observers);
+        }
+
+        private T getActiveContextValue() {
+            final Context<T> activeContext = delegate.getActiveContext();
+            return activeContext != null ? activeContext.getValue() : null;
+        }
+
+        private void notifyActivated(T newValue, T oldValue) {
+            for (ContextObserver<? super T> observer : observers) {
+                try {
+                    observer.onActivate(newValue, oldValue);
+                } catch (RuntimeException observerError) {
+                    LOGGER.log(Level.SEVERE, "Error in observer.onActivate of " + observer, observerError);
+                }
+            }
+        }
+
+        private void notifyDeactivated(T deactivatedValue, T restoredValue) {
+            for (ContextObserver<? super T> observer : observers) {
+                try {
+                    observer.onDeactivate(deactivatedValue, restoredValue);
+                } catch (RuntimeException observerError) {
+                    LOGGER.log(Level.SEVERE, "Error in observer.onActivate of " + observer, observerError);
+                }
+            }
+        }
+
+        public Context<T> initializeNewContext(final T newValue) {
+            final T oldValue = getActiveContextValue();
+            final Context<T> context = delegate.initializeNewContext(newValue);
+            notifyActivated(newValue, oldValue);
+
+            return new Context<T>() {
+                public T getValue() {
+                    return context.getValue();
+                }
+
+                public void close() {
+                    T deactivated = context.getValue(); // get before closing!
+                    context.close();
+                    notifyDeactivated(deactivated, getActiveContextValue());
+                }
+            };
+        }
+
+        public Context<T> getActiveContext() {
+            return delegate.getActiveContext();
+        }
+
+        @Override
+        public int hashCode() {
+            return delegate.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object other) { // IMPORTANT to reliably register observers.
+            return other instanceof ObservableContextManager
+                    && delegate.equals(((ObservableContextManager<?>) other).delegate);
+        }
+
+        @Override
+        public String toString() {
+            return delegate.toString();
         }
     }
 

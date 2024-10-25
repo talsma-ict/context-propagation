@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,10 @@ import nl.talsmasoftware.context.ContextManager;
  * are already observable.
  *
  * @author Sjoerd Talsma
+ * @deprecated Context observers will use simplified registration in v2.
  */
-public interface ContextObserver<T> {
+@Deprecated
+public interface ContextObserver<T> extends nl.talsmasoftware.context.api.ContextObserver<T> {
 
     /**
      * The observed context manager(s).
@@ -55,23 +57,9 @@ public interface ContextObserver<T> {
      * Return {@code null} to disable the observer.
      *
      * @return The observed context manager class or {@code null} to disable this observer.
+     * @deprecated This method will be removed. Observers must explicitly be registered at {@code ContextManagers} class.
      */
+    @Deprecated
     Class<? extends ContextManager<T>> getObservedContextManager();
-
-    /**
-     * Indicates that a context <em>was just activated</em>.
-     *
-     * @param activatedContextValue The now active context value.
-     * @param previousContextValue  The previous context value or {@code null} if unknown or unsupported.
-     */
-    void onActivate(T activatedContextValue, T previousContextValue);
-
-    /**
-     * Indicates that a context <em>was just deactivated</em>.
-     *
-     * @param deactivatedContextValue The deactivated context value.
-     * @param restoredContextValue    The now active restored context value or {@code null} if unknown or unsupported.
-     */
-    void onDeactivate(T deactivatedContextValue, T restoredContextValue);
 
 }

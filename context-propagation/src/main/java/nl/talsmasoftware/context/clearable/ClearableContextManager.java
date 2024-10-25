@@ -20,6 +20,7 @@ import nl.talsmasoftware.context.ContextManager;
 /**
  * Convenience interface to mark a {@linkplain Clearable} {@link ContextManager}.
  *
+ * @param <T> type of the context value
  * @author Sjoerd Talsma
  * @deprecated This interface will be removed. Method clear() will be added to the ContextManager interface.
  */

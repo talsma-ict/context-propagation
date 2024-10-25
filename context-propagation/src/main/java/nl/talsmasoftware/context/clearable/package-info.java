@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 /**
- * The {@code Clearable} interface and a {@code ClearableContextManager} in particular.
+ * <strong>(Deprecated)</strong> The {@code Clearable} interface and a {@code ClearableContextManager} in particular.
+ *
+ * <h2>Deprecated</h2>
+ * This package will be removed. Method clear() will be added to the ContextManager interface.
  *
  * <h2>{@linkplain nl.talsmasoftware.context.clearable.Clearable}</h2>
  * <p>
@@ -26,7 +29,5 @@
  * closing any context only applies to that single context,
  * while {@linkplain nl.talsmasoftware.context.clearable.ClearableContextManager#clear()} is
  * equivalent to closing the active context and <em>all</em> parents in the current thread.
- *
- * @deprecated This package will be removed. Method clear() will be added to the ContextManager interface.
  */
 package nl.talsmasoftware.context.clearable;
