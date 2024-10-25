@@ -4,8 +4,13 @@
 [![Javadoc][javadoc-img]][javadoc]
 
 > [!IMPORTANT]
+> Main focus of the 'v2' version is simplification of this library.
+> In the past, many features have been added to the library. Some features introduced more complexity than technically needed.
+> Due to the fact that we use semantic versioning and therefore can't break functionality for the sake of simplicity
+> we must take advantage of the next major version to do some api redesign that will allow simpler implementations.
+> 
 > This is  the development branch for the v2 version of this library.
-> All breaking changes and improvements to the library go in this branch
+> All breaking changes to the library must go in this branch.
 > - Java version bumped to Java8 mimimum
 > - `ContextManager.getActiveContext()` replaced by `getActiveContextValue()`.
 > - `ContextManager.clear()` will require an implementation.
