@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,20 +59,20 @@ public abstract class DelegatingFuture<V> extends Wrapper<Future<V>> implements 
     }
 
     public boolean cancel(boolean mayInterruptIfRunning) {
-        return nonNullDelegate().cancel(mayInterruptIfRunning);
+        return delegate().cancel(mayInterruptIfRunning);
     }
 
     public boolean isCancelled() {
-        return nonNullDelegate().isCancelled();
+        return delegate().isCancelled();
     }
 
     public boolean isDone() {
-        return nonNullDelegate().isDone();
+        return delegate().isDone();
     }
 
     public V get() throws InterruptedException, ExecutionException {
         try {
-            return wrapResult(nonNullDelegate().get());
+            return wrapResult(delegate().get());
         } catch (ExecutionException ee) {
             throw wrapException(ee);
         }
@@ -80,7 +80,7 @@ public abstract class DelegatingFuture<V> extends Wrapper<Future<V>> implements 
 
     public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
         try {
-            return wrapResult(nonNullDelegate().get(timeout, unit));
+            return wrapResult(delegate().get(timeout, unit));
         } catch (ExecutionException ee) {
             throw wrapException(ee);
         }

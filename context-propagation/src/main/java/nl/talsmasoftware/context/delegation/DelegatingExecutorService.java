@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,68 +104,68 @@ public abstract class DelegatingExecutorService extends Wrapper<ExecutorService>
     }
 
     public void shutdown() {
-        nonNullDelegate().shutdown();
+        delegate().shutdown();
     }
 
     public List<Runnable> shutdownNow() {
-        return nonNullDelegate().shutdownNow();
+        return delegate().shutdownNow();
     }
 
     public boolean isShutdown() {
-        return nonNullDelegate().isShutdown();
+        return delegate().isShutdown();
     }
 
     public boolean isTerminated() {
-        return nonNullDelegate().isTerminated();
+        return delegate().isTerminated();
     }
 
     public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-        return nonNullDelegate().awaitTermination(timeout, unit);
+        return delegate().awaitTermination(timeout, unit);
     }
 
     public <T> Future<T> submit(Callable<T> task) {
-        return wrap(nonNullDelegate().submit(wrap(task)));
+        return wrap(delegate().submit(wrap(task)));
     }
 
     public <T> Future<T> submit(Runnable task, T result) {
-        return wrap(nonNullDelegate().submit(wrap(task), result));
+        return wrap(delegate().submit(wrap(task), result));
     }
 
     public Future<?> submit(Runnable task) {
-        return wrap(nonNullDelegate().submit(wrap(task)));
+        return wrap(delegate().submit(wrap(task)));
     }
 
     public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
-        final List<Future<T>> futures = nonNullDelegate().invokeAll(wrapTasks(tasks));
+        final List<Future<T>> futures = delegate().invokeAll(wrapTasks(tasks));
         return wrapFutures(futures);
     }
 
     public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
-        final List<Future<T>> futures = nonNullDelegate().invokeAll(wrapTasks(tasks), timeout, unit);
+        final List<Future<T>> futures = delegate().invokeAll(wrapTasks(tasks), timeout, unit);
         return wrapFutures(futures);
     }
 
     public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
-        return nonNullDelegate().invokeAny(wrapTasks(tasks));
+        return delegate().invokeAny(wrapTasks(tasks));
     }
 
     public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        return nonNullDelegate().invokeAny(wrapTasks(tasks), timeout, unit);
+        return delegate().invokeAny(wrapTasks(tasks), timeout, unit);
     }
 
     public void execute(Runnable command) {
-        nonNullDelegate().execute(wrap(command));
+        delegate().execute(wrap(command));
     }
 
     @Override
     public int hashCode() {
-        return nonNullDelegate().hashCode();
+        return delegate().hashCode();
     }
 
     @Override
     public boolean equals(Object other) {
         return this == other || (other != null && getClass().equals(other.getClass())
-                && nonNullDelegate().equals(((DelegatingExecutorService) other).delegate()));
+                && delegate().equals(((DelegatingExecutorService) other).delegate()));
     }
 
     @Override

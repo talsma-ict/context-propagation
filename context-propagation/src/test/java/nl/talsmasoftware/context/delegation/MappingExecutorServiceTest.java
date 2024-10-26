@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.anyCollection;
@@ -70,21 +67,6 @@ public class MappingExecutorServiceTest {
     @AfterEach
     public void noMoreInteractions() {
         verifyNoMoreInteractions(delegate);
-    }
-
-    @Test
-    public void testNullConstructor() {
-        TestMappingExecutorService mapped = new TestMappingExecutorService(null);// No error at construction time.
-        try {
-            mapped.execute(new Runnable() {
-                public void run() {
-                    System.out.println("Whoops");
-                }
-            });
-            fail("Informative exception expected.");
-        } catch (RuntimeException expected) {
-            assertThat(expected, hasToString(containsString("No delegate available for TestMappingExecutorService")));
-        }
     }
 
     @Test

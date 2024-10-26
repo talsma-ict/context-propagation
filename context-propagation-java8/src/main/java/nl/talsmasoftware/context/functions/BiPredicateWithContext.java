@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
         try (Context<Void> context = snapshot().reactivate()) {
             try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                 LOGGER.log(Level.FINEST, "Delegating test method with {0} to {1}.", new Object[]{context, delegate()});
-                return nonNullDelegate().test(in1, in2);
+                return delegate().test(in1, in2);
             } finally {
                 if (contextSnapshotConsumer != null) {
                     ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
@@ -71,7 +71,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
             try (Context<Void> context = snapshot().reactivate()) {
                 try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                     LOGGER.log(Level.FINEST, "Delegating 'and' method with {0} to {1}.", new Object[]{context, delegate()});
-                    return nonNullDelegate().test(in1, in2) && other.test(in1, in2);
+                    return delegate().test(in1, in2) && other.test(in1, in2);
                 } finally {
                     if (contextSnapshotConsumer != null) {
                         ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
@@ -90,7 +90,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
             try (Context<Void> context = snapshot().reactivate()) {
                 try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                     LOGGER.log(Level.FINEST, "Delegating 'or' method with {0} to {1}.", new Object[]{context, delegate()});
-                    return nonNullDelegate().test(in1, in2) || other.test(in1, in2);
+                    return delegate().test(in1, in2) || other.test(in1, in2);
                 } finally {
                     if (contextSnapshotConsumer != null) {
                         ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();

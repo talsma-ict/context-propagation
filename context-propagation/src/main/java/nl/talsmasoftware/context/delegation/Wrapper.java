@@ -16,7 +16,7 @@
 package nl.talsmasoftware.context.delegation;
 
 /**
- * Base wrapper class offering a {@link #nonNullDelegate() non-null delegate} method.
+ * Base class for wrapping a {@linkplain #delegate()} object.
  *
  * @author Sjoerd Talsma
  */
@@ -36,10 +36,13 @@ public abstract class Wrapper<T> {
     }
 
     /**
-     * Delegate method that can be overridden in case the delegate is not yet available at construction time or when
-     * there some strategy applicable that determines the delegate at runtime.
+     * The wrapped delegate object.
+     *
      * <p>
-     * By default, the specified delegate value from the constructor is returned.
+     * Every wrapper must always return a non-{@code null} delegate.<br>
+     * By default, the specified delegate value from the constructor is returned.<br>
+     * This means this method <strong>must</strong> be overridden
+     * if the delegate is not yet available when the wrapper is constructed.
      *
      * @return The delegate for this wrapper.
      */
@@ -53,7 +56,10 @@ public abstract class Wrapper<T> {
      *
      * @return The delegate for this wrapper (guaranteed to be non-<code>null</code>).
      * @throws NullPointerException with a specific message in case the delegate was null.
+     * @deprecated This extra check will be removed in the next version,
+     * {@linkplain #delegate()} <strong>must</strong> return non-null.
      */
+    @Deprecated
     protected final T nonNullDelegate() {
         final T foundDelegate = delegate();
         if (foundDelegate == null) try {
@@ -62,6 +68,16 @@ public abstract class Wrapper<T> {
             throw new NullPointerException(String.format("No delegate available for %s.", getClass().getSimpleName()));
         }
         return foundDelegate;
+    }
+
+    /**
+     * Determines if this class is a wrapper of the specified object.
+     *
+     * @param other The object to check for being the delegate of this wrapper.
+     * @return {@code true} is this wrapper has the given object as its delegate.
+     */
+    public boolean isWrapperOf(T other) {
+        return delegate().equals(other);
     }
 
     @Override

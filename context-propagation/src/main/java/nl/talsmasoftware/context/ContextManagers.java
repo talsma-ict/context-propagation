@@ -18,6 +18,7 @@ package nl.talsmasoftware.context;
 import nl.talsmasoftware.context.api.ContextObserver;
 import nl.talsmasoftware.context.api.ContextSnapshot.Reactivation;
 import nl.talsmasoftware.context.clearable.Clearable;
+import nl.talsmasoftware.context.delegation.Wrapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -341,7 +342,7 @@ public final class ContextManagers {
                         ContextManager contextManager = delegate.next();
                         if (!(contextManager instanceof ObservableContextManager)) {
                             for (ObservableContextManager observableContextManager : OBSERVERS) {
-                                if (observableContextManager.delegate.equals(contextManager)) {
+                                if (observableContextManager.isWrapperOf(contextManager)) {
                                     CONTEXT_MANAGERS.replaceInCache(contextManager, observableContextManager);
                                     return observableContextManager;
                                 }
@@ -486,17 +487,16 @@ public final class ContextManagers {
         }
     }
 
-    private static final class ObservableContextManager<T> implements ContextManager<T> {
-        private final ContextManager<T> delegate;
+    private static final class ObservableContextManager<T> extends Wrapper<ContextManager<T>> implements ContextManager<T> {
         private final CopyOnWriteArrayList<ContextObserver<? super T>> observers;
 
         private ObservableContextManager(ContextManager<T> delegate, List<ContextObserver<? super T>> observers) {
-            this.delegate = delegate;
+            super(delegate);
             this.observers = new CopyOnWriteArrayList<ContextObserver<? super T>>(observers);
         }
 
         private T getActiveContextValue() {
-            final Context<T> activeContext = delegate.getActiveContext();
+            final Context<T> activeContext = delegate().getActiveContext();
             return activeContext != null ? activeContext.getValue() : null;
         }
 
@@ -522,7 +522,7 @@ public final class ContextManagers {
 
         public Context<T> initializeNewContext(final T newValue) {
             final T oldValue = getActiveContextValue();
-            final Context<T> context = delegate.initializeNewContext(newValue);
+            final Context<T> context = delegate().initializeNewContext(newValue);
             notifyActivated(newValue, oldValue);
 
             return new Context<T>() {
@@ -538,24 +538,25 @@ public final class ContextManagers {
             };
         }
 
+        @Deprecated
         public Context<T> getActiveContext() {
-            return delegate.getActiveContext();
+            return delegate().getActiveContext();
         }
 
         @Override
         public int hashCode() {
-            return delegate.hashCode();
+            return delegate().hashCode();
         }
 
         @Override
         public boolean equals(Object other) { // IMPORTANT to reliably register observers.
             return other instanceof ObservableContextManager
-                    && delegate.equals(((ObservableContextManager<?>) other).delegate);
+                    && delegate().equals(((ObservableContextManager<?>) other).delegate());
         }
 
         @Override
         public String toString() {
-            return delegate.toString();
+            return delegate().toString();
         }
     }
 

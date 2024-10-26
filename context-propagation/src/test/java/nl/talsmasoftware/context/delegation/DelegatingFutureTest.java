@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.concurrent.TimeoutException;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
@@ -68,17 +67,6 @@ public class DelegatingFutureTest {
     @AfterEach
     public void noMoreInteractions() {
         verifyNoMoreInteractions(delegate);
-    }
-
-    @Test
-    public void testNullConstructor() throws ExecutionException, InterruptedException {
-        final TestDelegatingFuture tdf = new TestDelegatingFuture(null); // no exception yet!
-        try {
-            tdf.get();
-            fail("Informative exception expected.");
-        } catch (RuntimeException expected) {
-            assertThat(expected, hasToString(containsString("No delegate available for TestDelegatingFuture")));
-        }
     }
 
     @Test
