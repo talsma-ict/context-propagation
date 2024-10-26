@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class MetricsContextTimerTest {
     public void testCreateSnapshotInFreshApplication() {
         assertThat(SharedMetricRegistries.names(), is(empty()));
         ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
-        String name = MetricRegistry.name(ContextManagers.class, "createContextSnapshot");
+        String name = MetricRegistry.name(nl.talsmasoftware.context.core.ContextManagers.class, "createContextSnapshot");
         assertThat(snapshot, is(notNullValue()));
 
         assertThat(SharedMetricRegistries.names(), contains("ContextPropagationMetrics"));
@@ -83,7 +83,7 @@ public class MetricsContextTimerTest {
 
         assertThat(SharedMetricRegistries.names(), contains("DefaultRegistry"));
         ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
-        String name = MetricRegistry.name(ContextManagers.class, "createContextSnapshot");
+        String name = MetricRegistry.name(nl.talsmasoftware.context.core.ContextManagers.class, "createContextSnapshot");
         assertThat(snapshot, is(notNullValue()));
 
         assertThat(SharedMetricRegistries.names(), contains("DefaultRegistry")); // No new registries!
@@ -99,7 +99,7 @@ public class MetricsContextTimerTest {
 
         assertThat(SharedMetricRegistries.names(), contains("NonDefaultRegistry"));
         ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
-        String name = MetricRegistry.name(ContextManagers.class, "createContextSnapshot");
+        String name = MetricRegistry.name(nl.talsmasoftware.context.core.ContextManagers.class, "createContextSnapshot");
         assertThat(snapshot, is(notNullValue()));
 
         assertThat(SharedMetricRegistries.names(), contains("NonDefaultRegistry")); // No new registries!
@@ -117,7 +117,7 @@ public class MetricsContextTimerTest {
         for (int i = 1; i <= 3; i++) {
             assertThat(ContextManagers.createContextSnapshot(), is(notNullValue()));
         }
-        String name = MetricRegistry.name(ContextManagers.class, "createContextSnapshot");
+        String name = MetricRegistry.name(nl.talsmasoftware.context.core.ContextManagers.class, "createContextSnapshot");
 
         assertThat(registry1.getTimers().containsKey(name), is(true));
         assertThat(registry1.timer(name).getCount(), is(3L));

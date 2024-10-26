@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class MicrometerContextTimerTest {
 
     @Test
     public void testCreateSnapshotInFreshApplication() {
-        Timer timer = Metrics.timer(ContextManagers.class.getName() + ".createContextSnapshot");
+        Timer timer = Metrics.timer(nl.talsmasoftware.context.core.ContextManagers.class.getName() + ".createContextSnapshot");
         assertThat(timer.count(), is(0L));
 
         ContextSnapshot snapshot = ContextManagers.createContextSnapshot();

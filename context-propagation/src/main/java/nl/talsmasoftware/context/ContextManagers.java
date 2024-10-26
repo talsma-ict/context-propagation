@@ -16,14 +16,9 @@
 package nl.talsmasoftware.context;
 
 import nl.talsmasoftware.context.api.ContextObserver;
-import nl.talsmasoftware.context.api.ContextSnapshot.Reactivation;
 import nl.talsmasoftware.context.clearable.Clearable;
 import nl.talsmasoftware.context.delegation.Wrapper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
@@ -38,7 +33,10 @@ import java.util.logging.Logger;
  * {@link Context#close() closed} again (preferably in a <code>try-with-resources</code> construct).
  *
  * @author Sjoerd Talsma
+ * @see nl.talsmasoftware.context.core.ContextManagers
+ * @deprecated This class has moved to the {@code nl.talsmasoftware.context.core} package.
  */
+@Deprecated
 public final class ContextManagers {
     private static final Logger LOGGER = Logger.getLogger(ContextManagers.class.getName());
 
@@ -81,39 +79,11 @@ public final class ContextManagers {
      *
      * @return A new snapshot that can be reactivated elsewhere (e.g. a background thread or even another node)
      * within a try-with-resources construct.
+     * @deprecated Moved to the {@code nl.talsmasoftware.context.core} package.
      */
+    @Deprecated
     public static nl.talsmasoftware.context.api.ContextSnapshot createContextSnapshot() {
-        final long start = System.nanoTime();
-        final List<ContextManager> managers = new LinkedList<ContextManager>();
-        final List<Object> values = new LinkedList<Object>();
-        Long managerStart = null;
-        for (ContextManager manager : getContextManagers()) {
-            managerStart = System.nanoTime();
-            try {
-                final Context activeContext = manager.getActiveContext();
-                if (activeContext != null) {
-                    values.add(activeContext.getValue());
-                    managers.add(manager);
-                    if (LOGGER.isLoggable(Level.FINEST)) {
-                        LOGGER.finest("Active context of " + manager + " added to new snapshot: " + activeContext + ".");
-                    }
-                    Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "getActiveContext");
-                } else if (LOGGER.isLoggable(Level.FINEST)) {
-                    LOGGER.log(Level.FINEST, "There is no active context for " + manager + " in this snapshot.");
-                }
-            } catch (RuntimeException rte) {
-                CONTEXT_MANAGERS.clearCache();
-                LOGGER.log(Level.WARNING, "Exception obtaining active context from " + manager + " for snapshot.", rte);
-                Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "getActiveContext.exception");
-            }
-        }
-        if (managerStart == null) {
-            NoContextManagersFound noContextManagersFound = new NoContextManagersFound();
-            LOGGER.log(Level.INFO, noContextManagersFound.getMessage(), noContextManagersFound);
-        }
-        ContextSnapshotImpl result = new ContextSnapshotImpl(managers, values);
-        Timers.timed(System.nanoTime() - start, ContextManagers.class, "createContextSnapshot");
-        return result;
+        return nl.talsmasoftware.context.core.ContextManagers.createContextSnapshot();
     }
 
     /**
@@ -133,38 +103,12 @@ public final class ContextManagers {
      * <p>
      * For context managers that are not {@linkplain Clearable} and contain an active {@linkplain Context}
      * that is not {@code Clearable} either, this active context will be closed normally.
+     *
+     * @deprecated Moved to the {@code nl.talsmasoftware.context.core} package.
      */
+    @Deprecated
     public static void clearActiveContexts() {
-        final long start = System.nanoTime();
-        Long managerStart = null;
-        for (ContextManager manager : getContextManagers()) {
-            managerStart = System.nanoTime();
-            try {
-                // TODO add ContextObserver.onClear()
-                if (manager instanceof Clearable) {
-                    ((Clearable) manager).clear();
-                    if (LOGGER.isLoggable(Level.FINEST)) {
-                        LOGGER.finest("Active context of " + manager + " was cleared.");
-                    }
-                    Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "clear");
-                } else {
-                    Context activeContext = manager.getActiveContext();
-                    if (activeContext != null) {
-                        clearContext(manager, activeContext);
-                    } else if (LOGGER.isLoggable(Level.FINEST)) {
-                        LOGGER.finest("There is no active context for " + manager + " to be cleared.");
-                    }
-                }
-            } catch (RuntimeException rte) {
-                LOGGER.log(Level.WARNING, "Exception clearing active context from " + manager + ".", rte);
-                Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "clear.exception");
-            }
-        }
-        if (managerStart == null) {
-            NoContextManagersFound noContextManagersFound = new NoContextManagersFound();
-            LOGGER.log(Level.INFO, noContextManagersFound.getMessage(), noContextManagersFound);
-        }
-        Timers.timed(System.nanoTime() - start, ContextManagers.class, "clearActiveContexts");
+        nl.talsmasoftware.context.core.ContextManagers.clearActiveContexts();
     }
 
     /**
@@ -175,36 +119,11 @@ public final class ContextManagers {
      * @param <T>                        Type of the value in the context.
      * @return {@code true} if the observer was registered.
      * @since 1.1.0
+     * @deprecated Moved to the {@code nl.talsmasoftware.context.core} package.
      */
+    @Deprecated
     public static <T> boolean registerContextObserver(ContextObserver<? super T> contextObserver, Class<ContextManager<T>> observedContextManagerType) {
-        if (contextObserver == null) {
-            throw new NullPointerException("Context observer must not be null.");
-        } else if (observedContextManagerType == null) {
-            throw new NullPointerException("Observed ContextManager type must not be null.");
-        }
-
-        // Find ContextManager to register.
-        ContextManager contextManager = null;
-        for (ContextManager manager : getContextManagers()) {
-            if (observedContextManagerType.isInstance(manager)) {
-                contextManager = manager;
-                break;
-            }
-        }
-        if (contextManager == null) {
-            LOGGER.warning("Trying to register observer to missing ContextManager type: " + observedContextManagerType + ".");
-            return false;
-        }
-
-        // Register new observer by wrapping the context manager.
-        ObservableContextManager<T> newObserver = new ObservableContextManager<T>(contextManager, (List) Arrays.asList(contextObserver));
-        if (OBSERVERS.addIfAbsent(newObserver)) {
-            return true;
-        }
-
-        // There is already an existing ObservableContextManager, add the observer to it.
-        ObservableContextManager existing = OBSERVERS.get(OBSERVERS.indexOf(newObserver));
-        return existing.observers.addIfAbsent(contextObserver);
+        return nl.talsmasoftware.context.core.ContextManagers.registerContextObserver(contextObserver, observedContextManagerType);
     }
 
     /**
@@ -213,16 +132,11 @@ public final class ContextManagers {
      * @param contextObserver The previously registered context observer.
      * @return {@code true} if the observer was unregistered.
      * @since 1.1.0
+     * @deprecated Moved to the {@code nl.talsmasoftware.context.core} package.
      */
+    @Deprecated
     public static boolean unregisterContextObserver(ContextObserver<?> contextObserver) {
-        boolean unregistered = false;
-        for (ObservableContextManager observer : OBSERVERS) {
-            unregistered |= observer.observers.remove(contextObserver);
-            if (observer.observers.isEmpty()) {
-                OBSERVERS.remove(observer);
-            }
-        }
-        return unregistered;
+        return nl.talsmasoftware.context.core.ContextManagers.unregisterContextObserver(contextObserver);
     }
 
     /**
@@ -245,14 +159,12 @@ public final class ContextManagers {
      * @param classLoader The single, fixed ClassLoader to use for finding context managers.
      *                    Specify {@code null} to restore the default behaviour.
      * @since 1.0.5
+     * @deprecated Moved to the {@code nl.talsmasoftware.context.core} package.
      */
+    @Deprecated
     public static void useClassLoader(ClassLoader classLoader) {
-        Level loglevel = PriorityServiceLoader.classLoaderOverride == classLoader ? Level.FINEST : Level.FINE;
-        if (LOGGER.isLoggable(loglevel)) {
-            LOGGER.log(loglevel, "Setting override classloader for loading ContextManager and ContextObserver " +
-                    "instances to " + classLoader + " (was: " + PriorityServiceLoader.classLoaderOverride + ").");
-        }
         PriorityServiceLoader.classLoaderOverride = classLoader;
+        nl.talsmasoftware.context.core.ContextManagers.useClassLoader(classLoader);
     }
 
     /**
@@ -263,8 +175,10 @@ public final class ContextManagers {
      * @param activatedContextValue The activated context value or {@code null} if no value was activated.
      * @param previousContextValue  The previous context value or {@code null} if unknown or unsupported.
      * @param <T>                   The type managed by the context manager.
+     * @see nl.talsmasoftware.context.core.ContextManagers#registerContextObserver(ContextObserver, Class)
+     * @see nl.talsmasoftware.context.core.ContextManagers#unregisterContextObserver(ContextObserver)
      * @since 1.0.6
-     * @deprecated To be replaced by explicit observer registration method (TODO)
+     * @deprecated Replaced by explicit observer registration
      */
     @Deprecated
     @SuppressWarnings("unchecked") // If the observer tells us it can observe the values, we trust it.
@@ -324,166 +238,6 @@ public final class ContextManagers {
                             observationException);
                 }
             }
-        }
-    }
-
-    private static Iterable<ContextManager> getContextManagers() {
-        // TODO change to stream implementation when java 8
-        return OBSERVERS.isEmpty() ? CONTEXT_MANAGERS : new Iterable<ContextManager>() {
-            public Iterator<ContextManager> iterator() {
-                return new Iterator<ContextManager>() {
-                    private final Iterator<ContextManager> delegate = CONTEXT_MANAGERS.iterator();
-
-                    public boolean hasNext() {
-                        return delegate.hasNext();
-                    }
-
-                    public ContextManager next() {
-                        ContextManager contextManager = delegate.next();
-                        if (!(contextManager instanceof ObservableContextManager)) {
-                            for (ObservableContextManager observableContextManager : OBSERVERS) {
-                                if (observableContextManager.isWrapperOf(contextManager)) {
-                                    CONTEXT_MANAGERS.replaceInCache(contextManager, observableContextManager);
-                                    return observableContextManager;
-                                }
-                            }
-                        }
-                        return contextManager;
-                    }
-
-                    public void remove() {
-                        delegate.remove();
-                    }
-                };
-            }
-        };
-    }
-
-    private static void clearContext(ContextManager manager, Context context) {
-        final long start = System.nanoTime();
-        final Class<? extends Context> contextType = context.getClass();
-        if (context instanceof Clearable) {
-            ((Clearable) context).clear();
-            if (LOGGER.isLoggable(Level.FINEST)) {
-                LOGGER.finest("Active context of " + manager + " was cleared.");
-            }
-        } else {
-            int maxAttempts = 255;
-            while (context != null && --maxAttempts > 0) {
-                context.close();
-                context = manager.getActiveContext();
-            }
-            if (context != null) {
-                Logger.getLogger(manager.getClass().getName()).warning(
-                        "Possible endless loop prevented clearing the active context for " + manager +
-                                ". Could it be that this manager returns a non-null context by default " +
-                                "and has not implemented the Clearable interface?");
-            }
-        }
-        Timers.timed(System.nanoTime() - start, contextType, "clear");
-    }
-
-    /**
-     * Implementation of the <code>createContextSnapshot</code> functionality that can reactivate all values from the
-     * snapshot in each corresponding {@link ContextManager}.
-     */
-    private static final class ContextSnapshotImpl implements nl.talsmasoftware.context.api.ContextSnapshot {
-        private static final ContextManager[] MANAGER_ARRAY = new ContextManager[0];
-        private final ContextManager[] managers;
-        private final Object[] values;
-
-        private ContextSnapshotImpl(List<ContextManager> managers, List<Object> values) {
-            this.managers = managers.toArray(MANAGER_ARRAY);
-            this.values = values.toArray();
-        }
-
-        public Reactivation reactivate() {
-            final long start = System.nanoTime();
-            final List<Context<?>> reactivatedContexts = new ArrayList<Context<?>>(managers.length);
-            try {
-                for (int i = 0; i < managers.length && i < values.length; i++) {
-                    reactivatedContexts.add(reactivate(managers[i], values[i]));
-                }
-                ReactivationImpl reactivation = new ReactivationImpl(reactivatedContexts);
-                Timers.timed(System.nanoTime() - start, nl.talsmasoftware.context.api.ContextSnapshot.class, "reactivate");
-                return reactivation;
-            } catch (RuntimeException reactivationException) {
-                CONTEXT_MANAGERS.clearCache();
-                for (Context alreadyReactivated : reactivatedContexts) {
-                    if (alreadyReactivated != null) try {
-                        if (LOGGER.isLoggable(Level.FINEST)) {
-                            LOGGER.finest("Snapshot reactivation failed! " +
-                                    "Closing already reactivated context: " + alreadyReactivated + ".");
-                        }
-                        alreadyReactivated.close();
-                    } catch (RuntimeException rte) {
-                        addSuppressedOrWarn(reactivationException, rte, "Could not close already reactivated context.");
-                    }
-                }
-                throw reactivationException;
-            }
-        }
-
-        @SuppressWarnings("unchecked") // As we got the values from the managers themselves, they must also accept them!
-        private Context reactivate(ContextManager contextManager, Object snapshotValue) {
-            long start = System.nanoTime();
-            Context reactivated = contextManager.initializeNewContext(snapshotValue);
-            if (LOGGER.isLoggable(Level.FINEST)) {
-                LOGGER.finest("Context reactivated from snapshot by " + contextManager + ": " + reactivated + ".");
-            }
-            Timers.timed(System.nanoTime() - start, contextManager.getClass(), "initializeNewContext");
-            return reactivated;
-        }
-
-        @Override
-        public String toString() {
-            return "ContextSnapshot{size=" + managers.length + '}';
-        }
-    }
-
-    /**
-     * Implementation of the reactivated 'container' context that closes all reactivated contexts
-     * when it is closed itself.<br>
-     * This context contains no meaningful value in itself and purely exists to close the reactivated contexts.
-     */
-    private static final class ReactivationImpl implements Reactivation {
-        private final List<Context<?>> reactivated;
-
-        private ReactivationImpl(List<Context<?>> reactivated) {
-            this.reactivated = reactivated;
-        }
-
-        public Void getValue() {
-            return null;
-        }
-
-        public void close() {
-            RuntimeException closeException = null;
-            // close in reverse order of reactivation
-            for (int i = this.reactivated.size() - 1; i >= 0; i--) {
-                Context<?> reactivated = this.reactivated.get(i);
-                if (reactivated != null) try {
-                    reactivated.close();
-                } catch (RuntimeException rte) {
-                    if (closeException == null) closeException = rte;
-                    else addSuppressedOrWarn(closeException, rte, "Exception closing the reactivated context.");
-                }
-            }
-            if (closeException != null) throw closeException;
-        }
-
-        @Override
-        public String toString() {
-            return "ReactivatedContext{size=" + reactivated.size() + '}';
-        }
-    }
-
-    @SuppressWarnings("Since15") // That's why we catch the LinkageError here
-    private static void addSuppressedOrWarn(Throwable exception, Throwable toSuppress, String message) {
-        if (exception != null && toSuppress != null) try {
-            exception.addSuppressed(toSuppress);
-        } catch (LinkageError le) {
-            LOGGER.log(Level.WARNING, message, toSuppress);
         }
     }
 
@@ -557,17 +311,6 @@ public final class ContextManagers {
         @Override
         public String toString() {
             return delegate().toString();
-        }
-    }
-
-    /**
-     * Exception that we don't actually throw, but it helps track the issue if we log it including the stacktrace.
-     */
-    private static class NoContextManagersFound extends RuntimeException {
-        private NoContextManagersFound() {
-            super("Context snapshot was created but no ContextManagers were found!"
-                    + " Thread=" + Thread.currentThread()
-                    + ", ContextClassLoader=" + Thread.currentThread().getContextClassLoader());
         }
     }
 }
