@@ -41,6 +41,7 @@ import java.util.logging.Logger;
  * {@link Context#close() closed} again (preferably in a <code>try-with-resources</code> construct).
  *
  * @author Sjoerd Talsma
+ * @since 1.1.0
  */
 public final class ContextManagers {
     private static final Logger LOGGER = Logger.getLogger(ContextManagers.class.getName());

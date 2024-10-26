@@ -15,7 +15,7 @@
  */
 package nl.talsmasoftware.context.core;
 
-import nl.talsmasoftware.context.timing.ContextTimer;
+import nl.talsmasoftware.context.api.ContextTimer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +42,12 @@ final class Timers {
             List<ContextTimer> delegates = new ArrayList<ContextTimer>();
             for (ContextTimer delegate : new PriorityServiceLoader<ContextTimer>(ContextTimer.class)) {
                 delegates.add(delegate);
+            }
+            // add legacy context services
+            for (nl.talsmasoftware.context.timing.ContextTimer delegate : new PriorityServiceLoader<nl.talsmasoftware.context.timing.ContextTimer>(nl.talsmasoftware.context.timing.ContextTimer.class)) {
+                if (!delegates.contains(delegate)) {
+                    delegates.add(delegate);
+                }
             }
             this.delegates = delegates.toArray(new ContextTimer[0]);
         }

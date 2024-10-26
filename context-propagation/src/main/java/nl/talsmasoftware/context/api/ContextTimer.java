@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.timing;
+package nl.talsmasoftware.context.api;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Minimal Service Provider Interface for services that wish to get informed of context switching metrics.
@@ -29,9 +31,18 @@ package nl.talsmasoftware.context.timing;
  * (*) <em>Timing is updated for each concrete {@code ContextManager} implementation class</em>
  *
  * @author Sjoerd Talsma
- * @deprecated Moved to package {@code nl.talsmasoftware.context.api}
+ * @since 1.1.0
  */
-@Deprecated
-public interface ContextTimer extends nl.talsmasoftware.context.api.ContextTimer {
+public interface ContextTimer {
+
+    /**
+     * Provides a new update for the context timer.
+     *
+     * @param type     The class being called
+     * @param method   The method being called
+     * @param duration The duration of the method
+     * @param unit     The unit of the duration
+     */
+    void update(Class<?> type, String method, long duration, TimeUnit unit);
 
 }
