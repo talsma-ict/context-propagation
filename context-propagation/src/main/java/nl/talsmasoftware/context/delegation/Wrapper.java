@@ -82,16 +82,24 @@ public abstract class Wrapper<T> {
 
     @Override
     public int hashCode() {
-        return delegate == null ? super.hashCode() : delegate.hashCode();
+        return delegate().hashCode();
     }
 
     @Override
     public boolean equals(Object other) {
-        return this == other || (other != null
-                && getClass().equals(other.getClass())
-                && equals(delegate, ((Wrapper) other).delegate));
+        return this == other
+                || (other != null && getClass().equals(other.getClass()) && delegate().equals(((Wrapper) other).delegate()));
     }
 
+    /**
+     * Null-safe Objects.equals equivalent for old Java versions.
+     *
+     * @param obj1 The first object to compare.
+     * @param obj2 The second object to compare.
+     * @return {@code true} if obj1.equals(obj2) or both objects are null.
+     * @deprecated To be removed after Java 8 version upgrade.
+     */
+    @Deprecated
     static boolean equals(Object obj1, Object obj2) {
         return obj1 == obj2 || (obj1 != null && obj1.equals(obj2));
     }
@@ -101,7 +109,6 @@ public abstract class Wrapper<T> {
      */
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{delegate=" + delegate + '}';
+        return getClass().getSimpleName() + '{' + delegate() + '}';
     }
-
 }

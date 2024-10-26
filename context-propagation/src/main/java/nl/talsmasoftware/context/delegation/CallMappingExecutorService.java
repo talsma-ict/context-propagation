@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public abstract class CallMappingExecutorService extends DelegatingExecutorServi
             final Callable<?> callable = Executors.callable(runnable);
             final Callable<?> wrapped = wrap(callable);
             // Only return adapter if the wrapping resulted in a different object:
-            if (!callable.equals(wrapped)) return new RunnableAdapter(wrapped);
+            if (!callable.equals(wrapped)) return new CallableToRunnable(wrapped);
         }
         return runnable;
     }

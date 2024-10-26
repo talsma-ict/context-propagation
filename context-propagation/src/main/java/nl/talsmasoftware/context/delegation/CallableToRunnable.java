@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,50 +20,34 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Package protected adapter from {@link Callable} to {@link Runnable} ignoring any specified results.
+ * Adapter from {@link Callable} to {@link Runnable} ignoring any results.
+ *
  * <p>
  * Normally it is a bad idea to ignore results; therefore this adapter class is limited to package-protected visibility.
  * It is used by the {@link CallMappingExecutorService} to re-use the {@link Callable} mapping functionality for mapping
  * {@link Runnable} objects as well. In that case, the {@Callable} being converted was already originally a
- * {@link Runnable} object, and this converter merely 'converts it back'.
- * Therefore the ignored result -in this particular usecase- actually is irrelevant indeed.
+ * {@link Runnable} object, and this converter merely 'converts it back'.<br>
+ * <em>In this particular usecase</em> the ignored result is indeed irrelevant.
  *
  * @author Sjoerd Talsma
  */
-final class RunnableAdapter implements Runnable {
-    private static final Logger LOGGER = Logger.getLogger(RunnableAdapter.class.getName());
-    private final Callable<?> callable;
+final class CallableToRunnable extends Wrapper<Callable<?>> implements Runnable {
+    private static final Logger LOGGER = Logger.getLogger(CallableToRunnable.class.getName());
 
-    RunnableAdapter(Callable<?> callable) {
+    CallableToRunnable(Callable<?> callable) {
+        super(callable);
         if (callable == null) throw new IllegalArgumentException("Callable to convert into runnable was <null>.");
-        this.callable = callable;
     }
 
     public void run() {
         try {
-            Object result = callable.call();
+            Object result = delegate().call();
             LOGGER.log(Level.FINEST, "Call result ignored by RunnableAdapter: {0}", result);
         } catch (RuntimeException unchecked) {
             throw unchecked;
         } catch (Exception checked) {
             throw new IllegalStateException("Checked exception thrown from call: " + checked.getMessage(), checked);
         }
-    }
-
-    @Override
-    public int hashCode() {
-        return callable.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        return this == other || (other != null && getClass().equals(other.getClass())
-                && callable.equals(((RunnableAdapter) other).callable));
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + '{' + callable + '}';
     }
 
 }

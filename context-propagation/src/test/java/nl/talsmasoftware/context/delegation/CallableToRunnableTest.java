@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,15 +40,15 @@ import static org.mockito.Mockito.when;
  *
  * @author Sjoerd Talsma
  */
-public class RunnableAdapterTest {
+public class CallableToRunnableTest {
 
     Callable<Object> delegate;
-    RunnableAdapter subject;
+    CallableToRunnable subject;
 
     @BeforeEach
     public void setUp() {
         delegate = mock(Callable.class);
-        subject = new RunnableAdapter(delegate);
+        subject = new CallableToRunnable(delegate);
     }
 
     @AfterEach
@@ -60,7 +60,7 @@ public class RunnableAdapterTest {
     public void testNullConstructor() {
         assertThrows(IllegalArgumentException.class, new Executable() {
             public void execute() {
-                new RunnableAdapter(null);
+                new CallableToRunnable(null);
             }
         });
     }
@@ -107,13 +107,13 @@ public class RunnableAdapterTest {
     @Test
     public void testEquals() {
         assertThat(subject, is(equalTo(subject)));
-        assertThat(subject, is(equalTo((Object) new RunnableAdapter(delegate))));
-        assertThat(subject, is(not(equalTo((Object) new RunnableAdapter(mock(Callable.class))))));
+        assertThat(subject, is(equalTo((Object) new CallableToRunnable(delegate))));
+        assertThat(subject, is(not(equalTo((Object) new CallableToRunnable(mock(Callable.class))))));
     }
 
     @Test
     public void testToString() {
-        assertThat(subject, hasToString("RunnableAdapter{" + delegate + "}"));
+        assertThat(subject, hasToString("CallableToRunnable{" + delegate + "}"));
     }
 
 }

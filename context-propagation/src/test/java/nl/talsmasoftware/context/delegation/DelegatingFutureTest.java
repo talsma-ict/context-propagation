@@ -147,6 +147,6 @@ public class DelegatingFutureTest {
 
     @Test
     public void testToString() {
-        assertThat(subject, hasToString("TestDelegatingFuture{delegate=" + delegate + "}"));
+        assertThat(subject, hasToString("TestDelegatingFuture{" + delegate + "}"));
     }
 }
