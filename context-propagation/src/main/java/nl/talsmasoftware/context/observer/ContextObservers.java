@@ -26,9 +26,9 @@ import nl.talsmasoftware.context.ContextManagers;
  * and {@linkplain #onDeactivate(Class, Object, Object) deactivate} occurrances.
  *
  * @author Sjoerd Talsma
- * @see ContextManagers#registerContextObserver(nl.talsmasoftware.context.api.ContextObserver, Class)
- * @see ContextManagers#unregisterContextObserver(nl.talsmasoftware.context.api.ContextObserver)
- * @deprecated The methods from this class will be replaced by explicit ContextManager registration.
+ * @see nl.talsmasoftware.context.core.ContextManagers#registerContextObserver(nl.talsmasoftware.context.api.ContextObserver, Class)
+ * @see nl.talsmasoftware.context.core.ContextManagers#unregisterContextObserver(nl.talsmasoftware.context.api.ContextObserver)
+ * @deprecated Replaced by explicit ContextManager registration.
  */
 @Deprecated
 public final class ContextObservers {

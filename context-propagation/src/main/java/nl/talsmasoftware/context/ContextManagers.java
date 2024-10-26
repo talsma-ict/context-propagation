@@ -112,34 +112,6 @@ public final class ContextManagers {
     }
 
     /**
-     * Register an observer for contexts managed by the specified ContextManager type.
-     *
-     * @param contextObserver            The observer to register.
-     * @param observedContextManagerType The context manager type to observe.
-     * @param <T>                        Type of the value in the context.
-     * @return {@code true} if the observer was registered.
-     * @since 1.1.0
-     * @deprecated Moved to the {@code nl.talsmasoftware.context.core} package.
-     */
-    @Deprecated
-    public static <T> boolean registerContextObserver(ContextObserver<? super T> contextObserver, Class<ContextManager<T>> observedContextManagerType) {
-        return nl.talsmasoftware.context.core.ContextManagers.registerContextObserver(contextObserver, observedContextManagerType);
-    }
-
-    /**
-     * Unregister an observer for any context.
-     *
-     * @param contextObserver The previously registered context observer.
-     * @return {@code true} if the observer was unregistered.
-     * @since 1.1.0
-     * @deprecated Moved to the {@code nl.talsmasoftware.context.core} package.
-     */
-    @Deprecated
-    public static boolean unregisterContextObserver(ContextObserver<?> contextObserver) {
-        return nl.talsmasoftware.context.core.ContextManagers.unregisterContextObserver(contextObserver);
-    }
-
-    /**
      * Override the {@linkplain ClassLoader} used to lookup {@linkplain ContextManager contextmanagers}.
      * <p>
      * Normally, taking a snapshot uses the {@linkplain Thread#getContextClassLoader() Context ClassLoader} from the
