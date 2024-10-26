@@ -13,37 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context;
+package nl.talsmasoftware.context.api;
 
 /**
- * The contract for a ContextManager Service.
+ * The service definition a {@linkplain Context} manager.
  *
  * <p>
- * Implementations can be registered by providing a fully qualified class name in a service file called:<br>
- * <code>"/META-INF/services/nl.talsmasoftware.context.ContextManager"</code><br>
- * That will take care of any active context being captured in {@link ContextSnapshot} instances
- * managed by the {@link ContextManagers} utility class.<br>
- * <b>Note:</b> <em>Make sure your implementation has a default (no-argument) constructor.</em>
- *
- * <p>
- * A context manager is required to notify
- * registered {@linkplain nl.talsmasoftware.context.observer.ContextObserver ContextObserver} instances
- * of context updates.<br>
- * The {@linkplain nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext AbstractThreadLocalContext}
- * already notifies these observers.<br>
- * Other implementations can use the {@linkplain ContextManagers#onActivate(Class, Object, Object)}
- * and {@linkplain ContextManagers#onDeactivate(Class, Object, Object)} methods
- * to notify the appropriate context observers.
+ * Implementations must be made available as <em>service provider</em>.<br>
+ * For details how to make your implementation available, please see the documentation of {@link java.util.ServiceLoader}.
  *
  * @param <T> type of the context value
  * @author Sjoerd Talsma
- * @deprecated Move to the {@code nl.talsmasoftware.context.api} package.
  */
-@Deprecated
-public interface ContextManager<T> {
+public interface ContextManager<T> extends nl.talsmasoftware.context.ContextManager<T> {
 
     /**
      * Initialize a new context containing the specified <code>value</code>.
+     *
      * <p>
      * Whether the value is allowed to be <code>null</code> is up to the implementation.
      *
@@ -57,7 +43,34 @@ public interface ContextManager<T> {
      * The currently active context, or <code>null</code> if no context is active.
      *
      * @return The active context or <code>null</code> if there is none.
+     * @deprecated In favour of {@link #getActiveContextValue}
      */
+    @Deprecated
     Context<T> getActiveContext();
+
+    /**
+     * The value of the currently active context, or {@code null} if no context is active.
+     *
+     * @return The value of the active context, or {@code null} if no context is active.
+     * @see Context#getValue()
+     */
+    T getActiveContextValue();
+
+    /**
+     * Clears the current context and any potential parent contexts that exist.
+     *
+     * <p>
+     * This is an optional operation.<br>
+     * When all initialized contexts are initialized in combination with try-with-resources blocks,
+     * it is not necessary to call clear.
+     *
+     * <p>
+     * The operation exists to allow thread pool management making sure
+     * to clear all contexts before returning threads to the pool.
+     *
+     * <p>
+     * This method normally should only get called by {@code ContextManagers.clearActiveContexts()}.
+     */
+    void clear();
 
 }
