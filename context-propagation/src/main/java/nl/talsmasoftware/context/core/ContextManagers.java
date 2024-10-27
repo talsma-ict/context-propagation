@@ -69,12 +69,13 @@ public final class ContextManagers {
      * This method is able to create a 'snapshot' from the current
      * {@link ContextManager#getActiveContext() active context} from <em>all known {@link ContextManager}</em>
      * implementations.
+     *
      * <p>
      * This snapshot is returned as a single object that can be temporarily
      * {@link ContextSnapshot#reactivate() reactivated}. Don't forget to {@link Context#close() close} the reactivated
      * context once you're done, preferably in a <code>try-with-resources</code> construct.
      *
-     * @return A new snapshot that can be reactivated elsewhere (e.g. a background thread or even another node)
+     * @return A new snapshot that can be reactivated elsewhere (e.g. a background thread)
      * within a try-with-resources construct.
      */
     public static nl.talsmasoftware.context.api.ContextSnapshot createContextSnapshot() {
