@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.functions;
+package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.ContextSnapshot;
 
@@ -26,13 +26,11 @@ import java.util.function.Supplier;
  * calling a delegate.
  *
  * @author Sjoerd Talsma
- * @deprecated Moved to package {@code nl.talsmasoftware.context.core.function}.
  */
-@Deprecated
-public class BinaryOperatorWithContext<T> extends nl.talsmasoftware.context.core.function.BinaryOperatorWithContext<T> {
+public class BinaryOperatorWithContext<T> extends BiFunctionWithContext<T, T, T> implements BinaryOperator<T> {
 
     public BinaryOperatorWithContext(ContextSnapshot snapshot, BinaryOperator<T> delegate) {
-        super(snapshot, delegate);
+        this(snapshot, delegate, null);
     }
 
     public BinaryOperatorWithContext(ContextSnapshot snapshot, BinaryOperator<T> delegate, Consumer<ContextSnapshot> consumer) {
