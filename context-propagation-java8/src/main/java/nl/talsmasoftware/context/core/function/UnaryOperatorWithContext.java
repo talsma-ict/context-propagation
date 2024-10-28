@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.functions;
+package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.ContextSnapshot;
+import nl.talsmasoftware.context.functions.FunctionWithContext;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -26,13 +27,11 @@ import java.util.function.UnaryOperator;
  * calling a delegate.
  *
  * @author Sjoerd Talsma
- * @deprecated Moved to package {@code nl.talsmasoftware.context.core.function}.
  */
-@Deprecated
-public class UnaryOperatorWithContext<T> extends nl.talsmasoftware.context.core.function.UnaryOperatorWithContext<T> {
+public class UnaryOperatorWithContext<T> extends FunctionWithContext<T, T> implements UnaryOperator<T> {
 
     public UnaryOperatorWithContext(ContextSnapshot snapshot, UnaryOperator<T> delegate) {
-        super(snapshot, delegate);
+        this(snapshot, delegate, null);
     }
 
     public UnaryOperatorWithContext(ContextSnapshot snapshot, UnaryOperator<T> delegate, Consumer<ContextSnapshot> snapshotConsumer) {

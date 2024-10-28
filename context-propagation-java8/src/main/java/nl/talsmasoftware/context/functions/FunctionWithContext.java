@@ -26,7 +26,9 @@ import java.util.function.Supplier;
  * calling a delegate.
  *
  * @author Sjoerd Talsma
+ * @deprecated Moved to package {@code nl.talsmasoftware.context.core.function}.
  */
+@Deprecated
 public class FunctionWithContext<IN, OUT> extends nl.talsmasoftware.context.core.function.FunctionWithContext<IN, OUT> {
 
     public FunctionWithContext(ContextSnapshot snapshot, Function<IN, OUT> delegate) {
