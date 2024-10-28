@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.futures;
+package nl.talsmasoftware.context.core.concurrent;
 
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
@@ -42,9 +42,7 @@ import static java.util.Objects.requireNonNull;
  * {@link ContextSnapshot context during creation} of this {@link ContextAwareCompletableFuture}.
  *
  * @author Sjoerd Talsma
- * @deprecated Moved to package {@code nl.talsmasoftware.context.core.concurrent}.
  */
-@Deprecated
 public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
 
     /**
