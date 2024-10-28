@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,7 @@ import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManager;
 import nl.talsmasoftware.context.ContextManagers;
 
-import java.lang.reflect.Modifier;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -32,19 +28,13 @@ import java.util.logging.Logger;
  * {@link #threadLocalInstanceOf(Class)}.
  *
  * @author Sjoerd Talsma
+ * @deprecated Moved to package {@code nl.talsmasoftware.context.core.threadlocal}.
  */
-public abstract class AbstractThreadLocalContext<T> implements Context<T> {
+@Deprecated
+public abstract class AbstractThreadLocalContext<T> extends nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext<T> {
     private static final Logger LOGGER = Logger.getLogger(AbstractThreadLocalContext.class.getName());
+    private static Class<? extends AbstractThreadLocalContext> contextType;
 
-    private static final AtomicBoolean DEPRECATED_CONSTRUCTOR_WARNING = new AtomicBoolean(true);
-    /**
-     * The constant of ThreadLocal context instances per subclass name so different types don't get mixed.
-     */
-    private static final ConcurrentMap<String, ThreadLocal<?>> INSTANCES =
-            new ConcurrentHashMap<String, ThreadLocal<?>>();
-
-    @SuppressWarnings("unchecked")
-    private final ThreadLocal<AbstractThreadLocalContext<T>> sharedThreadLocalContext = threadLocalInstanceOf((Class) getClass());
     private final AtomicBoolean closed = new AtomicBoolean(false);
     private final Class<? extends ContextManager<? super T>> contextManagerType;
 
@@ -69,17 +59,9 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
      *
      * @param newValue The new value to become active in this new context
      *                 (or <code>null</code> to register a new context with 'no value').
-     * @deprecated Using this constructor makes it impossible to register a {@code ContextObserver}!
      */
-    @Deprecated
     protected AbstractThreadLocalContext(T newValue) {
         this(null, newValue);
-        LOGGER.log(DEPRECATED_CONSTRUCTOR_WARNING.compareAndSet(true, false) ? Level.WARNING : Level.FINE,
-                "Initialized new {0} without context manager type. " +
-                        "This makes it impossible to register ContextObservers for it. " +
-                        "Please fix {1} by specifying a ContextManager type " +
-                        "in the AbstractThreadLocalContext constructor.",
-                new Object[]{this, getClass().getSimpleName()});
     }
 
     /**
@@ -92,32 +74,11 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
      */
     @SuppressWarnings("unchecked")
     protected AbstractThreadLocalContext(Class<? extends ContextManager<? super T>> contextManagerType, T newValue) {
-        this.unwindIfNecessary(); // avoid unnecessary parentContexts
+        super(newValue);
         this.contextManagerType = contextManagerType;
-        this.parentContext = sharedThreadLocalContext.get();
-        this.value = newValue;
-        this.sharedThreadLocalContext.set(this);
-        LOGGER.log(Level.FINEST, "Initialized new {0}.", this);
+        this.parentContext = super.parentContext;
+        this.value = super.value;
         ContextManagers.onActivate(contextManagerType, value, parentContext == null ? null : parentContext.getValue());
-    }
-
-    /**
-     * Unwinds the sharedThreadLocalContext.
-     *
-     * @return The new 'current' context (not necessarily related to 'this' object).
-     */
-    @SuppressWarnings("unchecked")
-    private AbstractThreadLocalContext<T> unwindIfNecessary() {
-        final AbstractThreadLocalContext<?> head = sharedThreadLocalContext.get();
-        AbstractThreadLocalContext<?> current = head;
-        while (current != null && current.closed.get()) { // Current is closed: unwind!
-            current = (AbstractThreadLocalContext<?>) current.parentContext;
-        }
-        if (current != head) { // refresh head if necessary.
-            if (current == null) sharedThreadLocalContext.remove();
-            else ((ThreadLocal) sharedThreadLocalContext).set(current);
-        }
-        return (AbstractThreadLocalContext<T>) current;
     }
 
     /**
@@ -126,16 +87,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
      * @return Whether the context is already closed.
      */
     protected boolean isClosed() {
-        return closed.get();
-    }
-
-    /**
-     * Returns the value of this context instance, or <code>null</code> if it was already closed.
-     *
-     * @return The value of this context.
-     */
-    public T getValue() {
-        return closed.get() ? null : value;
+        return super.isClosed();
     }
 
     /**
@@ -145,24 +97,10 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
      * <p>
      * This method has no side-effects if the context was already closed (it is safe to call multiple times).
      */
-    public void close() {
-        final boolean observe = closed.compareAndSet(false, true);
-        final Context<T> restored = this.unwindIfNecessary(); // Remove this context created in the same thread.
-        LOGGER.log(Level.FINEST, "Closed {0}.", this);
-        if (observe) {
-            ContextManagers.onDeactivate(contextManagerType, this.value, restored == null ? null : restored.getValue());
-        }
-    }
-
-    /**
-     * Returns the classname of this context followed by <code>"{closed}"</code> if it has been closed already;
-     * otherwise the contained {@link #getValue() value} by this context will be added.
-     *
-     * @return String representing this context class and either the current value or the fact that it was closed.
-     */
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + (isClosed() ? "{closed}" : "{value=" + value + '}');
+    public synchronized void close() {
+        final boolean observe = !super.isClosed();
+        super.close();
+        if (observe) ContextManagers.onDeactivate(contextManagerType, this.value, getValue());
     }
 
     /**
@@ -174,33 +112,12 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
      * @param <CTX>       The first non-abstract context subclass of AbstractThreadLocalContext.
      * @return The non-<code>null</code> shared <code>ThreadLocal</code> instance to register these contexts on.
      */
-    @SuppressWarnings("unchecked")
-    protected static <T, CTX extends AbstractThreadLocalContext<T>> ThreadLocal<CTX> threadLocalInstanceOf(
+    protected static <T, CTX extends nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext<T>> ThreadLocal<CTX> threadLocalInstanceOf(
             final Class<? extends CTX> contextType) {
-        if (contextType == null) throw new NullPointerException("The context type was <null>.");
-        Class<?> type = contextType;
-        String typeName = type.getName();
-        if (!INSTANCES.containsKey(typeName)) {
-            if (!AbstractThreadLocalContext.class.isAssignableFrom(type)) {
-                throw new IllegalArgumentException("Not a subclass of AbstractThreadLocalContext: " + type + '.');
-            } else if (Modifier.isAbstract(contextType.getModifiers())) {
-                throw new IllegalArgumentException("Context type was abstract: " + type + '.');
-            }
-            // Find the first non-abstract subclass of AbstractThreadLocalContext.
-            while (!Modifier.isAbstract(type.getSuperclass().getModifiers())) {
-                type = type.getSuperclass();
-                typeName = type.getName();
-            }
-            // Atomically get-or-create the appropriate ThreadLocal instance.
-            if (!INSTANCES.containsKey(typeName)) INSTANCES.putIfAbsent(typeName, new ThreadLocal());
-        }
-        return (ThreadLocal<CTX>) INSTANCES.get(typeName);
+        return nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext.threadLocalInstanceOf(contextType);
     }
 
-    @SuppressWarnings("unchecked")
-    protected static <T, CTX extends AbstractThreadLocalContext<T>> CTX current(Class<? extends CTX> contextType) {
-        final AbstractThreadLocalContext current = threadLocalInstanceOf(contextType).get();
-        return (CTX) (current == null || !current.isClosed() ? current : current.unwindIfNecessary());
+    protected static <T, CTX extends nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext<T>> CTX current(Class<? extends CTX> contextType) {
+        return nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext.current(contextType);
     }
-
 }
