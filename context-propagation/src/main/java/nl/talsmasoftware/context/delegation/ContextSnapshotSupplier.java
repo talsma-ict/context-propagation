@@ -25,7 +25,9 @@ import nl.talsmasoftware.context.ContextSnapshot;
  * in order to retain JDK 5 compatibility.
  *
  * @author Sjoerd Talsma
+ * @deprecated This will be replace by {@code Supplier<ContextSnapshot>} from Java 8.
  */
+@Deprecated
 public interface ContextSnapshotSupplier {
 
     /**
