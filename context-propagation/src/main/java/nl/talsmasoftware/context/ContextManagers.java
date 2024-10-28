@@ -17,10 +17,7 @@ package nl.talsmasoftware.context;
 
 import nl.talsmasoftware.context.api.ContextObserver;
 import nl.talsmasoftware.context.clearable.Clearable;
-import nl.talsmasoftware.context.delegation.Wrapper;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -38,24 +35,13 @@ import java.util.logging.Logger;
  */
 @Deprecated
 public final class ContextManagers {
-    private static final Logger LOGGER = Logger.getLogger(ContextManagers.class.getName());
-
-    /**
-     * The service loader that loads (and possibly caches) {@linkplain ContextManager} instances in prioritized order.
-     */
-    private static final PriorityServiceLoader<ContextManager> CONTEXT_MANAGERS =
-            new PriorityServiceLoader<ContextManager>(ContextManager.class);
-
-    /**
-     * Registered observers.
-     */
-    private static final CopyOnWriteArrayList<ObservableContextManager> OBSERVERS =
-            new CopyOnWriteArrayList<ObservableContextManager>();
 
     /**
      * The service loader that loads (and possibly caches) {@linkplain ContextManager} instances in prioritized order.
      *
-     * @deprecated To be replaced by explicitly registered {@link #OBSERVERS}
+     * @see nl.talsmasoftware.context.core.ContextManagers#registerContextObserver(ContextObserver, Class)
+     * @see nl.talsmasoftware.context.core.ContextManagers#unregisterContextObserver(ContextObserver)
+     * @deprecated To be replaced by explicitly registered observers
      */
     @Deprecated
     private static final PriorityServiceLoader<nl.talsmasoftware.context.observer.ContextObserver> CONTEXT_OBSERVERS =
@@ -185,8 +171,10 @@ public final class ContextManagers {
      * @param deactivatedContextValue The deactivated context value
      * @param restoredContextValue    The restored context value or {@code null} if unknown or unsupported.
      * @param <T>                     The type managed by the context manager.
+     * @see nl.talsmasoftware.context.core.ContextManagers#registerContextObserver(ContextObserver, Class)
+     * @see nl.talsmasoftware.context.core.ContextManagers#unregisterContextObserver(ContextObserver)
      * @since 1.0.6
-     * @deprecated To be replaced by explicit observer registration method (TODO)
+     * @deprecated To be replaced by explicit observer registration method
      */
     @Deprecated
     @SuppressWarnings("unchecked") // If the observer tells us it can observe the values, we trust it.
@@ -213,76 +201,4 @@ public final class ContextManagers {
         }
     }
 
-    private static final class ObservableContextManager<T> extends Wrapper<ContextManager<T>> implements ContextManager<T> {
-        private final CopyOnWriteArrayList<ContextObserver<? super T>> observers;
-
-        private ObservableContextManager(ContextManager<T> delegate, List<ContextObserver<? super T>> observers) {
-            super(delegate);
-            this.observers = new CopyOnWriteArrayList<ContextObserver<? super T>>(observers);
-        }
-
-        private T getActiveContextValue() {
-            final Context<T> activeContext = delegate().getActiveContext();
-            return activeContext != null ? activeContext.getValue() : null;
-        }
-
-        private void notifyActivated(T newValue, T oldValue) {
-            for (ContextObserver<? super T> observer : observers) {
-                try {
-                    observer.onActivate(newValue, oldValue);
-                } catch (RuntimeException observerError) {
-                    LOGGER.log(Level.SEVERE, "Error in observer.onActivate of " + observer, observerError);
-                }
-            }
-        }
-
-        private void notifyDeactivated(T deactivatedValue, T restoredValue) {
-            for (ContextObserver<? super T> observer : observers) {
-                try {
-                    observer.onDeactivate(deactivatedValue, restoredValue);
-                } catch (RuntimeException observerError) {
-                    LOGGER.log(Level.SEVERE, "Error in observer.onActivate of " + observer, observerError);
-                }
-            }
-        }
-
-        public Context<T> initializeNewContext(final T newValue) {
-            final T oldValue = getActiveContextValue();
-            final Context<T> context = delegate().initializeNewContext(newValue);
-            notifyActivated(newValue, oldValue);
-
-            return new Context<T>() {
-                public T getValue() {
-                    return context.getValue();
-                }
-
-                public void close() {
-                    T deactivated = context.getValue(); // get before closing!
-                    context.close();
-                    notifyDeactivated(deactivated, getActiveContextValue());
-                }
-            };
-        }
-
-        @Deprecated
-        public Context<T> getActiveContext() {
-            return delegate().getActiveContext();
-        }
-
-        @Override
-        public int hashCode() {
-            return delegate().hashCode();
-        }
-
-        @Override
-        public boolean equals(Object other) { // IMPORTANT to reliably register observers.
-            return other instanceof ObservableContextManager
-                    && delegate().equals(((ObservableContextManager<?>) other).delegate());
-        }
-
-        @Override
-        public String toString() {
-            return delegate().toString();
-        }
-    }
 }
