@@ -79,7 +79,7 @@ public abstract class DelegatingExecutorService extends Wrapper<ExecutorService>
             final List<Callable<T>> copy = new ArrayList<Callable<T>>(tasks.size());
             for (Callable<T> task : tasks) {
                 final Callable<T> wrapped = wrap(task);
-                modification |= !equals(task, wrapped);
+                modification |= (task == wrapped || (task != null && task.equals(wrapped))); // TODO Objects.equals
                 copy.add(wrapped);
             }
             if (modification) wrappedTasks = copy;

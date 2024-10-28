@@ -19,10 +19,10 @@ package nl.talsmasoftware.context.delegation;
  * Base class for wrapping a {@linkplain #delegate()} object.
  *
  * @author Sjoerd Talsma
+ * @deprecated Moved to package {@code nl.talsmasoftware.context.core.delegation}.
  */
-public abstract class Wrapper<T> {
-
-    private final T delegate;
+@Deprecated
+public abstract class Wrapper<T> extends nl.talsmasoftware.context.core.delegation.Wrapper<T> {
 
     /**
      * Constructor providing a delegate wrapped object.
@@ -32,22 +32,15 @@ public abstract class Wrapper<T> {
      *                 overridden to provide an alternative non-<code>null</code> result.
      */
     protected Wrapper(T delegate) {
-        this.delegate = delegate;
+        super(delegate);
     }
 
     /**
-     * The wrapped delegate object.
-     *
-     * <p>
-     * Every wrapper must always return a non-{@code null} delegate.<br>
-     * By default, the specified delegate value from the constructor is returned.<br>
-     * This means this method <strong>must</strong> be overridden
-     * if the delegate is not yet available when the wrapper is constructed.
-     *
-     * @return The delegate for this wrapper.
+     * {@inheritDoc}
      */
+    @Override
     protected T delegate() {
-        return delegate;
+        return super.delegate();
     }
 
     /**
@@ -68,47 +61,5 @@ public abstract class Wrapper<T> {
             throw new NullPointerException(String.format("No delegate available for %s.", getClass().getSimpleName()));
         }
         return foundDelegate;
-    }
-
-    /**
-     * Determines if this class is a wrapper of the specified object.
-     *
-     * @param other The object to check for being the delegate of this wrapper.
-     * @return {@code true} is this wrapper has the given object as its delegate.
-     */
-    public boolean isWrapperOf(T other) {
-        return delegate().equals(other);
-    }
-
-    @Override
-    public int hashCode() {
-        return delegate().hashCode();
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        return this == other
-                || (other != null && getClass().equals(other.getClass()) && delegate().equals(((Wrapper) other).delegate()));
-    }
-
-    /**
-     * Null-safe Objects.equals equivalent for old Java versions.
-     *
-     * @param obj1 The first object to compare.
-     * @param obj2 The second object to compare.
-     * @return {@code true} if obj1.equals(obj2) or both objects are null.
-     * @deprecated To be removed after Java 8 version upgrade.
-     */
-    @Deprecated
-    static boolean equals(Object obj1, Object obj2) {
-        return obj1 == obj2 || (obj1 != null && obj1.equals(obj2));
-    }
-
-    /**
-     * @return The class name and the delegate string representation.
-     */
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + '{' + delegate() + '}';
     }
 }
