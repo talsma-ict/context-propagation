@@ -24,12 +24,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Singleton initialized to lookup all {@link ContextTimer} delegates.
+ * Singleton initialized to look up all {@link ContextTimer} delegates.
  *
  * @author Sjoerd Talsma
  */
 final class Timers {
-    private static final Logger TIMING_LOGGER = Logger.getLogger("nl.talsmasoftware.context.Timing");
+    @Deprecated
+    private static final Logger DEPRECATED_TIMING_LOGGER = Logger.getLogger("nl.talsmasoftware.context.Timing");
+
+    private static final Logger TIMING_LOGGER = Logger.getLogger(Timers.class.getName());
 
     /**
      * Singleton containing resolved ContextTimer delegates.
@@ -57,7 +60,7 @@ final class Timers {
         for (ContextTimer delegate : Singleton.INSTANCE.delegates) {
             delegate.update(type, method, durationNanos, TimeUnit.NANOSECONDS);
         }
-        if (TIMING_LOGGER.isLoggable(Level.FINEST)) {
+        if (TIMING_LOGGER.isLoggable(Level.FINEST) || DEPRECATED_TIMING_LOGGER.isLoggable(Level.FINEST)) {
             TIMING_LOGGER.log(Level.FINEST, "{0}.{1}: {2,number}ns", new Object[]{type.getName(), method, durationNanos});
         }
     }
