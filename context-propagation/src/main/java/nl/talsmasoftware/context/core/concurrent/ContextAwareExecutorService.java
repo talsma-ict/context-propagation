@@ -13,10 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.executors;
+package nl.talsmasoftware.context.core.concurrent;
+
+import nl.talsmasoftware.context.Context;
+import nl.talsmasoftware.context.ContextManagers;
+import nl.talsmasoftware.context.ContextSnapshot;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Executor service that wraps another executor service, making sure background tasks operates 'within'
@@ -30,9 +36,10 @@ import java.util.concurrent.ExecutorService;
  * Both {@link Callable} and {@link Runnable} tasks are mapped.
  *
  * @author Sjoerd Talsma
- * @deprecated Moved to package {@code nl.talsmasoftware.context.core.concurrent}.
  */
-public class ContextAwareExecutorService extends nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService {
+public class ContextAwareExecutorService extends nl.talsmasoftware.context.delegation.CallMappingExecutorService {
+    private static final Logger LOGGER = Logger.getLogger(ContextAwareExecutorService.class.getName());
+
     public ContextAwareExecutorService(ExecutorService delegate) {
         super(delegate);
     }
@@ -47,6 +54,37 @@ public class ContextAwareExecutorService extends nl.talsmasoftware.context.core.
      */
     @Override
     protected <V> Callable<V> map(final Callable<V> callable) {
-        return super.map(callable);
+        final ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        return new Callable<V>() {
+            public V call() throws Exception {
+                Exception exception = null;
+                final Context<Void> context = snapshot.reactivate();
+                try {
+                    return callable.call();
+                } catch (Exception ex) {
+                    throw exception = ex;
+                } finally {
+                    tryClose(context, exception);
+                }
+            }
+        };
+    }
+
+    /**
+     * tryClose method to be called from a finally() block that properly manages close exceptions.
+     *
+     * @param context   context to be closed
+     * @param exception exception if any occurred
+     */
+    private static void tryClose(Context<?> context, Exception exception) throws Exception {
+        if (context != null) try {
+            context.close();
+        } catch (RuntimeException closeEx) {
+            if (exception != null) {
+                LOGGER.log(Level.WARNING, "Exception closing context after failed operation: " + closeEx.getMessage(), closeEx);
+                throw exception;
+            }
+            throw closeEx;
+        }
     }
 }
