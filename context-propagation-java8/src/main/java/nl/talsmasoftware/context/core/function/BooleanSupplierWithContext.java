@@ -13,26 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.functions;
+package nl.talsmasoftware.context.core.function;
 
+import nl.talsmasoftware.context.Context;
+import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A wrapper for {@link BooleanSupplier} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
  * calling a delegate.
  *
  * @author Sjoerd Talsma
- * @deprecated Moved to package {@code nl.talsmasoftware.context.core.function}.
  */
-@Deprecated
-public class BooleanSupplierWithContext extends nl.talsmasoftware.context.core.function.BooleanSupplierWithContext {
+public class BooleanSupplierWithContext extends WrapperWithContextAndConsumer<BooleanSupplier> implements BooleanSupplier {
+    private static final Logger LOGGER = Logger.getLogger(BooleanSupplierWithContext.class.getName());
 
     public BooleanSupplierWithContext(ContextSnapshot snapshot, BooleanSupplier delegate) {
-        super(snapshot, delegate);
+        this(snapshot, delegate, null);
     }
 
     public BooleanSupplierWithContext(ContextSnapshot snapshot, BooleanSupplier delegate, Consumer<ContextSnapshot> consumer) {
@@ -41,6 +44,22 @@ public class BooleanSupplierWithContext extends nl.talsmasoftware.context.core.f
 
     protected BooleanSupplierWithContext(Supplier<ContextSnapshot> supplier, BooleanSupplier delegate, Consumer<ContextSnapshot> consumer) {
         super(supplier, delegate, consumer);
+    }
+
+    @Override
+    public boolean getAsBoolean() {
+        try (Context<Void> context = snapshot().reactivate()) {
+            try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
+                LOGGER.log(Level.FINEST, "Delegating getAsBoolean method with {0} to {1}.", new Object[]{context, delegate()});
+                return delegate().getAsBoolean();
+            } finally {
+                if (contextSnapshotConsumer != null) {
+                    ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                    LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
+                    contextSnapshotConsumer.accept(resultSnapshot);
+                }
+            }
+        }
     }
 
 }
