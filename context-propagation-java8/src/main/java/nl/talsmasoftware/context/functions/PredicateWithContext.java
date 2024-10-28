@@ -15,29 +15,24 @@
  */
 package nl.talsmasoftware.context.functions;
 
-import nl.talsmasoftware.context.Context;
-import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * A wrapper for {@link Predicate} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
  * calling a delegate.
  *
  * @author Sjoerd Talsma
+ * @deprecated Moved to package {@code nl.talsmasoftware.context.core.function}.
  */
-public class PredicateWithContext<T> extends WrapperWithContextAndConsumer<Predicate<T>> implements Predicate<T> {
-    private static final Logger LOGGER = Logger.getLogger(PredicateWithContext.class.getName());
+@Deprecated
+public class PredicateWithContext<T> extends nl.talsmasoftware.context.core.function.PredicateWithContext<T> {
 
     public PredicateWithContext(ContextSnapshot snapshot, Predicate<T> delegate) {
-        this(snapshot, delegate, null);
+        super(snapshot, delegate);
     }
 
     public PredicateWithContext(ContextSnapshot snapshot, Predicate<T> delegate, Consumer<ContextSnapshot> consumer) {
@@ -46,60 +41,6 @@ public class PredicateWithContext<T> extends WrapperWithContextAndConsumer<Predi
 
     protected PredicateWithContext(Supplier<ContextSnapshot> supplier, Predicate<T> delegate, Consumer<ContextSnapshot> consumer) {
         super(supplier, delegate, consumer);
-    }
-
-    @Override
-    public boolean test(T t) {
-        try (Context<Void> context = snapshot().reactivate()) {
-            try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                LOGGER.log(Level.FINEST, "Delegating test method with {0} to {1}.", new Object[]{context, delegate()});
-                return delegate().test(t);
-            } finally {
-                if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
-                    LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                    contextSnapshotConsumer.accept(resultSnapshot);
-                }
-            }
-        }
-    }
-
-    @Override
-    public Predicate<T> and(Predicate<? super T> other) {
-        requireNonNull(other, "Cannot combine predicate with 'and' <null>.");
-        return (t) -> {
-            try (Context<Void> context = snapshot().reactivate()) {
-                try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                    LOGGER.log(Level.FINEST, "Delegating 'and' method with {0} to {1}.", new Object[]{context, delegate()});
-                    return delegate().test(t) && other.test(t);
-                } finally {
-                    if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
-                        LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                        contextSnapshotConsumer.accept(resultSnapshot);
-                    }
-                }
-            }
-        };
-    }
-
-    @Override
-    public Predicate<T> or(Predicate<? super T> other) {
-        requireNonNull(other, "Cannot combine predicate with 'or' <null>.");
-        return (t) -> {
-            try (Context<Void> context = snapshot().reactivate()) {
-                try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                    LOGGER.log(Level.FINEST, "Delegating 'or' method with {0} to {1}.", new Object[]{context, delegate()});
-                    return delegate().test(t) || other.test(t);
-                } finally {
-                    if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
-                        LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                        contextSnapshotConsumer.accept(resultSnapshot);
-                    }
-                }
-            }
-        };
     }
 
 }
