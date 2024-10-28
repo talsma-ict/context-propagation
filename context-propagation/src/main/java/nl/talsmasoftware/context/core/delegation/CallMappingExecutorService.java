@@ -13,21 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.delegation;
+package nl.talsmasoftware.context.core.delegation;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Abstract base-class that makes it a little easier to schedule tasks
- * ({@link java.lang.Runnable Runnable} or {@link Callable} objects) using an existing {@link ExecutorService} while
+ * ({@link Runnable Runnable} or {@link Callable} objects) using an existing {@link ExecutorService} while
  * providing a custom {@link #wrap(Callable) mapping} for all tasks <em>before</em> they get scheduled.
  *
  * @author Sjoerd Talsma
- * @deprecated This will be replace by {@code Supplier<ContextSnapshot>} from Java 8.
  */
-@Deprecated
-public abstract class CallMappingExecutorService extends nl.talsmasoftware.context.core.delegation.CallMappingExecutorService {
+public abstract class CallMappingExecutorService extends nl.talsmasoftware.context.delegation.DelegatingExecutorService {
 
     /**
      * Constructor to create a new wrapper around the specified {@link ExecutorService service delegate}.
@@ -36,6 +35,29 @@ public abstract class CallMappingExecutorService extends nl.talsmasoftware.conte
      */
     protected CallMappingExecutorService(ExecutorService delegate) {
         super(delegate);
+    }
+
+    /**
+     * The call mapping that needs to be implemented: map the given callable object into a desired variant before
+     * scheduling.
+     *
+     * @param callable The callable to be mapped.
+     * @param <V>      The type of result being returned by the callable object.
+     * @return The mapped callable object.
+     */
+    protected abstract <V> Callable<V> map(Callable<V> callable);
+
+    /**
+     * Wrapping a callable object is delegated to the abstract {@link #map(Callable)} method.
+     *
+     * @param callable The callable to be mapped.
+     * @param <V>      The type of result being returned by the callable object.
+     * @return The mapped callable object.
+     * @see #map(Callable)
+     */
+    @Override
+    protected final <V> Callable<V> wrap(Callable<V> callable) {
+        return map(callable);
     }
 
     /**
@@ -49,7 +71,13 @@ public abstract class CallMappingExecutorService extends nl.talsmasoftware.conte
      */
     @Override
     protected Runnable wrap(final Runnable runnable) {
-        return super.wrap(runnable);
+        if (runnable != null) {
+            final Callable<?> callable = Executors.callable(runnable);
+            final Callable<?> wrapped = wrap(callable);
+            // Only return adapter if the wrapping resulted in a different object:
+            if (!callable.equals(wrapped)) return new CallableToRunnable(wrapped);
+        }
+        return runnable;
     }
 
 }
