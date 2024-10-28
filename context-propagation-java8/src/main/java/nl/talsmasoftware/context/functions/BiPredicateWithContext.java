@@ -15,29 +15,23 @@
  */
 package nl.talsmasoftware.context.functions;
 
-import nl.talsmasoftware.context.Context;
-import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * A wrapper for {@link BiPredicate} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
  * calling a delegate.
  *
  * @author Sjoerd Talsma
+ * @deprecated Moved to package {@code nl.talsmasoftware.context.core.function}.
  */
-public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsumer<BiPredicate<IN1, IN2>> implements BiPredicate<IN1, IN2> {
-    private static final Logger LOGGER = Logger.getLogger(BiPredicateWithContext.class.getName());
-
+@Deprecated
+public class BiPredicateWithContext<IN1, IN2> extends nl.talsmasoftware.context.core.function.BiPredicateWithContext<IN1, IN2> {
     public BiPredicateWithContext(ContextSnapshot snapshot, BiPredicate<IN1, IN2> delegate) {
-        this(snapshot, delegate, null);
+        super(snapshot, delegate);
     }
 
     public BiPredicateWithContext(ContextSnapshot snapshot, BiPredicate<IN1, IN2> delegate, Consumer<ContextSnapshot> consumer) {
@@ -46,59 +40,5 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
 
     protected BiPredicateWithContext(Supplier<ContextSnapshot> supplier, BiPredicate<IN1, IN2> delegate, Consumer<ContextSnapshot> consumer) {
         super(supplier, delegate, consumer);
-    }
-
-    @Override
-    public boolean test(IN1 in1, IN2 in2) {
-        try (Context<Void> context = snapshot().reactivate()) {
-            try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                LOGGER.log(Level.FINEST, "Delegating test method with {0} to {1}.", new Object[]{context, delegate()});
-                return delegate().test(in1, in2);
-            } finally {
-                if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
-                    LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                    contextSnapshotConsumer.accept(resultSnapshot);
-                }
-            }
-        }
-    }
-
-    @Override
-    public BiPredicate<IN1, IN2> and(BiPredicate<? super IN1, ? super IN2> other) {
-        requireNonNull(other, "Cannot combine bi-predicate with 'and' <null>.");
-        return (IN1 in1, IN2 in2) -> {
-            try (Context<Void> context = snapshot().reactivate()) {
-                try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                    LOGGER.log(Level.FINEST, "Delegating 'and' method with {0} to {1}.", new Object[]{context, delegate()});
-                    return delegate().test(in1, in2) && other.test(in1, in2);
-                } finally {
-                    if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
-                        LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                        contextSnapshotConsumer.accept(resultSnapshot);
-                    }
-                }
-            }
-        };
-    }
-
-    @Override
-    public BiPredicate<IN1, IN2> or(BiPredicate<? super IN1, ? super IN2> other) {
-        requireNonNull(other, "Cannot combine bi-predicate with 'or' <null>.");
-        return (IN1 in1, IN2 in2) -> {
-            try (Context<Void> context = snapshot().reactivate()) {
-                try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                    LOGGER.log(Level.FINEST, "Delegating 'or' method with {0} to {1}.", new Object[]{context, delegate()});
-                    return delegate().test(in1, in2) || other.test(in1, in2);
-                } finally {
-                    if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
-                        LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                        contextSnapshotConsumer.accept(resultSnapshot);
-                    }
-                }
-            }
-        };
     }
 }
