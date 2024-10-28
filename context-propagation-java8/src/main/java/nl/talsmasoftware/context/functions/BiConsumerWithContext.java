@@ -26,7 +26,9 @@ import java.util.function.Supplier;
  * calling a delegate.
  *
  * @author Sjoerd Talsma
+ * @deprecated Moved to package {@code nl.talsmasoftware.context.core.function}.
  */
+@Deprecated
 public class BiConsumerWithContext<T, U> extends nl.talsmasoftware.context.core.function.BiConsumerWithContext<T, U> {
     public BiConsumerWithContext(ContextSnapshot snapshot, BiConsumer<T, U> delegate) {
         super(snapshot, delegate);

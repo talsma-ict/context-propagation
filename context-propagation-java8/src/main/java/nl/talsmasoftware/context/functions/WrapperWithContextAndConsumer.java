@@ -27,7 +27,9 @@ import java.util.function.Supplier;
  * {@link Supplier} and {@link Consumer} instead of the specific Java 5 versions.
  *
  * @param <T> The type of the wrapped delegate object.
+ * @deprecated Moved to package {@code nl.talsmasoftware.context.core.function}.
  */
+@Deprecated
 abstract class WrapperWithContextAndConsumer<T> extends WrapperWithContext<T> {
 
     /**

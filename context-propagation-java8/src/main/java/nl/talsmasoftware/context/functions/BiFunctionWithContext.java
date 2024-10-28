@@ -15,30 +15,24 @@
  */
 package nl.talsmasoftware.context.functions;
 
-import nl.talsmasoftware.context.Context;
-import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * A wrapper for {@link BiFunction} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
  * calling a delegate.
  *
  * @author Sjoerd Talsma
+ * @deprecated Moved to package {@code nl.talsmasoftware.context.core.function}.
  */
-public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndConsumer<BiFunction<IN1, IN2, OUT>> implements BiFunction<IN1, IN2, OUT> {
-    private static final Logger LOGGER = Logger.getLogger(BiFunctionWithContext.class.getName());
+@Deprecated
+public class BiFunctionWithContext<IN1, IN2, OUT> extends nl.talsmasoftware.context.core.function.BiFunctionWithContext<IN1, IN2, OUT> {
 
     public BiFunctionWithContext(ContextSnapshot snapshot, BiFunction<IN1, IN2, OUT> delegate) {
-        this(snapshot, delegate, null);
+        super(snapshot, delegate);
     }
 
     public BiFunctionWithContext(ContextSnapshot snapshot, BiFunction<IN1, IN2, OUT> delegate, Consumer<ContextSnapshot> consumer) {
@@ -47,41 +41,6 @@ public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndC
 
     protected BiFunctionWithContext(Supplier<ContextSnapshot> supplier, BiFunction<IN1, IN2, OUT> delegate, Consumer<ContextSnapshot> consumer) {
         super(supplier, delegate, consumer);
-    }
-
-    @Override
-    public OUT apply(IN1 in1, IN2 in2) {
-        try (Context<Void> context = snapshot().reactivate()) {
-            try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                LOGGER.log(Level.FINEST, "Delegating apply method with {0} to {1}.", new Object[]{context, delegate()});
-                return delegate().apply(in1, in2);
-            } finally {
-                if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
-                    LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                    contextSnapshotConsumer.accept(resultSnapshot);
-                }
-            }
-        }
-    }
-
-    @Override
-    public <V> BiFunction<IN1, IN2, V> andThen(Function<? super OUT, ? extends V> after) {
-        requireNonNull(after, "Cannot post-process bi-function with after function <null>.");
-        return (IN1 in1, IN2 in2) -> {
-            try (Context<Void> context = snapshot().reactivate()) {
-                try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                    LOGGER.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});
-                    return after.apply(delegate().apply(in1, in2));
-                } finally {
-                    if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
-                        LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                        contextSnapshotConsumer.accept(resultSnapshot);
-                    }
-                }
-            }
-        };
     }
 
 }
