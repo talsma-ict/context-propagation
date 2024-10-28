@@ -15,15 +15,11 @@
  */
 package nl.talsmasoftware.context.delegation;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Abstract baseclass that makes it a little easier to wrap existing {@link ExecutorService} implementations by
@@ -36,8 +32,10 @@ import java.util.concurrent.TimeoutException;
  * This is because it does not provide any value in itself.
  *
  * @author Sjoerd Talsma
+ * @deprecated Moved to package {@code nl.talsmasoftware.context.core.delegation}.
  */
-public abstract class DelegatingExecutorService extends Wrapper<ExecutorService> implements ExecutorService {
+@Deprecated
+public abstract class DelegatingExecutorService extends nl.talsmasoftware.context.core.delegation.DelegatingExecutorService {
 
     /**
      * Creates a new executor service that delegates all methods to the specified <code>delegate</code>.
@@ -52,15 +50,15 @@ public abstract class DelegatingExecutorService extends Wrapper<ExecutorService>
     }
 
     protected <T> Callable<T> wrap(Callable<T> source) {
-        return source;
+        return super.wrap(source);
     }
 
     protected Runnable wrap(Runnable source) {
-        return source;
+        return super.wrap(source);
     }
 
     protected <T> Future<T> wrap(Future<T> source) {
-        return source;
+        return super.wrap(source);
     }
 
     /**
@@ -73,18 +71,7 @@ public abstract class DelegatingExecutorService extends Wrapper<ExecutorService>
      * @see #wrap(Callable)
      */
     protected <T> Collection<? extends Callable<T>> wrapTasks(Collection<? extends Callable<T>> tasks) {
-        Collection<? extends Callable<T>> wrappedTasks = tasks;
-        if (tasks != null && !tasks.isEmpty()) {
-            boolean modification = false;
-            final List<Callable<T>> copy = new ArrayList<Callable<T>>(tasks.size());
-            for (Callable<T> task : tasks) {
-                final Callable<T> wrapped = wrap(task);
-                modification |= (task == wrapped || (task != null && task.equals(wrapped))); // TODO Objects.equals
-                copy.add(wrapped);
-            }
-            if (modification) wrappedTasks = copy;
-        }
-        return wrappedTasks;
+        return super.wrapTasks(tasks);
     }
 
     /**
@@ -97,80 +84,6 @@ public abstract class DelegatingExecutorService extends Wrapper<ExecutorService>
      * @see #wrap(Future)
      */
     protected <T> List<Future<T>> wrapFutures(Collection<? extends Future<T>> futures) {
-        if (futures == null) return null;
-        final List<Future<T>> wrappedFutures = new ArrayList<Future<T>>(futures.size());
-        for (Future<T> future : futures) wrappedFutures.add(wrap(future));
-        return wrappedFutures;
+        return super.wrapFutures(futures);
     }
-
-    public void shutdown() {
-        delegate().shutdown();
-    }
-
-    public List<Runnable> shutdownNow() {
-        return delegate().shutdownNow();
-    }
-
-    public boolean isShutdown() {
-        return delegate().isShutdown();
-    }
-
-    public boolean isTerminated() {
-        return delegate().isTerminated();
-    }
-
-    public boolean awaitTermination(long timeout, TimeUnit unit) throws InterruptedException {
-        return delegate().awaitTermination(timeout, unit);
-    }
-
-    public <T> Future<T> submit(Callable<T> task) {
-        return wrap(delegate().submit(wrap(task)));
-    }
-
-    public <T> Future<T> submit(Runnable task, T result) {
-        return wrap(delegate().submit(wrap(task), result));
-    }
-
-    public Future<?> submit(Runnable task) {
-        return wrap(delegate().submit(wrap(task)));
-    }
-
-    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) throws InterruptedException {
-        final List<Future<T>> futures = delegate().invokeAll(wrapTasks(tasks));
-        return wrapFutures(futures);
-    }
-
-    public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException {
-        final List<Future<T>> futures = delegate().invokeAll(wrapTasks(tasks), timeout, unit);
-        return wrapFutures(futures);
-    }
-
-    public <T> T invokeAny(Collection<? extends Callable<T>> tasks) throws InterruptedException, ExecutionException {
-        return delegate().invokeAny(wrapTasks(tasks));
-    }
-
-    public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        return delegate().invokeAny(wrapTasks(tasks), timeout, unit);
-    }
-
-    public void execute(Runnable command) {
-        delegate().execute(wrap(command));
-    }
-
-    @Override
-    public int hashCode() {
-        return delegate().hashCode();
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        return this == other || (other != null && getClass().equals(other.getClass())
-                && delegate().equals(((DelegatingExecutorService) other).delegate()));
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + '{' + delegate() + '}';
-    }
-
 }
