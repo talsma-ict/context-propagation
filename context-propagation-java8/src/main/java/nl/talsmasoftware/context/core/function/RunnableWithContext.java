@@ -13,23 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.functions;
+package nl.talsmasoftware.context.core.function;
 
+import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A wrapper for {@link Runnable} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
  * calling a delegate.
  *
  * @author Sjoerd Talsma
- * @deprecated Moved to package {@code nl.talsmasoftware.context.core.function}.
  */
-@Deprecated
-public class RunnableWithContext extends nl.talsmasoftware.context.core.function.RunnableWithContext {
+public class RunnableWithContext extends WrapperWithContextAndConsumer<Runnable> implements Runnable {
+    private static final Logger LOGGER = Logger.getLogger(RunnableWithContext.class.getName());
 
     /**
      * Creates a new runnable that performs the following steps, in-order:
@@ -43,7 +45,7 @@ public class RunnableWithContext extends nl.talsmasoftware.context.core.function
      * @see #RunnableWithContext(ContextSnapshot, Runnable, Consumer)
      */
     public RunnableWithContext(ContextSnapshot snapshot, Runnable delegate) {
-        super(snapshot, delegate);
+        this(snapshot, delegate, null);
     }
 
     /**
@@ -65,6 +67,22 @@ public class RunnableWithContext extends nl.talsmasoftware.context.core.function
 
     protected RunnableWithContext(Supplier<ContextSnapshot> supplier, Runnable delegate, Consumer<ContextSnapshot> consumer) {
         super(supplier, delegate, consumer);
+    }
+
+    @Override
+    public void run() {
+        try (Context<Void> context = snapshot().reactivate()) {
+            try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
+                LOGGER.log(Level.FINEST, "Delegating run method with {0} to {1}.", new Object[]{context, delegate()});
+                delegate().run();
+            } finally {
+                if (contextSnapshotConsumer != null) {
+                    ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                    LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
+                    contextSnapshotConsumer.accept(resultSnapshot);
+                }
+            }
+        }
     }
 
 }
