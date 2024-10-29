@@ -172,7 +172,7 @@ public final class ContextManagers {
      * @return {@code true} if the observer was registered.
      * @since 1.1.0
      */
-    public static <T> boolean registerContextObserver(ContextObserver<? super T> contextObserver, Class<ContextManager<T>> observedContextManagerType) {
+    public static <T> boolean registerContextObserver(ContextObserver<? super T> contextObserver, Class<? extends ContextManager<T>> observedContextManagerType) {
         if (contextObserver == null) {
             throw new NullPointerException("Context observer must not be null.");
         } else if (observedContextManagerType == null) {
