@@ -180,27 +180,38 @@ public final class ContextManagers {
         }
 
         // Find ContextManager to register.
+        ObservableContextManager observableContextManager = null;
         ContextManager contextManager = null;
         for (ContextManager manager : getContextManagers()) {
-            if (observedContextManagerType.isInstance(manager)) {
+            if (manager instanceof ObservableContextManager
+                    && ((ObservableContextManager) manager).observes(observedContextManagerType)) {
+                observableContextManager = (ObservableContextManager) manager;
+                break;
+            } else if (observedContextManagerType.isInstance(manager)) {
                 contextManager = manager;
                 break;
             }
         }
-        if (contextManager == null) {
+        if (observableContextManager == null && contextManager == null) {
             LOGGER.warning("Trying to register observer to missing ContextManager type: " + observedContextManagerType + ".");
             return false;
         }
 
-        // Register new observer by wrapping the context manager.
-        ObservableContextManager<T> newObserver = new ObservableContextManager<T>(contextManager, (List) Arrays.asList(contextObserver));
-        if (OBSERVERS.addIfAbsent(newObserver)) {
-            return true;
+        if (observableContextManager == null) {
+            // Register new observer by wrapping the context manager.
+            ObservableContextManager<T> newObserver = new ObservableContextManager<T>(contextManager, (List) Arrays.asList(contextObserver));
+            if (OBSERVERS.addIfAbsent(newObserver)) {
+                return true;
+            }
+
+            // There is already an existing ObservableContextManager, add the observer to it.
+            observableContextManager = OBSERVERS.get(OBSERVERS.indexOf(newObserver));
         }
 
-        // There is already an existing ObservableContextManager, add the observer to it.
-        ObservableContextManager existing = OBSERVERS.get(OBSERVERS.indexOf(newObserver));
-        return existing.observers.addIfAbsent(contextObserver);
+        // Add the context observer to the existing observable context manager.
+        synchronized (observableContextManager) {
+            return observableContextManager.observers.addIfAbsent(contextObserver);
+        }
     }
 
     /**
@@ -214,8 +225,10 @@ public final class ContextManagers {
         boolean unregistered = false;
         for (ObservableContextManager observer : OBSERVERS) {
             unregistered |= observer.observers.remove(contextObserver);
-            if (observer.observers.isEmpty()) {
-                OBSERVERS.remove(observer);
+            synchronized (observer) {
+                if (observer.observers.isEmpty()) {
+                    OBSERVERS.remove(observer);
+                }
             }
         }
         return unregistered;
@@ -419,6 +432,10 @@ public final class ContextManagers {
             this.observers = new CopyOnWriteArrayList<ContextObserver<? super T>>(observers);
         }
 
+        private boolean observes(Class<? extends ContextManager<?>> contextManagerType) {
+            return contextManagerType.isInstance(delegate());
+        }
+
         private T getActiveContextValue() {
             final Context<T> activeContext = delegate().getActiveContext();
             return activeContext != null ? activeContext.getValue() : null;
@@ -468,19 +485,8 @@ public final class ContextManagers {
         }
 
         @Override
-        public int hashCode() {
-            return delegate().hashCode();
-        }
-
-        @Override
-        public boolean equals(Object other) { // IMPORTANT to reliably register observers.
-            return other instanceof ObservableContextManager
-                    && delegate().equals(((ObservableContextManager<?>) other).delegate());
-        }
-
-        @Override
         public String toString() {
-            return delegate().toString();
+            return getClass().getSimpleName() + '{' + delegate() + ", " + observers + '}';
         }
     }
 

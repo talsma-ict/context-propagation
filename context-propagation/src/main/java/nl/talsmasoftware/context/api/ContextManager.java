@@ -15,6 +15,8 @@
  */
 package nl.talsmasoftware.context.api;
 
+import nl.talsmasoftware.context.clearable.Clearable;
+
 /**
  * The service definition a {@linkplain Context} manager.
  *
@@ -25,7 +27,7 @@ package nl.talsmasoftware.context.api;
  * @param <T> type of the context value
  * @author Sjoerd Talsma
  */
-public interface ContextManager<T> extends nl.talsmasoftware.context.ContextManager<T> {
+public interface ContextManager<T> extends nl.talsmasoftware.context.ContextManager<T>, Clearable {
 
     /**
      * Initialize a new context containing the specified <code>value</code>.
