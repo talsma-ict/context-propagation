@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,24 @@
  */
 package nl.talsmasoftware.context.functions;
 
-import nl.talsmasoftware.context.Context;
-import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * A wrapper for {@link Function} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
  * calling a delegate.
  *
  * @author Sjoerd Talsma
+ * @deprecated Moved to package {@code nl.talsmasoftware.context.core.function}.
  */
-public class FunctionWithContext<IN, OUT> extends WrapperWithContextAndConsumer<Function<IN, OUT>> implements Function<IN, OUT> {
-    private static final Logger LOGGER = Logger.getLogger(FunctionWithContext.class.getName());
+@Deprecated
+public class FunctionWithContext<IN, OUT> extends nl.talsmasoftware.context.core.function.FunctionWithContext<IN, OUT> {
 
     public FunctionWithContext(ContextSnapshot snapshot, Function<IN, OUT> delegate) {
-        this(snapshot, delegate, null);
+        super(snapshot, delegate);
     }
 
     public FunctionWithContext(ContextSnapshot snapshot, Function<IN, OUT> delegate, Consumer<ContextSnapshot> consumer) {
@@ -48,54 +43,4 @@ public class FunctionWithContext<IN, OUT> extends WrapperWithContextAndConsumer<
         super(supplier, delegate, consumer);
     }
 
-    public OUT apply(IN in) {
-        try (Context<Void> context = snapshot().reactivate()) {
-            try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                LOGGER.log(Level.FINEST, "Delegating apply method with {0} to {1}.", new Object[]{context, delegate()});
-                return nonNullDelegate().apply(in);
-            } finally {
-                if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
-                    LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                    contextSnapshotConsumer.accept(resultSnapshot);
-                }
-            }
-        }
-    }
-
-    public <V> Function<V, OUT> compose(Function<? super V, ? extends IN> before) {
-        requireNonNull(before, "Cannot compose with before function <null>.");
-        return (V v) -> {
-            try (Context<Void> context = snapshot().reactivate()) {
-                try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                    LOGGER.log(Level.FINEST, "Delegating compose method with {0} to {1}.", new Object[]{context, delegate()});
-                    return nonNullDelegate().apply(before.apply(v));
-                } finally {
-                    if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
-                        LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                        contextSnapshotConsumer.accept(resultSnapshot);
-                    }
-                }
-            }
-        };
-    }
-
-    public <V> Function<IN, V> andThen(Function<? super OUT, ? extends V> after) {
-        requireNonNull(after, "Cannot transform with after function <null>.");
-        return (IN in) -> {
-            try (Context<Void> context = snapshot().reactivate()) {
-                try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                    LOGGER.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});
-                    return after.apply(nonNullDelegate().apply(in));
-                } finally {
-                    if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
-                        LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                        contextSnapshotConsumer.accept(resultSnapshot);
-                    }
-                }
-            }
-        };
-    }
 }

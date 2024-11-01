@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,9 @@ import nl.talsmasoftware.context.ContextSnapshot;
  * in order to retain JDK 5 compatibility.
  *
  * @author Sjoerd Talsma
+ * @deprecated This will be replace by {@code Supplier<ContextSnapshot>} from Java 8.
  */
+@Deprecated
 public interface ContextSnapshotSupplier {
 
     /**

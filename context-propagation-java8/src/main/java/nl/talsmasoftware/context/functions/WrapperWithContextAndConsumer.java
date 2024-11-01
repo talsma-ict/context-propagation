@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,9 @@ import java.util.function.Supplier;
  * {@link Supplier} and {@link Consumer} instead of the specific Java 5 versions.
  *
  * @param <T> The type of the wrapped delegate object.
+ * @deprecated Moved to package {@code nl.talsmasoftware.context.core.function}.
  */
+@Deprecated
 abstract class WrapperWithContextAndConsumer<T> extends WrapperWithContext<T> {
 
     /**

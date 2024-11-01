@@ -42,7 +42,9 @@ import static java.util.Objects.requireNonNull;
  * {@link ContextSnapshot context during creation} of this {@link ContextAwareCompletableFuture}.
  *
  * @author Sjoerd Talsma
+ * @deprecated Moved to package {@code nl.talsmasoftware.context.core.concurrent}.
  */
+@Deprecated
 public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
 
     /**

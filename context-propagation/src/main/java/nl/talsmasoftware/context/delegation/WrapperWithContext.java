@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,10 @@ import nl.talsmasoftware.context.ContextSnapshot;
  * Wrapper that also contains a fixed context snapshot.
  *
  * @author Sjoerd Talsma
+ * @deprecated Moved to package {@code nl.talsmasoftware.context.core.delegation}.
  */
-public abstract class WrapperWithContext<T> extends Wrapper<T> {
-
-    private final ContextSnapshotSupplier supplier;
-    private volatile ContextSnapshot snapshot;
+@Deprecated
+public abstract class WrapperWithContext<T> extends nl.talsmasoftware.context.core.delegation.WrapperWithContext<T> {
 
     /**
      * Creates a new Wrapper with the specified context snapshot.
@@ -34,12 +33,7 @@ public abstract class WrapperWithContext<T> extends Wrapper<T> {
      * @param delegate The wrapped delegate object providing core functionality
      */
     protected WrapperWithContext(final ContextSnapshot snapshot, final T delegate) {
-        super(delegate);
-        this.supplier = null;
-        this.snapshot = snapshot;
-        if (snapshot == null) {
-            throw new NullPointerException("No context snapshot provided to " + this + '.');
-        }
+        super(snapshot, delegate);
     }
 
     /**
@@ -60,12 +54,7 @@ public abstract class WrapperWithContext<T> extends Wrapper<T> {
      * @see #WrapperWithContext(ContextSnapshot, Object)
      */
     protected WrapperWithContext(ContextSnapshotSupplier supplier, T delegate) {
-        super(delegate);
-        this.supplier = supplier;
-        this.snapshot = null;
-        if (supplier == null) {
-            throw new NullPointerException("No context snapshot supplier provided to " + this + '.');
-        }
+        super(supplier, delegate);
     }
 
     /**
@@ -74,28 +63,7 @@ public abstract class WrapperWithContext<T> extends Wrapper<T> {
      * @return The snapshot value.
      */
     protected ContextSnapshot snapshot() {
-        // Note: Double-checked locking works fine in decent JDKs
-        // Discussion here: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590407
-        if (snapshot == null && supplier != null) synchronized (this) {
-            if (snapshot == null) snapshot = supplier.get();
-            if (snapshot == null) throw new NullPointerException("Context snapshot is <null>.");
-        }
-        return snapshot;
-    }
-
-    @Override
-    public int hashCode() {
-        return 31 * super.hashCode() + snapshot().hashCode();
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        return this == other || (super.equals(other) && snapshot().equals(((WrapperWithContext<?>) other).snapshot()));
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + "{delegate=" + delegate() + (snapshot == null ? "" : ", " + snapshot) + '}';
+        return super.snapshot();
     }
 
 }

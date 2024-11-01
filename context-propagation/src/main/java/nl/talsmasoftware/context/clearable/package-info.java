@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 /**
- * The {@code Clearable} interface and a {@code ClearableContextManager} in particular.
+ * <strong>(Deprecated)</strong> The {@code Clearable} interface and a {@code ClearableContextManager} in particular.
+ *
+ * <h2>Deprecated</h2>
+ * This package will be removed. Method clear() will be added to the ContextManager interface.
  *
  * <h2>{@linkplain nl.talsmasoftware.context.clearable.Clearable}</h2>
  * <p>

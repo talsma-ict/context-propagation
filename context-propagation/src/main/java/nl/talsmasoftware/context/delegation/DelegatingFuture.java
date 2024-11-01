@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@ package nl.talsmasoftware.context.delegation;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Abstract baseclass that simplifies wrapping an existing {@link Future} by forwarding all required methods to a
@@ -31,59 +29,13 @@ import java.util.concurrent.TimeoutException;
  * This is because it does not provide any value in itself.
  *
  * @author Sjoerd Talsma
+ * @deprecated Moved to package {@code nl.talsmasoftware.context.core.delegation}.
  */
-public abstract class DelegatingFuture<V> extends Wrapper<Future<V>> implements Future<V> {
+@Deprecated
+public abstract class DelegatingFuture<V> extends nl.talsmasoftware.context.core.delegation.DelegatingFuture<V> {
 
     protected DelegatingFuture(Future<V> delegate) {
         super(delegate);
-    }
-
-    /**
-     * Overridable method to wrap the result after it has been obtained from the delegate future.
-     *
-     * @param result The original result from the delegate.
-     * @return The wrapped result.
-     */
-    protected V wrapResult(V result) {
-        return result;
-    }
-
-    /**
-     * Overridable method to wrap the {@link ExecutionException} after it has been thrown from the delegate future.
-     *
-     * @param exception The original execution exception from the delegate.
-     * @return The wrapped exception.
-     */
-    protected ExecutionException wrapException(ExecutionException exception) {
-        return exception;
-    }
-
-    public boolean cancel(boolean mayInterruptIfRunning) {
-        return nonNullDelegate().cancel(mayInterruptIfRunning);
-    }
-
-    public boolean isCancelled() {
-        return nonNullDelegate().isCancelled();
-    }
-
-    public boolean isDone() {
-        return nonNullDelegate().isDone();
-    }
-
-    public V get() throws InterruptedException, ExecutionException {
-        try {
-            return wrapResult(nonNullDelegate().get());
-        } catch (ExecutionException ee) {
-            throw wrapException(ee);
-        }
-    }
-
-    public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        try {
-            return wrapResult(nonNullDelegate().get(timeout, unit));
-        } catch (ExecutionException ee) {
-            throw wrapException(ee);
-        }
     }
 
 }

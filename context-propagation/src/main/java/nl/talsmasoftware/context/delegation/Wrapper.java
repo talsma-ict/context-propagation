@@ -16,13 +16,13 @@
 package nl.talsmasoftware.context.delegation;
 
 /**
- * Base wrapper class offering a {@link #nonNullDelegate() non-null delegate} method.
+ * Base class for wrapping a {@linkplain #delegate()} object.
  *
  * @author Sjoerd Talsma
+ * @deprecated Moved to package {@code nl.talsmasoftware.context.core.delegation}.
  */
-public abstract class Wrapper<T> {
-
-    private final T delegate;
+@Deprecated
+public abstract class Wrapper<T> extends nl.talsmasoftware.context.core.delegation.Wrapper<T> {
 
     /**
      * Constructor providing a delegate wrapped object.
@@ -32,19 +32,15 @@ public abstract class Wrapper<T> {
      *                 overridden to provide an alternative non-<code>null</code> result.
      */
     protected Wrapper(T delegate) {
-        this.delegate = delegate;
+        super(delegate);
     }
 
     /**
-     * Delegate method that can be overridden in case the delegate is not yet available at construction time or when
-     * there some strategy applicable that determines the delegate at runtime.
-     * <p>
-     * By default, the specified delegate value from the constructor is returned.
-     *
-     * @return The delegate for this wrapper.
+     * {@inheritDoc}
      */
+    @Override
     protected T delegate() {
-        return delegate;
+        return super.delegate();
     }
 
     /**
@@ -53,7 +49,10 @@ public abstract class Wrapper<T> {
      *
      * @return The delegate for this wrapper (guaranteed to be non-<code>null</code>).
      * @throws NullPointerException with a specific message in case the delegate was null.
+     * @deprecated This extra check will be removed in the next version,
+     * {@linkplain #delegate()} <strong>must</strong> return non-null.
      */
+    @Deprecated
     protected final T nonNullDelegate() {
         final T foundDelegate = delegate();
         if (foundDelegate == null) try {
@@ -63,29 +62,4 @@ public abstract class Wrapper<T> {
         }
         return foundDelegate;
     }
-
-    @Override
-    public int hashCode() {
-        return delegate == null ? super.hashCode() : delegate.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        return this == other || (other != null
-                && getClass().equals(other.getClass())
-                && equals(delegate, ((Wrapper) other).delegate));
-    }
-
-    static boolean equals(Object obj1, Object obj2) {
-        return obj1 == obj2 || (obj1 != null && obj1.equals(obj2));
-    }
-
-    /**
-     * @return The class name and the delegate string representation.
-     */
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + "{delegate=" + delegate + '}';
-    }
-
 }

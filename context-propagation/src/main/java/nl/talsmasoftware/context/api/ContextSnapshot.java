@@ -1,0 +1,93 @@
+/*
+ * Copyright 2016-2024 Talsma ICT
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package nl.talsmasoftware.context.api;
+
+import nl.talsmasoftware.context.Context;
+import nl.talsmasoftware.context.ContextManager;
+
+import java.io.Closeable;
+
+/**
+ * Snapshot of context values from all registered {@link ContextManager} implementations.
+ *
+ * <p>
+ * Such a snapshot can be passed to another thread and {@link #reactivate() reactivated} there,
+ * ensuring that all context values are set in that other thread.
+ *
+ * <p>
+ * A snapshot can be obtained from the {@code ContextManagers} utility class for interaction with all registered
+ * {@link ContextManager} implementations.
+ *
+ * <p>
+ * This library contains several utility classes named {@code ContextAware...} or {...WithContext} that will
+ * automatically take a new snapshot and reactivate it for a particular callable or runnable piece of code,
+ * making sure the reactivation is properly closed again.
+ *
+ * <p>
+ * If you need to explicitly interact with a snapshot yourself, please make sure to <strong>always</strong> call
+ * {@link Reactivation#close()}.
+ *
+ * @author Sjoerd Talsma
+ * @since 1.1.0
+ */
+public interface ContextSnapshot extends nl.talsmasoftware.context.ContextSnapshot {
+
+    /**
+     * Temporarily reactivates all captured context values that are in the snapshot.
+     *
+     * <p>
+     * Each reactivation <strong>must</strong> be closed in the same thread it was created,
+     * preferably using a try-with-resources code block.
+     *
+     * <p>
+     * Using <em>ContextAware</em> and <em>WithContext</em> classes from this library is a transparent way
+     * to propagate context snapshots without having to worry about closing them.
+     *
+     * @return A new reactivation of the captured snapshot values.
+     */
+    Reactivation reactivate();
+
+    /**
+     * Context snapshot reactivation.
+     *
+     * <p>
+     * Every snapshot reactivation <strong>must</strong> be closed in the same thread when the context snapshot is
+     * no longer needed.
+     *
+     * <p>
+     * It is <strong>strongly advised</strong> to only use reactivation with try-with-resources code blocks.
+     */
+    interface Reactivation extends Closeable, Context<Void> {
+        /**
+         * Ends the contexts from the reactivated context snapshot.
+         *
+         * <p>
+         * Depending on the {@link ContextManager}, the active context is either cleared or restored to the state
+         * before the snapshot was activated.
+         */
+        void close();
+
+        /**
+         * A reactivation contains no value.
+         *
+         * @return Always {@code null}.
+         * @deprecated From the next major version, Reactivation will no longer extend Context.
+         */
+        @Deprecated
+        Void getValue();
+    }
+
+}

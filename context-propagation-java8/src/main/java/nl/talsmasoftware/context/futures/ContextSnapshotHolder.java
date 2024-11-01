@@ -28,7 +28,9 @@ import static java.util.Objects.requireNonNull;
  * to be propagated from one {@code CompletionStage} to another.
  *
  * @author Sjoerd Talsma
+ * @deprecated Moved to package {@code nl.talsmasoftware.context.core.concurrent}.
  */
+@Deprecated
 final class ContextSnapshotHolder implements Consumer<ContextSnapshot>, Supplier<ContextSnapshot> {
     private volatile ContextSnapshot snapshot;
 

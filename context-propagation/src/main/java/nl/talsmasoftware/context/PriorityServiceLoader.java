@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,9 @@ import static java.util.Collections.unmodifiableList;
  *
  * @param <SVC> The type of service to load.
  * @author Sjoerd Talsma
+ * @deprecated We will switch to plain ServiceLoader in next major version to reduce complexity.
  */
+@Deprecated
 final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
     private static final Logger LOGGER = Logger.getLogger(PriorityServiceLoader.class.getName());
     private static final String SYSTEMPROPERTY_CACHING = "talsmasoftware.context.caching";
@@ -63,6 +65,20 @@ final class PriorityServiceLoader<SVC> implements Iterable<SVC> {
             if (!isCachingDisabled()) cache.put(classLoader, services);
         }
         return services.iterator();
+    }
+
+    void replaceInCache(SVC current, SVC replacement) {
+        final ClassLoader classLoader =
+                classLoaderOverride == null ? Thread.currentThread().getContextClassLoader() : classLoaderOverride;
+        List<SVC> services = cache.get(classLoader);
+        if (services != null) {
+            int idx = services.indexOf(current);
+            if (idx >= 0) {
+                ArrayList<SVC> copy = new ArrayList<SVC>(services);
+                copy.set(idx, replacement);
+                cache.put(classLoader, sortAndMakeUnmodifiable(copy));
+            }
+        }
     }
 
     /**

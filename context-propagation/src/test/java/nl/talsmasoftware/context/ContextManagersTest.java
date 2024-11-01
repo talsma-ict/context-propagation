@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package nl.talsmasoftware.context;
 
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
+import nl.talsmasoftware.context.observer.SimpleContextObserver;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,14 +25,23 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static nl.talsmasoftware.context.observer.Observed.activated;
 import static nl.talsmasoftware.context.observer.Observed.deactivated;
-import static nl.talsmasoftware.context.observer.SimpleContextObserver.observed;
-import static nl.talsmasoftware.context.observer.SimpleContextObserver.observedContextManager;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -55,8 +65,8 @@ public class ContextManagersTest {
     @BeforeEach
     @AfterEach
     public void clearObserved() {
-        observedContextManager = null;
-        observed.clear();
+        SimpleContextObserver.observedContextManager = null;
+        SimpleContextObserver.observed.clear();
     }
 
     @Test
@@ -239,28 +249,29 @@ public class ContextManagersTest {
     @Test
     @SuppressWarnings("unchecked")
     public void testOnActivate() {
-        observedContextManager = DummyContextManager.class;
+        SimpleContextObserver.observedContextManager = DummyContextManager.class;
         Class reportedClass = ContextManager.class;
         ContextManagers.onActivate(reportedClass, "activated value", "previous value");
-        assertThat(observed, is(empty()));
+        assertThat(SimpleContextObserver.observed, is(empty()));
 
-        observedContextManager = ContextManager.class;
+        SimpleContextObserver.observedContextManager = ContextManager.class;
         reportedClass = DummyContextManager.class;
         ContextManagers.onActivate(reportedClass, "activated value", "previous value");
-        assertThat(observed, hasItem(activated(equalTo("activated value"))));
+        assertThat(SimpleContextObserver.observed, hasItem(activated(equalTo("activated value"))));
     }
 
     @Test
     @SuppressWarnings("unchecked")
     public void testOnDeactivate() {
-        observedContextManager = DummyContextManager.class;
+        SimpleContextObserver.observedContextManager = DummyContextManager.class;
         Class reportedClass = ContextManager.class;
         ContextManagers.onDeactivate(reportedClass, "deactivated value", "restored value");
-        assertThat(observed, is(empty()));
+        assertThat(SimpleContextObserver.observed, is(empty()));
 
-        observedContextManager = ContextManager.class;
+        SimpleContextObserver.observedContextManager = ContextManager.class;
         reportedClass = DummyContextManager.class;
         ContextManagers.onDeactivate(reportedClass, "deactivated value", "restored value");
-        assertThat(observed, hasItem(deactivated(equalTo("deactivated value"))));
+        assertThat(SimpleContextObserver.observed, hasItem(deactivated(equalTo("deactivated value"))));
     }
+
 }

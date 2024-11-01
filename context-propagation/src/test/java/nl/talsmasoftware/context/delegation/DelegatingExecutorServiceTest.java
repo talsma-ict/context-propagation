@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,13 +32,11 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
@@ -74,21 +72,6 @@ public class DelegatingExecutorServiceTest {
     @AfterEach
     public void noMoreInteractions() {
         verifyNoMoreInteractions(delegate);
-    }
-
-    @Test
-    public void testNullConstructor() {
-        TestDelegatingExecutorService tdes = new TestDelegatingExecutorService(null); // No error at construction time.
-        try {
-            tdes.execute(new Runnable() {
-                public void run() {
-                    System.out.println("Whoops");
-                }
-            });
-            fail("Informative exception expected.");
-        } catch (RuntimeException expected) {
-            assertThat(expected, hasToString(containsString("No delegate available for TestDelegatingExecutorService")));
-        }
     }
 
     @Test

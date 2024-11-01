@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,9 @@ import nl.talsmasoftware.context.ContextManagers;
  * and {@linkplain #onDeactivate(Class, Object, Object) deactivate} occurrances.
  *
  * @author Sjoerd Talsma
- * @see ContextManagers
- * @deprecated The (static) utility methods from this class were moved to the {@code ContextManagers} class.
+ * @see nl.talsmasoftware.context.core.ContextManagers#registerContextObserver(nl.talsmasoftware.context.api.ContextObserver, Class)
+ * @see nl.talsmasoftware.context.core.ContextManagers#unregisterContextObserver(nl.talsmasoftware.context.api.ContextObserver)
+ * @deprecated Replaced by explicit ContextManager registration.
  */
 @Deprecated
 public final class ContextObservers {
