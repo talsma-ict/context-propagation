@@ -18,7 +18,7 @@ package nl.talsmasoftware.context.metrics;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
 import com.codahale.metrics.Timer;
-import nl.talsmasoftware.context.timing.ContextTimer;
+import nl.talsmasoftware.context.api.ContextTimer;
 
 import java.util.ArrayList;
 import java.util.Collection;

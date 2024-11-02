@@ -19,7 +19,7 @@ import io.opentracing.Span;
 import io.opentracing.util.GlobalTracer;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
-import nl.talsmasoftware.context.timing.ContextTimer;
+import nl.talsmasoftware.context.api.ContextTimer;
 
 import java.util.concurrent.TimeUnit;
 

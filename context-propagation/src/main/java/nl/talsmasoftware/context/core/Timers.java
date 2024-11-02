@@ -29,9 +29,6 @@ import java.util.logging.Logger;
  * @author Sjoerd Talsma
  */
 final class Timers {
-    @Deprecated
-    private static final Logger DEPRECATED_TIMING_LOGGER = Logger.getLogger("nl.talsmasoftware.context.Timing");
-
     private static final Logger TIMING_LOGGER = Logger.getLogger(Timers.class.getName());
 
     /**
@@ -46,12 +43,6 @@ final class Timers {
             for (ContextTimer delegate : new PriorityServiceLoader<ContextTimer>(ContextTimer.class)) {
                 delegates.add(delegate);
             }
-            // add legacy context services
-            for (nl.talsmasoftware.context.timing.ContextTimer delegate : new PriorityServiceLoader<nl.talsmasoftware.context.timing.ContextTimer>(nl.talsmasoftware.context.timing.ContextTimer.class)) {
-                if (!delegates.contains(delegate)) {
-                    delegates.add(delegate);
-                }
-            }
             this.delegates = delegates.toArray(new ContextTimer[0]);
         }
     }
@@ -60,7 +51,7 @@ final class Timers {
         for (ContextTimer delegate : Singleton.INSTANCE.delegates) {
             delegate.update(type, method, durationNanos, TimeUnit.NANOSECONDS);
         }
-        if (TIMING_LOGGER.isLoggable(Level.FINEST) || DEPRECATED_TIMING_LOGGER.isLoggable(Level.FINEST)) {
+        if (TIMING_LOGGER.isLoggable(Level.FINEST)) {
             TIMING_LOGGER.log(Level.FINEST, "{0}.{1}: {2,number}ns", new Object[]{type.getName(), method, durationNanos});
         }
     }

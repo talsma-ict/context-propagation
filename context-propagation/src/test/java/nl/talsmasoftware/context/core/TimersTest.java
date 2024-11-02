@@ -15,7 +15,7 @@
  */
 package nl.talsmasoftware.context.core;
 
-import nl.talsmasoftware.context.timing.ContextTimer;
+import nl.talsmasoftware.context.api.ContextTimer;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
