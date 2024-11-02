@@ -15,10 +15,11 @@
  */
 package nl.talsmasoftware.context.core.function;
 
-import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -71,7 +72,7 @@ public class RunnableWithContext extends WrapperWithContextAndConsumer<Runnable>
 
     @Override
     public void run() {
-        try (Context<Void> context = snapshot().reactivate()) {
+        try (Closeable context = snapshot().reactivate()) {
             try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                 LOGGER.log(Level.FINEST, "Delegating run method with {0} to {1}.", new Object[]{context, delegate()});
                 delegate().run();
@@ -82,6 +83,8 @@ public class RunnableWithContext extends WrapperWithContextAndConsumer<Runnable>
                     contextSnapshotConsumer.accept(resultSnapshot);
                 }
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 

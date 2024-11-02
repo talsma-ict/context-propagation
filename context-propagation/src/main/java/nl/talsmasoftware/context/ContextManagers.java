@@ -27,7 +27,7 @@ import java.util.logging.Logger;
  * <p>
  * Such a {@link ContextSnapshot snapshot} can be passed to a background task to allow the context to be
  * {@link ContextSnapshot#reactivate() reactivated} in that background thread, until it gets
- * {@link Context#close() closed} again (preferably in a <code>try-with-resources</code> construct).
+ * {@link nl.talsmasoftware.context.api.Context#close() closed} again (preferably in a <code>try-with-resources</code> construct).
  *
  * @author Sjoerd Talsma
  * @see nl.talsmasoftware.context.core.ContextManagers
@@ -60,7 +60,7 @@ public final class ContextManagers {
      * implementations.
      * <p>
      * This snapshot is returned as a single object that can be temporarily
-     * {@link ContextSnapshot#reactivate() reactivated}. Don't forget to {@link Context#close() close} the reactivated
+     * {@link ContextSnapshot#reactivate() reactivated}. Don't forget to {@link nl.talsmasoftware.context.api.Context#close() close} the reactivated
      * context once you're done, preferably in a <code>try-with-resources</code> construct.
      *
      * @return A new snapshot that can be reactivated elsewhere (e.g. a background thread or even another node)
@@ -87,7 +87,7 @@ public final class ContextManagers {
      * as this will allow any unclosed contexts to be garbage collected. Besides preventing contextual issues,
      * this reduces the risk of memory leaks by unbalanced context calls.
      * <p>
-     * For context managers that are not {@linkplain Clearable} and contain an active {@linkplain Context}
+     * For context managers that are not {@linkplain Clearable} and contain an active {@linkplain nl.talsmasoftware.context.api.Context}
      * that is not {@code Clearable} either, this active context will be closed normally.
      *
      * @deprecated Moved to the {@code nl.talsmasoftware.context.core} package.

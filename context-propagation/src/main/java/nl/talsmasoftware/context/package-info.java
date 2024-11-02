@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 /**
  * Main package defining the core {@code context-propagation} concepts in this library
  *
- * <h2>{@linkplain nl.talsmasoftware.context.Context}</h2>
+ * <h2>{@linkplain nl.talsmasoftware.context.api.Context}</h2>
  * <p>
- * A {@linkplain nl.talsmasoftware.context.Context context} contains
- * a {@linkplain nl.talsmasoftware.context.Context#getValue() value}.<br>
+ * A {@linkplain nl.talsmasoftware.context.api.Context context} contains
+ * a {@linkplain nl.talsmasoftware.context.api.Context#getValue() value}.<br>
  * There can be one active context per thread. A context remains active until it is closed or another context
  * is activated in that thread.
  *

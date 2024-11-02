@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 package nl.talsmasoftware.context.log4j2.threadcontext;
 
-import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
+import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
 import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.AfterEach;
@@ -25,6 +25,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -207,7 +209,7 @@ class Log4j2ThreadContextManagerTest {
     }
 
     @Test
-    void testSnapshotRestorationAfterClosingReactivatedSnapshot() {
+    void testSnapshotRestorationAfterClosingReactivatedSnapshot() throws IOException {
         String mapKey1 = "map1";
         ThreadContext.put(mapKey1, "value1");
         ThreadContext.push("stack1");
@@ -226,7 +228,7 @@ class Log4j2ThreadContextManagerTest {
         String mapKey2 = "map2";
         ThreadContext.put(mapKey2, "value2");
 
-        Context<Void> reactivation = snapshot.reactivate();
+        Closeable reactivation = snapshot.reactivate();
         assertThat("ThreadContext changed by reactivation", ThreadContext.get(mapKey1), equalTo("value1"));
         assertThat("Existing ThreadContext data should not have been cleared", ThreadContext.get(mapKey2), equalTo("value2"));
         assertThat(ThreadContext.getContext().size(), is(2));

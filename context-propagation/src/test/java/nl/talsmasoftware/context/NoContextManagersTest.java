@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,14 @@
  */
 package nl.talsmasoftware.context;
 
+import nl.talsmasoftware.context.api.Context;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -44,21 +47,21 @@ public class NoContextManagersTest {
     }
 
     @Test
-    public void testReactivate_withoutContextManagers() {
+    public void testReactivate_withoutContextManagers() throws IOException {
         Context<String> ctx1 = new DummyContext("foo");
         ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
         ctx1.close();
 
-        Context<Void> reactivated = snapshot.reactivate();
+        Closeable reactivated = snapshot.reactivate();
         reactivated.close();
     }
 
     @Test
-    public void testCreateSnapshot_withoutContextManagers() {
+    public void testCreateSnapshot_withoutContextManagers() throws IOException {
         ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
         assertThat(snapshot, is(notNullValue()));
 
-        Context<Void> reactivated = snapshot.reactivate();
+        Closeable reactivated = snapshot.reactivate();
         assertThat(reactivated, is(notNullValue()));
         reactivated.close();
     }

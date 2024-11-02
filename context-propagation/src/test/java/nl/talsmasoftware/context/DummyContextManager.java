@@ -15,6 +15,8 @@
  */
 package nl.talsmasoftware.context;
 
+import nl.talsmasoftware.context.api.Context;
+
 /**
  * Trivial manager around the {@link DummyContext} implementation to be registered as service provider.
  *

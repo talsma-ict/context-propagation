@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,16 @@
  */
 package nl.talsmasoftware.context.slf4j.mdc;
 
-import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
+import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 
+import java.io.Closeable;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -83,7 +84,7 @@ public class Slf4jMdcManagerTest {
         MDC.put("mdc-item", "Value 2");
         assertThat("Sanity check: MDC changed?", GET_MDC_ITEM.call(), is("Value 2"));
 
-        Context<Void> reactivation = snapshot.reactivate();
+        Closeable reactivation = snapshot.reactivate();
         assertThat("MDC changed by reactivation", GET_MDC_ITEM.call(), is("Value 1"));
 
         reactivation.close();

@@ -46,7 +46,7 @@ import java.io.Closeable;
  * @author Sjoerd Talsma
  * @since 1.1.0
  */
-public interface Context<T> extends Closeable, nl.talsmasoftware.context.Context<T> {
+public interface Context<T> extends Closeable {
 
     /**
      * The value associated with this context.

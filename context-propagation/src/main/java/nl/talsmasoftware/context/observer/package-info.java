@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@
  *
  * <p>
  * Each call to {@linkplain nl.talsmasoftware.context.ContextManager#initializeNewContext(java.lang.Object)} or
- * {@linkplain nl.talsmasoftware.context.Context#close()} is sent to all relevant context observers.
+ * {@linkplain nl.talsmasoftware.context.api.Context#close()} is sent to all relevant context observers.
  *
  * <p>
  * Each observer must specify which context manager is being observed by implementing the

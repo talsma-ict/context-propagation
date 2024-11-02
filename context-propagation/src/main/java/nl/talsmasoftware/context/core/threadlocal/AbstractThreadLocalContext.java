@@ -15,7 +15,7 @@
  */
 package nl.talsmasoftware.context.core.threadlocal;
 
-import nl.talsmasoftware.context.Context;
+import nl.talsmasoftware.context.api.Context;
 
 import java.lang.reflect.Modifier;
 import java.util.concurrent.ConcurrentHashMap;

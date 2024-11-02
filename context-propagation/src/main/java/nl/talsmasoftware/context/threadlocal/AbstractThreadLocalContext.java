@@ -15,9 +15,9 @@
  */
 package nl.talsmasoftware.context.threadlocal;
 
-import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManager;
 import nl.talsmasoftware.context.ContextManagers;
+import nl.talsmasoftware.context.api.Context;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;

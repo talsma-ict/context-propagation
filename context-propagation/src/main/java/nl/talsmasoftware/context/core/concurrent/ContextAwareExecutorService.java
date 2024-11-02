@@ -15,10 +15,10 @@
  */
 package nl.talsmasoftware.context.core.concurrent;
 
-import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 
+import java.io.Closeable;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
@@ -58,7 +58,7 @@ public class ContextAwareExecutorService extends nl.talsmasoftware.context.deleg
         return new Callable<V>() {
             public V call() throws Exception {
                 Exception exception = null;
-                final Context<Void> context = snapshot.reactivate();
+                final Closeable context = snapshot.reactivate();
                 try {
                     return callable.call();
                 } catch (Exception ex) {
@@ -76,7 +76,7 @@ public class ContextAwareExecutorService extends nl.talsmasoftware.context.deleg
      * @param context   context to be closed
      * @param exception exception if any occurred
      */
-    private static void tryClose(Context<?> context, Exception exception) throws Exception {
+    private static void tryClose(Closeable context, Exception exception) throws Exception {
         if (context != null) try {
             context.close();
         } catch (RuntimeException closeEx) {

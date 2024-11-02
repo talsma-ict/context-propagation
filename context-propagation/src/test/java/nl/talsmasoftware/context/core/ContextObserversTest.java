@@ -123,7 +123,7 @@ class ContextObserversTest {
     void testObserveActivatedSnapshot() {
         SimpleContextObserver observer = new SimpleContextObserver();
         try {
-            nl.talsmasoftware.context.Context<String> ctx = dummyManager.initializeNewContext("Snapshot value");
+            nl.talsmasoftware.context.api.Context<String> ctx = dummyManager.initializeNewContext("Snapshot value");
             ContextManagers.registerContextObserver(observer, DummyContextManager.class);
             ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
             ctx.close();
