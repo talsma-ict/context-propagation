@@ -17,8 +17,8 @@ package nl.talsmasoftware.context.metrics;
 
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
-import nl.talsmasoftware.context.ContextManagers;
-import nl.talsmasoftware.context.ContextSnapshot;
+import nl.talsmasoftware.context.api.ContextSnapshot;
+import nl.talsmasoftware.context.core.ContextManagers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
