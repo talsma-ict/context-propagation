@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,15 @@
  */
 package nl.talsmasoftware.context.functions;
 
-import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.DummyContextManager;
+import nl.talsmasoftware.context.api.Context;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -94,7 +96,7 @@ public class BiFunctionWithContextTest {
     }
 
     @Test
-    public void testApplyWithSnapshotConsumer() throws InterruptedException {
+    public void testApplyWithSnapshotConsumer() throws InterruptedException, IOException {
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
         DummyContextManager.setCurrentValue("Old value");
 
@@ -108,7 +110,7 @@ public class BiFunctionWithContextTest {
         t.join();
 
         assertThat(DummyContextManager.currentValue(), is(Optional.of("Old value")));
-        try (Context<Void> reactivation = snapshotHolder[0].reactivate()) {
+        try (Closeable reactivation = snapshotHolder[0].reactivate()) {
             assertThat(DummyContextManager.currentValue(), is(Optional.of("New value")));
         }
         assertThat(DummyContextManager.currentValue(), is(Optional.of("Old value")));

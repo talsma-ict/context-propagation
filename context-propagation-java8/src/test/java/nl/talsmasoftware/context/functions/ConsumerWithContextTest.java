@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,16 @@
  */
 package nl.talsmasoftware.context.functions;
 
-import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.DummyContextManager;
+import nl.talsmasoftware.context.api.Context;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,8 +34,12 @@ import java.util.function.Consumer;
 import static nl.talsmasoftware.context.DummyContextManager.currentValue;
 import static nl.talsmasoftware.context.DummyContextManager.setCurrentValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
  * @author Sjoerd Talsma
@@ -96,8 +102,10 @@ public class ConsumerWithContextTest {
         assertThat("Snapshot consumer must be called", snapshotHolder[0], is(notNullValue()));
 
         t = new Thread(() -> {
-            try (Context<Void> reactivation = snapshotHolder[0].reactivate()) {
+            try (Closeable reactivation = snapshotHolder[0].reactivate()) {
                 assertThat("Thread context must propagate", currentValue(), is(Optional.of("New value")));
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage(), e);
             }
         });
         t.start();
@@ -105,7 +113,7 @@ public class ConsumerWithContextTest {
     }
 
     @Test
-    public void testAndThen() throws InterruptedException {
+    public void testAndThen() throws InterruptedException, IOException {
         setCurrentValue("Old value");
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
 
@@ -120,7 +128,7 @@ public class ConsumerWithContextTest {
         t.join();
 
         assertThat(currentValue(), is(Optional.of("Old value")));
-        try (Context<Void> reactivated = snapshotHolder[0].reactivate()) {
+        try (Closeable reactivated = snapshotHolder[0].reactivate()) {
             assertThat(currentValue(), is(Optional.of("NEW VALUE, New value, Old value")));
         }
     }

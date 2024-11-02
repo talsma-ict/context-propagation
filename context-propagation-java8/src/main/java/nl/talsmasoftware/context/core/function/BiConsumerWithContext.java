@@ -15,10 +15,11 @@
  */
 package nl.talsmasoftware.context.core.function;
 
-import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -50,7 +51,7 @@ public class BiConsumerWithContext<T, U> extends WrapperWithContextAndConsumer<B
 
     @Override
     public void accept(T t, U u) {
-        try (Context<Void> context = snapshot().reactivate()) {
+        try (Closeable context = snapshot().reactivate()) {
             try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                 LOGGER.log(Level.FINEST, "Delegating accept method with {0} to {1}.", new Object[]{context, delegate()});
                 delegate().accept(t, u);
@@ -61,6 +62,8 @@ public class BiConsumerWithContext<T, U> extends WrapperWithContextAndConsumer<B
                     contextSnapshotConsumer.accept(resultSnapshot);
                 }
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
@@ -68,7 +71,7 @@ public class BiConsumerWithContext<T, U> extends WrapperWithContextAndConsumer<B
     public BiConsumer<T, U> andThen(BiConsumer<? super T, ? super U> after) {
         requireNonNull(after, "Cannot post-process with after bi-consumer <null>.");
         return (l, r) -> {
-            try (Context<Void> context = snapshot().reactivate()) {
+            try (Closeable context = snapshot().reactivate()) {
                 try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                     LOGGER.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});
                     delegate().accept(l, r);
@@ -80,6 +83,8 @@ public class BiConsumerWithContext<T, U> extends WrapperWithContextAndConsumer<B
                         contextSnapshotConsumer.accept(resultSnapshot);
                     }
                 }
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage(), e);
             }
         };
     }

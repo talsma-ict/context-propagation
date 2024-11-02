@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  */
 package nl.talsmasoftware.context.slf4j.mdc;
 
-import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManager;
 import nl.talsmasoftware.context.ContextManagers;
+import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.clearable.Clearable;
 import org.slf4j.MDC;
 

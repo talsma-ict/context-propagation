@@ -15,11 +15,13 @@
  */
 package nl.talsmasoftware.context;
 
+import java.io.Closeable;
+
 /**
  * Interface for a 'snapshot' that can capture the (then-) 'active context' from all known registered
  * {@link ContextManager} implementations.<br>
  * Obtain a new snapshot by calling {@link ContextManagers#createContextSnapshot()} which will include a snapshot
- * for all supported {@link Context} types through their respective {@link ContextManager managers}.
+ * for all supported {@link nl.talsmasoftware.context.api.Context} types through their respective {@link ContextManager managers}.
  * <p>
  * This allows for a generic method to:
  * <ol>
@@ -27,8 +29,8 @@ package nl.talsmasoftware.context;
  * <li>Pass the returned <code>ContextSnapshot</code> along to a background job.</li>
  * <li>Allow the background job to (temporary) {@link #reactivate() reactivate} the snapshot
  * for some required code path.</li>
- * <li>The reactivation is also a {@link Context} of its own. Although it does not return any specific
- * {@link Context#getValue() value}, it must be {@link Context#close() closed} when the work requiring
+ * <li>The reactivation is also a {@link nl.talsmasoftware.context.api.Context} of its own. Although it does not return any specific
+ * {@link nl.talsmasoftware.context.api.Context#getValue() value}, it must be {@link nl.talsmasoftware.context.api.Context#close() closed} when the work requiring
  * the context snapshot is done. This prevents context values leaking in case the used threads
  * are returned to some pool.</li>
  * </ol>
@@ -40,7 +42,7 @@ package nl.talsmasoftware.context;
 public interface ContextSnapshot {
 
     /**
-     * This method activates all contained values by the snapshot in their respective {@link Context} implementations.
+     * This method activates all contained values by the snapshot in their respective {@link nl.talsmasoftware.context.api.Context} implementations.
      * <p>
      * The reactivated context is of type {@code Void}, because it does not contain any value itself.
      * It closes all contained snapshot values collectively from its {@code close()} method.
@@ -54,6 +56,6 @@ public interface ContextSnapshot {
      * @return A new reactivation context with the snapshot values that will be valid until closed
      * (or new values are registered).
      */
-    Context<Void> reactivate();
+    Closeable reactivate();
 
 }

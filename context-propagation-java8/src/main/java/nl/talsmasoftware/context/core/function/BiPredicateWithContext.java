@@ -15,10 +15,11 @@
  */
 package nl.talsmasoftware.context.core.function;
 
-import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -50,7 +51,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
 
     @Override
     public boolean test(IN1 in1, IN2 in2) {
-        try (Context<Void> context = snapshot().reactivate()) {
+        try (Closeable context = snapshot().reactivate()) {
             try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                 LOGGER.log(Level.FINEST, "Delegating test method with {0} to {1}.", new Object[]{context, delegate()});
                 return delegate().test(in1, in2);
@@ -61,6 +62,8 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
                     contextSnapshotConsumer.accept(resultSnapshot);
                 }
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
@@ -68,7 +71,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
     public BiPredicate<IN1, IN2> and(BiPredicate<? super IN1, ? super IN2> other) {
         requireNonNull(other, "Cannot combine bi-predicate with 'and' <null>.");
         return (IN1 in1, IN2 in2) -> {
-            try (Context<Void> context = snapshot().reactivate()) {
+            try (Closeable context = snapshot().reactivate()) {
                 try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                     LOGGER.log(Level.FINEST, "Delegating 'and' method with {0} to {1}.", new Object[]{context, delegate()});
                     return delegate().test(in1, in2) && other.test(in1, in2);
@@ -79,6 +82,8 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
                         contextSnapshotConsumer.accept(resultSnapshot);
                     }
                 }
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage(), e);
             }
         };
     }
@@ -87,7 +92,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
     public BiPredicate<IN1, IN2> or(BiPredicate<? super IN1, ? super IN2> other) {
         requireNonNull(other, "Cannot combine bi-predicate with 'or' <null>.");
         return (IN1 in1, IN2 in2) -> {
-            try (Context<Void> context = snapshot().reactivate()) {
+            try (Closeable context = snapshot().reactivate()) {
                 try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                     LOGGER.log(Level.FINEST, "Delegating 'or' method with {0} to {1}.", new Object[]{context, delegate()});
                     return delegate().test(in1, in2) || other.test(in1, in2);
@@ -98,6 +103,8 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
                         contextSnapshotConsumer.accept(resultSnapshot);
                     }
                 }
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage(), e);
             }
         };
     }

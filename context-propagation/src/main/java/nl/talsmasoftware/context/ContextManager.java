@@ -15,6 +15,8 @@
  */
 package nl.talsmasoftware.context;
 
+import nl.talsmasoftware.context.api.Context;
+
 /**
  * The contract for a ContextManager Service.
  *

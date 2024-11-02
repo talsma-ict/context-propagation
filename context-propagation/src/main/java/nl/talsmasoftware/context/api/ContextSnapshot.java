@@ -15,7 +15,6 @@
  */
 package nl.talsmasoftware.context.api;
 
-import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManager;
 
 import java.io.Closeable;

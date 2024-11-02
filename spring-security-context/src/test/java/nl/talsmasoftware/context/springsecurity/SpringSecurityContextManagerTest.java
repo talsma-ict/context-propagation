@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package nl.talsmasoftware.context.springsecurity;
 
-import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
@@ -26,6 +25,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.io.Closeable;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -103,7 +103,7 @@ public class SpringSecurityContextManagerTest {
         assertThat("Sanity check: Context changed?", GET_AUTHENTICATION.call(),
                 hasToString(containsString("Jules Winnfield")));
 
-        Context<Void> reactivation = snapshot.reactivate();
+        Closeable reactivation = snapshot.reactivate();
         assertThat("Context changed by reactivation", GET_AUTHENTICATION.call(),
                 hasToString(containsString("Vincent Vega")));
 

@@ -15,12 +15,15 @@
  */
 package nl.talsmasoftware.context;
 
+import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
 import nl.talsmasoftware.context.observer.SimpleContextObserver;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -89,7 +92,7 @@ public class ContextManagersTest {
     }
 
     @Test
-    public void testSnapshot_inSameThread() {
+    public void testSnapshot_inSameThread() throws IOException {
         DummyContext.reset();
         assertThat(DummyContext.currentValue(), is(nullValue()));
 
@@ -106,10 +109,10 @@ public class ContextManagersTest {
         assertThat(DummyContext.currentValue(), is("third value"));
 
         // Reactivate snapshot: ctx1 -> ctx2 -> ctx3 -> ctx2'
-        Context<Void> ctxSnapshot = snapshot.reactivate();
+        Closeable reactivation = snapshot.reactivate();
         assertThat(DummyContext.currentValue(), is("second value"));
 
-        ctxSnapshot.close();
+        reactivation.close();
         assertThat(DummyContext.currentValue(), is("third value")); // back to ctx3, NOT ctx1 !!
 
         // out-of-order closing!
@@ -183,14 +186,14 @@ public class ContextManagersTest {
     }
 
     @Test
-    public void testCreateSnapshot_ExceptionHandling() {
+    public void testCreateSnapshot_ExceptionHandling() throws IOException {
         ThrowingContextManager.onGet = new IllegalStateException("No active context!");
         Context<String> ctx = new DummyContext("blah");
         ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
         ctx.close();
 
         assertThat(DummyContext.currentValue(), is(nullValue()));
-        Context<Void> reactivation = snapshot.reactivate();
+        Closeable reactivation = snapshot.reactivate();
         assertThat(DummyContext.currentValue(), is("blah"));
         reactivation.close();
         assertThat(DummyContext.current(), is(nullValue()));

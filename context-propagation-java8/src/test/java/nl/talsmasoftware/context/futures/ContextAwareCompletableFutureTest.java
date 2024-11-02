@@ -15,10 +15,10 @@
  */
 package nl.talsmasoftware.context.futures;
 
-import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.DummyContextManager;
+import nl.talsmasoftware.context.api.Context;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

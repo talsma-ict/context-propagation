@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,15 @@
  */
 package nl.talsmasoftware.context;
 
+import nl.talsmasoftware.context.api.Context;
 import org.junit.jupiter.api.Test;
+
+import java.io.Closeable;
+import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.startsWith;
 
 /**
@@ -40,7 +43,7 @@ public class ContextSnapshotTest {
     }
 
     @Test
-    public void testSnapshotReactivate() {
+    public void testSnapshotReactivate() throws IOException {
         Context<String> ctx = MGR.initializeNewContext("Old value");
         try {
             ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
@@ -48,10 +51,9 @@ public class ContextSnapshotTest {
             try {
 
                 assertThat(MGR.getActiveContext().getValue(), is("New value"));
-                Context<Void> reactivation = snapshot.reactivate();
+                Closeable reactivation = snapshot.reactivate();
                 try {
                     assertThat(MGR.getActiveContext().getValue(), is("Old value"));
-                    assertThat(reactivation.getValue(), is(nullValue()));
                     assertThat(reactivation, hasToString(startsWith("ReactivatedContext{size=")));
                 } finally {
                     reactivation.close();

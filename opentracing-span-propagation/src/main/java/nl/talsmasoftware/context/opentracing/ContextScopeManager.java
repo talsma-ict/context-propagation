@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package nl.talsmasoftware.context.opentracing;
 import io.opentracing.Scope;
 import io.opentracing.ScopeManager;
 import io.opentracing.Span;
-import nl.talsmasoftware.context.Context;
 import nl.talsmasoftware.context.ContextManager;
+import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext;
 
 import java.util.concurrent.atomic.AtomicBoolean;
