@@ -33,10 +33,6 @@
     <properties>
         <project.moduleName>${project.groupId}.mdc</project.moduleName>
         <root.basedir>${project.parent.basedir}</root.basedir>
-        <maven.compiler.source>1.5</maven.compiler.source>
-        <maven.compiler.target>1.5</maven.compiler.target>
-        <!-- Suppress java version deprecation warnings -->
-        <project.compiler.argument>-Xlint:-options</project.compiler.argument>
         <project.javadoc.version>8</project.javadoc.version>
     </properties>
 
