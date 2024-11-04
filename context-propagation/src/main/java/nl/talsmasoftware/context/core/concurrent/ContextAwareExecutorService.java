@@ -17,6 +17,7 @@ package nl.talsmasoftware.context.core.concurrent;
 
 import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.api.ContextSnapshot;
+import nl.talsmasoftware.context.core.delegation.CallMappingExecutorService;
 
 import java.io.Closeable;
 import java.util.concurrent.Callable;
@@ -37,7 +38,7 @@ import java.util.logging.Logger;
  *
  * @author Sjoerd Talsma
  */
-public class ContextAwareExecutorService extends nl.talsmasoftware.context.delegation.CallMappingExecutorService {
+public class ContextAwareExecutorService extends CallMappingExecutorService {
     private static final Logger LOGGER = Logger.getLogger(ContextAwareExecutorService.class.getName());
 
     public ContextAwareExecutorService(ExecutorService delegate) {

@@ -35,4 +35,4 @@
  * objects, providing a base executor service that can wrap any background task
  * by implementing a single {@code map(Callable)} method.
  */
-package nl.talsmasoftware.context.delegation;
+package nl.talsmasoftware.context.core.delegation;
