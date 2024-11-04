@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.delegation;
+package nl.talsmasoftware.context.core.delegation;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -30,7 +31,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -39,7 +40,6 @@ import static org.mockito.Mockito.mock;
 public class WrapperWithContextTest {
 
     @Test
-    @SuppressWarnings("deprecation")
     public void testCreateWrapperWithoutDelegate() {
         WrapperWithContext<Object> wrapper = new WrapperWithContext<Object>(mock(ContextSnapshot.class), null) {
         };
@@ -48,32 +48,36 @@ public class WrapperWithContextTest {
     }
 
     @Test
-    @SuppressWarnings("deprecation")
     public void testCreateWrapperWithoutSnapshot() {
-        try {
-            new WrapperWithContext<Object>((ContextSnapshot) null, mock(Wrapper.class)) {
-            };
-            fail("Exception expected.");
-        } catch (NullPointerException expected) {
-            assertThat(expected, hasToString(containsString("No context snapshot provided")));
-        }
+        ContextSnapshot snapshot = null;
+        Wrapper<Object> wrapper = mock(Wrapper.class);
+        Exception expected = assertThrows(NullPointerException.class, () ->
+                new WrapperWithContext<Object>(snapshot, wrapper) {
+                });
+        assertThat(expected, hasToString(containsString("No context snapshot provided")));
     }
 
     @Test
     public void testCreateWrapperWithoutSnapshotSupplier() {
-        try {
-            new WrapperWithContext<Object>((ContextSnapshotSupplier) null, mock(Wrapper.class)) {
-            };
-            fail("Exception expected.");
-        } catch (NullPointerException expected) {
-            assertThat(expected, hasToString(containsString("No context snapshot supplier provided")));
-        }
+        Supplier<ContextSnapshot> supplier = null;
+        Wrapper<Object> wrapper = mock(Wrapper.class);
+        Exception expected = assertThrows(NullPointerException.class, () ->
+                new WrapperWithContext<Object>(supplier, wrapper) {
+                });
+        assertThat(expected, hasToString(containsString("No context snapshot supplier provided")));
     }
 
     @Test
-    @SuppressWarnings("deprecation")
+    public void testSupplySnapshotNull() {
+        WrapperWithContext<Object> wrapperWithContext = new WrapperWithContext<Object>((Supplier<ContextSnapshot>) () -> null, mock(Wrapper.class)) {
+        };
+        Exception expected = assertThrows(NullPointerException.class, wrapperWithContext::snapshot);
+        assertThat(expected, hasToString(containsString("Context snapshot is <null>")));
+    }
+
+    @Test
     public void testEqualsHashcode() {
-        Set<WrapperWithContext<Object>> set = new LinkedHashSet<WrapperWithContext<Object>>();
+        Set<WrapperWithContext<Object>> set = new LinkedHashSet<>();
         ContextSnapshot snapshot = mock(ContextSnapshot.class);
         Wrapper<Object> delegate = mock(Wrapper.class);
 
@@ -87,7 +91,7 @@ public class WrapperWithContextTest {
         assertThat(set, hasSize(3));
 
         assertThat(wrapper, equalTo(wrapper));
-        assertThat(wrapper, equalTo((WrapperWithContext<Object>) new DoNothingWrapper(snapshot, delegate)));
+        assertThat(wrapper, equalTo(new DoNothingWrapper(snapshot, delegate)));
         WrapperWithContext<Object> copy = new WrapperWithContext<Object>(snapshot, delegate) {
         };
         assertThat(wrapper, not(equalTo(copy))); // different inner class
@@ -100,7 +104,6 @@ public class WrapperWithContextTest {
     }
 
     @Test
-    @SuppressWarnings("deprecation")
     public void testToString() {
         ContextSnapshot snapshot = mock(ContextSnapshot.class);
         Wrapper<Object> delegate = mock(Wrapper.class);
@@ -115,11 +118,7 @@ public class WrapperWithContextTest {
     public void testToString_contextSnapshotSupplier() {
         final ContextSnapshot snapshot = mock(ContextSnapshot.class);
         final Wrapper<Object> delegate = mock(Wrapper.class);
-        final WrapperWithContext<Object> wrapper = new WrapperWithContext<Object>(new ContextSnapshotSupplier() {
-            public ContextSnapshot get() {
-                return snapshot;
-            }
-        }, delegate) {
+        final WrapperWithContext<Object> wrapper = new WrapperWithContext<Object>(() -> snapshot, delegate) {
         };
 
         // Test that toString does NOT trigger eager snapshot evaluation.
@@ -128,20 +127,4 @@ public class WrapperWithContextTest {
         wrapper.snapshot();
         assertThat(wrapper, hasToString(containsString(snapshot.toString())));
     }
-
-    @Test
-    public void testSupplySnapshotNull() {
-        try {
-            new WrapperWithContext<String>(new ContextSnapshotSupplier() {
-                public ContextSnapshot get() {
-                    return null;
-                }
-            }, "Delegate") {
-            }.snapshot();
-            fail("Exception expected!");
-        } catch (NullPointerException expected) {
-            assertThat(expected, hasToString(containsString("Context snapshot is <null>")));
-        }
-    }
-
 }

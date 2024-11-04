@@ -17,6 +17,8 @@ package nl.talsmasoftware.context.delegation;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
 
+import java.util.function.Supplier;
+
 /**
  * Wrapper that also contains a fixed context snapshot.
  *
@@ -53,7 +55,7 @@ public abstract class WrapperWithContext<T> extends nl.talsmasoftware.context.co
      * @param delegate The delegate object to be wrapped.
      * @see #WrapperWithContext(ContextSnapshot, Object)
      */
-    protected WrapperWithContext(ContextSnapshotSupplier supplier, T delegate) {
+    protected WrapperWithContext(Supplier<ContextSnapshot> supplier, T delegate) {
         super(supplier, delegate);
     }
 
