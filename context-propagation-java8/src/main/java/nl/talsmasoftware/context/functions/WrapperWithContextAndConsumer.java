@@ -16,7 +16,7 @@
 package nl.talsmasoftware.context.functions;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.delegation.WrapperWithContext;
+import nl.talsmasoftware.context.core.delegation.WrapperWithContext;
 
 import java.util.Optional;
 import java.util.function.Consumer;

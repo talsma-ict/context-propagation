@@ -16,14 +16,17 @@
 package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.delegation.WrapperWithContext;
+import nl.talsmasoftware.context.core.delegation.WrapperWithContext;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * Package-convenience subclass for {@linkplain WrapperWithContext} that takes Java 8 generic functional interfaces
- * {@link Supplier} and {@link Consumer} instead of the specific Java 5 versions.
+ * A {@linkplain WrapperWithContext} that takes an additional {@link Consumer} accepting a result snapshot,
+ * captured after the function end.
+ *
+ * <p>
+ * This consumer is optional. All clients should avoid taking unnecessary snapshots if the consumer is {@code null}.
  *
  * @param <T> The type of the wrapped delegate object.
  */
@@ -54,7 +57,7 @@ abstract class WrapperWithContextAndConsumer<T> extends WrapperWithContext<T> {
      * @param contextSnapshotConsumer An optional post-action consumer to receive a new context snapshot taken after the action.
      */
     protected WrapperWithContextAndConsumer(Supplier<ContextSnapshot> contextSnapshotSupplier, T delegate, Consumer<ContextSnapshot> contextSnapshotConsumer) {
-        super(contextSnapshotSupplier == null ? null : contextSnapshotSupplier::get, delegate);
+        super(contextSnapshotSupplier, delegate);
         this.contextSnapshotConsumer = contextSnapshotConsumer;
     }
 
