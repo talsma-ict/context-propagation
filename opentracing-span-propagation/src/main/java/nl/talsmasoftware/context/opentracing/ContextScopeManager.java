@@ -18,11 +18,9 @@ package nl.talsmasoftware.context.opentracing;
 import io.opentracing.Scope;
 import io.opentracing.ScopeManager;
 import io.opentracing.Span;
-import nl.talsmasoftware.context.ContextManager;
 import nl.talsmasoftware.context.api.Context;
-import nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext;
-
-import java.util.concurrent.atomic.AtomicBoolean;
+import nl.talsmasoftware.context.api.ContextManager;
+import nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext;
 
 /**
  * Our own implementation of the opentracing {@linkplain ScopeManager}.
@@ -32,7 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * taking care to restore the previous value when closing an active scope.
  *
  * <p>
- * This manager is based on our {@linkplain nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext}
+ * This manager is based on our {@linkplain nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext}
  * implementation. Compared to the 'standard' {@linkplain io.opentracing.util.ThreadLocalScopeManager}
  * this implementation has the following advantages:
  * <ol>
@@ -41,7 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * <li>More predictable behaviour for out-of-order closing of scopes.
  * Although this is explicitly unsupported by the opentracing specification,
  * we think having consistent and predictable behaviour is an advantage.
- * <li>Support for {@link nl.talsmasoftware.context.observer.ContextObserver}.
+ * <li>Support for {@link nl.talsmasoftware.context.api.ContextObserver}.
  * See https://github.com/opentracing/opentracing-java/issues/334 explicitly wanting this.
  * </ol>
  *
@@ -58,33 +56,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @since 1.0.6
  */
 public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
-    /**
-     * Makes the given span the new active span.
-     *
-     * @param span              The span to become the active span.
-     * @param finishSpanOnClose Whether the span should automatically finish when closing the resulting scope.
-     * @return The new active scope (must be closed from the same thread).
-     * @deprecated This is no longer part of the OpenTracing API as of {@code 0.33.0}
-     */
-    @Deprecated
-    public Scope activate(Span span, boolean finishSpanOnClose) {
-        return new ThreadLocalSpanContext(getClass(), span, finishSpanOnClose);
-    }
-
     @Override
     public Scope activate(Span span) {
-        return new ThreadLocalSpanContext(getClass(), span, false);
-    }
-
-    /**
-     * The currently active {@link Scope} containing the {@linkplain #activeSpan() active span}.
-     *
-     * @return the active scope, or {@code null} if none could be found.
-     * @deprecated This is no longer part of the OpenTracing API as of {@code 0.33.0}
-     */
-    @Deprecated
-    public Scope active() {
-        return ThreadLocalSpanContext.current();
+        return new ThreadLocalSpanContext(span);
     }
 
     @Override
@@ -102,7 +76,7 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
      */
     @Override
     public Context<Span> initializeNewContext(Span value) {
-        return new ThreadLocalSpanContext(getClass(), value, false);
+        return new ThreadLocalSpanContext(value);
     }
 
     /**
@@ -113,6 +87,17 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
         return ThreadLocalSpanContext.current();
     }
 
+    @Override
+    public Span getActiveContextValue() {
+        Context<Span> activeContext = getActiveContext();
+        return activeContext == null ? null : activeContext.getValue();
+    }
+
+    @Override
+    public void clear() {
+        ThreadLocalSpanContext.removeThreadLocal();
+    }
+
     /**
      * @return String representation for this context manager.
      */
@@ -121,31 +106,16 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
     }
 
     private static final class ThreadLocalSpanContext extends AbstractThreadLocalContext<Span> implements Scope {
-        private final AtomicBoolean finishOnClose;
-
-        private ThreadLocalSpanContext(Class<? extends ContextManager<? super Span>> contextManagerType, Span newValue, boolean finishOnClose) {
-            super(contextManagerType, newValue);
-            this.finishOnClose = new AtomicBoolean(finishOnClose);
+        private ThreadLocalSpanContext(Span newValue) {
+            super(newValue);
         }
 
         private static ThreadLocalSpanContext current() {
             return current(ThreadLocalSpanContext.class);
         }
 
-        /**
-         * @deprecated This is no longer part of the OpenTracing API as of {@code 0.33.0}
-         */
-        @Deprecated
-        public Span span() {
-            return value;
-        }
-
-        @Override
-        public void close() {
-            super.close();
-            if (finishOnClose.compareAndSet(true, false) && value != null) {
-                value.finish();
-            }
+        private static void removeThreadLocal() {
+            threadLocalInstanceOf(ThreadLocalSpanContext.class).remove();
         }
     }
 }

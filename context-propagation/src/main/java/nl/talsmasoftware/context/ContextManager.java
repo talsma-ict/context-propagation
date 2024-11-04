@@ -23,7 +23,7 @@ import nl.talsmasoftware.context.api.Context;
  * <p>
  * Implementations can be registered by providing a fully qualified class name in a service file called:<br>
  * <code>"/META-INF/services/nl.talsmasoftware.context.ContextManager"</code><br>
- * That will take care of any active context being captured in {@link ContextSnapshot} instances
+ * That will take care of any active context being captured in {@link nl.talsmasoftware.context.api.ContextSnapshot} instances
  * managed by the {@link ContextManagers} utility class.<br>
  * <b>Note:</b> <em>Make sure your implementation has a default (no-argument) constructor.</em>
  *
@@ -31,7 +31,7 @@ import nl.talsmasoftware.context.api.Context;
  * A context manager is required to notify
  * registered {@linkplain nl.talsmasoftware.context.observer.ContextObserver ContextObserver} instances
  * of context updates.<br>
- * The {@linkplain nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext AbstractThreadLocalContext}
+ * The {@linkplain nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext AbstractThreadLocalContext}
  * already notifies these observers.<br>
  * Other implementations can use the {@linkplain ContextManagers#onActivate(Class, Object, Object)}
  * and {@linkplain ContextManagers#onDeactivate(Class, Object, Object)} methods

@@ -15,8 +15,8 @@
  */
 package nl.talsmasoftware.context.futures;
 
-import nl.talsmasoftware.context.ContextManagers;
-import nl.talsmasoftware.context.ContextSnapshot;
+import nl.talsmasoftware.context.api.ContextSnapshot;
+import nl.talsmasoftware.context.core.ContextManagers;
 import nl.talsmasoftware.context.functions.BiConsumerWithContext;
 import nl.talsmasoftware.context.functions.BiFunctionWithContext;
 import nl.talsmasoftware.context.functions.ConsumerWithContext;

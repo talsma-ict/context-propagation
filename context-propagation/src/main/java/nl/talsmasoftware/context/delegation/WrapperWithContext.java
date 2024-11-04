@@ -15,7 +15,7 @@
  */
 package nl.talsmasoftware.context.delegation;
 
-import nl.talsmasoftware.context.ContextSnapshot;
+import nl.talsmasoftware.context.api.ContextSnapshot;
 
 /**
  * Wrapper that also contains a fixed context snapshot.

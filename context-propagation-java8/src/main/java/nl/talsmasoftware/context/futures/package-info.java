@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * Package for context-aware java {@link java.util.concurrent.Future} code.
  *
  * <h2>{@linkplain nl.talsmasoftware.context.futures.ContextAwareCompletableFuture}</h2>
  * <p>
  * A {@linkplain java.util.concurrent.CompletableFuture} that applies a certain
- * {@linkplain nl.talsmasoftware.context.ContextSnapshot} to all
+ * {@linkplain nl.talsmasoftware.context.api.ContextSnapshot} to all
  * {@linkplain java.util.concurrent.CompletionStage completion stages} of the completable future.
  */
 package nl.talsmasoftware.context.futures;

@@ -25,8 +25,8 @@ import java.util.logging.Logger;
  * Core implementation to allow {@link #createContextSnapshot() taking a snapshot of all contexts}.
  *
  * <p>
- * Such a {@link ContextSnapshot snapshot} can be passed to a background task to allow the context to be
- * {@link ContextSnapshot#reactivate() reactivated} in that background thread, until it gets
+ * Such a {@link nl.talsmasoftware.context.api.ContextSnapshot snapshot} can be passed to a background task to allow the context to be
+ * {@link nl.talsmasoftware.context.api.ContextSnapshot#reactivate() reactivated} in that background thread, until it gets
  * {@link nl.talsmasoftware.context.api.Context#close() closed} again (preferably in a <code>try-with-resources</code> construct).
  *
  * @author Sjoerd Talsma
@@ -60,7 +60,7 @@ public final class ContextManagers {
      * implementations.
      * <p>
      * This snapshot is returned as a single object that can be temporarily
-     * {@link ContextSnapshot#reactivate() reactivated}. Don't forget to {@link nl.talsmasoftware.context.api.Context#close() close} the reactivated
+     * {@link nl.talsmasoftware.context.api.ContextSnapshot#reactivate() reactivated}. Don't forget to {@link nl.talsmasoftware.context.api.Context#close() close} the reactivated
      * context once you're done, preferably in a <code>try-with-resources</code> construct.
      *
      * @return A new snapshot that can be reactivated elsewhere (e.g. a background thread or even another node)
@@ -105,7 +105,7 @@ public final class ContextManagers {
      * It is possible to configure a fixed, single classloader in your application for looking up the context managers.
      * <p>
      * Using this method to specify a fixed classloader will only impact
-     * new {@linkplain ContextSnapshot context snapshots}. Existing snapshots will not be impacted.
+     * new {@linkplain nl.talsmasoftware.context.api.ContextSnapshot context snapshots}. Existing snapshots will not be impacted.
      * <p>
      * <strong>Notes:</strong><br>
      * <ul>

@@ -33,7 +33,7 @@
  * Can {@linkplain nl.talsmasoftware.context.ContextManager#initializeNewContext(java.lang.Object) initialize a new context}
  * and provides access to the {@linkplain nl.talsmasoftware.context.ContextManager#getActiveContext() active context}.
  *
- * <h2>{@linkplain nl.talsmasoftware.context.ContextSnapshot}</h2>
+ * <h2>{@linkplain nl.talsmasoftware.context.api.ContextSnapshot}</h2>
  * <p>
  * A snapshot contains the current value from all known context managers.<br>
  * These values can be reactivated in another thread.<br>

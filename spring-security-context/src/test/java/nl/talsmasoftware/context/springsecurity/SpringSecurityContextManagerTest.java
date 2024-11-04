@@ -15,8 +15,8 @@
  */
 package nl.talsmasoftware.context.springsecurity;
 
-import nl.talsmasoftware.context.ContextManagers;
-import nl.talsmasoftware.context.ContextSnapshot;
+import nl.talsmasoftware.context.api.ContextSnapshot;
+import nl.talsmasoftware.context.core.ContextManagers;
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

@@ -15,8 +15,6 @@
  */
 package nl.talsmasoftware.context.api;
 
-import nl.talsmasoftware.context.ContextManager;
-
 import java.io.Closeable;
 
 /**
@@ -42,7 +40,7 @@ import java.io.Closeable;
  * @author Sjoerd Talsma
  * @since 1.1.0
  */
-public interface ContextSnapshot extends nl.talsmasoftware.context.ContextSnapshot {
+public interface ContextSnapshot {
 
     /**
      * Temporarily reactivates all captured context values that are in the snapshot.
@@ -69,7 +67,7 @@ public interface ContextSnapshot extends nl.talsmasoftware.context.ContextSnapsh
      * <p>
      * It is <strong>strongly advised</strong> to only use reactivation with try-with-resources code blocks.
      */
-    interface Reactivation extends Closeable, Context<Void> {
+    interface Reactivation extends Closeable {
         /**
          * Ends the contexts from the reactivated context snapshot.
          *
@@ -78,15 +76,6 @@ public interface ContextSnapshot extends nl.talsmasoftware.context.ContextSnapsh
          * before the snapshot was activated.
          */
         void close();
-
-        /**
-         * A reactivation contains no value.
-         *
-         * @return Always {@code null}.
-         * @deprecated From the next major version, Reactivation will no longer extend Context.
-         */
-        @Deprecated
-        Void getValue();
     }
 
 }

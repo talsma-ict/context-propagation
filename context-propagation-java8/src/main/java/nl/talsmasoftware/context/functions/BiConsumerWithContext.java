@@ -15,7 +15,7 @@
  */
 package nl.talsmasoftware.context.functions;
 
-import nl.talsmasoftware.context.ContextSnapshot;
+import nl.talsmasoftware.context.api.ContextSnapshot;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;

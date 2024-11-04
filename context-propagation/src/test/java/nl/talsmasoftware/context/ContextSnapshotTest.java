@@ -16,6 +16,7 @@
 package nl.talsmasoftware.context;
 
 import nl.talsmasoftware.context.api.Context;
+import nl.talsmasoftware.context.api.ContextSnapshot;
 import org.junit.jupiter.api.Test;
 
 import java.io.Closeable;
