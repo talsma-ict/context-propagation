@@ -16,16 +16,17 @@
 package nl.talsmasoftware.context.core.delegation;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.delegation.ContextSnapshotSupplier;
+
+import java.util.function.Supplier;
 
 /**
  * Wrapper that contains a context snapshot.
  *
  * @author Sjoerd Talsma
  */
-public abstract class WrapperWithContext<T> extends nl.talsmasoftware.context.delegation.Wrapper<T> {
+public abstract class WrapperWithContext<T> extends Wrapper<T> {
 
-    private final ContextSnapshotSupplier supplier;
+    private final Supplier<ContextSnapshot> supplier;
     private volatile ContextSnapshot snapshot;
 
     /**
@@ -48,7 +49,7 @@ public abstract class WrapperWithContext<T> extends nl.talsmasoftware.context.de
      * <p>
      * <strong>Note:</strong> <em>Make sure the supplier function does <strong>not</strong> obtain the context snapshot
      * from any threadlocal storage! The wrapper is designed to propagate contexts from one thread to another.
-     * Therefore, the snapshot must be {@link nl.talsmasoftware.context.ContextManagers#createContextSnapshot() captured}
+     * Therefore, the snapshot must be {@link nl.talsmasoftware.context.core.ContextManagers#createContextSnapshot() captured}
      * in the source thread and {@link ContextSnapshot#reactivate() reactivated} in the target thread.
      * If unsure, please use the
      * {@link #WrapperWithContext(ContextSnapshot, Object) constructor with snapshot} instead.</em>
@@ -60,7 +61,7 @@ public abstract class WrapperWithContext<T> extends nl.talsmasoftware.context.de
      * @param delegate The delegate object to be wrapped.
      * @see #WrapperWithContext(ContextSnapshot, Object)
      */
-    protected WrapperWithContext(ContextSnapshotSupplier supplier, T delegate) {
+    protected WrapperWithContext(Supplier<ContextSnapshot> supplier, T delegate) {
         super(delegate);
         this.supplier = supplier;
         this.snapshot = null;
