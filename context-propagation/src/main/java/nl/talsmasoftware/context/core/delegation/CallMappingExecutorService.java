@@ -26,7 +26,7 @@ import java.util.concurrent.Executors;
  *
  * @author Sjoerd Talsma
  */
-public abstract class CallMappingExecutorService extends nl.talsmasoftware.context.delegation.DelegatingExecutorService {
+public abstract class CallMappingExecutorService extends DelegatingExecutorService {
 
     /**
      * Constructor to create a new wrapper around the specified {@link ExecutorService service delegate}.
