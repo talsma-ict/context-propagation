@@ -15,6 +15,7 @@
  */
 package nl.talsmasoftware.context.delegation;
 
+import nl.talsmasoftware.context.core.delegation.DelegatingFuture;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,14 +50,14 @@ import static org.mockito.Mockito.when;
  */
 public class DelegatingFutureTest {
 
-    private static class TestDelegatingFuture extends DelegatingFuture<Object> {
+    private static class TestDelegatingFuture extends nl.talsmasoftware.context.core.delegation.DelegatingFuture<Object> {
         private TestDelegatingFuture(Future<Object> delegate) {
             super(delegate);
         }
     }
 
     Future<Object> delegate;
-    DelegatingFuture subject;
+    DelegatingFuture<Object> subject;
 
     @BeforeEach
     public void setUp() {
