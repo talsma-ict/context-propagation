@@ -25,12 +25,12 @@
  * and {@code nonNullDelegate()}. The latter validates that the delegate is non-null.
  *
  * <p>
- * The {@linkplain nl.talsmasoftware.context.delegation.WrapperWithContext} is
+ * The {@linkplain nl.talsmasoftware.context.core.delegation.WrapperWithContext} is
  * just a wrapper that also contains a context snapshot (or a supplier for it).
  *
- * <h2>{@linkplain nl.talsmasoftware.context.delegation.CallMappingExecutorService}</h2>
+ * <h2>{@linkplain nl.talsmasoftware.context.core.delegation.CallMappingExecutorService}</h2>
  * <p>
- * A {@linkplain nl.talsmasoftware.context.delegation.DelegatingExecutorService} that maps
+ * A {@linkplain nl.talsmasoftware.context.core.delegation.DelegatingExecutorService} that maps
  * all {@linkplain java.lang.Runnable} tasks in {@linkplain java.util.concurrent.Callable}
  * objects, providing a base executor service that can wrap any background task
  * by implementing a single {@code map(Callable)} method.
