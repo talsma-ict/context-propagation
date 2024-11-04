@@ -23,7 +23,7 @@ import java.util.concurrent.Future;
 
 /**
  * Abstract baseclass that makes it a little easier to wrap existing {@link ExecutorService} implementations by
- * forwarding all methods to a {@link Wrapper#delegate() delegate} executor service.<br>
+ * forwarding all methods to a {@link nl.talsmasoftware.context.core.delegation.Wrapper#delegate() delegate} executor service.<br>
  * The class also provides overridable <code>wrapper</code> methods for all complex input (e.g. {@link Callable}, {@link Runnable})
  * and result types (e.g. {@link Future}).
  * <p>

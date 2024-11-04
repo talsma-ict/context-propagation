@@ -22,7 +22,7 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * Abstract baseclass that simplifies wrapping an existing {@link Future} by forwarding all required methods to a
- * {@link nl.talsmasoftware.context.delegation.Wrapper#delegate() delegate future} object.<br>
+ * {@link Wrapper#delegate() delegate future} object.<br>
  * The class also provides overridable wrapper methods for {@link #wrapResult(Object) result}
  * and {@link #wrapException(ExecutionException) exception} outcomes.
  * <p>
@@ -32,7 +32,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @author Sjoerd Talsma
  */
-public abstract class DelegatingFuture<V> extends nl.talsmasoftware.context.delegation.Wrapper<Future<V>> implements Future<V> {
+public abstract class DelegatingFuture<V> extends Wrapper<Future<V>> implements Future<V> {
 
     protected DelegatingFuture(Future<V> delegate) {
         super(delegate);

@@ -18,6 +18,7 @@ package nl.talsmasoftware.context.core.delegation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -27,7 +28,7 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * Abstract baseclass that makes it a little easier to wrap existing {@link ExecutorService} implementations by
- * forwarding all methods to a {@link nl.talsmasoftware.context.delegation.Wrapper#delegate() delegate} executor service.<br>
+ * forwarding all methods to a {@link Wrapper#delegate() delegate} executor service.<br>
  * The class also provides overridable <code>wrapper</code> methods for all complex input (e.g. {@link Callable}, {@link Runnable})
  * and result types (e.g. {@link Future}).
  * <p>
@@ -37,7 +38,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @author Sjoerd Talsma
  */
-public abstract class DelegatingExecutorService extends nl.talsmasoftware.context.delegation.Wrapper<ExecutorService> implements ExecutorService {
+public abstract class DelegatingExecutorService extends Wrapper<ExecutorService> implements ExecutorService {
 
     /**
      * Creates a new executor service that delegates all methods to the specified <code>delegate</code>.
@@ -79,7 +80,7 @@ public abstract class DelegatingExecutorService extends nl.talsmasoftware.contex
             final List<Callable<T>> copy = new ArrayList<Callable<T>>(tasks.size());
             for (Callable<T> task : tasks) {
                 final Callable<T> wrapped = wrap(task);
-                modification |= (task == wrapped || (task != null && task.equals(wrapped))); // TODO Objects.equals
+                modification |= (task == wrapped || Objects.equals(task, wrapped));
                 copy.add(wrapped);
             }
             if (modification) wrappedTasks = copy;
