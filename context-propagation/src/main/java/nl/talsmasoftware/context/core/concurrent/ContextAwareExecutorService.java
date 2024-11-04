@@ -16,7 +16,7 @@
 package nl.talsmasoftware.context.core.concurrent;
 
 import nl.talsmasoftware.context.ContextManagers;
-import nl.talsmasoftware.context.ContextSnapshot;
+import nl.talsmasoftware.context.api.ContextSnapshot;
 
 import java.io.Closeable;
 import java.util.concurrent.Callable;

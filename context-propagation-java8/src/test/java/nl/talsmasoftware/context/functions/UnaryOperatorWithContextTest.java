@@ -15,9 +15,9 @@
  */
 package nl.talsmasoftware.context.functions;
 
-import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.DummyContextManager;
 import nl.talsmasoftware.context.api.Context;
+import nl.talsmasoftware.context.api.ContextSnapshot;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -117,7 +117,8 @@ public class UnaryOperatorWithContextTest {
 
     @Test
     public void testCloseReactivatedContextInCaseOfException() {
-        when(snapshot.reactivate()).thenReturn(context);
+        ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
+        when(snapshot.reactivate()).thenReturn(reactivation);
         final RuntimeException expectedException = new RuntimeException("Whoops!");
 
         try {
@@ -129,7 +130,7 @@ public class UnaryOperatorWithContextTest {
         }
 
         verify(snapshot).reactivate();
-        verify(context).close();
+        verify(reactivation).close();
     }
 
     private static <T> UnaryOperator<T> throwing(RuntimeException rte) {

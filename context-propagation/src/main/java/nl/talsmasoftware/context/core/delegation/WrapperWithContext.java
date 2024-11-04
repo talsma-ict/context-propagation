@@ -15,7 +15,7 @@
  */
 package nl.talsmasoftware.context.core.delegation;
 
-import nl.talsmasoftware.context.ContextSnapshot;
+import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.delegation.ContextSnapshotSupplier;
 
 /**

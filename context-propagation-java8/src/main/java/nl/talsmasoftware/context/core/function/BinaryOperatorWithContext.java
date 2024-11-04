@@ -15,7 +15,7 @@
  */
 package nl.talsmasoftware.context.core.function;
 
-import nl.talsmasoftware.context.ContextSnapshot;
+import nl.talsmasoftware.context.api.ContextSnapshot;
 
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;

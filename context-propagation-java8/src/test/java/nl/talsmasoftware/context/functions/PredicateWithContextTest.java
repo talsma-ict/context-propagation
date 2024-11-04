@@ -15,9 +15,9 @@
  */
 package nl.talsmasoftware.context.functions;
 
-import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.DummyContextManager;
 import nl.talsmasoftware.context.api.Context;
+import nl.talsmasoftware.context.api.ContextSnapshot;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -120,7 +120,8 @@ public class PredicateWithContextTest {
 
     @Test
     public void testCloseReactivatedContextInCaseOfException() {
-        when(snapshot.reactivate()).thenReturn(context);
+        ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
+        when(snapshot.reactivate()).thenReturn(reactivation);
         final RuntimeException expectedException = new RuntimeException("Whoops!");
 
         try {
@@ -131,7 +132,7 @@ public class PredicateWithContextTest {
         }
 
         verify(snapshot).reactivate();
-        verify(context).close();
+        verify(reactivation).close();
     }
 
     @Test
@@ -146,7 +147,8 @@ public class PredicateWithContextTest {
 
     @Test
     public void testAnd_singleContextSwitch() {
-        when(snapshot.reactivate()).thenReturn(context);
+        ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
+        when(snapshot.reactivate()).thenReturn(reactivation);
         Predicate<String> predicate = Objects::nonNull;
         Predicate<String> and = String::isEmpty;
 
@@ -155,13 +157,14 @@ public class PredicateWithContextTest {
 
         assertThat(combined.test(""), is(true));
         verify(snapshot, times(1)).reactivate();
-        verify(context, times(1)).close();
+        verify(reactivation, times(1)).close();
         assertThat(consumed.get(), is(1));
     }
 
     @Test
     public void testAnd_shortCircuit() {
-        when(snapshot.reactivate()).thenReturn(context);
+        ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
+        when(snapshot.reactivate()).thenReturn(reactivation);
         Predicate<String> predicate = Objects::nonNull;
         @SuppressWarnings("unchecked")
         Predicate<String> and = mock(Predicate.class);
@@ -173,7 +176,7 @@ public class PredicateWithContextTest {
         verifyNoMoreInteractions(and);
 
         verify(snapshot, times(1)).reactivate();
-        verify(context, times(1)).close();
+        verify(reactivation, times(1)).close();
         assertThat(consumed.get(), is(1));
     }
 
@@ -189,7 +192,8 @@ public class PredicateWithContextTest {
 
     @Test
     public void tesOr_singleContextSwitch() {
-        when(snapshot.reactivate()).thenReturn(context);
+        ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
+        when(snapshot.reactivate()).thenReturn(reactivation);
         Predicate<String> predicate = Objects::isNull;
         Predicate<String> or = String::isEmpty;
 
@@ -198,13 +202,14 @@ public class PredicateWithContextTest {
 
         assertThat(combined.test(""), is(true));
         verify(snapshot, times(1)).reactivate();
-        verify(context, times(1)).close();
+        verify(reactivation, times(1)).close();
         assertThat(consumed.get(), is(1));
     }
 
     @Test
     public void testOr_shortCircuit() {
-        when(snapshot.reactivate()).thenReturn(context);
+        ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
+        when(snapshot.reactivate()).thenReturn(reactivation);
         Predicate<String> predicate = Objects::isNull;
         @SuppressWarnings("unchecked")
         Predicate<String> or = mock(Predicate.class);
@@ -216,7 +221,7 @@ public class PredicateWithContextTest {
         verifyNoMoreInteractions(or);
 
         verify(snapshot, times(1)).reactivate();
-        verify(context, times(1)).close();
+        verify(reactivation, times(1)).close();
         assertThat(consumed.get(), is(1));
     }
 

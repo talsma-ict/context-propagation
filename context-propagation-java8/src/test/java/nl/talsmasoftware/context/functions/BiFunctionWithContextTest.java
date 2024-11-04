@@ -15,9 +15,9 @@
  */
 package nl.talsmasoftware.context.functions;
 
-import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.DummyContextManager;
 import nl.talsmasoftware.context.api.Context;
+import nl.talsmasoftware.context.api.ContextSnapshot;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -120,7 +120,8 @@ public class BiFunctionWithContextTest {
 
     @Test
     public void testCloseReactivatedContextInCaseOfException() {
-        when(snapshot.reactivate()).thenReturn(context);
+        ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
+        when(snapshot.reactivate()).thenReturn(reactivation);
         final RuntimeException expectedException = new RuntimeException("Whoops!");
 
         try {
@@ -131,7 +132,7 @@ public class BiFunctionWithContextTest {
         }
 
         verify(snapshot).reactivate();
-        verify(context).close();
+        verify(reactivation).close();
     }
 
     @Test
@@ -146,7 +147,8 @@ public class BiFunctionWithContextTest {
 
     @Test
     public void testAndThen_singleContextSwitch() {
-        when(snapshot.reactivate()).thenReturn(context);
+        ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
+        when(snapshot.reactivate()).thenReturn(reactivation);
         Function<Integer, Integer> after = i -> i + 100;
         BiFunction<Integer, Integer, Integer> function = (a, b) -> a * 10 + b * 5;
         AtomicInteger consumed = new AtomicInteger(0);
@@ -157,7 +159,7 @@ public class BiFunctionWithContextTest {
 
         assertThat(composed.apply(2, 3), is(20 + 15 + 100));
         verify(snapshot, times(1)).reactivate();
-        verify(context, times(1)).close();
+        verify(reactivation, times(1)).close();
         assertThat(consumed.get(), is(1));
     }
 

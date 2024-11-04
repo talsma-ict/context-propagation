@@ -16,6 +16,7 @@
 package nl.talsmasoftware.context;
 
 import nl.talsmasoftware.context.api.Context;
+import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
 import nl.talsmasoftware.context.observer.SimpleContextObserver;
 import org.junit.jupiter.api.AfterEach;

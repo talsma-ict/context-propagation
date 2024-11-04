@@ -16,9 +16,9 @@
 package nl.talsmasoftware.context.core;
 
 import nl.talsmasoftware.context.ContextManager;
-import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextObserver;
+import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.api.ContextSnapshot.Reactivation;
 import nl.talsmasoftware.context.clearable.Clearable;
 import nl.talsmasoftware.context.delegation.Wrapper;

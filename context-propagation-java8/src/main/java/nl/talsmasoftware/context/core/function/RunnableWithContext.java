@@ -15,8 +15,8 @@
  */
 package nl.talsmasoftware.context.core.function;
 
-import nl.talsmasoftware.context.ContextManagers;
-import nl.talsmasoftware.context.ContextSnapshot;
+import nl.talsmasoftware.context.api.ContextSnapshot;
+import nl.talsmasoftware.context.core.ContextManagers;
 
 import java.io.Closeable;
 import java.io.IOException;

@@ -15,9 +15,9 @@
  */
 package nl.talsmasoftware.context.functions;
 
-import nl.talsmasoftware.context.ContextSnapshot;
 import nl.talsmasoftware.context.DummyContextManager;
 import nl.talsmasoftware.context.api.Context;
+import nl.talsmasoftware.context.api.ContextSnapshot;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -119,7 +119,8 @@ public class BiPredicateWithContextTest {
 
     @Test
     public void testCloseReactivatedContextInCaseOfException() {
-        when(snapshot.reactivate()).thenReturn(context);
+        ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
+        when(snapshot.reactivate()).thenReturn(reactivation);
         final RuntimeException expectedException = new RuntimeException("Whoops!");
 
         try {
@@ -130,7 +131,7 @@ public class BiPredicateWithContextTest {
         }
 
         verify(snapshot).reactivate();
-        verify(context).close();
+        verify(reactivation).close();
     }
 
     @Test
@@ -145,7 +146,8 @@ public class BiPredicateWithContextTest {
 
     @Test
     public void testAnd_singleContextSwitch() {
-        when(snapshot.reactivate()).thenReturn(context);
+        ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
+        when(snapshot.reactivate()).thenReturn(reactivation);
         BiPredicate<String, String> predicate = (a, b) -> a != null && b != null;
         BiPredicate<String, String> and = (a, b) -> a.isEmpty() || b.isEmpty();
 
@@ -155,13 +157,14 @@ public class BiPredicateWithContextTest {
 
         assertThat(combined.test("", ""), is(true));
         verify(snapshot, times(1)).reactivate();
-        verify(context, times(1)).close();
+        verify(reactivation, times(1)).close();
         assertThat(consumed.get(), is(1));
     }
 
     @Test
     public void testAnd_shortCircuit() {
-        when(snapshot.reactivate()).thenReturn(context);
+        ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
+        when(snapshot.reactivate()).thenReturn(reactivation);
         BiPredicate<String, String> predicate = (a, b) -> a != null && b != null;
         @SuppressWarnings("unchecked")
         BiPredicate<String, String> and = mock(BiPredicate.class);
@@ -174,7 +177,7 @@ public class BiPredicateWithContextTest {
         verifyNoMoreInteractions(and);
 
         verify(snapshot, times(1)).reactivate();
-        verify(context, times(1)).close();
+        verify(reactivation, times(1)).close();
         assertThat(consumed.get(), is(1));
     }
 
@@ -190,7 +193,8 @@ public class BiPredicateWithContextTest {
 
     @Test
     public void tesOr_singleContextSwitch() {
-        when(snapshot.reactivate()).thenReturn(context);
+        ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
+        when(snapshot.reactivate()).thenReturn(reactivation);
         BiPredicate<String, String> predicate = (a, b) -> a == null || b == null;
         BiPredicate<String, String> or = (a, b) -> a.isEmpty() || b.isEmpty();
 
@@ -200,13 +204,14 @@ public class BiPredicateWithContextTest {
 
         assertThat(combined.test("", ""), is(true));
         verify(snapshot, times(1)).reactivate();
-        verify(context, times(1)).close();
+        verify(reactivation, times(1)).close();
         assertThat(consumed.get(), is(1));
     }
 
     @Test
     public void testOr_shortCircuit() {
-        when(snapshot.reactivate()).thenReturn(context);
+        ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
+        when(snapshot.reactivate()).thenReturn(reactivation);
         BiPredicate<String, String> predicate = (a, b) -> a == null || b == null;
         @SuppressWarnings("unchecked")
         BiPredicate<String, String> or = mock(BiPredicate.class);
@@ -219,7 +224,7 @@ public class BiPredicateWithContextTest {
         verifyNoMoreInteractions(or);
 
         verify(snapshot, times(1)).reactivate();
-        verify(context, times(1)).close();
+        verify(reactivation, times(1)).close();
         assertThat(consumed.get(), is(1));
     }
 
