@@ -21,7 +21,7 @@ import nl.talsmasoftware.context.api.ContextObserver;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.api.ContextSnapshot.Reactivation;
 import nl.talsmasoftware.context.clearable.Clearable;
-import nl.talsmasoftware.context.delegation.Wrapper;
+import nl.talsmasoftware.context.core.delegation.Wrapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;

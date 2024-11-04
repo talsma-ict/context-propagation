@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 /**
  * Layered code for delegation such as {@code CallMappingExecutorService}.
  *
- * <h2>{@linkplain nl.talsmasoftware.context.delegation.Wrapper}</h2>
+ * <h2>{@linkplain nl.talsmasoftware.context.core.delegation.Wrapper}</h2>
  * <p>
  * The base class for any delegation in this package.
  * Any wrapper contains an implementation of {@code hashCode}, {@code equals}

@@ -20,7 +20,7 @@ import java.util.concurrent.Future;
 
 /**
  * Abstract baseclass that simplifies wrapping an existing {@link Future} by forwarding all required methods to a
- * {@link Wrapper#delegate() delegate future} object.<br>
+ * {@link nl.talsmasoftware.context.core.delegation.Wrapper#delegate() delegate future} object.<br>
  * The class also provides overridable wrapper methods for {@link #wrapResult(Object) result}
  * and {@link #wrapException(ExecutionException) exception} outcomes.
  * <p>
