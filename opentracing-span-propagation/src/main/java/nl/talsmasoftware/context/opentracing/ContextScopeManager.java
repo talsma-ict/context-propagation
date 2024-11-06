@@ -39,8 +39,6 @@ import nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext;
  * <li>More predictable behaviour for out-of-order closing of scopes.
  * Although this is explicitly unsupported by the opentracing specification,
  * we think having consistent and predictable behaviour is an advantage.
- * <li>Support for {@link nl.talsmasoftware.context.api.ContextObserver}.
- * See https://github.com/opentracing/opentracing-java/issues/334 explicitly wanting this.
  * </ol>
  *
  * <p>
@@ -63,8 +61,7 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
 
     @Override
     public Span activeSpan() {
-        Context<Span> current = ThreadLocalSpanContext.current();
-        return current == null ? null : current.getValue();
+        return ThreadLocalSpanContext.currentSpan();
     }
 
     /**
@@ -75,8 +72,9 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
      * @see #activate(Span)
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Context<Span> initializeNewContext(Span value) {
-        return new ThreadLocalSpanContext(value);
+        return (Context<Span>) activate(value);
     }
 
     @Override
@@ -86,7 +84,7 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
 
     @Override
     public void clear() {
-        ThreadLocalSpanContext.removeThreadLocal();
+        ThreadLocalSpanContext.remove();
     }
 
     /**
@@ -97,16 +95,20 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
     }
 
     private static final class ThreadLocalSpanContext extends AbstractThreadLocalContext<Span> implements Scope {
+        private static final ThreadLocal<ThreadLocalSpanContext> SPAN_CONTEXT =
+                AbstractThreadLocalContext.threadLocalInstanceOf(ThreadLocalSpanContext.class);
+
         private ThreadLocalSpanContext(Span newValue) {
             super(newValue);
         }
 
-        private static ThreadLocalSpanContext current() {
-            return current(ThreadLocalSpanContext.class);
+        private static Span currentSpan() {
+            ThreadLocalSpanContext current = SPAN_CONTEXT.get();
+            return current != null ? current.getValue() : null;
         }
 
-        private static void removeThreadLocal() {
-            threadLocalInstanceOf(ThreadLocalSpanContext.class).remove();
+        private static void remove() {
+            SPAN_CONTEXT.remove();
         }
     }
 }

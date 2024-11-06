@@ -17,39 +17,15 @@ package nl.talsmasoftware.context.core;
 
 import nl.talsmasoftware.context.api.ContextTimer;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ServiceLoader;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Singleton initialized to look up all {@link ContextTimer} delegates.
- *
- * @author Sjoerd Talsma
- */
 final class Timers {
     private static final Logger TIMING_LOGGER = Logger.getLogger(Timers.class.getName());
 
-    /**
-     * Singleton containing resolved ContextTimer delegates.
-     */
-    private enum Singleton {
-        INSTANCE;
-        private final ContextTimer[] delegates;
-
-        Singleton() {
-            List<ContextTimer> delegates = new ArrayList<ContextTimer>();
-            for (ContextTimer delegate : ServiceLoader.load(ContextTimer.class)) {
-                delegates.add(delegate);
-            }
-            this.delegates = delegates.toArray(new ContextTimer[0]);
-        }
-    }
-
     static void timed(long durationNanos, Class<?> type, String method) {
-        for (ContextTimer delegate : Singleton.INSTANCE.delegates) {
+        for (ContextTimer delegate : ContextManagers.getContextTimers()) {
             delegate.update(type, method, durationNanos, TimeUnit.NANOSECONDS);
         }
         if (TIMING_LOGGER.isLoggable(Level.FINEST)) {

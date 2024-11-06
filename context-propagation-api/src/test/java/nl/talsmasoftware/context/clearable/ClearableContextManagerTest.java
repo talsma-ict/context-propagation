@@ -32,7 +32,6 @@ import static org.hamcrest.Matchers.nullValue;
  */
 public class ClearableContextManagerTest {
     private static ContextManager<String> CLEARABLE = new ClearableDummyContextManager();
-    private static ContextManager<String> AUTO_INITIALIZING = new AutoInitializingContextManager();
 
     @Test
     public void testClearActiveContexts_byManager() {

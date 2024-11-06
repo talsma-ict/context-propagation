@@ -17,18 +17,15 @@ package nl.talsmasoftware.context.core;
 
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextManager;
-import nl.talsmasoftware.context.api.ContextObserver;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.api.ContextSnapshot.Reactivation;
-import nl.talsmasoftware.context.core.delegation.Wrapper;
+import nl.talsmasoftware.context.api.ContextTimer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,15 +44,13 @@ public final class ContextManagers {
     private static final Logger LOGGER = Logger.getLogger(ContextManagers.class.getName());
 
     /**
-     * Registered observers.
-     */
-    private static final CopyOnWriteArrayList<ObservableContextManager> OBSERVERS =
-            new CopyOnWriteArrayList<>();
-
-    /**
      * Sometimes a single, fixed classloader may be necessary (e.g. #97)
      */
     private static volatile ClassLoader classLoaderOverride = null;
+
+    private static volatile List<ContextManager<?>> contextManagers = null;
+
+    private static volatile List<ContextTimer> contextTimers = null;
 
     /**
      * Private constructor to avoid instantiation of this class.
@@ -140,6 +135,7 @@ public final class ContextManagers {
                 Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "clear");
             } catch (RuntimeException rte) {
                 LOGGER.log(Level.WARNING, "Exception clearing active context from " + manager + ".", rte);
+                contextManagers = null;
                 Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "clear.exception");
             }
         }
@@ -148,77 +144,6 @@ public final class ContextManagers {
             LOGGER.log(Level.INFO, noContextManagersFound.getMessage(), noContextManagersFound);
         }
         Timers.timed(System.nanoTime() - start, ContextManagers.class, "clearActiveContexts");
-    }
-
-    /**
-     * Register an observer for contexts managed by the specified ContextManager type.
-     *
-     * @param contextObserver            The observer to register.
-     * @param observedContextManagerType The context manager type to observe.
-     * @param <T>                        Type of the value in the context.
-     * @return {@code true} if the observer was registered.
-     * @since 1.1.0
-     */
-    public static <T> boolean registerContextObserver(ContextObserver<? super T> contextObserver, Class<? extends ContextManager<T>> observedContextManagerType) {
-        if (contextObserver == null) {
-            throw new NullPointerException("Context observer must not be null.");
-        } else if (observedContextManagerType == null) {
-            throw new NullPointerException("Observed ContextManager type must not be null.");
-        }
-
-        // Find ContextManager to register.
-        ObservableContextManager<T> observableContextManager = null;
-        ContextManager<T> contextManager = null;
-        for (ContextManager<?> manager : getContextManagers()) {
-            if (manager instanceof ObservableContextManager
-                    && ((ObservableContextManager<?>) manager).observes(observedContextManagerType)) {
-                observableContextManager = (ObservableContextManager<T>) manager;
-                break;
-            } else if (observedContextManagerType.isInstance(manager)) {
-                contextManager = (ContextManager<T>) manager;
-                break;
-            }
-        }
-        if (observableContextManager == null && contextManager == null) {
-            LOGGER.warning("Trying to register observer to missing ContextManager type: " + observedContextManagerType + ".");
-            return false;
-        }
-
-        if (observableContextManager == null) {
-            // Register new observer by wrapping the context manager.
-            ObservableContextManager<T> newObserver = new ObservableContextManager<T>(contextManager, (List) Arrays.asList(contextObserver));
-            if (OBSERVERS.addIfAbsent(newObserver)) {
-                return true;
-            }
-
-            // There is already an existing ObservableContextManager, add the observer to it.
-            observableContextManager = OBSERVERS.get(OBSERVERS.indexOf(newObserver));
-        }
-
-        // Add the context observer to the existing observable context manager.
-        synchronized (observableContextManager) {
-            return observableContextManager.observers.addIfAbsent(contextObserver);
-        }
-    }
-
-    /**
-     * Unregister an observer for any context.
-     *
-     * @param contextObserver The previously registered context observer.
-     * @return {@code true} if the observer was unregistered.
-     * @since 1.1.0
-     */
-    public static boolean unregisterContextObserver(ContextObserver<?> contextObserver) {
-        boolean unregistered = false;
-        for (ObservableContextManager<?> observer : OBSERVERS) {
-            unregistered |= observer.observers.remove(contextObserver);
-            synchronized (observer) {
-                if (observer.observers.isEmpty()) {
-                    OBSERVERS.remove(observer);
-                }
-            }
-        }
-        return unregistered;
     }
 
     /**
@@ -235,7 +160,7 @@ public final class ContextManagers {
      * <ul>
      * <li>Please be aware that this configuration is global!
      * <li>This will also affect the lookup of
-     * {@linkplain nl.talsmasoftware.context.api.ContextObserver context observers}
+     * {@linkplain nl.talsmasoftware.context.api.ContextTimer context timers}
      * </ul>
      *
      * @param classLoader The single, fixed ClassLoader to use for finding context managers.
@@ -249,45 +174,49 @@ public final class ContextManagers {
         }
         LOGGER.fine(() -> "Updating classloader override to " + classLoader + " (was: " + classLoaderOverride + ")");
         classLoaderOverride = classLoader;
+        contextManagers = null;
+        contextTimers = null;
     }
 
-    private static Iterable<ContextManager> getContextManagers() {
-        // TODO change to stream implementation when java 8
-        final Iterable<ContextManager> resolved = classLoaderOverride == null ? ServiceLoader.load(ContextManager.class)
-                : ServiceLoader.load(ContextManager.class, classLoaderOverride);
-        return OBSERVERS.isEmpty() ? resolved : new Iterable<ContextManager>() {
-            public Iterator<ContextManager> iterator() {
-                return new Iterator<ContextManager>() {
-                    private final Iterator<ContextManager> delegate = resolved.iterator();
-
-                    public boolean hasNext() {
-                        return delegate.hasNext();
-                    }
-
-                    public ContextManager next() {
-                        ContextManager contextManager = delegate.next();
-                        if (!(contextManager instanceof ObservableContextManager)) {
-                            for (ObservableContextManager observableContextManager : OBSERVERS) {
-                                if (observableContextManager.isWrapperOf(contextManager)) {
-                                    return observableContextManager;
-                                }
-                            }
-                        }
-                        return contextManager;
-                    }
-
-                    public void remove() {
-                        delegate.remove();
-                    }
-                };
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static List<ContextManager<?>> getContextManagers() {
+        if (contextManagers == null) {
+            synchronized (ContextManagers.class) {
+                if (contextManagers == null) {
+                    contextManagers = (List) load(ContextManager.class);
+                }
             }
-        };
+        }
+        return contextManagers;
+    }
+
+    static List<ContextTimer> getContextTimers() {
+        if (contextTimers == null) {
+            synchronized (ContextManagers.class) {
+                if (contextTimers == null) {
+                    contextTimers = load(ContextTimer.class);
+                }
+            }
+        }
+        return contextTimers;
+    }
+
+    private static <T> List<T> load(Class<T> type) {
+        ArrayList<T> list = new ArrayList<>();
+        if (classLoaderOverride == null) {
+            ServiceLoader.load(type).forEach(list::add);
+        } else {
+            ServiceLoader.load(type, classLoaderOverride).forEach(list::add);
+        }
+        list.trimToSize();
+        return Collections.unmodifiableList(list);
     }
 
     /**
      * Implementation of the <code>createContextSnapshot</code> functionality that can reactivate all values from the
      * snapshot in each corresponding {@link ContextManager}.
      */
+    @SuppressWarnings("rawtypes")
     private static final class ContextSnapshotImpl implements nl.talsmasoftware.context.api.ContextSnapshot {
         private static final ContextManager[] MANAGER_ARRAY = new ContextManager[0];
         private final ContextManager[] managers;
@@ -320,6 +249,7 @@ public final class ContextManagers {
                         reactivationException.addSuppressed(rte);
                     }
                 }
+                contextManagers = null;
                 throw reactivationException;
             }
         }
@@ -371,73 +301,6 @@ public final class ContextManagers {
         @Override
         public String toString() {
             return "ReactivatedContext{size=" + reactivated.size() + '}';
-        }
-    }
-
-    private static final class ObservableContextManager<T> extends Wrapper<ContextManager<T>> implements ContextManager<T> {
-        private final CopyOnWriteArrayList<ContextObserver<? super T>> observers;
-
-        private ObservableContextManager(ContextManager<T> delegate, List<ContextObserver<? super T>> observers) {
-            super(delegate);
-            this.observers = new CopyOnWriteArrayList<>(observers);
-        }
-
-        private boolean observes(Class<? extends ContextManager<?>> contextManagerType) {
-            return contextManagerType.isInstance(delegate());
-        }
-
-        @Override
-        public T getActiveContextValue() {
-            return delegate().getActiveContextValue();
-        }
-
-        @Override
-        public void clear() {
-            delegate().clear();
-        }
-
-        private void notifyActivated(T newValue, T oldValue) {
-            for (ContextObserver<? super T> observer : observers) {
-                try {
-                    observer.onActivate(newValue, oldValue);
-                } catch (RuntimeException observerError) {
-                    LOGGER.log(Level.SEVERE, "Error in observer.onActivate of " + observer, observerError);
-                }
-            }
-        }
-
-        private void notifyDeactivated(T deactivatedValue, T restoredValue) {
-            for (ContextObserver<? super T> observer : observers) {
-                try {
-                    observer.onDeactivate(deactivatedValue, restoredValue);
-                } catch (RuntimeException observerError) {
-                    LOGGER.log(Level.SEVERE, "Error in observer.onActivate of " + observer, observerError);
-                }
-            }
-        }
-
-        @Override
-        public Context<T> initializeNewContext(final T newValue) {
-            final T oldValue = getActiveContextValue();
-            final Context<T> context = delegate().initializeNewContext(newValue);
-            notifyActivated(newValue, oldValue);
-
-            return new Context<T>() {
-                public T getValue() {
-                    return context.getValue();
-                }
-
-                public void close() {
-                    T deactivated = context.getValue(); // get before closing!
-                    context.close();
-                    notifyDeactivated(deactivated, getActiveContextValue());
-                }
-            };
-        }
-
-        @Override
-        public String toString() {
-            return getClass().getSimpleName() + '{' + delegate() + ", " + observers + '}';
         }
     }
 
