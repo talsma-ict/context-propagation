@@ -24,7 +24,7 @@
  * is activated in that thread.
  *
  * <p>
- * An {@linkplain nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext AbstractThreadLocalContext}
+ * An {@linkplain nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext AbstractThreadLocalContext}
  * base class is provided that supports nested contexts and provides predictable behaviour for out-of-order closing.
  *
  * <h2>{@linkplain nl.talsmasoftware.context.ContextManager}</h2>
