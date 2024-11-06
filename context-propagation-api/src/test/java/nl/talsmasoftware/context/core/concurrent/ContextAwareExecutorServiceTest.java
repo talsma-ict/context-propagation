@@ -18,7 +18,6 @@ package nl.talsmasoftware.context.core.concurrent;
 import nl.talsmasoftware.context.core.ContextManagers;
 import nl.talsmasoftware.context.dummy.DummyContextManager;
 import nl.talsmasoftware.context.dummy.ThrowingContextManager;
-import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -94,10 +93,8 @@ public class ContextAwareExecutorServiceTest {
 
     @Test
     public void testCallException() throws InterruptedException {
-        Future<String> dummy = executor.submit(new Callable<String>() {
-            public String call() {
-                throw new IllegalStateException("DOH!");
-            }
+        Future<String> dummy = executor.submit(() -> {
+            throw new IllegalStateException("DOH!");
         });
 
         try {
