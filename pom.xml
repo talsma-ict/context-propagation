@@ -24,20 +24,20 @@
 
     <!-- Artifact identification -->
     <groupId>nl.talsmasoftware.context</groupId>
-    <artifactId>context-propagation-root</artifactId>
+    <artifactId>context-propagation</artifactId>
     <version>2.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <!-- Project information -->
-    <name>Context propagation</name>
+    <name>Context propagation (root)</name>
     <description>Standardized context propagation in concurrent systems.</description>
     <url>https://github.com/talsma-ict/context-propagation</url>
     <inceptionYear>2016</inceptionYear>
 
     <modules>
         <module>context-propagation-bom</module>
-        <module>context-propagation</module>
-        <module>context-propagation-java8</module>
+        <module>context-propagation-api</module>
+        <module>context-propagation-core</module>
         <module>context-propagation-metrics</module>
         <module>context-propagation-micrometer</module>
         <module>locale-context</module>
@@ -154,7 +154,8 @@
                 <version>${maven-surefire-plugin.version}</version>
                 <configuration>
                     <systemPropertyVariables>
-                        <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
+                        <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties
+                        </java.util.logging.config.file>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -238,7 +239,9 @@
                     </links>
                     <offlineLinks>
                         <offlineLink>
-                            <url>https://javadoc.io/page/${project.groupId}/context-propagation-root/${project.version}</url>
+                            <url>
+                                https://javadoc.io/page/${project.groupId}/context-propagation-root/${project.version}
+                            </url>
                             <location>${root.basedir}/.mvn/javadoc</location>
                         </offlineLink>
                         <offlineLink>
@@ -246,11 +249,14 @@
                             <location>${root.basedir}/.mvn/javadoc/opentracing-api</location>
                         </offlineLink>
                         <offlineLink>
-                            <url>https://javadoc.io/page/io.opentracing/opentracing-util/${opentracing-api.version}</url>
+                            <url>https://javadoc.io/page/io.opentracing/opentracing-util/${opentracing-api.version}
+                            </url>
                             <location>${root.basedir}/.mvn/javadoc/opentracing-util</location>
                         </offlineLink>
                         <offlineLink>
-                            <url>https://javadoc.io/page/org.springframework.security/spring-security-core/${spring-security.version}</url>
+                            <url>
+                                https://javadoc.io/page/org.springframework.security/spring-security-core/${spring-security.version}
+                            </url>
                             <location>${root.basedir}/.mvn/javadoc/spring-security-core</location>
                         </offlineLink>
                         <offlineLink>

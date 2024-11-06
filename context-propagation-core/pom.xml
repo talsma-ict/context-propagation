@@ -28,15 +28,13 @@
     </parent>
 
     <!-- Artifact identification -->
-    <artifactId>context-propagation-micrometer</artifactId>
-    <name>Context propagation (micrometer)</name>
+    <artifactId>context-propagation-core</artifactId>
+    <name>Context propagation (core)</name>
     <packaging>jar</packaging>
 
     <properties>
-        <project.moduleName>${project.groupId}.metrics</project.moduleName>
+        <project.moduleName>${project.groupId}.core</project.moduleName>
         <root.basedir>${project.parent.basedir}</root.basedir>
-
-        <micrometer.version>1.13.6</micrometer.version>
     </properties>
 
     <dependencies>
@@ -45,12 +43,5 @@
             <artifactId>context-propagation-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-core</artifactId>
-            <version>${micrometer.version}</version>
-        </dependency>
     </dependencies>
-
 </project>
