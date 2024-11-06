@@ -15,8 +15,8 @@
  */
 package nl.talsmasoftware.context.locale;
 
-import nl.talsmasoftware.context.ContextManager;
 import nl.talsmasoftware.context.api.Context;
+import nl.talsmasoftware.context.api.ContextManager;
 
 import java.util.Locale;
 
@@ -26,23 +26,17 @@ import java.util.Locale;
  * @author Sjoerd Talsma
  */
 public final class LocaleContextManager implements ContextManager<Locale> {
-
-    /**
-     * @return The {@code Locale} for the current thread, or {@code null} if no context was initialized.
-     * @see #getCurrentLocaleOrDefault()
-     */
-    public static Locale getCurrentLocale() {
-        final LocaleContext current = LocaleContext.current();
-        return current == null ? null : current.getValue();
-    }
-
     /**
      * @return The {@code Locale} for the current thread, or {@code Locale.getDefault()} if no context was initialized.
      * @see Locale#getDefault()
      */
     public static Locale getCurrentLocaleOrDefault() {
-        final Locale current = getCurrentLocale();
+        final Locale current = LocaleContext.currentValue();
         return current != null ? current : Locale.getDefault();
+    }
+
+    public static Context<Locale> setCurrentLocale(Locale locale) {
+        return new LocaleContext(locale);
     }
 
     /**
@@ -53,22 +47,22 @@ public final class LocaleContextManager implements ContextManager<Locale> {
      * @return The context to be closed again by the caller to remove this locale as current locale.
      */
     public Context<Locale> initializeNewContext(Locale value) {
-        return new LocaleContext(value);
+        return setCurrentLocale(value);
     }
 
     /**
      * @return The active {@code Locale} context or {@code null} if no such context is active in the current thread.
      */
-    public Context<Locale> getActiveContext() {
-        return LocaleContext.current();
+    public Locale getActiveContextValue() {
+        return LocaleContext.currentValue();
     }
 
     /**
      * Unconditionally removes the active context (and any parents).
      * <p>
-     * This is useful for boundary filters, whose Threads may be returned to some threadpool.
+     * This is useful for boundary filters, whose Threads may be returned to some thread pool.
      */
-    public static void clear() {
+    public void clear() {
         LocaleContext.clearAll();
     }
 

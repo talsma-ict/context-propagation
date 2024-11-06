@@ -15,10 +15,9 @@
  */
 package nl.talsmasoftware.context.slf4j.mdc;
 
-import nl.talsmasoftware.context.ContextManager;
-import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.api.Context;
-import nl.talsmasoftware.context.clearable.Clearable;
+import nl.talsmasoftware.context.api.ContextManager;
+import nl.talsmasoftware.context.core.ContextManagers;
 import org.slf4j.MDC;
 
 import java.util.Map;
@@ -26,17 +25,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Manager to propagate the SLF4J {@link MDC} content from one thread to another.
+ *
  * <p>
  * As {@link MDC} already manages its own thread-local state,
- * getting the active context is 100% delegated to the MDC.<br>
- * This means that closing the resulting context from {@link #getActiveContext()} will have no side-effects,
- * as it is not ours to manage.
+ * getting the active context is 100% delegated to the MDC.
+ *
  * <p>
- * Closing a context returned form {@link #initializeNewContext(Map)} <strong>will</strong> reset the MDC
+ * Closing a context returned form {@link #initializeNewContext(Map)} restores the MDC
  * to the values it had before the context was created.<br>
  * This means that closing nested contexts out-of-order will probably result in an undesirable state.<br>
  * It is therefore strongly advised to use Java's {@code try-with-resources} mechanism to ensure proper
  * closing when nesting new MDC contexts.
+ *
+ * <p>
+ * This manager does not implement the optional {@link #clear()} method.
+ * {@link ContextManagers#clearActiveContexts()} will therefore <strong>not</strong> clear the {@linkplain MDC}.
+ * Please use {@linkplain MDC#clear()} explicitly to do that.
  *
  * @author Sjoerd Talsma
  */
@@ -55,11 +59,7 @@ public class Slf4jMdcManager implements ContextManager<Map<String, String>> {
      * @return A context that -when closed- will restore the active MDC values to what they were just before this call.
      */
     public Context<Map<String, String>> initializeNewContext(final Map<String, String> mdcValues) {
-        // Capture current MDC as 'previous' and make the given values the 'new current' MDC.
-        final Map<String, String> previous = MDC.getCopyOfContextMap();
-        if (mdcValues == null) MDC.clear();
-        else MDC.setContextMap(mdcValues);
-        return new Slf4jMdcContext(previous, mdcValues, false);
+        return new Slf4jMdcContext(mdcValues);
     }
 
     /**
@@ -70,9 +70,33 @@ public class Slf4jMdcManager implements ContextManager<Map<String, String>> {
      *
      * @return Context containing the active MDC values.
      */
-    public Context<Map<String, String>> getActiveContext() {
-        // Return fresh context that is 'already-closed'. Therefore it doesn't need a previous mdc.
-        return new Slf4jMdcContext(null, MDC.getCopyOfContextMap(), true);
+    public Map<String, String> getActiveContextValue() {
+        return MDC.getCopyOfContextMap();
+    }
+
+    /**
+     * This manager does not support clearing the MDC.
+     *
+     * <p>
+     * Calling {@code ContextManagers.clearActiveContexts()} will therefore <strong>not</strong> clear the
+     * MDC by default. This can be achieved by calling {@link MDC#clear()} explicitly.
+     *
+     * @see MDC#clear()
+     */
+    public void clear() {
+        // no-op
+    }
+
+    private static Map<String, String> currentMdc() {
+        return MDC.getCopyOfContextMap();
+    }
+
+    private static void setMdc(Map<String, String> mdc) {
+        if (mdc == null) {
+            MDC.clear();
+        } else {
+            MDC.setContextMap(mdc);
+        }
     }
 
     @Override
@@ -80,37 +104,31 @@ public class Slf4jMdcManager implements ContextManager<Map<String, String>> {
         return getClass().getSimpleName();
     }
 
-    private static final class Slf4jMdcContext implements Context<Map<String, String>>, Clearable {
-        private final Map<String, String> previous, value;
+    private static final class Slf4jMdcContext implements Context<Map<String, String>> {
+        private final Map<String, String> previous;
         private final AtomicBoolean closed;
 
-        private Slf4jMdcContext(Map<String, String> previous, Map<String, String> value, boolean closed) {
-            this.previous = previous;
-            this.value = value;
-            this.closed = new AtomicBoolean(closed);
-            ContextManagers.onActivate(Slf4jMdcManager.class, value, previous);
+        private Slf4jMdcContext(Map<String, String> value) {
+            // Capture current MDC as 'previous' and make the given values the 'new current' MDC.
+            this.previous = currentMdc();
+            setMdc(value);
+            this.closed = new AtomicBoolean(false);
         }
 
         public Map<String, String> getValue() {
-            return value;
+            return currentMdc();
         }
 
         public void close() {
             if (closed.compareAndSet(false, true)) {
-                if (previous == null) MDC.clear();
-                else MDC.setContextMap(previous);
-                ContextManagers.onDeactivate(Slf4jMdcManager.class, value, previous);
+                setMdc(previous);
             }
-        }
-
-        public void clear() {
-            close();
         }
 
         @Override
         public String toString() {
-            return closed.get() ? "Slf4jMdcContext{closed}" : "Slf4jMdcContext" + (value == null ? "{}" : value);
+            Map<String, String> mdc = getValue();
+            return closed.get() ? "Slf4jMdcContext{closed}" : "Slf4jMdcContext" + (mdc == null ? "{}" : mdc);
         }
-
     }
 }

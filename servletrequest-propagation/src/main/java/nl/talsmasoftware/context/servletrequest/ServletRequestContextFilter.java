@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package nl.talsmasoftware.context.servletrequest;
 
+import nl.talsmasoftware.context.api.Context;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -28,7 +30,7 @@ import java.util.logging.Logger;
 /**
  * Servlet {@link Filter} that registers the current {@link ServletRequest} with the
  * {@link ServletRequestContextManager} to become the
- * {@link ServletRequestContextManager#getActiveContext() active context}
+ * {@link ServletRequestContextManager#getActiveContextValue() active context value}
  * while the filter is active.
  *
  * @author Sjoerd Talsma
@@ -42,19 +44,19 @@ public class ServletRequestContextFilter implements Filter {
 
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-        try {
+        // Automatically becomes the new active context.
+        try (Context<ServletRequest> context = new ServletRequestContext(request)) {
 
-            new ServletRequestContext(request); // Automatically becomes the new active context.
             if (request.isAsyncStarted()) try {
                 request.getAsyncContext().addListener(new ServletRequestContextAsyncListener());
             } catch (IllegalStateException e) {
-                LOGGER.log(Level.FINE, "Could not register servletrequest asynchronous listener: " + e.getMessage(), e);
+                LOGGER.log(Level.FINE, "Could not register ServletRequest asynchronous listener: " + e.getMessage(), e);
             }
 
             chain.doFilter(request, response);
 
         } finally {
-            ServletRequestContextManager.clear(); // Make sure there are no requests returned to the HTTP threadpool.
+            ServletRequestContext.clear(); // Make sure there are no requests returned to the HTTP thread pool.
         }
     }
 

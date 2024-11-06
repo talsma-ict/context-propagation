@@ -15,9 +15,8 @@
  */
 package nl.talsmasoftware.context.springsecurity;
 
-import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.api.Context;
-import nl.talsmasoftware.context.clearable.ClearableContextManager;
+import nl.talsmasoftware.context.api.ContextManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,71 +32,70 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @author Sjoerd Talsma
  */
-public class SpringSecurityContextManager implements ClearableContextManager<Authentication> {
+public class SpringSecurityContextManager implements ContextManager<Authentication> {
 
     /**
      * Creates a new Spring {@linkplain SecurityContext} and sets the {@linkplain Authentication value} in it.
+     *
      * <p>
      * This new value is set in the {@linkplain SecurityContextHolder} and the current {@linkplain Authentication}
      * is remembered, to be restored when the returned {@link Context} is closed.
      *
-     * @param value The value to initialize a new context for.
+     * @param authentication The value to initialize a new context for.
      * @return A context with the new Authentication, restoring the previous authentication when closed.
      */
-    public Context<Authentication> initializeNewContext(Authentication value) {
-        SecurityContext previous = SecurityContextHolder.getContext();
-        SecurityContext current = SecurityContextHolder.createEmptyContext();
-        current.setAuthentication(value);
-        SecurityContextHolder.setContext(current);
-        return new AuthenticationContext(current, previous, false);
+    public Context<Authentication> initializeNewContext(Authentication authentication) {
+        return new AuthenticationContext(authentication);
     }
 
     /**
      * @return A context object referring to the current {@code Authentication} in the spring security context holder.
      * Closing the returned context does nothing.
      */
-    public Context<Authentication> getActiveContext() {
-        return new AuthenticationContext(SecurityContextHolder.getContext(), null, true);
+    public Authentication getActiveContextValue() {
+        return currentAuthentication();
+    }
+
+    private static Authentication currentAuthentication() {
+        SecurityContext context = SecurityContextHolder.getContext();
+        return context != null ? context.getAuthentication() : null;
     }
 
     /**
-     * Clears the Spring {@linkplain SecurityContext} by calling {@linkplain SecurityContextHolder#clearContext()}.
+     * Clears the Spring {@linkplain SecurityContext}.
+     *
+     * @see SecurityContextHolder#clearContext()
      */
     public void clear() {
         SecurityContextHolder.clearContext();
     }
 
     private static final class AuthenticationContext implements Context<Authentication> {
-        private volatile SecurityContext current;
         private final SecurityContext previous;
         private final AtomicBoolean closed;
 
-        private AuthenticationContext(SecurityContext current, SecurityContext previous, boolean alreadyClosed) {
-            this.current = current;
-            this.previous = previous;
-            this.closed = new AtomicBoolean(alreadyClosed);
-            ContextManagers.onActivate(SpringSecurityContextManager.class, auth(current), auth(previous));
+        private AuthenticationContext(Authentication authentication) {
+            this.previous = SecurityContextHolder.getContext();
+            this.closed = new AtomicBoolean(false);
+            setCurrentAuthentication(authentication);
+        }
+
+        private void setCurrentAuthentication(Authentication authentication) {
+            SecurityContext current = SecurityContextHolder.createEmptyContext();
+            if (authentication != null) {
+                current.setAuthentication(authentication);
+            }
+            SecurityContextHolder.setContext(current);
         }
 
         public Authentication getValue() {
-            return auth(current);
+            return currentAuthentication();
         }
 
         public void close() {
             if (closed.compareAndSet(false, true)) {
                 SecurityContextHolder.setContext(previous);
-                ContextManagers.onDeactivate(SpringSecurityContextManager.class, auth(current), auth(previous));
             }
-        }
-
-        /**
-         * Null-safe {@code getAuthentication()} call
-         *
-         * @param securityContext optional security context to get authentication object from.
-         * @return the authentication object or null if security context itself was null.
-         */
-        private static Authentication auth(SecurityContext securityContext) {
-            return securityContext == null ? null : securityContext.getAuthentication();
         }
     }
 

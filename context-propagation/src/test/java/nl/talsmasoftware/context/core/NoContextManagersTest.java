@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context;
+package nl.talsmasoftware.context.core;
 
 import nl.talsmasoftware.context.api.Context;
+import nl.talsmasoftware.context.api.ContextManager;
 import nl.talsmasoftware.context.api.ContextSnapshot;
+import nl.talsmasoftware.context.dummy.DummyContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,7 +52,7 @@ public class NoContextManagersTest {
     @Test
     public void testReactivate_withoutContextManagers() throws IOException {
         Context<String> ctx1 = new DummyContext("foo");
-        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        ContextSnapshot snapshot = nl.talsmasoftware.context.ContextManagers.createContextSnapshot();
         ctx1.close();
 
         Closeable reactivated = snapshot.reactivate();
@@ -59,7 +61,7 @@ public class NoContextManagersTest {
 
     @Test
     public void testCreateSnapshot_withoutContextManagers() throws IOException {
-        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        ContextSnapshot snapshot = nl.talsmasoftware.context.ContextManagers.createContextSnapshot();
         assertThat(snapshot, is(notNullValue()));
 
         Closeable reactivated = snapshot.reactivate();

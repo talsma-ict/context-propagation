@@ -163,7 +163,7 @@ public class ContextScopeManagerTest {
     public void testInitializeNewContext() {
         Span span = GlobalTracer.get().buildSpan("span").start();
         Context<Span> context = scopeManager.initializeNewContext(span);
-        assertThat(scopeManager.getActiveContext().getValue(), is(span));
+        assertThat(scopeManager.getActiveContextValue(), is(span));
         assertThat(scopeManager.activeSpan(), is(span));
         assertThat(GlobalTracer.get().activeSpan(), is(span));
         context.close();

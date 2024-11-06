@@ -16,12 +16,14 @@
 package nl.talsmasoftware.context.clearable;
 
 import nl.talsmasoftware.context.api.Context;
+import nl.talsmasoftware.context.api.ContextManager;
 
-public class ClearableDummyContextManager implements ClearableContextManager<String> {
+public class ClearableDummyContextManager implements ContextManager<String> {
     private static final ThreadLocal<DummyContext> CTX = new ThreadLocal<DummyContext>();
 
-    public Context<String> getActiveContext() {
-        return CTX.get();
+    public String getActiveContextValue() {
+        DummyContext current = CTX.get();
+        return current != null ? current.getValue() : null;
     }
 
     public Context<String> initializeNewContext(String value) {

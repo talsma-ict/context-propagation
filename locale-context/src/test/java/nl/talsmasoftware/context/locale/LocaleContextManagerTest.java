@@ -15,15 +15,14 @@
  */
 package nl.talsmasoftware.context.locale;
 
-import nl.talsmasoftware.context.ContextManagers;
 import nl.talsmasoftware.context.api.Context;
-import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
+import nl.talsmasoftware.context.core.ContextManagers;
+import nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Locale;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -36,7 +35,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 
 /**
@@ -48,7 +46,8 @@ public class LocaleContextManagerTest {
     private static final Locale GERMAN = Locale.GERMANY;
 
     private static final Locale DEFAULT_LOCALE = Locale.getDefault();
-    private static LocaleContextManager manager = new LocaleContextManager();
+    private static final LocaleContextManager MANAGER = new LocaleContextManager();
+
     private ExecutorService threadpool;
 
     @BeforeEach
@@ -65,88 +64,80 @@ public class LocaleContextManagerTest {
 
     @Test
     public void testLocalePropagation() throws ExecutionException, InterruptedException {
-        Context<Locale> ctx1 = manager.initializeNewContext(DUTCH);
-        try {
-            assertThat("Current context", manager.getActiveContext(), is(notNullValue()));
-            assertThat("Current context value", manager.getActiveContext().getValue(), is(DUTCH));
+        try (Context<Locale> ctx1 = LocaleContextManager.setCurrentLocale(DUTCH)) {
+            assertThat(ctx1.getValue(), is(DUTCH));
+            assertThat(MANAGER.getActiveContextValue(), is(DUTCH));
+            assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(DUTCH));
 
-            Context<Locale> ctx2 = manager.initializeNewContext(GERMAN);
             final CountDownLatch blocker = new CountDownLatch(1);
             Future<Locale> slowCall;
-            try {
+            try (Context<Locale> ctx2 = MANAGER.initializeNewContext(GERMAN)) {
+                assertThat(ctx2.getValue(), is(GERMAN));
+                assertThat(MANAGER.getActiveContextValue(), is(GERMAN));
+                assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(GERMAN));
 
-                slowCall = threadpool.submit(new Callable<Locale>() {
-                    public Locale call() throws InterruptedException {
-                        blocker.await(5, TimeUnit.SECONDS);
-                        return LocaleContextManager.getCurrentLocale();
-                    }
+                slowCall = threadpool.submit(() -> {
+                    blocker.await(5, TimeUnit.SECONDS);
+                    return MANAGER.getActiveContextValue();
                 });
-
-            } finally {
-                ctx2.close();
             }
-            assertThat("Restored context in parent", LocaleContextManager.getCurrentLocale(), is(DUTCH));
+
+            assertThat("Restored context in parent", MANAGER.getActiveContextValue(), is(DUTCH));
             assertThat("Slow thread already done", slowCall.isDone(), is(false));
             blocker.countDown();
             assertThat("Context in slow thread", slowCall.get(), is(GERMAN));
-
-        } finally {
-            ctx1.close();
         }
-        assertThat("Current context", manager.getActiveContext(), is(nullValue()));
+        assertThat("Current context", MANAGER.getActiveContextValue(), is(nullValue()));
+        assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(DEFAULT_LOCALE));
     }
 
     @Test
     public void testGetCurrentLocaleOrDefault() {
         assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(DEFAULT_LOCALE));
-        Context<Locale> ctx1 = manager.initializeNewContext(GERMAN);
-        try {
+        try (Context<Locale> ctx1 = LocaleContextManager.setCurrentLocale(GERMAN)) {
             assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(GERMAN));
-            Context<Locale> ctx2 = manager.initializeNewContext(null);
-            try {
+            assertThat(MANAGER.getActiveContextValue(), is(GERMAN));
+
+            try (Context<Locale> ctx2 = MANAGER.initializeNewContext(null)) {
                 assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(DEFAULT_LOCALE));
+                assertThat(MANAGER.getActiveContextValue(), nullValue());
             } finally {
-                ctx2.close();
                 assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(GERMAN));
+                assertThat(MANAGER.getActiveContextValue(), is(GERMAN));
             }
         } finally {
-            ctx1.close();
             assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(DEFAULT_LOCALE));
         }
     }
 
     @Test
     public void testClear() {
-        Context<Locale> dutchCtx = manager.initializeNewContext(DUTCH);
-        Context<Locale> englishCtx = manager.initializeNewContext(ENGLISH);
+        Context<Locale> dutchCtx = MANAGER.initializeNewContext(DUTCH);
+        Context<Locale> englishCtx = MANAGER.initializeNewContext(ENGLISH);
 
-        LocaleContextManager.clear();
-        assertThat(manager.getActiveContext(), is(nullValue()));
-        assertThat(LocaleContextManager.getCurrentLocale(), is(nullValue()));
+        MANAGER.clear();
+        assertThat(MANAGER.getActiveContextValue(), is(nullValue()));
+        assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(DEFAULT_LOCALE));
 
-        assertThat(((LocaleContext) englishCtx).isClosed(), is(true));
-        assertThat(((LocaleContext) dutchCtx).isClosed(), is(true));
         assertThat(englishCtx.getValue(), equalTo(ENGLISH));
         assertThat(dutchCtx.getValue(), equalTo(DUTCH));
     }
 
     @Test
     public void testClearActiveContexts() {
-        Context<Locale> dutchCtx = manager.initializeNewContext(DUTCH);
-        Context<Locale> englishCtx = manager.initializeNewContext(ENGLISH);
+        Context<Locale> dutchCtx = MANAGER.initializeNewContext(DUTCH);
+        Context<Locale> englishCtx = MANAGER.initializeNewContext(ENGLISH);
 
         ContextManagers.clearActiveContexts();
-        assertThat(manager.getActiveContext(), is(nullValue()));
-        assertThat(LocaleContextManager.getCurrentLocale(), is(nullValue()));
+        assertThat(MANAGER.getActiveContextValue(), is(nullValue()));
+        assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(DEFAULT_LOCALE));
 
-        assertThat(((LocaleContext) englishCtx).isClosed(), is(true));
-        assertThat(((LocaleContext) dutchCtx).isClosed(), is(true));
         assertThat(englishCtx.getValue(), equalTo(ENGLISH));
         assertThat(dutchCtx.getValue(), equalTo(DUTCH));
     }
 
     @Test
     public void testToString() {
-        assertThat(manager, hasToString(containsString("LocaleContextManager")));
+        assertThat(MANAGER, hasToString(containsString("LocaleContextManager")));
     }
 }

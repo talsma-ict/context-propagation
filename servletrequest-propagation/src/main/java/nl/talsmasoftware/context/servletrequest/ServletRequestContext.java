@@ -15,46 +15,35 @@
  */
 package nl.talsmasoftware.context.servletrequest;
 
-import nl.talsmasoftware.context.ContextManagers;
-import nl.talsmasoftware.context.api.Context;
+import nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext;
 
 import javax.servlet.ServletRequest;
 
 /**
- * Simple (unstacked) context using a Threadlocal containing the current {@link ServletRequest}.
+ * Simple (unstacked) context using a ThreadLocal containing the current {@link ServletRequest}.
  *
  * @author Sjoerd Talsma
  */
-final class ServletRequestContext implements Context<ServletRequest> {
-
-    private static final ThreadLocal<ServletRequestContext> CONTEXT = new ThreadLocal<ServletRequestContext>();
-
-    volatile ServletRequest servletRequest;
+final class ServletRequestContext extends AbstractThreadLocalContext<ServletRequest> {
+    private static final ThreadLocal<ServletRequestContext> CONTEXT =
+            AbstractThreadLocalContext.threadLocalInstanceOf(ServletRequestContext.class);
 
     ServletRequestContext(ServletRequest servletRequest) {
-        this.servletRequest = servletRequest;
-        CONTEXT.set(this);
-        ContextManagers.onActivate(ServletRequestContextManager.class, servletRequest, null);
+        super(servletRequest);
     }
 
-    static Context<ServletRequest> current() {
-        return CONTEXT.get();
+    static ServletRequest currentValue() {
+        ServletRequestContext current = CONTEXT.get();
+        return current != null ? current.getValue() : null;
     }
 
-    public ServletRequest getValue() {
-        return servletRequest;
+    static void clear() {
+        try {
+            for (ServletRequestContext current = CONTEXT.get(); current != null; current = CONTEXT.get()) {
+                current.close();
+            }
+        } finally {
+            CONTEXT.remove();
+        }
     }
-
-    public void close() {
-        final ServletRequest deactivated = servletRequest;
-        servletRequest = null;
-        CONTEXT.set(null);
-        ContextManagers.onDeactivate(ServletRequestContextManager.class, deactivated, null);
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + (servletRequest == null ? "{closed}" : "{value=" + servletRequest + "}");
-    }
-
 }

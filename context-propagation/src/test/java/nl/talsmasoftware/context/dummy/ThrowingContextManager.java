@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context;
+package nl.talsmasoftware.context.dummy;
 
 import nl.talsmasoftware.context.api.Context;
-import nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext;
+import nl.talsmasoftware.context.api.ContextManager;
+import nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext;
 
 /**
  * Badly behaved {@link ContextManager} implementation that can throw things at us for testing purposes.
@@ -24,7 +25,7 @@ import nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext;
  * @author Sjoerd Talsma
  */
 public class ThrowingContextManager implements ContextManager<String> {
-    public static RuntimeException inConstructor = null, onInitialize = null, onGet = null, onClose = null;
+    public static RuntimeException inConstructor = null, onInitialize = null, onGet = null, onClose = null, onClear = null;
 
     public ThrowingContextManager() {
         if (inConstructor != null) try {
@@ -34,6 +35,7 @@ public class ThrowingContextManager implements ContextManager<String> {
         }
     }
 
+    @Override
     public Context<String> initializeNewContext(String value) {
         if (onInitialize != null) try {
             throw onInitialize;
@@ -43,13 +45,24 @@ public class ThrowingContextManager implements ContextManager<String> {
         return new Ctx(value);
     }
 
-    public Context<String> getActiveContext() {
+    @Override
+    public String getActiveContextValue() {
         if (onGet != null) try {
             throw onGet;
         } finally {
             onGet = null;
         }
-        return Ctx.current();
+        return Ctx.currentValue();
+    }
+
+    @Override
+    public void clear() {
+        if (onClear != null) try {
+            throw onClear;
+        } finally {
+            onClear = null;
+        }
+        Ctx.remove();
     }
 
     @Override
@@ -59,11 +72,16 @@ public class ThrowingContextManager implements ContextManager<String> {
 
     private final static class Ctx extends AbstractThreadLocalContext<String> {
         private Ctx(String newValue) {
-            super(ThrowingContextManager.class, newValue);
+            super(newValue);
         }
 
-        private static Ctx current() {
-            return current(Ctx.class);
+        private static String currentValue() {
+            Ctx current = AbstractThreadLocalContext.current(Ctx.class);
+            return current != null ? current.getValue() : null;
+        }
+
+        private static void remove() {
+            AbstractThreadLocalContext.threadLocalInstanceOf(Ctx.class).remove();
         }
 
         @Override
