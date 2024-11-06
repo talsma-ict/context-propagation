@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,16 +47,21 @@ public final class ContextManagers {
     private static final Logger LOGGER = Logger.getLogger(ContextManagers.class.getName());
 
     /**
-     * The service loader that loads (and possibly caches) {@linkplain ContextManager} instances in prioritized order.
-     */
-    private static final PriorityServiceLoader<ContextManager> CONTEXT_MANAGERS =
-            new PriorityServiceLoader<>(ContextManager.class);
-
-    /**
      * Registered observers.
      */
     private static final CopyOnWriteArrayList<ObservableContextManager> OBSERVERS =
             new CopyOnWriteArrayList<>();
+
+    /**
+     * Sometimes a single, fixed classloader may be necessary (e.g. #97)
+     */
+    private static volatile ClassLoader classLoaderOverride = null;
+
+    /**
+     * The service loader that loads (and possibly caches) {@linkplain ContextManager} instances in prioritized order.
+     */
+    @SuppressWarnings("rawtypes")
+    private static volatile ServiceLoader<ContextManager> contextManagers = ServiceLoader.load(ContextManager.class);
 
     /**
      * Private constructor to avoid instantiation of this class.
@@ -97,7 +103,6 @@ public final class ContextManagers {
                     LOGGER.log(Level.FINEST, "There is no active context for " + manager + " in this snapshot.");
                 }
             } catch (RuntimeException rte) {
-                CONTEXT_MANAGERS.clearCache();
                 LOGGER.log(Level.WARNING, "Exception obtaining active context from " + manager + " for snapshot.", rte);
                 Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "getActiveContext.exception");
             }
@@ -113,9 +118,11 @@ public final class ContextManagers {
 
     /**
      * Clears all active contexts from the current thread.
+     *
      * <p>
      * Contexts that are 'stacked' (i.e. restore the previous state upon close) should be
      * closed in a way that includes all 'parent' contexts as well.
+     *
      * <p>
      * This operation is not intended to be used by general application code as it likely breaks any 'stacked'
      * active context that surrounding code may depend upon.
@@ -242,20 +249,23 @@ public final class ContextManagers {
      * @since 1.0.5
      */
     public static void useClassLoader(ClassLoader classLoader) {
-        Level loglevel = PriorityServiceLoader.classLoaderOverride == classLoader ? Level.FINEST : Level.FINE;
-        if (LOGGER.isLoggable(loglevel)) {
-            LOGGER.log(loglevel, "Setting override classloader for loading ContextManager and ContextObserver " +
-                    "instances to " + classLoader + " (was: " + PriorityServiceLoader.classLoaderOverride + ").");
+        if (classLoaderOverride == classLoader) {
+            LOGGER.finest(() -> "Maintaining classloader override as " + classLoader + " (unchanged)");
+            return;
         }
-        PriorityServiceLoader.classLoaderOverride = classLoader;
+        LOGGER.fine(() -> "Updating classloader override to " + classLoader + " (was: " + classLoaderOverride + ")");
+        classLoaderOverride = classLoader;
+        contextManagers = classLoaderOverride == null
+                ? ServiceLoader.load(ContextManager.class)
+                : ServiceLoader.load(ContextManager.class, classLoaderOverride);
     }
 
     private static Iterable<ContextManager> getContextManagers() {
         // TODO change to stream implementation when java 8
-        return OBSERVERS.isEmpty() ? CONTEXT_MANAGERS : new Iterable<ContextManager>() {
+        return OBSERVERS.isEmpty() ? contextManagers : new Iterable<ContextManager>() {
             public Iterator<ContextManager> iterator() {
                 return new Iterator<ContextManager>() {
-                    private final Iterator<ContextManager> delegate = CONTEXT_MANAGERS.iterator();
+                    private final Iterator<ContextManager> delegate = contextManagers.iterator();
 
                     public boolean hasNext() {
                         return delegate.hasNext();
@@ -266,7 +276,6 @@ public final class ContextManagers {
                         if (!(contextManager instanceof ObservableContextManager)) {
                             for (ObservableContextManager observableContextManager : OBSERVERS) {
                                 if (observableContextManager.isWrapperOf(contextManager)) {
-                                    CONTEXT_MANAGERS.replaceInCache(contextManager, observableContextManager);
                                     return observableContextManager;
                                 }
                             }
@@ -307,7 +316,7 @@ public final class ContextManagers {
                 Timers.timed(System.nanoTime() - start, nl.talsmasoftware.context.api.ContextSnapshot.class, "reactivate");
                 return reactivation;
             } catch (RuntimeException reactivationException) {
-                CONTEXT_MANAGERS.clearCache();
+//                contextManagers.clearCache();
                 for (Context alreadyReactivated : reactivatedContexts) {
                     if (alreadyReactivated != null) try {
                         if (LOGGER.isLoggable(Level.FINEST)) {
