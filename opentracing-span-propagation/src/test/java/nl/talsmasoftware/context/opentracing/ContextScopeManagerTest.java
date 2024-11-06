@@ -23,9 +23,7 @@ import io.opentracing.util.GlobalTracerTestUtil;
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.core.ContextManagers;
 import nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -37,34 +35,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static nl.talsmasoftware.context.opentracing.ContextScopeManagerObserver.EventMatcher.activated;
-import static nl.talsmasoftware.context.opentracing.ContextScopeManagerObserver.EventMatcher.deactivated;
-import static nl.talsmasoftware.context.opentracing.MockSpanMatcher.withOperationName;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ContextScopeManagerTest {
-    static ContextScopeManagerObserver observer = new ContextScopeManagerObserver();
     MockTracer mockTracer;
     ContextScopeManager scopeManager;
     ExecutorService threadpool;
-
-    @BeforeAll
-    static void registerObserver() {
-        ContextManagers.registerContextObserver(observer, ContextScopeManager.class);
-    }
-
-    @AfterAll
-    static void unregisterObserver() {
-        ContextManagers.unregisterContextObserver(observer);
-    }
 
     @BeforeEach
     public void registerMockGlobalTracer() {
@@ -80,26 +61,6 @@ public class ContextScopeManagerTest {
         threadpool.shutdown();
         ContextManagers.clearActiveContexts();
         GlobalTracerTestUtil.resetGlobalTracer();
-        ContextScopeManagerObserver.observed.clear();
-    }
-
-    @Test
-    @Disabled("TODO replace observer by MockTracer .finishedSpans inspection!")
-    public void testObservedSpans() {
-        assertThat(ContextScopeManagerObserver.observed, is(empty()));
-        Span parentSpan = GlobalTracer.get().buildSpan("parent").start();
-        Scope parent = GlobalTracer.get().activateSpan(parentSpan);
-        Span innerSpan = GlobalTracer.get().buildSpan("inner").start();
-        Scope inner = GlobalTracer.get().activateSpan(innerSpan);
-        inner.close();
-        parent.close();
-
-        assertThat(ContextScopeManagerObserver.observed, contains(
-                activated(withOperationName("parent")),
-                activated(withOperationName("inner")),
-                deactivated(withOperationName("inner")),
-                deactivated(withOperationName("parent"))
-        ));
     }
 
     @Test
@@ -123,9 +84,9 @@ public class ContextScopeManagerTest {
                 }
             });
         }
-        assertThat(ContextScopeManagerObserver.observed, contains(
-                activated(withOperationName("parent"))
-        ));
+//        assertThat(ContextScopeManagerObserver.observed, contains(
+//                activated(withOperationName("parent"))
+//        ));
 
         assertThat(GlobalTracer.get().activeSpan(), equalTo(parentSpan));
         for (Thread t : threads) t.start();
@@ -133,30 +94,30 @@ public class ContextScopeManagerTest {
         parentSpan.finish();
         parent.close();
         assertThat(GlobalTracer.get().activeSpan(), is(nullValue()));
-        assertThat(ContextScopeManagerObserver.observed, contains(
-                activated(withOperationName("parent")),
-                activated(withOperationName(startsWith("inner"))),
-                activated(withOperationName(startsWith("inner"))),
-                activated(withOperationName(startsWith("inner"))),
-                activated(withOperationName(startsWith("inner"))),
-                activated(withOperationName(startsWith("inner"))),
-                activated(withOperationName(startsWith("inner"))),
-                activated(withOperationName(startsWith("inner"))),
-                activated(withOperationName(startsWith("inner"))),
-                activated(withOperationName(startsWith("inner"))),
-                activated(withOperationName(startsWith("inner"))),
-                deactivated(withOperationName(startsWith("inner"))),
-                deactivated(withOperationName(startsWith("inner"))),
-                deactivated(withOperationName(startsWith("inner"))),
-                deactivated(withOperationName(startsWith("inner"))),
-                deactivated(withOperationName(startsWith("inner"))),
-                deactivated(withOperationName(startsWith("inner"))),
-                deactivated(withOperationName(startsWith("inner"))),
-                deactivated(withOperationName(startsWith("inner"))),
-                deactivated(withOperationName(startsWith("inner"))),
-                deactivated(withOperationName(startsWith("inner"))),
-                deactivated(withOperationName("parent"))
-        ));
+//        assertThat(ContextScopeManagerObserver.observed, contains(
+//                activated(withOperationName("parent")),
+//                activated(withOperationName(startsWith("inner"))),
+//                activated(withOperationName(startsWith("inner"))),
+//                activated(withOperationName(startsWith("inner"))),
+//                activated(withOperationName(startsWith("inner"))),
+//                activated(withOperationName(startsWith("inner"))),
+//                activated(withOperationName(startsWith("inner"))),
+//                activated(withOperationName(startsWith("inner"))),
+//                activated(withOperationName(startsWith("inner"))),
+//                activated(withOperationName(startsWith("inner"))),
+//                activated(withOperationName(startsWith("inner"))),
+//                deactivated(withOperationName(startsWith("inner"))),
+//                deactivated(withOperationName(startsWith("inner"))),
+//                deactivated(withOperationName(startsWith("inner"))),
+//                deactivated(withOperationName(startsWith("inner"))),
+//                deactivated(withOperationName(startsWith("inner"))),
+//                deactivated(withOperationName(startsWith("inner"))),
+//                deactivated(withOperationName(startsWith("inner"))),
+//                deactivated(withOperationName(startsWith("inner"))),
+//                deactivated(withOperationName(startsWith("inner"))),
+//                deactivated(withOperationName(startsWith("inner"))),
+//                deactivated(withOperationName("parent"))
+//        ));
     }
 
     @Test

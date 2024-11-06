@@ -215,13 +215,14 @@ public class ContextManagersTest {
         int threadcount = 25;
         ExecutorService threadpool = Executors.newFixedThreadPool(threadcount);
         try {
-            List<Future<ContextSnapshot>> snapshots = new ArrayList<>(threadcount);
+            Future<ContextSnapshot>[] snapshots = new Future[threadcount];
             for (int i = 0; i < threadcount; i++) {
-                snapshots.add(threadpool.submit(ContextManagers::createContextSnapshot));
+                snapshots[i] = threadpool.submit(ContextManagers::createContextSnapshot);
             }
 
             for (int i = 0; i < threadcount; i++) {
-                assertThat(snapshots.get(i).get(), is(notNullValue()));
+                assertThat("Future " + i, snapshots[i], notNullValue());
+                assertThat("Snapshot " + i, snapshots[i].get(), notNullValue());
             }
         } finally {
             threadpool.shutdown();
