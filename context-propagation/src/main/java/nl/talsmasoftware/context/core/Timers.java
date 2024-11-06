@@ -19,6 +19,7 @@ import nl.talsmasoftware.context.api.ContextTimer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ServiceLoader;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -40,7 +41,7 @@ final class Timers {
 
         Singleton() {
             List<ContextTimer> delegates = new ArrayList<ContextTimer>();
-            for (ContextTimer delegate : new PriorityServiceLoader<ContextTimer>(ContextTimer.class)) {
+            for (ContextTimer delegate : ServiceLoader.load(ContextTimer.class)) {
                 delegates.add(delegate);
             }
             this.delegates = delegates.toArray(new ContextTimer[0]);
