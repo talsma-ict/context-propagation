@@ -15,12 +15,11 @@
  */
 package nl.talsmasoftware.context.core;
 
-import nl.talsmasoftware.context.ContextManager;
 import nl.talsmasoftware.context.api.Context;
+import nl.talsmasoftware.context.api.ContextManager;
 import nl.talsmasoftware.context.api.ContextObserver;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.api.ContextSnapshot.Reactivation;
-import nl.talsmasoftware.context.clearable.Clearable;
 import nl.talsmasoftware.context.core.delegation.Wrapper;
 
 import java.util.ArrayList;
@@ -50,13 +49,13 @@ public final class ContextManagers {
      * The service loader that loads (and possibly caches) {@linkplain ContextManager} instances in prioritized order.
      */
     private static final PriorityServiceLoader<ContextManager> CONTEXT_MANAGERS =
-            new PriorityServiceLoader<ContextManager>(ContextManager.class);
+            new PriorityServiceLoader<>(ContextManager.class);
 
     /**
      * Registered observers.
      */
     private static final CopyOnWriteArrayList<ObservableContextManager> OBSERVERS =
-            new CopyOnWriteArrayList<ObservableContextManager>();
+            new CopyOnWriteArrayList<>();
 
     /**
      * Private constructor to avoid instantiation of this class.
@@ -67,8 +66,8 @@ public final class ContextManagers {
 
     /**
      * This method is able to create a 'snapshot' from the current
-     * {@link ContextManager#getActiveContext() active context} from <em>all known {@link ContextManager}</em>
-     * implementations.
+     * {@link ContextManager#getActiveContextValue() active context value}
+     * from <em>all known {@link ContextManager}</em> implementations.
      *
      * <p>
      * This snapshot is returned as a single object that can be temporarily
@@ -80,18 +79,18 @@ public final class ContextManagers {
      */
     public static nl.talsmasoftware.context.api.ContextSnapshot createContextSnapshot() {
         final long start = System.nanoTime();
-        final List<ContextManager> managers = new LinkedList<ContextManager>();
-        final List<Object> values = new LinkedList<Object>();
+        final List<ContextManager<?>> managers = new LinkedList<>();
+        final List<Object> values = new LinkedList<>();
         Long managerStart = null;
-        for (ContextManager manager : getContextManagers()) {
+        for (ContextManager<?> manager : getContextManagers()) {
             managerStart = System.nanoTime();
             try {
-                final Context activeContext = manager.getActiveContext();
-                if (activeContext != null) {
-                    values.add(activeContext.getValue());
+                final Object activeContextValue = manager.getActiveContextValue();
+                if (activeContextValue != null) {
+                    values.add(activeContextValue);
                     managers.add(manager);
                     if (LOGGER.isLoggable(Level.FINEST)) {
-                        LOGGER.finest("Active context of " + manager + " added to new snapshot: " + activeContext + ".");
+                        LOGGER.finest("Active context value of " + manager + " added to new snapshot: " + activeContextValue);
                     }
                     Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "getActiveContext");
                 } else if (LOGGER.isLoggable(Level.FINEST)) {
@@ -126,31 +125,18 @@ public final class ContextManagers {
      * An even better strategy would be to clear the context right before returning a used thread to the pool
      * as this will allow any unclosed contexts to be garbage collected. Besides preventing contextual issues,
      * this reduces the risk of memory leaks by unbalanced context calls.
-     * <p>
-     * For context managers that are not {@linkplain Clearable} and contain an active {@linkplain Context}
-     * that is not {@code Clearable} either, this active context will be closed normally.
      */
     public static void clearActiveContexts() {
         final long start = System.nanoTime();
         Long managerStart = null;
-        for (ContextManager manager : getContextManagers()) {
+        for (ContextManager<?> manager : getContextManagers()) {
             managerStart = System.nanoTime();
             try {
-                // TODO add ContextObserver.onClear()
-                if (manager instanceof Clearable) {
-                    ((Clearable) manager).clear();
-                    if (LOGGER.isLoggable(Level.FINEST)) {
-                        LOGGER.finest("Active context of " + manager + " was cleared.");
-                    }
-                    Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "clear");
-                } else {
-                    Context activeContext = manager.getActiveContext();
-                    if (activeContext != null) {
-                        clearContext(manager, activeContext);
-                    } else if (LOGGER.isLoggable(Level.FINEST)) {
-                        LOGGER.finest("There is no active context for " + manager + " to be cleared.");
-                    }
+                manager.clear();
+                if (LOGGER.isLoggable(Level.FINEST)) {
+                    LOGGER.finest("Active context of " + manager + " was cleared.");
                 }
+                Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "clear");
             } catch (RuntimeException rte) {
                 LOGGER.log(Level.WARNING, "Exception clearing active context from " + manager + ".", rte);
                 Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "clear.exception");
@@ -180,15 +166,15 @@ public final class ContextManagers {
         }
 
         // Find ContextManager to register.
-        ObservableContextManager observableContextManager = null;
-        ContextManager contextManager = null;
-        for (ContextManager manager : getContextManagers()) {
+        ObservableContextManager<T> observableContextManager = null;
+        ContextManager<T> contextManager = null;
+        for (ContextManager<?> manager : getContextManagers()) {
             if (manager instanceof ObservableContextManager
-                    && ((ObservableContextManager) manager).observes(observedContextManagerType)) {
-                observableContextManager = (ObservableContextManager) manager;
+                    && ((ObservableContextManager<?>) manager).observes(observedContextManagerType)) {
+                observableContextManager = (ObservableContextManager<T>) manager;
                 break;
             } else if (observedContextManagerType.isInstance(manager)) {
-                contextManager = manager;
+                contextManager = (ContextManager<T>) manager;
                 break;
             }
         }
@@ -223,7 +209,7 @@ public final class ContextManagers {
      */
     public static boolean unregisterContextObserver(ContextObserver<?> contextObserver) {
         boolean unregistered = false;
-        for (ObservableContextManager observer : OBSERVERS) {
+        for (ObservableContextManager<?> observer : OBSERVERS) {
             unregistered |= observer.observers.remove(contextObserver);
             synchronized (observer) {
                 if (observer.observers.isEmpty()) {
@@ -296,30 +282,6 @@ public final class ContextManagers {
         };
     }
 
-    private static void clearContext(ContextManager manager, Context context) {
-        final long start = System.nanoTime();
-        final Class<? extends Context> contextType = context.getClass();
-        if (context instanceof Clearable) {
-            ((Clearable) context).clear();
-            if (LOGGER.isLoggable(Level.FINEST)) {
-                LOGGER.finest("Active context of " + manager + " was cleared.");
-            }
-        } else {
-            int maxAttempts = 255;
-            while (context != null && --maxAttempts > 0) {
-                context.close();
-                context = manager.getActiveContext();
-            }
-            if (context != null) {
-                Logger.getLogger(manager.getClass().getName()).warning(
-                        "Possible endless loop prevented clearing the active context for " + manager +
-                                ". Could it be that this manager returns a non-null context by default " +
-                                "and has not implemented the Clearable interface?");
-            }
-        }
-        Timers.timed(System.nanoTime() - start, contextType, "clear");
-    }
-
     /**
      * Implementation of the <code>createContextSnapshot</code> functionality that can reactivate all values from the
      * snapshot in each corresponding {@link ContextManager}.
@@ -329,7 +291,7 @@ public final class ContextManagers {
         private final ContextManager[] managers;
         private final Object[] values;
 
-        private ContextSnapshotImpl(List<ContextManager> managers, List<Object> values) {
+        private ContextSnapshotImpl(List<ContextManager<?>> managers, List<Object> values) {
             this.managers = managers.toArray(MANAGER_ARRAY);
             this.values = values.toArray();
         }
@@ -354,7 +316,7 @@ public final class ContextManagers {
                         }
                         alreadyReactivated.close();
                     } catch (RuntimeException rte) {
-                        addSuppressedOrWarn(reactivationException, rte, "Could not close already reactivated context.");
+                        reactivationException.addSuppressed(rte);
                     }
                 }
                 throw reactivationException;
@@ -390,10 +352,6 @@ public final class ContextManagers {
             this.reactivated = reactivated;
         }
 
-        public Void getValue() {
-            return null;
-        }
-
         public void close() {
             RuntimeException closeException = null;
             // close in reverse order of reactivation
@@ -403,7 +361,7 @@ public final class ContextManagers {
                     reactivated.close();
                 } catch (RuntimeException rte) {
                     if (closeException == null) closeException = rte;
-                    else addSuppressedOrWarn(closeException, rte, "Exception closing the reactivated context.");
+                    else closeException.addSuppressed(rte);
                 }
             }
             if (closeException != null) throw closeException;
@@ -412,15 +370,6 @@ public final class ContextManagers {
         @Override
         public String toString() {
             return "ReactivatedContext{size=" + reactivated.size() + '}';
-        }
-    }
-
-    @SuppressWarnings("Since15") // That's why we catch the LinkageError here
-    private static void addSuppressedOrWarn(Throwable exception, Throwable toSuppress, String message) {
-        if (exception != null && toSuppress != null) try {
-            exception.addSuppressed(toSuppress);
-        } catch (LinkageError le) {
-            LOGGER.log(Level.WARNING, message, toSuppress);
         }
     }
 
@@ -436,9 +385,14 @@ public final class ContextManagers {
             return contextManagerType.isInstance(delegate());
         }
 
-        private T getActiveContextValue() {
-            final Context<T> activeContext = delegate().getActiveContext();
-            return activeContext != null ? activeContext.getValue() : null;
+        @Override
+        public T getActiveContextValue() {
+            return delegate().getActiveContextValue();
+        }
+
+        @Override
+        public void clear() {
+            delegate().clear();
         }
 
         private void notifyActivated(T newValue, T oldValue) {
@@ -461,6 +415,7 @@ public final class ContextManagers {
             }
         }
 
+        @Override
         public Context<T> initializeNewContext(final T newValue) {
             final T oldValue = getActiveContextValue();
             final Context<T> context = delegate().initializeNewContext(newValue);
@@ -477,11 +432,6 @@ public final class ContextManagers {
                     notifyDeactivated(deactivated, getActiveContextValue());
                 }
             };
-        }
-
-        @Deprecated
-        public Context<T> getActiveContext() {
-            return delegate().getActiveContext();
         }
 
         @Override

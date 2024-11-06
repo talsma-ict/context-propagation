@@ -1,6 +1,0 @@
-nl.talsmasoftware.context.DummyContextManager
-nl.talsmasoftware.context.ThrowingContextManager
-nl.talsmasoftware.context.clearable.AutoInitializingContextManager
-nl.talsmasoftware.context.clearable.ClearableDummyContextManager
-nl.talsmasoftware.context.clearable.DummyManagerOfClearableContext
-nl.talsmasoftware.context.observer.DeprecatedContextManager

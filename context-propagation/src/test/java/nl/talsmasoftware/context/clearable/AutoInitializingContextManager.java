@@ -15,8 +15,8 @@
  */
 package nl.talsmasoftware.context.clearable;
 
-import nl.talsmasoftware.context.ContextManager;
 import nl.talsmasoftware.context.api.Context;
+import nl.talsmasoftware.context.api.ContextManager;
 
 public class AutoInitializingContextManager implements ContextManager<String> {
     private static final ThreadLocal<DummyContext> CTX = new ThreadLocal<DummyContext>() {
@@ -26,13 +26,21 @@ public class AutoInitializingContextManager implements ContextManager<String> {
         }
     };
 
-    public Context<String> getActiveContext() {
-        return CTX.get();
-    }
-
+    @Override
     public Context<String> initializeNewContext(String value) {
         CTX.set(new DummyContext(CTX.get(), value));
         return CTX.get();
+    }
+
+    @Override
+    public String getActiveContextValue() {
+        DummyContext dummyContext = CTX.get();
+        return dummyContext != null ? dummyContext.getValue() : null;
+    }
+
+    @Override
+    public void clear() {
+        CTX.remove();
     }
 
     private static class DummyContext implements Context<String> {

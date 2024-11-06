@@ -15,9 +15,9 @@
  */
 package nl.talsmasoftware.context.functions;
 
-import nl.talsmasoftware.context.DummyContextManager;
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextSnapshot;
+import nl.talsmasoftware.context.dummy.DummyContextManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,7 +52,7 @@ public class BiPredicateWithContextTest {
     @BeforeEach
     @AfterEach
     public void clearDummyContext() {
-        DummyContextManager.clear();
+        DummyContextManager.clearAllContexts();
     }
 
     @BeforeEach

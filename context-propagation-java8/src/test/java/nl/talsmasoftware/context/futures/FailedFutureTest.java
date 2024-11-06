@@ -15,9 +15,9 @@
  */
 package nl.talsmasoftware.context.futures;
 
-import nl.talsmasoftware.context.DummyContextManager;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.core.ContextManagers;
+import nl.talsmasoftware.context.dummy.DummyContextManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,12 +35,12 @@ public class FailedFutureTest {
     private static final DummyContextManager manager = new DummyContextManager();
 
     private static final BiFunction<String, Throwable, String> addActiveContextValue =
-            (value, ex) -> (ex == null ? value : ex.getMessage()) + ", " + manager.getActiveContext().getValue();
+            (value, ex) -> (ex == null ? value : ex.getMessage()) + ", " + manager.getActiveContextValue();
 
     @BeforeEach
     @AfterEach
     public void clearDummyContext() {
-        DummyContextManager.clear();
+        DummyContextManager.clearAllContexts();
     }
 
     @Test
@@ -51,7 +51,7 @@ public class FailedFutureTest {
         CompletableFuture<String> future = completed.handleAsync(addActiveContextValue);
 
         assertThat(future.get(), is("Mr. Blue, Mr. Blonde"));
-        assertThat(manager.getActiveContext().getValue(), is("Mr. Brown"));
+        assertThat(manager.getActiveContextValue(), is("Mr. Brown"));
     }
 
     @Test
@@ -64,7 +64,7 @@ public class FailedFutureTest {
         CompletableFuture<String> future = completed.handleAsync(addActiveContextValue);
 
         assertThat(future.get(), is("Mr. Blue, Mr. Blonde"));
-        assertThat(manager.getActiveContext().getValue(), is("Mr. Orange"));
+        assertThat(manager.getActiveContextValue(), is("Mr. Orange"));
     }
 
     @Test
@@ -75,7 +75,7 @@ public class FailedFutureTest {
         CompletionStage<String> stage = completed.handleAsync(addActiveContextValue);
 
         assertThat(stage.toCompletableFuture().get(), is("Mr. Blue, Mr. Blonde"));
-        assertThat(manager.getActiveContext().getValue(), is("Mr. Brown"));
+        assertThat(manager.getActiveContextValue(), is("Mr. Brown"));
     }
 
 }

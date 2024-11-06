@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context;
+package nl.talsmasoftware.context.dummy;
 
 import nl.talsmasoftware.context.api.Context;
-import nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext;
+import nl.talsmasoftware.context.api.ContextManager;
+import nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext;
 
 import java.util.Optional;
 import java.util.logging.Logger;
@@ -28,8 +29,12 @@ public class DummyContextManager implements ContextManager<String> {
         return setCurrentValue(value);
     }
 
-    public Context<String> getActiveContext() {
-        return DummyContext.current();
+    public String getActiveContextValue() {
+        return currentValue().orElse(null);
+    }
+
+    public void clear() {
+        clearAllContexts();
     }
 
     public static Optional<String> currentValue() {
@@ -52,14 +57,14 @@ public class DummyContextManager implements ContextManager<String> {
     /**
      * For easier testing
      */
-    public static void clear() {
+    public static void clearAllContexts() {
         LOGGER.fine(() -> "Clearing values in " + Thread.currentThread() + ", currently: " + DummyContext.current());
         DummyContext.clear();
     }
 
     private static final class DummyContext extends AbstractThreadLocalContext<String> {
         private DummyContext(String newValue) {
-            super(DummyContextManager.class, newValue);
+            super(newValue);
         }
 
         private static void clear() {

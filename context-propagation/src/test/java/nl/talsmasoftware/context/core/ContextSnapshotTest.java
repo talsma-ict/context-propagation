@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context;
+package nl.talsmasoftware.context.core;
 
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextSnapshot;
+import nl.talsmasoftware.context.dummy.DummyContextManager;
 import org.junit.jupiter.api.Test;
 
 import java.io.Closeable;
@@ -35,37 +36,25 @@ public class ContextSnapshotTest {
 
     @Test
     public void testSnapshotToString() {
-        Context<String> ctx = MGR.initializeNewContext("Dummy value");
-        try {
+        try (Context<String> ctx = MGR.initializeNewContext("Dummy value")) {
             assertThat(ContextManagers.createContextSnapshot(), hasToString(startsWith("ContextSnapshot{size=")));
-        } finally {
-            ctx.close();
         }
     }
 
     @Test
     public void testSnapshotReactivate() throws IOException {
-        Context<String> ctx = MGR.initializeNewContext("Old value");
-        try {
+        try (Context<String> ctx = MGR.initializeNewContext("Old value")) {
             ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
-            Context<String> ctx2 = MGR.initializeNewContext("New value");
-            try {
+            try (Context<String> ctx2 = MGR.initializeNewContext("New value")) {
+                assertThat(MGR.getActiveContextValue(), is("New value"));
 
-                assertThat(MGR.getActiveContext().getValue(), is("New value"));
-                Closeable reactivation = snapshot.reactivate();
-                try {
-                    assertThat(MGR.getActiveContext().getValue(), is("Old value"));
+                try (Closeable reactivation = snapshot.reactivate()) {
+                    assertThat(MGR.getActiveContextValue(), is("Old value"));
                     assertThat(reactivation, hasToString(startsWith("ReactivatedContext{size=")));
-                } finally {
-                    reactivation.close();
                 }
-                assertThat(MGR.getActiveContext().getValue(), is("New value"));
 
-            } finally {
-                ctx2.close();
+                assertThat(MGR.getActiveContextValue(), is("New value"));
             }
-        } finally {
-            ctx.close();
         }
     }
 

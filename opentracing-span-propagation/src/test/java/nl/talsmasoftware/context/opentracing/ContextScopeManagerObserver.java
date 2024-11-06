@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,7 @@ package nl.talsmasoftware.context.opentracing;
 
 import io.opentracing.Span;
 import io.opentracing.mock.MockSpan;
-import nl.talsmasoftware.context.ContextManager;
-import nl.talsmasoftware.context.observer.ContextObserver;
+import nl.talsmasoftware.context.api.ContextObserver;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -29,12 +28,7 @@ import java.util.List;
 import static java.util.Collections.synchronizedList;
 
 public class ContextScopeManagerObserver implements ContextObserver<Span> {
-    static final List<Event> observed = synchronizedList(new ArrayList<Event>());
-
-    @Override
-    public Class<? extends ContextManager<Span>> getObservedContextManager() {
-        return ContextScopeManager.class;
-    }
+    static final List<Event> observed = synchronizedList(new ArrayList<>());
 
     @Override
     public void onActivate(Span activatedContextValue, Span previousContextValue) {

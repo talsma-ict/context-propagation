@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.executors;
+package nl.talsmasoftware.context.core.concurrent;
 
-import nl.talsmasoftware.context.ContextManagers;
-import nl.talsmasoftware.context.DummyContextManager;
-import nl.talsmasoftware.context.ThrowingContextManager;
-import nl.talsmasoftware.context.api.Context;
+import nl.talsmasoftware.context.core.ContextManagers;
+import nl.talsmasoftware.context.dummy.DummyContextManager;
+import nl.talsmasoftware.context.dummy.ThrowingContextManager;
+import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,12 +40,7 @@ public class ContextAwareExecutorServiceTest {
     private static DummyContextManager dummyContextManager = new DummyContextManager();
     private static ThrowingContextManager throwingContextManager = new ThrowingContextManager();
 
-    private static Callable<String> getDummyContext = new Callable<String>() {
-        public String call() {
-            Context<String> active = dummyContextManager.getActiveContext();
-            return active == null ? null : active.getValue();
-        }
-    };
+    private static Callable<String> getDummyContext = dummyContextManager::getActiveContextValue;
 
     private ContextAwareExecutorService executor;
 
@@ -78,7 +73,7 @@ public class ContextAwareExecutorServiceTest {
         dummyContextManager.initializeNewContext("The quick brown fox jumps over the lazy dog");
         Future<String> dummy = executor.submit(getDummyContext);
         dummyContextManager.initializeNewContext("god yzal eht revo spmuj xof nworb kciuq ehT");
-        assertThat(dummyContextManager.getActiveContext().getValue(), is("god yzal eht revo spmuj xof nworb kciuq ehT"));
+        assertThat(dummyContextManager.getActiveContextValue(), is("god yzal eht revo spmuj xof nworb kciuq ehT"));
         assertThat(dummy.get(), is("The quick brown fox jumps over the lazy dog"));
     }
 

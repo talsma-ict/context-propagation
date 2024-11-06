@@ -15,8 +15,8 @@
  */
 package nl.talsmasoftware.context.servletrequest;
 
-import nl.talsmasoftware.context.ContextManager;
 import nl.talsmasoftware.context.api.Context;
+import nl.talsmasoftware.context.api.ContextManager;
 
 import javax.servlet.ServletRequest;
 
@@ -33,28 +33,24 @@ public final class ServletRequestContextManager implements ContextManager<Servle
      * @return The current ServletRequest if available, or <code>null</code> otherwise.
      */
     public static ServletRequest currentServletRequest() {
-        Context<ServletRequest> current = ServletRequestContext.current();
-        return current == null ? null : current.getValue();
+        return ServletRequestContext.currentValue();
     }
 
     public Context<ServletRequest> initializeNewContext(ServletRequest value) {
         return new ServletRequestContext(value);
     }
 
-    public Context<ServletRequest> getActiveContext() {
-        return ServletRequestContext.current();
+    public ServletRequest getActiveContextValue() {
+        return currentServletRequest();
     }
 
     /**
      * Unconditionally removes the active context (and any parents).
      * <p>
-     * This is useful for boundary filters, whose Threads may be returned to some threadpool.
+     * This is useful for boundary filters, whose Threads may be returned to some thread pool.
      */
-    public static void clear() {
-        Context<ServletRequest> current = ServletRequestContext.current();
-        if (current != null) {
-            current.close();
-        }
+    public void clear() {
+        ServletRequestContext.clear();
     }
 
     @Override

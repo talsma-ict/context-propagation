@@ -18,19 +18,16 @@ package nl.talsmasoftware.context.log4j2.threadcontext;
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.core.ContextManagers;
-import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
+import nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService;
 import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -55,6 +52,7 @@ class Log4j2ThreadContextManagerTest {
      * Underlying executor of {@link #threadpool}; not context-aware
      */
     private ExecutorService rawThreadpool;
+
     /**
      * Context-aware executor
      */
@@ -79,19 +77,11 @@ class Log4j2ThreadContextManagerTest {
     }
 
     private static Callable<String> createGetMapValue(final String key) {
-        return new Callable<String>() {
-            public String call() {
-                return ThreadContext.get(key);
-            }
-        };
+        return () -> ThreadContext.get(key);
     }
 
     private static Callable<String> createGetStackValue(final int index) {
-        return new Callable<String>() {
-            public String call() {
-                return ThreadContext.getImmutableStack().asList().get(index);
-            }
-        };
+        return () -> ThreadContext.getImmutableStack().asList().get(index);
     }
 
     @Test
@@ -109,35 +99,9 @@ class Log4j2ThreadContextManagerTest {
 
     @Test
     void testInitializeNewContext_null() {
-        NullPointerException expected = assertThrows(NullPointerException.class, new Executable() {
-            public void execute() {
-                Log4j2ThreadContextManager.provider().initializeNewContext(null);
-            }
-        });
+        Log4j2ThreadContextManager manager = Log4j2ThreadContextManager.provider();
+        NullPointerException expected = assertThrows(NullPointerException.class, () -> manager.initializeNewContext(null));
         assertThat(expected.getMessage(), notNullValue());
-    }
-
-    /**
-     * Verify that calling {@code close()} on the result of {@link Log4j2ThreadContextManager#getActiveContext()}
-     * has no effect because it is managed by Log4j2.
-     */
-    @Test
-    void testGetActiveContext_close() {
-        ThreadContext.put("map1", "value1");
-        ThreadContext.put("map2", "value2");
-        ThreadContext.push("stack1");
-        ThreadContext.push("stack2");
-
-        // Should have no effect
-        Log4j2ThreadContextManager.provider().getActiveContext().close();
-
-        Map<String, String> expectedMap = new HashMap<String, String>();
-        expectedMap.put("map1", "value1");
-        expectedMap.put("map2", "value2");
-        assertThat(ThreadContext.getContext(), equalTo(expectedMap));
-
-        List<String> expectedStack = Arrays.asList("stack1", "stack2");
-        assertThat(ThreadContext.getImmutableStack().asList(), equalTo(expectedStack));
     }
 
     @Test
@@ -259,7 +223,6 @@ class Log4j2ThreadContextManagerTest {
 
         final Log4j2ThreadContextManager mgr = Log4j2ThreadContextManager.provider();
 
-        assertThat(mgr.getActiveContext(), hasToString("ReadonlyLog4j2ThreadContext{" + data + "}"));
         Context<Log4j2ThreadContextSnapshot> ctx = mgr.initializeNewContext(data);
         try {
             assertThat(ctx, hasToString("ManagedLog4j2ThreadContext{" + data + "}"));

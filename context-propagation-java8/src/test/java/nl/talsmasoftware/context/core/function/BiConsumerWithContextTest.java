@@ -13,18 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.functions;
+package nl.talsmasoftware.context.core.function;
 
-import nl.talsmasoftware.context.DummyContextManager;
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextSnapshot;
+import nl.talsmasoftware.context.api.ContextSnapshot.Reactivation;
 import nl.talsmasoftware.context.core.ContextManagers;
+import nl.talsmasoftware.context.dummy.DummyContextManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -32,8 +31,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 import static java.lang.String.format;
-import static nl.talsmasoftware.context.DummyContextManager.currentValue;
-import static nl.talsmasoftware.context.DummyContextManager.setCurrentValue;
+import static nl.talsmasoftware.context.dummy.DummyContextManager.currentValue;
+import static nl.talsmasoftware.context.dummy.DummyContextManager.setCurrentValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -53,7 +52,7 @@ public class BiConsumerWithContextTest {
     @BeforeEach
     @AfterEach
     public void clearDummyContext() {
-        DummyContextManager.clear();
+        DummyContextManager.clearAllContexts();
     }
 
     @BeforeEach
@@ -108,10 +107,8 @@ public class BiConsumerWithContextTest {
         assertThat("Snapshot consumer must be called", snapshotHolder[0], is(notNullValue()));
 
         t = new Thread(() -> {
-            try (Closeable reactivation = snapshotHolder[0].reactivate()) {
+            try (Reactivation reactivation = snapshotHolder[0].reactivate()) {
                 assertThat("Thread context must propagate", currentValue(), is(Optional.of("New value")));
-            } catch (IOException e) {
-                throw new RuntimeException(e.getMessage(), e);
             }
         });
         t.start();
@@ -119,23 +116,23 @@ public class BiConsumerWithContextTest {
     }
 
     @Test
-    public void testAndThen() throws InterruptedException, IOException {
-        setCurrentValue("Old value");
+    public void testAndThen() throws InterruptedException {
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
 
-        BiConsumer<String, String> consumer = new BiConsumerWithContext<String, String>(
+        setCurrentValue("Old value");
+        BiConsumer<String, String> consumer1 = new BiConsumerWithContext<>(
                 ContextManagers.createContextSnapshot(),
                 (a, b) -> setCurrentValue(a + " " + b + ", " + currentValue().orElse("NO VALUE")),
-                s -> snapshotHolder[0] = s)
-                .andThen((a, b) -> setCurrentValue(a.toUpperCase() + " " + b.toLowerCase() + ", " + currentValue()
-                        .orElse("NO VALUE")));
+                s -> snapshotHolder[0] = s);
+        BiConsumer<String, String> consumer2 = consumer1.andThen(
+                (a, b) -> setCurrentValue(a.toUpperCase() + " " + b.toLowerCase() + ", " + currentValue().orElse("NO VALUE")));
 
-        Thread t = new Thread(() -> consumer.accept("New", "value"));
+        Thread t = new Thread(() -> consumer2.accept("New", "value"));
         t.start();
         t.join();
 
         assertThat(currentValue(), is(Optional.of("Old value")));
-        try (Closeable reactivated = snapshotHolder[0].reactivate()) {
+        try (Reactivation reactivated = snapshotHolder[0].reactivate()) {
             assertThat(currentValue(), is(Optional.of("NEW value, New value, Old value")));
         }
     }

@@ -16,9 +16,9 @@
 package nl.talsmasoftware.context.functions;
 
 import nl.talsmasoftware.context.ContextManagers;
-import nl.talsmasoftware.context.DummyContextManager;
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextSnapshot;
+import nl.talsmasoftware.context.dummy.DummyContextManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,8 +31,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import static nl.talsmasoftware.context.DummyContextManager.currentValue;
-import static nl.talsmasoftware.context.DummyContextManager.setCurrentValue;
+import static nl.talsmasoftware.context.dummy.DummyContextManager.currentValue;
+import static nl.talsmasoftware.context.dummy.DummyContextManager.setCurrentValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -52,7 +52,7 @@ public class ConsumerWithContextTest {
     @BeforeEach
     @AfterEach
     public void clearDummyContext() {
-        DummyContextManager.clear();
+        DummyContextManager.clearAllContexts();
     }
 
     @BeforeEach

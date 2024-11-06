@@ -17,7 +17,7 @@ package nl.talsmasoftware.context.springsecurity;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.core.ContextManagers;
-import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
+import nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -79,7 +79,7 @@ public class SpringSecurityContextManagerTest {
 
     @Test
     public void testWithoutAnyAuthentication() {
-        assertThat(new SpringSecurityContextManager().getActiveContext().getValue(), is(nullValue()));
+        assertThat(new SpringSecurityContextManager().getActiveContextValue(), is(nullValue()));
     }
 
     @Test
@@ -113,21 +113,12 @@ public class SpringSecurityContextManagerTest {
     }
 
     @Test
-    public void testClosingCurrentAuthenticationContext() {
-        setAuthentication("Vincent Vega");
-        assertThat(new SpringSecurityContextManager().getActiveContext().getValue().getName(), is("Vincent Vega"));
-
-        new SpringSecurityContextManager().getActiveContext().close(); // Not ours to manage!
-        assertThat(new SpringSecurityContextManager().getActiveContext().getValue().getName(), is("Vincent Vega"));
-    }
-
-    @Test
     public void testClearableImplementation() {
         setAuthentication("Vincent Vega");
-        assertThat(new SpringSecurityContextManager().getActiveContext().getValue().getName(), is("Vincent Vega"));
+        assertThat(new SpringSecurityContextManager().getActiveContextValue().getName(), is("Vincent Vega"));
 
         ContextManagers.clearActiveContexts();
-        assertThat(new SpringSecurityContextManager().getActiveContext().getValue(), is(nullValue()));
+        assertThat(new SpringSecurityContextManager().getActiveContextValue(), is(nullValue()));
     }
 
 }

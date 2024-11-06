@@ -15,10 +15,10 @@
  */
 package nl.talsmasoftware.context.futures;
 
-import nl.talsmasoftware.context.DummyContextManager;
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.core.ContextManagers;
+import nl.talsmasoftware.context.dummy.DummyContextManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,11 +58,11 @@ public class ContextAwareCompletableFutureTest {
     @BeforeEach
     @AfterEach
     public void clearDummyContext() {
-        DummyContextManager.clear();
+        DummyContextManager.clearAllContexts();
     }
 
     private static void assertContext(String expectedValue) {
-        assertThat("Active context value", manager.getActiveContext().getValue(), is(expectedValue));
+        assertThat("Active context value", manager.getActiveContextValue(), is(expectedValue));
     }
 
     private static Supplier<String> stringSupplier(String name, String requiredContext) {
@@ -81,8 +81,8 @@ public class ContextAwareCompletableFutureTest {
         CompletableFuture<String> future1 = new ContextAwareCompletableFuture<>(); // should have a new snapshot with foo
         ctx.close();
 
-        CompletableFuture<String> future2 = future1.thenApply(value -> manager.getActiveContext().getValue() + value);
-        assertThat(manager.getActiveContext(), is(nullValue()));
+        CompletableFuture<String> future2 = future1.thenApply(value -> manager.getActiveContextValue() + value);
+        assertThat(manager.getActiveContextValue(), is(nullValue()));
         assertThat(future1.isDone(), is(false));
         assertThat(future2.isDone(), is(false));
 
@@ -701,7 +701,7 @@ public class ContextAwareCompletableFutureTest {
                                 manager.initializeNewContext("Trudy");
                                 throw exception;
                             })
-                            .handleAsync((voidValue, throwable) -> manager.getActiveContext().getValue())
+                            .handleAsync((voidValue, throwable) -> manager.getActiveContextValue())
                             .get(),
                     is("Jody"));
         }
@@ -712,7 +712,7 @@ public class ContextAwareCompletableFutureTest {
                                 manager.initializeNewContext("Trudy");
                                 throw exception;
                             }, null, null, true)
-                            .handleAsync((voidValue, throwable) -> manager.getActiveContext().getValue())
+                            .handleAsync((voidValue, throwable) -> manager.getActiveContextValue())
                             .get(),
                     is("Trudy"));
         }
@@ -727,7 +727,7 @@ public class ContextAwareCompletableFutureTest {
                                 manager.initializeNewContext("Trudy");
                                 throw exception;
                             })
-                            .handleAsync((voidValue, throwable) -> manager.getActiveContext().getValue())
+                            .handleAsync((voidValue, throwable) -> manager.getActiveContextValue())
                             .get(),
                     is("Jody"));
         }
@@ -738,7 +738,7 @@ public class ContextAwareCompletableFutureTest {
                                 manager.initializeNewContext("Trudy");
                                 throw exception;
                             }, null, null, true)
-                            .handleAsync((voidValue, throwable) -> manager.getActiveContext().getValue())
+                            .handleAsync((voidValue, throwable) -> manager.getActiveContextValue())
                             .get(),
                     is("Trudy"));
         }
@@ -754,7 +754,7 @@ public class ContextAwareCompletableFutureTest {
                                 throw exception;
                             })
                             .handleAsync(
-                                    (voidValue, throwable) -> manager.getActiveContext().getValue(),
+                                    (voidValue, throwable) -> manager.getActiveContextValue(),
                                     contextUnawareThreadpool)
                             .get(),
                     is("Jody"));
@@ -767,7 +767,7 @@ public class ContextAwareCompletableFutureTest {
                                 throw exception;
                             }, null, null, true)
                             .handleAsync(
-                                    (voidValue, throwable) -> manager.getActiveContext().getValue(),
+                                    (voidValue, throwable) -> manager.getActiveContextValue(),
                                     contextUnawareThreadpool)
                             .get(),
                     is("Trudy"));
@@ -785,7 +785,7 @@ public class ContextAwareCompletableFutureTest {
                             })
                             .takeNewSnapshot()
                             .handle((voidValue, throwable) -> {
-                                String val = manager.getActiveContext().getValue();
+                                String val = manager.getActiveContextValue();
                                 manager.initializeNewContext("-" + val);
                                 return val;
                             })
@@ -801,7 +801,7 @@ public class ContextAwareCompletableFutureTest {
                                 throw exception;
                             }, null, null, true)
                             .handle((voidValue, throwable) -> {
-                                String val = manager.getActiveContext().getValue();
+                                String val = manager.getActiveContextValue();
                                 manager.initializeNewContext("-" + val);
                                 return val;
                             })
@@ -822,7 +822,7 @@ public class ContextAwareCompletableFutureTest {
                             })
                             .takeNewSnapshot()
                             .handleAsync((voidValue, throwable) -> {
-                                String val = manager.getActiveContext().getValue();
+                                String val = manager.getActiveContextValue();
                                 manager.initializeNewContext("-" + val);
                                 return val;
                             })
@@ -838,7 +838,7 @@ public class ContextAwareCompletableFutureTest {
                                 throw exception;
                             }, null, null, true)
                             .handleAsync((voidValue, throwable) -> {
-                                String val = manager.getActiveContext().getValue();
+                                String val = manager.getActiveContextValue();
                                 manager.initializeNewContext("-" + val);
                                 return val;
                             })
@@ -859,7 +859,7 @@ public class ContextAwareCompletableFutureTest {
                             })
                             .takeNewSnapshot()
                             .handleAsync((voidValue, throwable) -> {
-                                String val = manager.getActiveContext().getValue();
+                                String val = manager.getActiveContextValue();
                                 manager.initializeNewContext("-" + val);
                                 return val;
                             }, contextUnawareThreadpool)
@@ -875,7 +875,7 @@ public class ContextAwareCompletableFutureTest {
                                 throw exception;
                             }, null, null, true)
                             .handleAsync((voidValue, throwable) -> {
-                                String val = manager.getActiveContext().getValue();
+                                String val = manager.getActiveContextValue();
                                 manager.initializeNewContext("-" + val);
                                 return val;
                             }, contextUnawareThreadpool)
@@ -894,7 +894,7 @@ public class ContextAwareCompletableFutureTest {
                         throw new RuntimeException("Bad Motherfucker");
                     })
                     .exceptionally(ex -> {
-                        String val = manager.getActiveContext().getValue();
+                        String val = manager.getActiveContextValue();
                         assertThat(val, is("Gringo"));
                         return null;
                     })
@@ -908,7 +908,7 @@ public class ContextAwareCompletableFutureTest {
                         throw new RuntimeException("Bad Motherfucker");
                     }, null, null, true)
                     .exceptionally(ex -> {
-                        String val = manager.getActiveContext().getValue();
+                        String val = manager.getActiveContextValue();
                         assertThat(val, is("Jules Winnfield"));
                         return null;
                     })
@@ -926,7 +926,7 @@ public class ContextAwareCompletableFutureTest {
                     })
                     .takeNewSnapshot()
                     .exceptionally(ex -> {
-                        String val = manager.getActiveContext().getValue();
+                        String val = manager.getActiveContextValue();
                         assertThat(val, is("Gringo"));
                         manager.initializeNewContext("-" + val);
                         return null;
@@ -942,7 +942,7 @@ public class ContextAwareCompletableFutureTest {
                         throw new RuntimeException("Bad Motherfucker");
                     }, null, null, true)
                     .exceptionally(ex -> {
-                        String val = manager.getActiveContext().getValue();
+                        String val = manager.getActiveContextValue();
                         assertThat(val, is("Jules Winnfield"));
                         manager.initializeNewContext("-" + val);
                         return null;
@@ -1138,7 +1138,7 @@ public class ContextAwareCompletableFutureTest {
                     .runAsync(() -> manager.initializeNewContext("Quentin").getValue(), null, null, true)
                     .thenAcceptBoth(completedFuture("Tarantino"),
                             (Void voidA, String stringB) ->
-                                    assertThat(manager.getActiveContext().getValue() + stringB,
+                                    assertThat(manager.getActiveContextValue() + stringB,
                                             is("QuentinTarantino")))
                     .get();
             assertThat(DummyContextManager.currentValue(), is(Optional.of("Pulp Fiction")));
@@ -1152,7 +1152,7 @@ public class ContextAwareCompletableFutureTest {
                     .runAsync(() -> manager.initializeNewContext("Quentin").getValue(), null, null, true)
                     .thenAcceptBothAsync(completedFuture("Tarantino"),
                             (Void voidA, String stringB) ->
-                                    assertThat(manager.getActiveContext().getValue() + stringB,
+                                    assertThat(manager.getActiveContextValue() + stringB,
                                             is("QuentinTarantino")))
                     .get();
             assertThat(DummyContextManager.currentValue(), is(Optional.of("Pulp Fiction")));
@@ -1166,7 +1166,7 @@ public class ContextAwareCompletableFutureTest {
                     .runAsync(() -> manager.initializeNewContext("Quentin").getValue(), null, null, true)
                     .thenAcceptBothAsync(completedFuture("Tarantino"),
                             (Void voidA, String stringB) ->
-                                    assertThat(manager.getActiveContext().getValue() + stringB,
+                                    assertThat(manager.getActiveContextValue() + stringB,
                                             is("QuentinTarantino")),
                             contextUnawareThreadpool)
                     .get();
@@ -1182,7 +1182,7 @@ public class ContextAwareCompletableFutureTest {
                     .takeNewSnapshot()
                     .thenAcceptBoth(completedFuture(" by Tarantino"),
                             (Void voidA, String stringB) -> {
-                                String val = manager.getActiveContext().getValue() + stringB;
+                                String val = manager.getActiveContextValue() + stringB;
                                 assertThat(val, is("Pulp Fiction by Tarantino"));
                                 manager.initializeNewContext("-" + val);
                             })
@@ -1195,7 +1195,7 @@ public class ContextAwareCompletableFutureTest {
                     .runAsync(() -> manager.initializeNewContext("Quentin").getValue(), null, null, true)
                     .thenAcceptBoth(completedFuture(" by Tarantino"),
                             (Void voidA, String stringB) -> {
-                                String val = manager.getActiveContext().getValue() + stringB;
+                                String val = manager.getActiveContextValue() + stringB;
                                 assertThat(val, is("Quentin by Tarantino"));
                                 manager.initializeNewContext("-" + val);
                             })
@@ -1212,7 +1212,7 @@ public class ContextAwareCompletableFutureTest {
                     .takeNewSnapshot()
                     .thenAcceptBoth(completedFuture(" by Tarantino"),
                             (Void voidA, String stringB) -> {
-                                String val = manager.getActiveContext().getValue() + stringB;
+                                String val = manager.getActiveContextValue() + stringB;
                                 assertThat(val, is("Pulp Fiction by Tarantino"));
                                 manager.initializeNewContext("-" + val);
                             })
@@ -1225,7 +1225,7 @@ public class ContextAwareCompletableFutureTest {
                     .runAsync(() -> manager.initializeNewContext("Quentin").getValue(), null, null, true)
                     .thenAcceptBoth(completedFuture("Tarantino"),
                             (Void voidA, String stringB) -> {
-                                String val = manager.getActiveContext().getValue() + stringB;
+                                String val = manager.getActiveContextValue() + stringB;
                                 assertThat(val, is("QuentinTarantino"));
                                 manager.initializeNewContext("-" + val);
                             })
@@ -1242,7 +1242,7 @@ public class ContextAwareCompletableFutureTest {
                     .takeNewSnapshot()
                     .thenAcceptBothAsync(completedFuture(" by Tarantino"),
                             (Void voidA, String stringB) -> {
-                                String val = manager.getActiveContext().getValue() + stringB;
+                                String val = manager.getActiveContextValue() + stringB;
                                 assertThat(val, is("Pulp Fiction by Tarantino"));
                                 manager.initializeNewContext("-" + val);
                             },
@@ -1257,7 +1257,7 @@ public class ContextAwareCompletableFutureTest {
                     .runAsync(() -> manager.initializeNewContext("Quentin").getValue(), null, null, true)
                     .thenAcceptBothAsync(completedFuture("Tarantino"),
                             (Void voidA, String stringB) -> {
-                                String val = manager.getActiveContext().getValue() + stringB;
+                                String val = manager.getActiveContextValue() + stringB;
                                 assertThat(val, is("QuentinTarantino"));
                                 manager.initializeNewContext("-" + val);
                             },
@@ -1342,7 +1342,7 @@ public class ContextAwareCompletableFutureTest {
                     .runAfterBoth(
                             ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Mayonaise")),
                             () -> {
-                                String val = manager.getActiveContext().getValue();
+                                String val = manager.getActiveContextValue();
                                 assertThat(val, is("French Fries"));
                                 manager.initializeNewContext("-" + val);
                             })
@@ -1356,7 +1356,7 @@ public class ContextAwareCompletableFutureTest {
                     .runAfterBoth(
                             ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Mayonaise")),
                             () -> {
-                                String val = manager.getActiveContext().getValue();
+                                String val = manager.getActiveContextValue();
                                 assertThat(val, is("Ketchup"));
                                 manager.initializeNewContext("-" + val);
                             })
@@ -1374,7 +1374,7 @@ public class ContextAwareCompletableFutureTest {
                     .runAfterBothAsync(
                             ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Mayonaise")),
                             () -> {
-                                String val = manager.getActiveContext().getValue();
+                                String val = manager.getActiveContextValue();
                                 assertThat(val, is("French Fries"));
                                 manager.initializeNewContext("-" + val);
                             })
@@ -1388,7 +1388,7 @@ public class ContextAwareCompletableFutureTest {
                     .runAfterBothAsync(
                             ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Mayonaise")),
                             () -> {
-                                String val = manager.getActiveContext().getValue();
+                                String val = manager.getActiveContextValue();
                                 assertThat(val, is("Ketchup"));
                                 manager.initializeNewContext("-" + val);
                             })
@@ -1406,7 +1406,7 @@ public class ContextAwareCompletableFutureTest {
                     .runAfterBothAsync(
                             ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Mayonaise")),
                             () -> {
-                                String val = manager.getActiveContext().getValue();
+                                String val = manager.getActiveContextValue();
                                 assertThat(val, is("French Fries"));
                                 manager.initializeNewContext("-" + val);
                             },
@@ -1421,7 +1421,7 @@ public class ContextAwareCompletableFutureTest {
                     .runAfterBothAsync(
                             ContextAwareCompletableFuture.runAsync(() -> manager.initializeNewContext("Mayonaise")),
                             () -> {
-                                String val = manager.getActiveContext().getValue();
+                                String val = manager.getActiveContextValue();
                                 assertThat(val, is("Ketchup"));
                                 manager.initializeNewContext("-" + val);
                             },
@@ -1444,7 +1444,7 @@ public class ContextAwareCompletableFutureTest {
                     .takeNewSnapshot(takeNewSnapshot)
                     .applyToEither(future2,
                             input -> String.format("Winner: %s, Thread: %s, Context: %s",
-                                    input, Thread.currentThread().getName(), manager.getActiveContext().getValue()));
+                                    input, Thread.currentThread().getName(), manager.getActiveContextValue()));
 
             // verify
             assertThat(result.get(), allOf(startsWith("Winner: Function"), endsWith("Context: Parent")));
@@ -1465,7 +1465,7 @@ public class ContextAwareCompletableFutureTest {
                     .applyToEitherAsync(
                             future2,
                             input -> String.format("Winner: %s, Thread: %s, Context: %s",
-                                    input, Thread.currentThread().getName(), manager.getActiveContext().getValue()));
+                                    input, Thread.currentThread().getName(), manager.getActiveContextValue()));
 
             // verify
             assertThat(result.get(), allOf(startsWith("Winner: Function"), endsWith("Context: Parent")));
@@ -1486,7 +1486,7 @@ public class ContextAwareCompletableFutureTest {
                     .applyToEitherAsync(
                             future2,
                             input -> String.format("Winner: %s, Thread: %s, Context: %s",
-                                    input, Thread.currentThread().getName(), manager.getActiveContext().getValue()),
+                                    input, Thread.currentThread().getName(), manager.getActiveContextValue()),
                             contextUnawareThreadpool);
 
             // verify
@@ -1616,24 +1616,24 @@ public class ContextAwareCompletableFutureTest {
     public void testThenCompose() throws ExecutionException, InterruptedException {
         try (Context<String> ctx = manager.initializeNewContext("John")) {
             assertThat(supplyAsync(() -> {
-                        String current = manager.getActiveContext().getValue();
+                        String current = manager.getActiveContextValue();
                         manager.initializeNewContext("Travolta");
                         return current;
                     })
                             .thenCompose(value -> supplyAsync(
-                                    () -> value + manager.getActiveContext().getValue()))
+                                    () -> value + manager.getActiveContextValue()))
                             .get(),
                     is("JohnJohn"));
         }
 
         try (Context<String> ctx = manager.initializeNewContext("John")) {
             assertThat(supplyAsync(() -> {
-                        String current = manager.getActiveContext().getValue();
+                        String current = manager.getActiveContextValue();
                         manager.initializeNewContext("Travolta");
                         return current;
                     }, null, null, true)
                             .thenCompose(value -> supplyAsync(
-                                    () -> value + manager.getActiveContext().getValue()))
+                                    () -> value + manager.getActiveContextValue()))
                             .get(),
                     is("JohnTravolta"));
         }
@@ -1643,24 +1643,24 @@ public class ContextAwareCompletableFutureTest {
     public void testThenComposeAsync() throws ExecutionException, InterruptedException {
         try (Context<String> ctx = manager.initializeNewContext("John")) {
             assertThat(supplyAsync(() -> {
-                        String current = manager.getActiveContext().getValue();
+                        String current = manager.getActiveContextValue();
                         manager.initializeNewContext("Travolta");
                         return current;
                     })
                             .thenComposeAsync(value -> supplyAsync(
-                                    () -> value + manager.getActiveContext().getValue()))
+                                    () -> value + manager.getActiveContextValue()))
                             .get(),
                     is("JohnJohn"));
         }
 
         try (Context<String> ctx = manager.initializeNewContext("John")) {
             assertThat(supplyAsync(() -> {
-                        String current = manager.getActiveContext().getValue();
+                        String current = manager.getActiveContextValue();
                         manager.initializeNewContext("Travolta");
                         return current;
                     }, null, null, true)
                             .thenComposeAsync(value -> supplyAsync(
-                                    () -> value + manager.getActiveContext().getValue()))
+                                    () -> value + manager.getActiveContextValue()))
                             .get(),
                     is("JohnTravolta"));
         }
@@ -1670,12 +1670,12 @@ public class ContextAwareCompletableFutureTest {
     public void testThenComposeAsync_executor() throws ExecutionException, InterruptedException {
         try (Context<String> ctx = manager.initializeNewContext("John")) {
             assertThat(supplyAsync(() -> {
-                        String current = manager.getActiveContext().getValue();
+                        String current = manager.getActiveContextValue();
                         manager.initializeNewContext("Travolta");
                         return current;
                     })
                             .thenComposeAsync(
-                                    value -> completedFuture(value + manager.getActiveContext().getValue()),
+                                    value -> completedFuture(value + manager.getActiveContextValue()),
                                     contextUnawareThreadpool)
                             .get(),
                     is("JohnJohn"));
@@ -1683,12 +1683,12 @@ public class ContextAwareCompletableFutureTest {
 
         try (Context<String> ctx = manager.initializeNewContext("John")) {
             assertThat(supplyAsync(() -> {
-                        String current = manager.getActiveContext().getValue();
+                        String current = manager.getActiveContextValue();
                         manager.initializeNewContext("Travolta");
                         return current;
                     }, null, null, true)
                             .thenComposeAsync(
-                                    value -> completedFuture(value + manager.getActiveContext().getValue()),
+                                    value -> completedFuture(value + manager.getActiveContextValue()),
                                     contextUnawareThreadpool)
                             .get(),
                     is("JohnTravolta"));
@@ -1745,7 +1745,7 @@ public class ContextAwareCompletableFutureTest {
         ContextAwareCompletableFuture<Void> future = ContextAwareCompletableFuture.allOf(cf1, cf2);
         manager.initializeNewContext("Jules Winnfield");
 
-        ContextAwareCompletableFuture<String> result = future.thenApplyAsync(aVoid -> manager.getActiveContext().getValue());
+        ContextAwareCompletableFuture<String> result = future.thenApplyAsync(aVoid -> manager.getActiveContextValue());
         assertThat(result.isDone(), is(false));
         cf1.complete("Value 1");
         assertThat(result.isDone(), is(false));
@@ -1768,7 +1768,7 @@ public class ContextAwareCompletableFutureTest {
         ContextAwareCompletableFuture<Void> future = ContextAwareCompletableFuture.allOf(snapshot, cf1, cf2);
         manager.initializeNewContext("Jules Winnfield");
 
-        ContextAwareCompletableFuture<String> result = future.thenApplyAsync(aVoid -> manager.getActiveContext().getValue());
+        ContextAwareCompletableFuture<String> result = future.thenApplyAsync(aVoid -> manager.getActiveContextValue());
         assertThat(result.isDone(), is(false));
         cf1.complete("Value 1");
         assertThat(result.isDone(), is(false));
@@ -1790,7 +1790,7 @@ public class ContextAwareCompletableFutureTest {
         manager.initializeNewContext("Jules Winnfield");
 
         ContextAwareCompletableFuture<String> result = future
-                .thenApplyAsync(s -> manager.getActiveContext().getValue());
+                .thenApplyAsync(s -> manager.getActiveContextValue());
         assertThat(result.isDone(), is(false));
         cf2.complete("Value 2");
         assertThat(result.get(), is("Vincent Vega"));
@@ -1813,7 +1813,7 @@ public class ContextAwareCompletableFutureTest {
         manager.initializeNewContext("Jules Winnfield");
 
         ContextAwareCompletableFuture<String> result = future
-                .thenApplyAsync(s -> manager.getActiveContext().getValue());
+                .thenApplyAsync(s -> manager.getActiveContextValue());
         assertThat(result.isDone(), is(false));
         cf1.complete("Value 1");
         assertThat(result.get(), is("Vincent Vega"));

@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context;
+package nl.talsmasoftware.context.dummy;
 
 import nl.talsmasoftware.context.api.Context;
-import nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext;
+import nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext;
 
 /**
  * @author Sjoerd Talsma
  */
-final class DummyContext extends AbstractThreadLocalContext<String> {
+public final class DummyContext extends AbstractThreadLocalContext<String> {
     private static final ThreadLocal<DummyContext> INSTANCE =
             AbstractThreadLocalContext.threadLocalInstanceOf(DummyContext.class);
 
-    DummyContext(String newValue) {
-        super(DummyContextManager.class, newValue);
+    public DummyContext(String newValue) {
+        super(newValue);
     }
 
     // Public for testing!
@@ -34,16 +34,12 @@ final class DummyContext extends AbstractThreadLocalContext<String> {
         return super.isClosed();
     }
 
-    static Context<String> current() {
-        return AbstractThreadLocalContext.current(DummyContext.class);
-    }
-
-    static String currentValue() {
-        final Context<String> currentContext = current();
+    public static String currentValue() {
+        final Context<String> currentContext = INSTANCE.get();
         return currentContext != null ? currentContext.getValue() : null;
     }
 
-    static void reset() {
+    public static void reset() {
         INSTANCE.remove();
     }
 

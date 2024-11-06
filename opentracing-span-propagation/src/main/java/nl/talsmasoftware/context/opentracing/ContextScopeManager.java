@@ -79,18 +79,9 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
         return new ThreadLocalSpanContext(value);
     }
 
-    /**
-     * @return The active span context (this is identical to the active scope).
-     */
-    @Override
-    public Context<Span> getActiveContext() {
-        return ThreadLocalSpanContext.current();
-    }
-
     @Override
     public Span getActiveContextValue() {
-        Context<Span> activeContext = getActiveContext();
-        return activeContext == null ? null : activeContext.getValue();
+        return activeSpan();
     }
 
     @Override

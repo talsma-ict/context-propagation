@@ -15,8 +15,6 @@
  */
 package nl.talsmasoftware.context.api;
 
-import nl.talsmasoftware.context.clearable.Clearable;
-
 /**
  * The service definition a {@linkplain Context} manager.
  *
@@ -27,7 +25,7 @@ import nl.talsmasoftware.context.clearable.Clearable;
  * @param <T> type of the context value
  * @author Sjoerd Talsma
  */
-public interface ContextManager<T> extends nl.talsmasoftware.context.ContextManager<T>, Clearable {
+public interface ContextManager<T> {
 
     /**
      * Initialize a new context containing the specified <code>value</code>.
@@ -40,15 +38,6 @@ public interface ContextManager<T> extends nl.talsmasoftware.context.ContextMana
      * which should be closed by the caller at the end of its lifecycle from the same thread.
      */
     Context<T> initializeNewContext(T value);
-
-    /**
-     * The currently active context, or <code>null</code> if no context is active.
-     *
-     * @return The active context or <code>null</code> if there is none.
-     * @deprecated In favour of {@link #getActiveContextValue}
-     */
-    @Deprecated
-    Context<T> getActiveContext();
 
     /**
      * The value of the currently active context, or {@code null} if no context is active.

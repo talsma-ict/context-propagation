@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context;
+package nl.talsmasoftware.context.core;
 
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
-import nl.talsmasoftware.context.observer.SimpleContextObserver;
+import nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService;
+import nl.talsmasoftware.context.dummy.DummyContext;
+import nl.talsmasoftware.context.dummy.DummyContextManager;
+import nl.talsmasoftware.context.dummy.ThrowingContextManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,17 +37,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static nl.talsmasoftware.context.observer.Observed.activated;
-import static nl.talsmasoftware.context.observer.Observed.deactivated;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -53,24 +50,18 @@ import static org.junit.jupiter.api.Assertions.fail;
  * @author Sjoerd Talsma
  */
 public class ContextManagersTest {
+    DummyContextManager dummyManager = new DummyContextManager();
 
     @BeforeEach
     @AfterEach
     public void resetContexts() {
-        DummyContext.reset();
+        ContextManagers.clearActiveContexts();
     }
 
     @BeforeEach
     @AfterEach
     public void resetContextClassLoader() {
         ContextManagers.useClassLoader(null);
-    }
-
-    @BeforeEach
-    @AfterEach
-    public void clearObserved() {
-        SimpleContextObserver.observedContextManager = null;
-        SimpleContextObserver.observed.clear();
     }
 
     @Test
@@ -83,9 +74,7 @@ public class ContextManagersTest {
             constructors[0].setAccessible(true);
             constructors[0].newInstance();
             fail("Exception expected.");
-        } catch (IllegalAccessException e) {
-            fail("InvocationTargetException expected.");
-        } catch (InstantiationException e) {
+        } catch (IllegalAccessException | InstantiationException e) {
             fail("InvocationTargetException expected.");
         } catch (InvocationTargetException e) {
             assertThat(e.getCause(), is(instanceOf(UnsupportedOperationException.class)));
@@ -94,7 +83,7 @@ public class ContextManagersTest {
 
     @Test
     public void testSnapshot_inSameThread() throws IOException {
-        DummyContext.reset();
+        dummyManager.clear();
         assertThat(DummyContext.currentValue(), is(nullValue()));
 
         DummyContext ctx1 = new DummyContext("initial value");
@@ -148,11 +137,8 @@ public class ContextManagersTest {
         threadResult = threadpool.submit(new Callable<String>() {
             public String call() throws Exception {
                 String res = DummyContext.currentValue();
-                DummyContext inThread = new DummyContext("in-thread value");
-                try {
+                try (DummyContext inThread = new DummyContext("in-thread value")) {
                     res += ", " + DummyContext.currentValue();
-                } finally {
-                    inThread.close();
                 }
                 return res + ", " + DummyContext.currentValue();
             }
@@ -197,7 +183,7 @@ public class ContextManagersTest {
         Closeable reactivation = snapshot.reactivate();
         assertThat(DummyContext.currentValue(), is("blah"));
         reactivation.close();
-        assertThat(DummyContext.current(), is(nullValue()));
+        assertThat(DummyContext.currentValue(), is(nullValue()));
     }
 
     @Test
@@ -210,21 +196,17 @@ public class ContextManagersTest {
         ThrowingContextManager.onInitialize = reactivationException;
 
         assertThat(DummyContext.currentValue(), is("foo"));
-        assertThat(mgr.getActiveContext().getValue(), is("bar"));
+        assertThat(mgr.getActiveContextValue(), is("bar"));
         ctx1.close();
         ctx2.close();
 
         assertThat(DummyContext.currentValue(), is(nullValue()));
-        assertThat(mgr.getActiveContext(), is(nullValue()));
-        try {
-            snapshot.reactivate();
-            fail("Exception expected");
-        } catch (RuntimeException expected) {
-            assertThat(expected, is(sameInstance(reactivationException)));
-        }
+        assertThat(mgr.getActiveContextValue(), is(nullValue()));
+        RuntimeException expected = assertThrows(RuntimeException.class, snapshot::reactivate);
+
         // foo + bar mustn't be set after exception!
         assertThat(DummyContext.currentValue(), is(nullValue()));
-        assertThat(mgr.getActiveContext(), is(nullValue()));
+        assertThat(mgr.getActiveContextValue(), is(nullValue()));
     }
 
     @Test
@@ -235,11 +217,7 @@ public class ContextManagersTest {
         try {
             List<Future<ContextSnapshot>> snapshots = new ArrayList<Future<ContextSnapshot>>(threadcount);
             for (int i = 0; i < threadcount; i++) {
-                snapshots.add(threadpool.submit(new Callable<ContextSnapshot>() {
-                    public ContextSnapshot call() throws Exception {
-                        return ContextManagers.createContextSnapshot();
-                    }
-                }));
+                snapshots.add(threadpool.submit(ContextManagers::createContextSnapshot));
             }
 
             for (int i = 0; i < threadcount; i++) {
@@ -248,34 +226,6 @@ public class ContextManagersTest {
         } finally {
             threadpool.shutdown();
         }
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    public void testOnActivate() {
-        SimpleContextObserver.observedContextManager = DummyContextManager.class;
-        Class reportedClass = ContextManager.class;
-        ContextManagers.onActivate(reportedClass, "activated value", "previous value");
-        assertThat(SimpleContextObserver.observed, is(empty()));
-
-        SimpleContextObserver.observedContextManager = ContextManager.class;
-        reportedClass = DummyContextManager.class;
-        ContextManagers.onActivate(reportedClass, "activated value", "previous value");
-        assertThat(SimpleContextObserver.observed, hasItem(activated(equalTo("activated value"))));
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    public void testOnDeactivate() {
-        SimpleContextObserver.observedContextManager = DummyContextManager.class;
-        Class reportedClass = ContextManager.class;
-        ContextManagers.onDeactivate(reportedClass, "deactivated value", "restored value");
-        assertThat(SimpleContextObserver.observed, is(empty()));
-
-        SimpleContextObserver.observedContextManager = ContextManager.class;
-        reportedClass = DummyContextManager.class;
-        ContextManagers.onDeactivate(reportedClass, "deactivated value", "restored value");
-        assertThat(SimpleContextObserver.observed, hasItem(deactivated(equalTo("deactivated value"))));
     }
 
 }

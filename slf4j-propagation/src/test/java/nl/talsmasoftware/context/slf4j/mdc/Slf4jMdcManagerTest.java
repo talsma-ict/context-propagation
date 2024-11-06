@@ -18,7 +18,7 @@ package nl.talsmasoftware.context.slf4j.mdc;
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.core.ContextManagers;
-import nl.talsmasoftware.context.executors.ContextAwareExecutorService;
+import nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +33,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 
@@ -101,12 +102,10 @@ public class Slf4jMdcManagerTest {
         Slf4jMdcManager mgr = new Slf4jMdcManager();
         MDC.put("dummy", "value");
         Map<String, String> mdc = MDC.getCopyOfContextMap();
-        assertThat(mgr.getActiveContext(), hasToString("Slf4jMdcContext{closed}"));
-        Context<Map<String, String>> ctx = mgr.initializeNewContext(mdc);
-        try {
+        assertThat(mgr.getActiveContextValue(), equalTo(mdc));
+
+        try (Context<Map<String, String>> ctx = mgr.initializeNewContext(mdc)) {
             assertThat(ctx, hasToString("Slf4jMdcContext" + mdc));
-        } finally {
-            ctx.close();
         }
     }
 

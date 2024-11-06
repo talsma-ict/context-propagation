@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context;
+package nl.talsmasoftware.context.dummy;
 
 import nl.talsmasoftware.context.api.Context;
+import nl.talsmasoftware.context.api.ContextManager;
 
 /**
  * Trivial manager around the {@link DummyContext} implementation to be registered as service provider.
@@ -28,8 +29,8 @@ public class DummyContextManager implements ContextManager<String> {
         return new DummyContext(value);
     }
 
-    public Context<String> getActiveContext() {
-        return DummyContext.current();
+    public String getActiveContextValue() {
+        return DummyContext.currentValue();
     }
 
     public void clear() {

@@ -216,7 +216,7 @@ public class SpanManagerTest {
         Span parentSpan = mockTracer.buildSpan("first-op").start();
         Scope parent = mockTracer.activateSpan(parentSpan);
         Span newSpan = mockTracer.buildSpan("second-span").start();
-        assertThat(deprecatedManager.getActiveContext().getValue(), is(equalTo(parentSpan)));
+        assertThat(deprecatedManager.getActiveContextValue(), is(equalTo(parentSpan)));
 
         Context<Span> newContext = deprecatedManager.initializeNewContext(newSpan);
         assertThat(SCOPE_MANAGER.activeSpan(), is(equalTo(newSpan)));
@@ -231,7 +231,7 @@ public class SpanManagerTest {
     public void testClearingAllContexts() {
         Span span = mockTracer.buildSpan("test-span").start();
         Scope scope = mockTracer.scopeManager().activate(span);
-        assertThat(new SpanManager().getActiveContext().getValue(), is(sameInstance(span)));
+        assertThat(new SpanManager().getActiveContextValue(), is(sameInstance(span)));
 
         ContextManagers.clearActiveContexts();
         // TODO Test after this is merged: https://github.com/opentracing/opentracing-java/pull/313
@@ -246,17 +246,12 @@ public class SpanManagerTest {
     @Test
     public void testSpanContextToString() {
         Span span = mockTracer.buildSpan("test-span").start();
-        assertThat(new SpanManager().getActiveContext(), nullValue());
+        assertThat(new SpanManager().getActiveContextValue(), nullValue());
 
         Scope scope = mockTracer.scopeManager().activate(span);
-        Context<Span> spanContext = new SpanManager().getActiveContext();
-        assertThat(spanContext, hasToString("SpanContext{" + span + "}"));
+        assertThat(new SpanManager().getActiveContextValue(), is(span));
 
         scope.close();
-        assertThat(new SpanManager().getActiveContext(), nullValue());
-        assertThat(spanContext, hasToString("SpanContext{" + span + "}"));
-
-        spanContext.close();
-        assertThat(spanContext, hasToString("SpanContext{closed}"));
+        assertThat(new SpanManager().getActiveContextValue(), nullValue());
     }
 }

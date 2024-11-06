@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,7 @@
  */
 package nl.talsmasoftware.context.locale;
 
-import nl.talsmasoftware.context.clearable.Clearable;
-import nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext;
+import nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext;
 
 import java.util.Locale;
 
@@ -32,7 +31,10 @@ import java.util.Locale;
  *
  * @author Sjoerd Talsma
  */
-final class LocaleContext extends AbstractThreadLocalContext<Locale> implements Clearable {
+final class LocaleContext extends AbstractThreadLocalContext<Locale> {
+    private static final ThreadLocal<LocaleContext> LOCALE =
+            AbstractThreadLocalContext.threadLocalInstanceOf(LocaleContext.class);
+
     /**
      * Instantiates a new context with the specified value.
      * The new context will be made the active context for the current thread.
@@ -41,48 +43,24 @@ final class LocaleContext extends AbstractThreadLocalContext<Locale> implements 
      *                 (or <code>null</code> to register a new context with 'no value').
      */
     LocaleContext(Locale newValue) {
-        super(LocaleContextManager.class, newValue);
+        super(newValue);
     }
 
-    /**
-     * @return The current {@code LocaleContext} or {@code null} if there is no current Locale context.
-     */
-    static LocaleContext current() {
-        return AbstractThreadLocalContext.current(LocaleContext.class);
-    }
-
-    /**
-     * @return Wether this locale context was already closed.
-     */
-    @Override
-    public boolean isClosed() {
-        return super.isClosed();
-    }
-
-    /**
-     * @return The locale of this context (even after the context itself is closed)
-     */
     @Override
     public Locale getValue() {
         return value;
     }
 
-    /**
-     * Clears all remembered locales from this thread.
-     */
-    public void clear() {
-        clearAll();
+    static Locale currentValue() {
+        LocaleContext current = LOCALE.get();
+        return current != null ? current.value : null;
     }
 
     /**
      * Unconditionally clears the entire {@link LocaleContext}.
-     * This can be useful when returning threads to a threadpool.
+     * This can be useful when returning threads to a thread pool.
      */
     static void clearAll() {
-        try {
-            for (LocaleContext current = current(); current != null; current = current()) current.close();
-        } finally {
-            AbstractThreadLocalContext.threadLocalInstanceOf(LocaleContext.class).remove();
-        }
+        LOCALE.remove();
     }
 }
