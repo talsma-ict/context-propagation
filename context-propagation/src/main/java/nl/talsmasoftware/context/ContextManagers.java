@@ -16,7 +16,6 @@
 package nl.talsmasoftware.context;
 
 import nl.talsmasoftware.context.api.ContextObserver;
-import nl.talsmasoftware.context.clearable.Clearable;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -86,9 +85,6 @@ public final class ContextManagers {
      * An even better strategy would be to clear the context right before returning a used thread to the pool
      * as this will allow any unclosed contexts to be garbage collected. Besides preventing contextual issues,
      * this reduces the risk of memory leaks by unbalanced context calls.
-     * <p>
-     * For context managers that are not {@linkplain Clearable} and contain an active {@linkplain nl.talsmasoftware.context.api.Context}
-     * that is not {@code Clearable} either, this active context will be closed normally.
      *
      * @deprecated Moved to the {@code nl.talsmasoftware.context.core} package.
      */
