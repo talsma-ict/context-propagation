@@ -32,8 +32,6 @@ import nl.talsmasoftware.context.ContextManager;
  * by the {@linkplain nl.talsmasoftware.context.ContextManagers#onActivate(Class, Object, Object)}
  * and {@linkplain nl.talsmasoftware.context.ContextManagers#onDeactivate(Class, Object, Object)}
  * utility methods.<br>
- * All subclasses of {@linkplain nl.talsmasoftware.context.threadlocal.AbstractThreadLocalContext}
- * are already observable.
  *
  * @author Sjoerd Talsma
  * @deprecated Context observers will use simplified registration in v2.
