@@ -38,11 +38,12 @@
         <module>context-propagation-bom</module>
         <module>context-propagation-api</module>
         <module>context-propagation-core</module>
+
         <module>timers/context-timer-metrics</module>
         <module>timers/context-timer-micrometer</module>
         <module>timers/context-timer-opentracing</module>
 
-        <module>locale-context</module>
+        <module>managers/context-manager-locale</module>
         <module>log4j2-propagation</module>
         <module>servletrequest-propagation</module>
         <module>slf4j-propagation</module>

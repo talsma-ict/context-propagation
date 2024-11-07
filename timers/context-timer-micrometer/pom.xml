@@ -43,7 +43,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>${parent.groupId}</groupId>
+            <groupId>${project.parent.groupId}</groupId>
             <artifactId>context-propagation-api</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -55,7 +55,7 @@
         </dependency>
 
         <dependency>
-            <groupId>${parent.groupId}</groupId>
+            <groupId>${project.parent.groupId}</groupId>
             <artifactId>context-propagation-core</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
