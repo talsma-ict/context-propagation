@@ -64,17 +64,17 @@ public class LocaleContextManagerTest {
 
     @Test
     public void testLocalePropagation() throws ExecutionException, InterruptedException {
-        try (Context<Locale> ctx1 = LocaleContextManager.setCurrentLocale(DUTCH)) {
+        try (Context<Locale> ctx1 = LocaleContext.set(DUTCH)) {
             assertThat(ctx1.getValue(), is(DUTCH));
             assertThat(MANAGER.getActiveContextValue(), is(DUTCH));
-            assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(DUTCH));
+            assertThat(LocaleContext.getOrDefault(), is(DUTCH));
 
             final CountDownLatch blocker = new CountDownLatch(1);
             Future<Locale> slowCall;
             try (Context<Locale> ctx2 = MANAGER.initializeNewContext(GERMAN)) {
                 assertThat(ctx2.getValue(), is(GERMAN));
                 assertThat(MANAGER.getActiveContextValue(), is(GERMAN));
-                assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(GERMAN));
+                assertThat(LocaleContext.getOrDefault(), is(GERMAN));
 
                 slowCall = threadpool.submit(() -> {
                     blocker.await(5, TimeUnit.SECONDS);
@@ -88,25 +88,25 @@ public class LocaleContextManagerTest {
             assertThat("Context in slow thread", slowCall.get(), is(GERMAN));
         }
         assertThat("Current context", MANAGER.getActiveContextValue(), is(nullValue()));
-        assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(DEFAULT_LOCALE));
+        assertThat(LocaleContext.getOrDefault(), is(DEFAULT_LOCALE));
     }
 
     @Test
     public void testGetCurrentLocaleOrDefault() {
-        assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(DEFAULT_LOCALE));
-        try (Context<Locale> ctx1 = LocaleContextManager.setCurrentLocale(GERMAN)) {
-            assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(GERMAN));
+        assertThat(LocaleContext.getOrDefault(), is(DEFAULT_LOCALE));
+        try (Context<Locale> ctx1 = LocaleContext.set(GERMAN)) {
+            assertThat(LocaleContext.getOrDefault(), is(GERMAN));
             assertThat(MANAGER.getActiveContextValue(), is(GERMAN));
 
             try (Context<Locale> ctx2 = MANAGER.initializeNewContext(null)) {
-                assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(DEFAULT_LOCALE));
+                assertThat(LocaleContext.getOrDefault(), is(DEFAULT_LOCALE));
                 assertThat(MANAGER.getActiveContextValue(), nullValue());
             } finally {
-                assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(GERMAN));
+                assertThat(LocaleContext.getOrDefault(), is(GERMAN));
                 assertThat(MANAGER.getActiveContextValue(), is(GERMAN));
             }
         } finally {
-            assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(DEFAULT_LOCALE));
+            assertThat(LocaleContext.getOrDefault(), is(DEFAULT_LOCALE));
         }
     }
 
@@ -117,7 +117,7 @@ public class LocaleContextManagerTest {
 
         MANAGER.clear();
         assertThat(MANAGER.getActiveContextValue(), is(nullValue()));
-        assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(DEFAULT_LOCALE));
+        assertThat(LocaleContext.getOrDefault(), is(DEFAULT_LOCALE));
 
         assertThat(englishCtx.getValue(), equalTo(ENGLISH));
         assertThat(dutchCtx.getValue(), equalTo(DUTCH));
@@ -130,7 +130,7 @@ public class LocaleContextManagerTest {
 
         ContextManagers.clearActiveContexts();
         assertThat(MANAGER.getActiveContextValue(), is(nullValue()));
-        assertThat(LocaleContextManager.getCurrentLocaleOrDefault(), is(DEFAULT_LOCALE));
+        assertThat(LocaleContext.getOrDefault(), is(DEFAULT_LOCALE));
 
         assertThat(englishCtx.getValue(), equalTo(ENGLISH));
         assertThat(dutchCtx.getValue(), equalTo(DUTCH));

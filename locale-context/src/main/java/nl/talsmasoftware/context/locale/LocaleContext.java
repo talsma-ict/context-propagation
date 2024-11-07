@@ -15,52 +15,108 @@
  */
 package nl.talsmasoftware.context.locale;
 
-import nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext;
+import nl.talsmasoftware.context.api.Context;
 
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Package protected context implementation based on {@link AbstractThreadLocalContext}.
- * <p>
- * This context works subtly different from the abstract implementation:
- * <ol>
- * <li>It exposes the {@link #isClosed()} method, because</li>
- * <li>The {@link #getValue()} method keeps returning the contained {@linkplain Locale},
- * even after the context is already closed.</li>
- * </ol>
+ * Implementation for a current {@linkplain Locale} context.
  *
  * @author Sjoerd Talsma
  */
-final class LocaleContext extends AbstractThreadLocalContext<Locale> {
-    private static final ThreadLocal<LocaleContext> LOCALE =
-            AbstractThreadLocalContext.threadLocalInstanceOf(LocaleContext.class);
+public final class LocaleContext implements Context<Locale> {
+    private static final ThreadLocal<LocaleContext> LOCALE = new ThreadLocal<>();
 
-    /**
-     * Instantiates a new context with the specified value.
-     * The new context will be made the active context for the current thread.
-     *
-     * @param newValue The new value to become active in this new context
-     *                 (or <code>null</code> to register a new context with 'no value').
-     */
+    private final LocaleContext parent;
+    private final Locale locale;
+    private final AtomicBoolean closed;
+
     LocaleContext(Locale newValue) {
-        super(newValue);
+        this.parent = unwindClosed();
+        this.locale = newValue;
+        this.closed = new AtomicBoolean(false);
+        LOCALE.set(this);
     }
 
     @Override
     public Locale getValue() {
-        return value;
+        return locale;
     }
 
-    static Locale currentValue() {
-        LocaleContext current = LOCALE.get();
-        return current != null ? current.value : null;
+    private LocaleContext closeAndUnwind() {
+        closed.set(true);
+        return unwindClosed();
+    }
+
+    public void close() {
+        closeAndUnwind();
+    }
+
+    public String toString() {
+        return closed.get() ? "LocaleContext{closed}" : "LocaleContext{" + locale + "}";
+    }
+
+    /**
+     * Current locale or {@code null} if none was set or its context was already closed.
+     *
+     * @return The current locale or {@code null}
+     * @see #getOrDefault()
+     * @see #set(Locale)
+     */
+    public static Locale get() {
+        final LocaleContext current = unwindClosed();
+        return current != null ? current.locale : null;
+    }
+
+    /**
+     * Current locale or {@linkplain Locale#getDefault()} if none was set or its context was already closed.
+     *
+     * @return The current locale or {@code Locale.getDefault()}.
+     * @see #get()
+     * @see #set(Locale)
+     */
+    public static Locale getOrDefault() {
+        Locale current = get();
+        return current != null ? current : Locale.getDefault();
+    }
+
+    /**
+     * Sets the current locale on the current thread until {@linkplain Context#close()} is called.
+     *
+     * @param locale The locale to become the current locale.
+     * @return The context to restore the previous locale with upon {@code close()}.
+     */
+    public static Context<Locale> set(Locale locale) {
+        return new LocaleContext(locale);
     }
 
     /**
      * Unconditionally clears the entire {@link LocaleContext}.
      * This can be useful when returning threads to a thread pool.
      */
-    static void clearAll() {
-        LOCALE.remove();
+    static void clear() {
+        LocaleContext current = unwindClosed();
+        while (current != null) {
+            current = current.closeAndUnwind();
+        }
+    }
+
+    /**
+     * Unwind closed contexts from the threadlocal until the first unclosed context is found.
+     *
+     * @return The current (unclosed) context or {@code null} if all contexts were closed.
+     */
+    private static LocaleContext unwindClosed() {
+        // Find the first unclosed context.
+        LocaleContext context = LOCALE.get();
+        while (context != null && context.closed.get()) {
+            context = context.parent;
+        }
+
+        // Set the found unclosed context and return it.
+        if (context == null) LOCALE.remove();
+        else LOCALE.set(context);
+        return context;
     }
 }
