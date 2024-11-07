@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * Maintain a current {@linkplain java.util.Locale Locale} context.
  *
  * <p>
- * Setting a current locale can be done using the {@linkplain nl.talsmasoftware.context.locale.LocaleContextManager}:
+ * Setting a current locale can be done using the {@linkplain nl.talsmasoftware.context.managers.locale.LocaleContextManager}:
  * <pre>{@code
  * private static LocaleContextManager localeContextManager = new LocaleContextManager();
  *
@@ -38,4 +37,4 @@
  * }
  * }</pre>
  */
-package nl.talsmasoftware.context.locale;
+package nl.talsmasoftware.context.managers.locale;
