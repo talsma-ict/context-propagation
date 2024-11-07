@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.functions;
+package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextSnapshot;
+import nl.talsmasoftware.context.dummy.DummyContext;
 import nl.talsmasoftware.context.dummy.DummyContextManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +25,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -77,24 +77,24 @@ public class SupplierWithContextTest {
 
     @Test
     public void testGetWithSnapshotConsumer() throws ExecutionException, InterruptedException, IOException {
-        DummyContextManager.setCurrentValue("Old value");
+        DummyContext.setCurrentValue("Old value");
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
 
-        Supplier<Optional<String>> supplier = new SupplierWithContext<>(snapshot, () -> {
+        Supplier<String> supplier = new SupplierWithContext<>(snapshot, () -> {
             try {
-                return DummyContextManager.currentValue();
+                return DummyContext.currentValue();
             } finally {
-                DummyContextManager.setCurrentValue("New value");
+                DummyContext.setCurrentValue("New value");
             }
         }, s -> snapshotHolder[0] = s);
 
-        Future<Optional<String>> future = unawareThreadpool.submit(supplier::get);
-        assertThat(future.get(), is(Optional.empty()));
+        Future<String> future = unawareThreadpool.submit(supplier::get);
+        assertThat(future.get(), is(nullValue()));
 
         verify(snapshot).reactivate();
-        assertThat(DummyContextManager.currentValue(), is(Optional.of("Old value")));
+        assertThat(DummyContext.currentValue(), is("Old value"));
         try (Closeable reactivation = snapshotHolder[0].reactivate()) {
-            assertThat(DummyContextManager.currentValue(), is(Optional.of("New value")));
+            assertThat(DummyContext.currentValue(), is("New value"));
         }
     }
 

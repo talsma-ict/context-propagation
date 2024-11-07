@@ -1,3 +1,0 @@
-nl.talsmasoftware.context.dummy.DummyContextManager
-nl.talsmasoftware.context.dummy.ThrowingContextManager
-nl.talsmasoftware.context.clearable.ClearableDummyContextManager

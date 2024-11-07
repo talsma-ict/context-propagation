@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
- * Main package defining the core {@code context-propagation} concepts in this library
+ * Main API concepts used throughout the {@code context-propagation} library.
  *
  * <h2>{@linkplain nl.talsmasoftware.context.api.Context}</h2>
  * <p>
@@ -24,8 +24,8 @@
  * is activated in that thread.
  *
  * <p>
- * An {@linkplain nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext AbstractThreadLocalContext}
- * base class is provided that supports nested contexts and provides predictable behaviour for out-of-order closing.
+ * An {@code AbstractThreadLocalContext} base class is provided in the core module that supports
+ * nested contexts and provides predictable behaviour for out-of-order closing.
  *
  * <h2>{@linkplain nl.talsmasoftware.context.api.ContextManager}</h2>
  * <p>
@@ -34,6 +34,10 @@
  * and provides access to
  * the {@linkplain nl.talsmasoftware.context.api.ContextManager#getActiveContextValue() active context value}.
  *
+ * <p>
+ * For most application code it should not be necessary to interact with context managers directly.
+ * Instead, using the various context-aware utility classes will automatically propagate context values.
+ *
  * <h2>{@linkplain nl.talsmasoftware.context.api.ContextSnapshot}</h2>
  * <p>
  * A snapshot contains the current value from all known context managers.<br>
@@ -41,12 +45,9 @@
  * Reactivated snapshots must be closed to avoid leaking context.
  *
  * <p>
- * All context aware utility classes in this library are tested to make sure they reactivate and close snapshots in a safe way.
- *
- * <h2>{@linkplain nl.talsmasoftware.context.core.ContextManagers}</h2>
- * <p>
- * Utility class that detects available context managers and lets you take a snapshot of all active contexts at once.
+ * All context aware utility classes in this library are tested
+ * to make sure they reactivate and close snapshots in a safe way.
  *
  * @author Sjoerd Talsma
  */
-package nl.talsmasoftware.context;
+package nl.talsmasoftware.context.api;

@@ -31,8 +31,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 import static java.lang.String.format;
-import static nl.talsmasoftware.context.dummy.DummyContextManager.currentValue;
-import static nl.talsmasoftware.context.dummy.DummyContextManager.setCurrentValue;
+import static nl.talsmasoftware.context.dummy.DummyContext.currentValue;
+import static nl.talsmasoftware.context.dummy.DummyContext.setCurrentValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -100,15 +100,15 @@ public class BiConsumerWithContextTest {
 
         Thread t = new Thread(() -> consumer.accept("New", "value"));
         t.start();
-        assertThat("Setting context in other thread musn't impact caller", currentValue(), is(Optional.of("Old value")));
+        assertThat("Setting context in other thread musn't impact caller", currentValue(), is("Old value"));
         t.join(); // Block and trigger assertions
 
-        assertThat("Setting context in other thread musn't impact caller", currentValue(), is(Optional.of("Old value")));
+        assertThat("Setting context in other thread musn't impact caller", currentValue(), is("Old value"));
         assertThat("Snapshot consumer must be called", snapshotHolder[0], is(notNullValue()));
 
         t = new Thread(() -> {
             try (Reactivation reactivation = snapshotHolder[0].reactivate()) {
-                assertThat("Thread context must propagate", currentValue(), is(Optional.of("New value")));
+                assertThat("Thread context must propagate", currentValue(), is("New value"));
             }
         });
         t.start();
@@ -122,18 +122,18 @@ public class BiConsumerWithContextTest {
         setCurrentValue("Old value");
         BiConsumer<String, String> consumer1 = new BiConsumerWithContext<>(
                 ContextManagers.createContextSnapshot(),
-                (a, b) -> setCurrentValue(a + " " + b + ", " + currentValue().orElse("NO VALUE")),
+                (a, b) -> setCurrentValue(a + " " + b + ", " + Optional.ofNullable(currentValue()).orElse("NO VALUE")),
                 s -> snapshotHolder[0] = s);
         BiConsumer<String, String> consumer2 = consumer1.andThen(
-                (a, b) -> setCurrentValue(a.toUpperCase() + " " + b.toLowerCase() + ", " + currentValue().orElse("NO VALUE")));
+                (a, b) -> setCurrentValue(a.toUpperCase() + " " + b.toLowerCase() + ", " + Optional.ofNullable(currentValue()).orElse("NO VALUE")));
 
         Thread t = new Thread(() -> consumer2.accept("New", "value"));
         t.start();
         t.join();
 
-        assertThat(currentValue(), is(Optional.of("Old value")));
+        assertThat(currentValue(), is("Old value"));
         try (Reactivation reactivated = snapshotHolder[0].reactivate()) {
-            assertThat(currentValue(), is(Optional.of("NEW value, New value, Old value")));
+            assertThat(currentValue(), is("NEW value, New value, Old value"));
         }
     }
 

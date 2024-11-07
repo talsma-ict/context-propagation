@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.functions;
+package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextSnapshot;
+import nl.talsmasoftware.context.dummy.DummyContext;
 import nl.talsmasoftware.context.dummy.DummyContextManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,9 +25,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -42,7 +41,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Sjoerd Talsma
  */
-public class UnaryOperatorWithContextTest {
+public class RunnableWithContextTest {
 
     private ContextSnapshot snapshot;
     private Context<Void> context;
@@ -66,15 +65,17 @@ public class UnaryOperatorWithContextTest {
     }
 
     @Test
-    public void testApply() {
-        new UnaryOperatorWithContext<>(snapshot, input -> input).apply("input");
+    public void testRun() {
+        new RunnableWithContext(snapshot, () -> {
+        }).run();
         verify(snapshot).reactivate();
     }
 
     @Test
-    public void testApplyWithoutSnapshot() {
+    public void testRunWithoutSnapshot() {
         try {
-            new UnaryOperatorWithContext<>(null, input -> input);
+            new RunnableWithContext(null, () -> {
+            });
             fail("Exception expected");
         } catch (RuntimeException expected) {
             assertThat(expected, hasToString(containsString("No context snapshot provided")));
@@ -82,10 +83,10 @@ public class UnaryOperatorWithContextTest {
     }
 
     @Test
-    public void testApplyWithoutSnapshotSupplier() {
+    public void testRunWithoutSnapshotSupplier() {
         try {
-            new UnaryOperatorWithContext<>((Supplier<ContextSnapshot>) null, input -> input, context -> {
-            });
+            new RunnableWithContext((Supplier<ContextSnapshot>) null, () -> {
+            }, null);
             fail("Exception expected");
         } catch (RuntimeException expected) {
             assertThat(expected, hasToString(containsString("No context snapshot supplier provided")));
@@ -93,24 +94,20 @@ public class UnaryOperatorWithContextTest {
     }
 
     @Test
-    public void testApplyWithSnapshotConsumer() throws InterruptedException, IOException {
+    public void testRunWithSnapshotConsumer() throws InterruptedException, IOException {
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
-        DummyContextManager.setCurrentValue("Old value");
+        DummyContext.setCurrentValue("Old value");
 
-        Thread t = new Thread(() -> new UnaryOperatorWithContext<>(snapshot,
-                input -> {
-                    DummyContextManager.setCurrentValue("New value");
-                    return input;
-                },
-                snapshot -> snapshotHolder[0] = snapshot).apply("input"));
+        Thread t = new Thread(new RunnableWithContext(snapshot,
+                () -> DummyContext.setCurrentValue("New value"),
+                snapshot -> snapshotHolder[0] = snapshot));
         t.start();
         t.join();
 
-        assertThat(DummyContextManager.currentValue(), is(Optional.of("Old value")));
+        assertThat(DummyContext.currentValue(), is("Old value"));
         try (Closeable reactivation = snapshotHolder[0].reactivate()) {
-            assertThat(DummyContextManager.currentValue(), is(Optional.of("New value")));
+            assertThat(DummyContext.currentValue(), is("New value"));
         }
-        assertThat(DummyContextManager.currentValue(), is(Optional.of("Old value")));
 
         verify(snapshot).reactivate();
     }
@@ -122,8 +119,7 @@ public class UnaryOperatorWithContextTest {
         final RuntimeException expectedException = new RuntimeException("Whoops!");
 
         try {
-            new UnaryOperatorWithContext<String>(() -> snapshot, throwing(expectedException), null) {
-            }.apply("input");
+            new RunnableWithContext(snapshot, throwing(expectedException)).run();
             fail("Exception expected");
         } catch (RuntimeException rte) {
             assertThat(rte, is(sameInstance(expectedException)));
@@ -133,8 +129,8 @@ public class UnaryOperatorWithContextTest {
         verify(reactivation).close();
     }
 
-    private static <T> UnaryOperator<T> throwing(RuntimeException rte) {
-        return input -> {
+    private static Runnable throwing(RuntimeException rte) {
+        return () -> {
             throw rte;
         };
     }

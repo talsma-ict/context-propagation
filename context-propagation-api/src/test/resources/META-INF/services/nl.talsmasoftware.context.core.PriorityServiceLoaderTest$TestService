@@ -1,3 +1,0 @@
-nl.talsmasoftware.context.core.PriorityServiceLoaderTest$LowestPrioImplementation
-nl.talsmasoftware.context.core.PriorityServiceLoaderTest$HighestPrioImplementation
-nl.talsmasoftware.context.core.PriorityServiceLoaderTest$ImplementationWithoutPriority

@@ -28,7 +28,7 @@
 
     <!-- Artifact identification -->
     <artifactId>context-propagation-api</artifactId>
-    <name>Context propagation (API)</name>
+    <name>Context propagation (api)</name>
     <packaging>jar</packaging>
 
     <properties>

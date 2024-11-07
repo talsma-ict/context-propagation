@@ -23,7 +23,7 @@ import nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext;
  */
 public final class DummyContext extends AbstractThreadLocalContext<String> {
     private static final ThreadLocal<DummyContext> INSTANCE =
-            AbstractThreadLocalContext.threadLocalInstanceOf(DummyContext.class);
+            threadLocalInstanceOf(DummyContext.class);
 
     public DummyContext(String newValue) {
         super(newValue);
@@ -37,6 +37,10 @@ public final class DummyContext extends AbstractThreadLocalContext<String> {
     public static String currentValue() {
         final Context<String> currentContext = INSTANCE.get();
         return currentContext != null ? currentContext.getValue() : null;
+    }
+
+    public static void setCurrentValue(String value) {
+        new DummyContext(value);
     }
 
     public static void reset() {

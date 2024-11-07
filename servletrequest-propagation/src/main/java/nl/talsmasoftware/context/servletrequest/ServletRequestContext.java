@@ -15,26 +15,49 @@
  */
 package nl.talsmasoftware.context.servletrequest;
 
-import nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext;
+import nl.talsmasoftware.context.api.Context;
 
 import javax.servlet.ServletRequest;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Simple (unstacked) context using a ThreadLocal containing the current {@link ServletRequest}.
+ * Simple context using a ThreadLocal containing the current {@link ServletRequest}.
  *
  * @author Sjoerd Talsma
  */
-final class ServletRequestContext extends AbstractThreadLocalContext<ServletRequest> {
-    private static final ThreadLocal<ServletRequestContext> CONTEXT =
-            AbstractThreadLocalContext.threadLocalInstanceOf(ServletRequestContext.class);
+final class ServletRequestContext implements Context<ServletRequest> {
+    private static final ThreadLocal<ServletRequestContext> CONTEXT = new ThreadLocal<>();
+    final ServletRequestContext previous;
+    final ServletRequest value;
+    final AtomicBoolean closed;
 
     ServletRequestContext(ServletRequest servletRequest) {
-        super(servletRequest);
+        previous = CONTEXT.get();
+        value = servletRequest;
+        closed = new AtomicBoolean(false);
+        CONTEXT.set(this);
+    }
+
+    @Override
+    public ServletRequest getValue() {
+        return closed.get() ? null : value;
+    }
+
+    @Override
+    public void close() {
+        if (closed.compareAndSet(false, true)) {
+            CONTEXT.set(previous);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + (closed.get() ? "{closed}" : "{value=" + value + '}');
     }
 
     static ServletRequest currentValue() {
         ServletRequestContext current = CONTEXT.get();
-        return current != null ? current.getValue() : null;
+        return current != null ? current.value : null;
     }
 
     static void clear() {
@@ -46,4 +69,5 @@ final class ServletRequestContext extends AbstractThreadLocalContext<ServletRequ
             CONTEXT.remove();
         }
     }
+
 }

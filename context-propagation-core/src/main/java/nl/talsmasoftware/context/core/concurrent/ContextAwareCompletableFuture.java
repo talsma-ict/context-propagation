@@ -17,12 +17,12 @@ package nl.talsmasoftware.context.core.concurrent;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.core.ContextManagers;
-import nl.talsmasoftware.context.functions.BiConsumerWithContext;
-import nl.talsmasoftware.context.functions.BiFunctionWithContext;
-import nl.talsmasoftware.context.functions.ConsumerWithContext;
-import nl.talsmasoftware.context.functions.FunctionWithContext;
-import nl.talsmasoftware.context.functions.RunnableWithContext;
-import nl.talsmasoftware.context.functions.SupplierWithContext;
+import nl.talsmasoftware.context.core.function.BiConsumerWithContext;
+import nl.talsmasoftware.context.core.function.BiFunctionWithContext;
+import nl.talsmasoftware.context.core.function.ConsumerWithContext;
+import nl.talsmasoftware.context.core.function.FunctionWithContext;
+import nl.talsmasoftware.context.core.function.RunnableWithContext;
+import nl.talsmasoftware.context.core.function.SupplierWithContext;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;

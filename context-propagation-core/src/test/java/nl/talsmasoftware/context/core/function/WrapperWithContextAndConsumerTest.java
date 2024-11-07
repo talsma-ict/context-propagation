@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.functions;
+package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -36,7 +37,6 @@ public class WrapperWithContextAndConsumerTest {
     private ContextSnapshot snapshot;
 
     @BeforeEach
-    @SuppressWarnings("unchecked")
     public void setUp() {
         snapshot = mock(ContextSnapshot.class);
     }
@@ -50,14 +50,14 @@ public class WrapperWithContextAndConsumerTest {
     @Deprecated
     public void testDeprecatedConsumerMethod() {
         assertThat(new WrapperWithContextAndConsumer<String>(snapshot, "string", null) {
-        }.consumer(), is(Optional.empty()));
+        }.contextSnapshotConsumer, is(nullValue()));
 
         final Consumer<ContextSnapshot> contextSnapshotConsumer = snapshot -> {
         };
 
         assertThat(new WrapperWithContextAndConsumer<String>(snapshot, "string", contextSnapshotConsumer) {
-                }.consumer(),
-                is(Optional.of(contextSnapshotConsumer)));
+                }.contextSnapshotConsumer,
+                is(sameInstance(contextSnapshotConsumer)));
     }
 
 }

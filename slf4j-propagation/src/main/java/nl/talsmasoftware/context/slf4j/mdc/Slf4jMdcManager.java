@@ -17,7 +17,6 @@ package nl.talsmasoftware.context.slf4j.mdc;
 
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextManager;
-import nl.talsmasoftware.context.core.ContextManagers;
 import org.slf4j.MDC;
 
 import java.util.Map;
@@ -39,7 +38,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * <p>
  * This manager does not implement the optional {@link #clear()} method.
- * {@link ContextManagers#clearActiveContexts()} will therefore <strong>not</strong> clear the {@linkplain MDC}.
+ * {@code ContextManagers.clearActiveContexts()} will therefore <strong>not</strong> clear the {@linkplain MDC}.
  * Please use {@linkplain MDC#clear()} explicitly to do that.
  *
  * @author Sjoerd Talsma
