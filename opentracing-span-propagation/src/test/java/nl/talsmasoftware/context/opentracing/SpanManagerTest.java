@@ -23,8 +23,6 @@ import io.opentracing.mock.MockTracer;
 import io.opentracing.util.GlobalTracer;
 import io.opentracing.util.GlobalTracerTestUtil;
 import io.opentracing.util.ThreadLocalScopeManager;
-import nl.talsmasoftware.context.api.Context;
-import nl.talsmasoftware.context.api.ContextManager;
 import nl.talsmasoftware.context.core.ContextManagers;
 import nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService;
 import org.junit.jupiter.api.AfterEach;
@@ -206,25 +204,6 @@ public class SpanManagerTest {
         assertThat("unblocked baggage", blockingBackgroundBaggage.get(), equalTo("in-child-span"));
         assertThat("active-span", GlobalTracer.get().scopeManager().activeSpan(), is(nullValue()));
         assertThat("child span finished?", mockTracer.finishedSpans(), hasItem((MockSpan) childSpanRef.get()));
-    }
-
-    @Test
-    @Deprecated
-    public void testDeprecatedClassStillWorks() {
-        ContextManager<Span> deprecatedManager = new OpentracingSpanManager();
-
-        Span parentSpan = mockTracer.buildSpan("first-op").start();
-        Scope parent = mockTracer.activateSpan(parentSpan);
-        Span newSpan = mockTracer.buildSpan("second-span").start();
-        assertThat(deprecatedManager.getActiveContextValue(), is(equalTo(parentSpan)));
-
-        Context<Span> newContext = deprecatedManager.initializeNewContext(newSpan);
-        assertThat(SCOPE_MANAGER.activeSpan(), is(equalTo(newSpan)));
-        newContext.close();
-        assertThat(SCOPE_MANAGER.activeSpan(), not(equalTo(newSpan)));
-
-        newContext.close();
-        newContext.close();
     }
 
     @Test

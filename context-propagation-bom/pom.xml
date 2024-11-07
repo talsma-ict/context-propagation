@@ -42,6 +42,9 @@
 
     <dependencyManagement>
         <dependencies>
+
+            <!-- API and core library versions -->
+
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>context-propagation-api</artifactId>
@@ -78,41 +81,63 @@
                 <classifier>sources</classifier>
             </dependency>
 
+            <!-- Context timer versions -->
+
             <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>context-propagation-metrics</artifactId>
+                <groupId>${project.groupId}.timers</groupId>
+                <artifactId>context-timer-metrics</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>context-propagation-metrics</artifactId>
+                <groupId>${project.groupId}.timers</groupId>
+                <artifactId>context-timer-metrics</artifactId>
                 <version>${project.version}</version>
                 <classifier>javadoc</classifier>
             </dependency>
             <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>context-propagation-metrics</artifactId>
+                <groupId>${project.groupId}.timers</groupId>
+                <artifactId>context-timer-metrics</artifactId>
                 <version>${project.version}</version>
                 <classifier>sources</classifier>
             </dependency>
 
             <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>context-propagation-micrometer</artifactId>
+                <groupId>${project.groupId}.timers</groupId>
+                <artifactId>context-timer-micrometer</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>context-propagation-micrometer</artifactId>
+                <groupId>${project.groupId}.timers</groupId>
+                <artifactId>context-timer-micrometer</artifactId>
                 <version>${project.version}</version>
                 <classifier>javadoc</classifier>
             </dependency>
             <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>context-propagation-micrometer</artifactId>
+                <groupId>${project.groupId}.timers</groupId>
+                <artifactId>context-timer-micrometer</artifactId>
                 <version>${project.version}</version>
                 <classifier>sources</classifier>
             </dependency>
+
+            <dependency>
+                <groupId>${project.groupId}.timers</groupId>
+                <artifactId>context-timer-opentracing</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}.timers</groupId>
+                <artifactId>context-timer-opentracing</artifactId>
+                <version>${project.version}</version>
+                <classifier>javadoc</classifier>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}.timers</groupId>
+                <artifactId>context-timer-opentracing</artifactId>
+                <version>${project.version}</version>
+                <classifier>sources</classifier>
+            </dependency>
+
+            <!-- To be reorganized: manager implementations -->
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
