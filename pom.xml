@@ -44,9 +44,9 @@
         <module>timers/context-timer-opentracing</module>
 
         <module>managers/context-manager-locale</module>
+        <module>managers/context-manager-slf4j</module>
         <module>log4j2-propagation</module>
         <module>servletrequest-propagation</module>
-        <module>slf4j-propagation</module>
         <module>spring-security-context</module>
         <module>opentracing-span-propagation</module>
     </modules>
