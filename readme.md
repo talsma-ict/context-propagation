@@ -15,6 +15,7 @@
 > - `ContextManager.getActiveContext()` replaced by `getActiveContextValue()`.
 > - `ContextManager.clear()` will require an implementation.
 > - All `@Deprecated(forRemoval=true)` is to be removed.
+> - Add caveat about use vs. Scoped values and Structured Concurrency.
 
 # Context propagation library
 

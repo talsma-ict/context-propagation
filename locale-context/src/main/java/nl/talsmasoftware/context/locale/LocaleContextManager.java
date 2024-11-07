@@ -26,18 +26,6 @@ import java.util.Locale;
  * @author Sjoerd Talsma
  */
 public final class LocaleContextManager implements ContextManager<Locale> {
-    /**
-     * @return The {@code Locale} for the current thread, or {@code Locale.getDefault()} if no context was initialized.
-     * @see Locale#getDefault()
-     */
-    public static Locale getCurrentLocaleOrDefault() {
-        final Locale current = LocaleContext.currentValue();
-        return current != null ? current : Locale.getDefault();
-    }
-
-    public static Context<Locale> setCurrentLocale(Locale locale) {
-        return new LocaleContext(locale);
-    }
 
     /**
      * Registers the given {@linkplain Locale} value as the current Locale for the active thread
@@ -47,14 +35,14 @@ public final class LocaleContextManager implements ContextManager<Locale> {
      * @return The context to be closed again by the caller to remove this locale as current locale.
      */
     public Context<Locale> initializeNewContext(Locale value) {
-        return setCurrentLocale(value);
+        return new LocaleContext(value);
     }
 
     /**
      * @return The active {@code Locale} context or {@code null} if no such context is active in the current thread.
      */
     public Locale getActiveContextValue() {
-        return LocaleContext.currentValue();
+        return LocaleContext.get();
     }
 
     /**
@@ -63,7 +51,7 @@ public final class LocaleContextManager implements ContextManager<Locale> {
      * This is useful for boundary filters, whose Threads may be returned to some thread pool.
      */
     public void clear() {
-        LocaleContext.clearAll();
+        LocaleContext.clear();
     }
 
     /**
