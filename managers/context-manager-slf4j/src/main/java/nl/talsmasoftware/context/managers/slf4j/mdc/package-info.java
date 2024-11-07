@@ -25,4 +25,4 @@
  * is {@linkplain nl.talsmasoftware.context.api.ContextSnapshot#reactivate() reactivated}
  * in another thread.
  */
-package nl.talsmasoftware.context.slf4j.mdc;
+package nl.talsmasoftware.context.managers.slf4j.mdc;
