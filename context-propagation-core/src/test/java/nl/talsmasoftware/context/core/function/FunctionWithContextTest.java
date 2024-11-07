@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.functions;
+package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextSnapshot;
+import nl.talsmasoftware.context.dummy.DummyContext;
 import nl.talsmasoftware.context.dummy.DummyContextManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,13 +25,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -47,7 +44,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Sjoerd Talsma
  */
-public class BinaryOperatorWithContextTest {
+public class FunctionWithContextTest {
 
     private ContextSnapshot snapshot;
     private Context<Void> context;
@@ -72,14 +69,14 @@ public class BinaryOperatorWithContextTest {
 
     @Test
     public void testApply() {
-        new BinaryOperatorWithContext<>(snapshot, (a, b) -> b).apply("input1", "input2");
+        new FunctionWithContext<>(snapshot, Function.identity()).apply("input");
         verify(snapshot).reactivate();
     }
 
     @Test
     public void testApplyWithoutSnapshot() {
         try {
-            new BinaryOperatorWithContext<>(null, (a, b) -> b);
+            new FunctionWithContext<>(null, Function.identity());
             fail("Exception expected");
         } catch (RuntimeException expected) {
             assertThat(expected, hasToString(containsString("No context snapshot provided")));
@@ -89,7 +86,7 @@ public class BinaryOperatorWithContextTest {
     @Test
     public void testApplyWithoutSnapshotSupplier() {
         try {
-            new BinaryOperatorWithContext<>((Supplier<ContextSnapshot>) null, (a, b) -> b, context -> {
+            new FunctionWithContext<>((Supplier<ContextSnapshot>) null, Function.identity(), context -> {
             });
             fail("Exception expected");
         } catch (RuntimeException expected) {
@@ -100,22 +97,22 @@ public class BinaryOperatorWithContextTest {
     @Test
     public void testApplyWithSnapshotConsumer() throws InterruptedException, IOException {
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
-        DummyContextManager.setCurrentValue("Old value");
+        DummyContext.setCurrentValue("Old value");
 
-        Thread t = new Thread(() -> new BinaryOperatorWithContext<>(snapshot,
-                (input1, input2) -> {
-                    DummyContextManager.setCurrentValue("New value");
-                    return input2;
+        Thread t = new Thread(() -> new FunctionWithContext<>(snapshot,
+                input -> {
+                    DummyContext.setCurrentValue("New value");
+                    return input;
                 },
-                snapshot -> snapshotHolder[0] = snapshot).apply("input1", "input2"));
+                snapshot -> snapshotHolder[0] = snapshot).apply("input"));
         t.start();
         t.join();
 
-        assertThat(DummyContextManager.currentValue(), is(Optional.of("Old value")));
+        assertThat(DummyContext.currentValue(), is("Old value"));
         try (Closeable reactivation = snapshotHolder[0].reactivate()) {
-            assertThat(DummyContextManager.currentValue(), is(Optional.of("New value")));
+            assertThat(DummyContext.currentValue(), is("New value"));
         }
-        assertThat(DummyContextManager.currentValue(), is(Optional.of("Old value")));
+        assertThat(DummyContext.currentValue(), is("Old value"));
 
         verify(snapshot).reactivate();
     }
@@ -127,8 +124,7 @@ public class BinaryOperatorWithContextTest {
         final RuntimeException expectedException = new RuntimeException("Whoops!");
 
         try {
-            new BinaryOperatorWithContext<String>(() -> snapshot, throwing(expectedException), null) {
-            }.apply("input1", "input2");
+            new FunctionWithContext<>(snapshot, throwing(expectedException)).apply("input");
             fail("Exception expected");
         } catch (RuntimeException rte) {
             assertThat(rte, is(sameInstance(expectedException)));
@@ -139,28 +135,42 @@ public class BinaryOperatorWithContextTest {
     }
 
     @Test
-    public void testAndThenNull() {
+    public void testComposeWithNull() {
         try {
-            new BinaryOperatorWithContext<>(snapshot, (a, b) -> b).andThen(null);
+            new FunctionWithContext<>(snapshot, Function.identity()).compose(null);
             fail("Exception expected");
         } catch (NullPointerException expected) {
-            assertThat(expected, hasToString(containsString("after function <null>")));
+            assertThat(expected, hasToString(containsString("before function <null>")));
         }
+    }
+
+    @Test
+    public void testComposeWith_singleContextSwitch() {
+        ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
+        when(snapshot.reactivate()).thenReturn(reactivation);
+        Function<Integer, Integer> before = i -> i * 10;
+        Function<Integer, Integer> function = i -> i + 3;
+        AtomicInteger consumed = new AtomicInteger(0);
+
+        Function<Integer, Integer> composed = new FunctionWithContext<>(snapshot, function, snapshot -> consumed.incrementAndGet()).compose(before);
+
+        assertThat(composed.apply(2), is((2 * 10) + 3));
+        verify(snapshot, times(1)).reactivate();
+        verify(reactivation, times(1)).close();
+        assertThat(consumed.get(), is(1));
     }
 
     @Test
     public void testAndThen_singleContextSwitch() {
         ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
         when(snapshot.reactivate()).thenReturn(reactivation);
-        UnaryOperator<Integer> after = i -> i + 100;
-        BinaryOperator<Integer> function = (a, b) -> a * 10 + b * 5;
+        Function<Integer, Integer> after = i -> i * 10;
+        Function<Integer, Integer> function = i -> i + 3;
         AtomicInteger consumed = new AtomicInteger(0);
 
-        BiFunction<Integer, Integer, Integer> composed =
-                new BinaryOperatorWithContext<>(snapshot, function, snapshot -> consumed.incrementAndGet())
-                        .andThen(after);
+        Function<Integer, Integer> composed = new FunctionWithContext<>(snapshot, function, snapshot -> consumed.incrementAndGet()).andThen(after);
 
-        assertThat(composed.apply(2, 3), is(20 + 15 + 100));
+        assertThat(composed.apply(2), is((2 + 3) * 10));
         verify(snapshot, times(1)).reactivate();
         verify(reactivation, times(1)).close();
         assertThat(consumed.get(), is(1));
@@ -176,8 +186,8 @@ public class BinaryOperatorWithContextTest {
         }
     }
 
-    private static <T> BinaryOperator<T> throwing(RuntimeException rte) {
-        return (input1, input2) -> {
+    private static <IN, OUT> Function<IN, OUT> throwing(RuntimeException rte) {
+        return input -> {
             throw rte;
         };
     }

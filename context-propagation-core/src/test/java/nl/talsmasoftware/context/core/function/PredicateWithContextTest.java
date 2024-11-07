@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.functions;
+package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextSnapshot;
+import nl.talsmasoftware.context.dummy.DummyContext;
 import nl.talsmasoftware.context.dummy.DummyContextManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,9 +25,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -44,7 +45,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Sjoerd Talsma
  */
-public class BiPredicateWithContextTest {
+public class PredicateWithContextTest {
 
     private ContextSnapshot snapshot;
     private Context<Void> context;
@@ -69,14 +70,14 @@ public class BiPredicateWithContextTest {
 
     @Test
     public void testTest() {
-        new BiPredicateWithContext<>(snapshot, (a, b) -> true).test("input1", "input2");
+        new PredicateWithContext<>(snapshot, input -> true).test("input");
         verify(snapshot).reactivate();
     }
 
     @Test
     public void testTestWithoutSnapshot() {
         try {
-            new BiPredicateWithContext<>(null, (a, b) -> true);
+            new PredicateWithContext<>(null, input -> true);
             fail("Exception expected");
         } catch (RuntimeException expected) {
             assertThat(expected, hasToString(containsString("No context snapshot provided")));
@@ -86,7 +87,7 @@ public class BiPredicateWithContextTest {
     @Test
     public void testTestWithoutSnapshotSupplier() {
         try {
-            new BiPredicateWithContext<>((Supplier<ContextSnapshot>) null, (a, b) -> true, context -> {
+            new PredicateWithContext<>((Supplier<ContextSnapshot>) null, input -> true, context -> {
             });
             fail("Exception expected");
         } catch (RuntimeException expected) {
@@ -97,22 +98,22 @@ public class BiPredicateWithContextTest {
     @Test
     public void testTestWithSnapshotConsumer() throws InterruptedException, IOException {
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
-        DummyContextManager.setCurrentValue("Old value");
+        DummyContext.setCurrentValue("Old value");
 
-        Thread t = new Thread(() -> new BiPredicateWithContext<>(snapshot,
-                (a, b) -> {
-                    DummyContextManager.setCurrentValue("New value");
+        Thread t = new Thread(() -> new PredicateWithContext<>(snapshot,
+                input -> {
+                    DummyContext.setCurrentValue("New value");
                     return true;
                 },
-                snapshot -> snapshotHolder[0] = snapshot).test("input1", "input2"));
+                snapshot -> snapshotHolder[0] = snapshot).test("input"));
         t.start();
         t.join();
 
-        assertThat(DummyContextManager.currentValue(), is(Optional.of("Old value")));
+        assertThat(DummyContext.currentValue(), is("Old value"));
         try (Closeable reactivation = snapshotHolder[0].reactivate()) {
-            assertThat(DummyContextManager.currentValue(), is(Optional.of("New value")));
+            assertThat(DummyContext.currentValue(), is("New value"));
         }
-        assertThat(DummyContextManager.currentValue(), is(Optional.of("Old value")));
+        assertThat(DummyContext.currentValue(), is("Old value"));
 
         verify(snapshot).reactivate();
     }
@@ -124,7 +125,7 @@ public class BiPredicateWithContextTest {
         final RuntimeException expectedException = new RuntimeException("Whoops!");
 
         try {
-            new BiPredicateWithContext<>(snapshot, throwing(expectedException)).test("input1", "input2");
+            new PredicateWithContext<>(snapshot, throwing(expectedException)).test("input");
             fail("Exception expected");
         } catch (RuntimeException rte) {
             assertThat(rte, is(sameInstance(expectedException)));
@@ -137,7 +138,7 @@ public class BiPredicateWithContextTest {
     @Test
     public void testAndOtherNull() {
         try {
-            new BiPredicateWithContext<>(snapshot, (a, b) -> true).and(null);
+            new PredicateWithContext<>(snapshot, input -> true).and(null);
             fail("Exception expected");
         } catch (NullPointerException expected) {
             assertThat(expected, hasToString(containsString("'and' <null>")));
@@ -148,14 +149,13 @@ public class BiPredicateWithContextTest {
     public void testAnd_singleContextSwitch() {
         ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
         when(snapshot.reactivate()).thenReturn(reactivation);
-        BiPredicate<String, String> predicate = (a, b) -> a != null && b != null;
-        BiPredicate<String, String> and = (a, b) -> a.isEmpty() || b.isEmpty();
+        Predicate<String> predicate = Objects::nonNull;
+        Predicate<String> and = String::isEmpty;
 
         AtomicInteger consumed = new AtomicInteger(0);
-        BiPredicate<String, String> combined =
-                new BiPredicateWithContext<>(snapshot, predicate, snapshot -> consumed.incrementAndGet()).and(and);
+        Predicate<String> combined = new PredicateWithContext<>(snapshot, predicate, snapshot -> consumed.incrementAndGet()).and(and);
 
-        assertThat(combined.test("", ""), is(true));
+        assertThat(combined.test(""), is(true));
         verify(snapshot, times(1)).reactivate();
         verify(reactivation, times(1)).close();
         assertThat(consumed.get(), is(1));
@@ -165,15 +165,14 @@ public class BiPredicateWithContextTest {
     public void testAnd_shortCircuit() {
         ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
         when(snapshot.reactivate()).thenReturn(reactivation);
-        BiPredicate<String, String> predicate = (a, b) -> a != null && b != null;
+        Predicate<String> predicate = Objects::nonNull;
         @SuppressWarnings("unchecked")
-        BiPredicate<String, String> and = mock(BiPredicate.class);
+        Predicate<String> and = mock(Predicate.class);
 
         AtomicInteger consumed = new AtomicInteger(0);
-        BiPredicate<String, String> combined =
-                new BiPredicateWithContext<>(snapshot, predicate, snapshot -> consumed.incrementAndGet()).and(and);
+        Predicate<String> combined = new PredicateWithContext<>(snapshot, predicate, snapshot -> consumed.incrementAndGet()).and(and);
 
-        assertThat(combined.test(null, null), is(false));
+        assertThat(combined.test(null), is(false));
         verifyNoMoreInteractions(and);
 
         verify(snapshot, times(1)).reactivate();
@@ -184,7 +183,7 @@ public class BiPredicateWithContextTest {
     @Test
     public void testOrOtherNull() {
         try {
-            new BiPredicateWithContext<>(snapshot, (a, b) -> true).or(null);
+            new PredicateWithContext<>(snapshot, input -> true).or(null);
             fail("Exception expected");
         } catch (NullPointerException expected) {
             assertThat(expected, hasToString(containsString("'or' <null>")));
@@ -195,14 +194,13 @@ public class BiPredicateWithContextTest {
     public void tesOr_singleContextSwitch() {
         ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
         when(snapshot.reactivate()).thenReturn(reactivation);
-        BiPredicate<String, String> predicate = (a, b) -> a == null || b == null;
-        BiPredicate<String, String> or = (a, b) -> a.isEmpty() || b.isEmpty();
+        Predicate<String> predicate = Objects::isNull;
+        Predicate<String> or = String::isEmpty;
 
         AtomicInteger consumed = new AtomicInteger(0);
-        BiPredicate<String, String> combined =
-                new BiPredicateWithContext<>(snapshot, predicate, snapshot -> consumed.incrementAndGet()).or(or);
+        Predicate<String> combined = new PredicateWithContext<>(snapshot, predicate, snapshot -> consumed.incrementAndGet()).or(or);
 
-        assertThat(combined.test("", ""), is(true));
+        assertThat(combined.test(""), is(true));
         verify(snapshot, times(1)).reactivate();
         verify(reactivation, times(1)).close();
         assertThat(consumed.get(), is(1));
@@ -212,15 +210,14 @@ public class BiPredicateWithContextTest {
     public void testOr_shortCircuit() {
         ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
         when(snapshot.reactivate()).thenReturn(reactivation);
-        BiPredicate<String, String> predicate = (a, b) -> a == null || b == null;
+        Predicate<String> predicate = Objects::isNull;
         @SuppressWarnings("unchecked")
-        BiPredicate<String, String> or = mock(BiPredicate.class);
+        Predicate<String> or = mock(Predicate.class);
 
         AtomicInteger consumed = new AtomicInteger(0);
-        BiPredicate<String, String> combined =
-                new BiPredicateWithContext<>(snapshot, predicate, snapshot -> consumed.incrementAndGet()).or(or);
+        Predicate<String> combined = new PredicateWithContext<>(snapshot, predicate, snapshot -> consumed.incrementAndGet()).or(or);
 
-        assertThat(combined.test(null, null), is(true));
+        assertThat(combined.test(null), is(true));
         verifyNoMoreInteractions(or);
 
         verify(snapshot, times(1)).reactivate();
@@ -228,8 +225,8 @@ public class BiPredicateWithContextTest {
         assertThat(consumed.get(), is(1));
     }
 
-    private static <T, U> BiPredicate<T, U> throwing(RuntimeException rte) {
-        return (t, u) -> {
+    private static <T> Predicate<T> throwing(RuntimeException rte) {
+        return input -> {
             throw rte;
         };
     }

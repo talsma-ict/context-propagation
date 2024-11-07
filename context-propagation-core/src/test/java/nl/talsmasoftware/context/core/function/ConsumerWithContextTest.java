@@ -32,8 +32,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import static nl.talsmasoftware.context.dummy.DummyContextManager.currentValue;
-import static nl.talsmasoftware.context.dummy.DummyContextManager.setCurrentValue;
+import static nl.talsmasoftware.context.dummy.DummyContext.currentValue;
+import static nl.talsmasoftware.context.dummy.DummyContext.setCurrentValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -96,15 +96,15 @@ public class ConsumerWithContextTest {
 
         Thread t = new Thread(() -> consumer.accept("New value"));
         t.start();
-        assertThat("Setting context in other thread musn't impact caller", currentValue(), is(Optional.of("Old value")));
+        assertThat("Setting context in other thread musn't impact caller", currentValue(), is("Old value"));
         t.join(); // Block and trigger assertions
 
-        assertThat("Setting context in other thread musn't impact caller", currentValue(), is(Optional.of("Old value")));
+        assertThat("Setting context in other thread musn't impact caller", currentValue(), is("Old value"));
         assertThat("Snapshot consumer must be called", snapshotHolder[0], is(notNullValue()));
 
         t = new Thread(() -> {
             try (Closeable reactivation = snapshotHolder[0].reactivate()) {
-                assertThat("Thread context must propagate", currentValue(), is(Optional.of("New value")));
+                assertThat("Thread context must propagate", currentValue(), is("New value"));
             } catch (IOException e) {
                 throw new RuntimeException(e.getMessage(), e);
             }
@@ -120,17 +120,17 @@ public class ConsumerWithContextTest {
 
         Consumer<String> consumer = new ConsumerWithContext<String>(
                 ContextManagers.createContextSnapshot(),
-                val -> setCurrentValue(val + ", " + currentValue().orElse("NO VALUE")),
+                val -> setCurrentValue(val + ", " + Optional.ofNullable(currentValue()).orElse("NO VALUE")),
                 s -> snapshotHolder[0] = s)
-                .andThen(val -> setCurrentValue(val.toUpperCase() + ", " + currentValue().orElse("NO VALUE")));
+                .andThen(val -> setCurrentValue(val.toUpperCase() + ", " + Optional.ofNullable(currentValue()).orElse("NO VALUE")));
 
         Thread t = new Thread(() -> consumer.accept("New value"));
         t.start();
         t.join();
 
-        assertThat(currentValue(), is(Optional.of("Old value")));
+        assertThat(currentValue(), is("Old value"));
         try (Closeable reactivated = snapshotHolder[0].reactivate()) {
-            assertThat(currentValue(), is(Optional.of("NEW VALUE, New value, Old value")));
+            assertThat(currentValue(), is("NEW VALUE, New value, Old value"));
         }
     }
 

@@ -41,7 +41,7 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>context-propagation-api</artifactId>
+            <artifactId>context-propagation-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -49,6 +49,7 @@
             <artifactId>opentracing-util</artifactId>
             <version>${opentracing-api.version}</version>
         </dependency>
+
         <dependency>
             <groupId>io.opentracing</groupId>
             <artifactId>opentracing-mock</artifactId>

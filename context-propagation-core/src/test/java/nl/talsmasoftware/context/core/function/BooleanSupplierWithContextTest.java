@@ -17,6 +17,7 @@ package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.core.ContextManagers;
+import nl.talsmasoftware.context.dummy.DummyContext;
 import nl.talsmasoftware.context.dummy.DummyContextManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,7 +25,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -86,25 +86,25 @@ public class BooleanSupplierWithContextTest {
 
     @Test
     public void testGetAsBooleanWithSnapshotConsumer() throws ExecutionException, InterruptedException, IOException {
-        DummyContextManager.setCurrentValue("true");
+        DummyContext.setCurrentValue("true");
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
 
         BooleanSupplier supplier = new BooleanSupplierWithContext(ContextManagers.createContextSnapshot(), () -> {
             try {
-                return Boolean.parseBoolean(DummyContextManager.currentValue().get());
+                return Boolean.parseBoolean(DummyContext.currentValue());
             } finally {
-                DummyContextManager.setCurrentValue("false");
+                DummyContext.setCurrentValue("false");
             }
         }, s -> snapshotHolder[0] = s);
 
         Future<Boolean> future = unawareThreadpool.submit(supplier::getAsBoolean);
         assertThat(future.get(), is(true));
 
-        assertThat(DummyContextManager.currentValue(), is(Optional.of("true")));
+        assertThat(DummyContext.currentValue(), is("true"));
         try (Closeable reactivation = snapshotHolder[0].reactivate()) {
-            assertThat(DummyContextManager.currentValue(), is(Optional.of("false")));
+            assertThat(DummyContext.currentValue(), is("false"));
         }
-        assertThat(DummyContextManager.currentValue(), is(Optional.of("true")));
+        assertThat(DummyContext.currentValue(), is("true"));
     }
 
 }

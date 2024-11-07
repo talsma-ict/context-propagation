@@ -17,62 +17,42 @@ package nl.talsmasoftware.context.dummy;
 
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextManager;
-import nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext;
 
-import java.util.Optional;
-import java.util.logging.Logger;
-
+/**
+ * Trivial manager around the {@link DummyContext} implementation to be registered as service provider.
+ *
+ * @author Sjoerd Talsma
+ */
 public class DummyContextManager implements ContextManager<String> {
-    private static final Logger LOGGER = Logger.getLogger(DummyContextManager.class.getName());
 
     public Context<String> initializeNewContext(String value) {
-        return setCurrentValue(value);
-    }
-
-    public String getActiveContextValue() {
-        return currentValue().orElse(null);
-    }
-
-    public void clear() {
-        clearAllContexts();
-    }
-
-    public static Optional<String> currentValue() {
-        Optional<String> currentValue = Optional.ofNullable(DummyContext.current()).map(Context::getValue);
-        LOGGER.fine(() -> "Current value in " + Thread.currentThread() + ": " + currentValue);
-        return currentValue;
-    }
-
-    /**
-     * For easier testing
-     *
-     * @param value The new value to be set (can be null)
-     * @return A context to optionally be closed
-     */
-    public static Context<String> setCurrentValue(String value) {
-        LOGGER.fine(() -> "Setting current value in " + Thread.currentThread() + ": " + value);
         return new DummyContext(value);
     }
 
-    /**
-     * For easier testing
-     */
-    public static void clearAllContexts() {
-        LOGGER.fine(() -> "Clearing values in " + Thread.currentThread() + ", currently: " + DummyContext.current());
-        DummyContext.clear();
+    public String getActiveContextValue() {
+        return DummyContext.currentValue();
     }
 
-    private static final class DummyContext extends AbstractThreadLocalContext<String> {
-        private DummyContext(String newValue) {
-            super(newValue);
-        }
+    public void clear() {
+        DummyContext.reset();
+    }
 
-        private static void clear() {
-            AbstractThreadLocalContext.threadLocalInstanceOf(DummyContext.class).remove();
-        }
+    public static void clearAllContexts() {
+        DummyContext.reset();
+    }
 
-        private static Context<String> current() {
-            return AbstractThreadLocalContext.current(DummyContext.class);
-        }
+    @Override
+    public int hashCode() {
+        return DummyContextManager.class.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return this == other || other instanceof DummyContextManager;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
     }
 }
