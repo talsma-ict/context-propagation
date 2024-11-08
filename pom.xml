@@ -48,8 +48,7 @@
         <module>managers/context-manager-opentracing</module>
         <module>managers/context-manager-servletrequest</module>
         <module>managers/context-manager-slf4j</module>
-
-        <module>spring-security-context</module>
+        <module>managers/context-manager-spring-security</module>
     </modules>
 
     <licenses>
