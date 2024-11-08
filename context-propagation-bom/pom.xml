@@ -88,6 +88,11 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}.managers</groupId>
+                <artifactId>context-manager-opentelemetry</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}.managers</groupId>
                 <artifactId>context-manager-opentracing</artifactId>
                 <version>${project.version}</version>
             </dependency>
