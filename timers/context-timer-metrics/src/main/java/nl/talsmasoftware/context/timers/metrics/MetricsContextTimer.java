@@ -15,6 +15,7 @@
  */
 package nl.talsmasoftware.context.timers.metrics;
 
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
 import com.codahale.metrics.Timer;
@@ -68,30 +69,43 @@ public class MetricsContextTimer implements ContextTimer {
     private static final String SYS_REGISTRY_NAME = "contextpropagation.metrics.registry";
     private static final String ENV_REGISTRY_NAME = SYS_REGISTRY_NAME.toUpperCase().replace('.', '_');
 
-    private static final ConcurrentMap<String, Timer> TIMERS = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Timer> CACHED_TIMERS = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Meter> CACHED_ERRORS = new ConcurrentHashMap<>();
 
     @Override
-    public void update(Class<?> type, String method, long duration, TimeUnit unit) {
-        locateTimer(type, method).update(duration, unit);
+    public void update(Class<?> type, String method, long duration, TimeUnit unit, Throwable error) {
+        final String name = MetricRegistry.name(type, method);
+        final String errorsName = MetricRegistry.name(name, "errors");
+        CACHED_TIMERS.computeIfAbsent(name, this::registerTimer).update(duration, unit);
+        CACHED_ERRORS.computeIfAbsent(errorsName, this::registerMeter).mark(error == null ? 0L : 1L);
     }
 
-    private static Timer locateTimer(Class<?> type, String method) {
-        final String name = MetricRegistry.name(type, method);
-        Timer timer = TIMERS.get(name);
-        if (timer == null) {
-            final Collection<MetricRegistry> sharedRegistries = locateSharedRegistries();
-            for (MetricRegistry registry : sharedRegistries) {
-                timer = registry.getTimers().get(name);
-                if (timer != null) break;
-            }
-            if (timer == null) timer = new Timer();
-            TIMERS.putIfAbsent(name, timer);
-            timer = TIMERS.get(name); // In case of race conditions
-            for (MetricRegistry registry : sharedRegistries) {
-                if (!registry.getTimers().containsKey(name)) registry.register(name, timer);
+    private Timer registerTimer(String name) {
+        final Collection<MetricRegistry> sharedRegistries = locateSharedRegistries();
+        for (MetricRegistry registry : sharedRegistries) {
+            Timer timer = registry.getTimers().get(name);
+            if (timer != null) {
+                return timer;
             }
         }
+
+        final Timer timer = new Timer();
+        sharedRegistries.forEach(registry -> registry.register(name, timer));
         return timer;
+    }
+
+    private Meter registerMeter(String name) {
+        final Collection<MetricRegistry> sharedRegistries = locateSharedRegistries();
+        for (MetricRegistry registry : sharedRegistries) {
+            Meter meter = registry.getMeters().get(name);
+            if (meter != null) {
+                return meter;
+            }
+        }
+
+        final Meter meter = new Meter();
+        sharedRegistries.forEach(registry -> registry.register(name, meter));
+        return meter;
     }
 
     private static Collection<MetricRegistry> locateSharedRegistries() {
@@ -123,6 +137,6 @@ public class MetricsContextTimer implements ContextTimer {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{timers=" + TIMERS.keySet() + "}";
+        return getClass().getSimpleName() + "{timers=" + CACHED_TIMERS.keySet() + "}";
     }
 }

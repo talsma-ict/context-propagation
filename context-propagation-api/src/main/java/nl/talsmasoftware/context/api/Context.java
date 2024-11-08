@@ -42,7 +42,7 @@ import java.io.Closeable;
  *
  * @param <T> Type of the context value.
  * @author Sjoerd Talsma
- * @since 1.1.0
+ * @since 2.0.0
  */
 public interface Context<T> extends Closeable {
 

@@ -34,7 +34,7 @@ public class TimersTest {
 
     @Test
     public void testTimingDelegation() {
-        Timers.timed(TimeUnit.MILLISECONDS.toNanos(150), getClass(), "testTimingDelegation");
+        Timers.timed(TimeUnit.MILLISECONDS.toNanos(150), getClass(), "testTimingDelegation", null);
         assertThat(TestContextTimer.getLastTimedMillis(getClass(), "testTimingDelegation"), is(150L));
     }
 
@@ -45,7 +45,7 @@ public class TimersTest {
             return LAST_TIMED.get(type.getName() + "." + method);
         }
 
-        public void update(Class<?> type, String method, long duration, TimeUnit unit) {
+        public void update(Class<?> type, String method, long duration, TimeUnit unit, Throwable error) {
             LAST_TIMED.put(type.getName() + "." + method, unit.toMillis(duration));
         }
 

@@ -20,29 +20,30 @@ import java.util.concurrent.TimeUnit;
 /**
  * Minimal Service Provider Interface for services that wish to get informed of context switching metrics.
  * <p>
- * Currently the following timed operations are updated:
+ * Currently, the following timed operations are updated:
  * <ul>
  * <li>{@code ContextManagers.createContextSnapshot}</li>
- * <li>{@code ContextSnapshot.reactivate}</li>
- * <li>{@code ContextManager.initializeNewContext}(*)</li>
- * <li>{@code ContextManager.getActiveContext}(*)</li>
+ * <li>{@linkplain ContextSnapshot#reactivate()}</li>
+ * <li>{@linkplain ContextManager#getActiveContextValue()} (*)</li>
+ * <li>{@linkplain ContextManager#initializeNewContext(Object)} (*)</li>
  * </ul>
  * <p>
  * (*) <em>Timing is updated for each concrete {@code ContextManager} implementation class</em>
  *
  * @author Sjoerd Talsma
- * @since 1.1.0
+ * @since 2.0.0
  */
 public interface ContextTimer {
 
     /**
      * Provides a new update for the context timer.
      *
-     * @param type     The class being called
-     * @param method   The method being called
-     * @param duration The duration of the method
-     * @param unit     The unit of the duration
+     * @param type     Class that was called
+     * @param method   Method that was called
+     * @param duration Duration of the call
+     * @param unit     Unit of the duration
+     * @param error    Error that was thrown in the call (optional, normally {@code null})
      */
-    void update(Class<?> type, String method, long duration, TimeUnit unit);
+    void update(Class<?> type, String method, long duration, TimeUnit unit, Throwable error);
 
 }

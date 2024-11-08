@@ -24,6 +24,7 @@ package nl.talsmasoftware.context.api;
  *
  * @param <T> type of the context value
  * @author Sjoerd Talsma
+ * @since 2.0.0
  */
 public interface ContextManager<T> {
 

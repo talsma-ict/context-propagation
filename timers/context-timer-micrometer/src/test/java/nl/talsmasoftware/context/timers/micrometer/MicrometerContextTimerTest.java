@@ -61,7 +61,7 @@ public class MicrometerContextTimerTest {
     @Test
     public void testTiming() {
         Timer timer = Metrics.timer(MicrometerContextTimerTest.class.getName() + ".testTiming");
-        new MicrometerContextTimer().update(MicrometerContextTimerTest.class, "testTiming", 43, TimeUnit.MILLISECONDS);
+        new MicrometerContextTimer().update(MicrometerContextTimerTest.class, "testTiming", 43, TimeUnit.MILLISECONDS, null);
         assertThat(timer.count(), is(1L));
         assertThat(timer.mean(TimeUnit.NANOSECONDS), closeTo(43000000.0d, 0.001d));
     }
