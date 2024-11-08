@@ -62,7 +62,7 @@ public final class ContextManagers {
     @SuppressWarnings("rawtypes")
     public static nl.talsmasoftware.context.api.ContextSnapshot createContextSnapshot() {
         final long start = System.nanoTime();
-        final List<ContextManager> managers = ServiceCache.cached(ContextManager.class);
+        final List<ContextManager> managers = ServiceCache.cached(ContextManager.class); // Cached list is immutable
         final Object[] values = new Object[managers.size()];
 
         for (ListIterator<ContextManager> it = managers.listIterator(); it.hasNext(); ) {
