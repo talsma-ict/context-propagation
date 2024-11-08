@@ -229,34 +229,22 @@
                 <classifier>sources</classifier>
             </dependency>
 
-
-
-
-
-
-
             <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>spring-security-context</artifactId>
+                <groupId>${project.groupId}.managers</groupId>
+                <artifactId>context-manager-spring-security</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>spring-security-context</artifactId>
+                <groupId>${project.groupId}.managers</groupId>
+                <artifactId>context-manager-spring-security</artifactId>
                 <version>${project.version}</version>
                 <classifier>javadoc</classifier>
             </dependency>
             <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>spring-security-context</artifactId>
+                <groupId>${project.groupId}.managers</groupId>
+                <artifactId>context-manager-spring-security</artifactId>
                 <version>${project.version}</version>
                 <classifier>sources</classifier>
-            </dependency>
-
-            <dependency> <!-- concurrency 0.1.3 delegates to context-propagation -->
-                <groupId>nl.talsmasoftware</groupId>
-                <artifactId>concurrency</artifactId>
-                <version>0.1.3</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
