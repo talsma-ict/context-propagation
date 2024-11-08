@@ -96,11 +96,12 @@ public final class ContextManagers {
                 Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "getActiveContext.exception");
             }
         }
-        if (managerStart == null) {
-            NoContextManagersFound noContextManagersFound = new NoContextManagersFound();
-            LOGGER.log(Level.INFO, noContextManagersFound.getMessage(), noContextManagersFound);
+        final ContextSnapshotImpl result = new ContextSnapshotImpl(managers, values);
+        if (managerStart == null && LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer(result + " was created but no ContextManagers were found! "
+                    + " Thead=" + Thread.currentThread()
+                    + ", ContextClassLoader=" + Thread.currentThread().getContextClassLoader());
         }
-        ContextSnapshotImpl result = new ContextSnapshotImpl(managers, values);
         Timers.timed(System.nanoTime() - start, ContextManagers.class, "createContextSnapshot");
         return result;
     }
@@ -139,9 +140,10 @@ public final class ContextManagers {
                 Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "clear.exception");
             }
         }
-        if (managerStart == null) {
-            NoContextManagersFound noContextManagersFound = new NoContextManagersFound();
-            LOGGER.log(Level.INFO, noContextManagersFound.getMessage(), noContextManagersFound);
+        if (managerStart == null && LOGGER.isLoggable(Level.FINER)) {
+            LOGGER.finer("No ContextManagers were cleared because none were found! "
+                    + " Thead=" + Thread.currentThread()
+                    + ", ContextClassLoader=" + Thread.currentThread().getContextClassLoader());
         }
         Timers.timed(System.nanoTime() - start, ContextManagers.class, "clearActiveContexts");
     }
@@ -300,18 +302,7 @@ public final class ContextManagers {
 
         @Override
         public String toString() {
-            return "ReactivatedContext{size=" + reactivated.size() + '}';
-        }
-    }
-
-    /**
-     * Exception that we don't actually throw, but it helps track the issue if we log it including the stacktrace.
-     */
-    private static class NoContextManagersFound extends RuntimeException {
-        private NoContextManagersFound() {
-            super("Context snapshot was created but no ContextManagers were found!"
-                    + " Thread=" + Thread.currentThread()
-                    + ", ContextClassLoader=" + Thread.currentThread().getContextClassLoader());
+            return "ContextSnapshot.Reactivation{size=" + reactivated.size() + '}';
         }
     }
 }
