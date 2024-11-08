@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.opentracing;
+package nl.talsmasoftware.context.managers.opentracing;
 
 import io.opentracing.ScopeManager;
 import io.opentracing.mock.MockTracer;
