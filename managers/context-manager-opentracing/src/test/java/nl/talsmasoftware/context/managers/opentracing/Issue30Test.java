@@ -26,9 +26,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.Closeable;
-import java.io.IOException;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
@@ -71,9 +68,9 @@ public class Issue30Test {
     }
 
     @Test
-    public void testIssue30NullPointerException() throws IOException {
+    public void testIssue30NullPointerException() {
         ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
-        Closeable reactivation = snapshot.reactivate();
+        ContextSnapshot.Reactivation reactivation = snapshot.reactivate();
         reactivation.close(); // This throws NPE in issue 30
     }
 

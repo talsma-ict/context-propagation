@@ -23,8 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -85,7 +83,7 @@ public class BooleanSupplierWithContextTest {
     }
 
     @Test
-    public void testGetAsBooleanWithSnapshotConsumer() throws ExecutionException, InterruptedException, IOException {
+    public void testGetAsBooleanWithSnapshotConsumer() throws ExecutionException, InterruptedException {
         DummyContext.setCurrentValue("true");
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
 
@@ -101,7 +99,7 @@ public class BooleanSupplierWithContextTest {
         assertThat(future.get(), is(true));
 
         assertThat(DummyContext.currentValue(), is("true"));
-        try (Closeable reactivation = snapshotHolder[0].reactivate()) {
+        try (ContextSnapshot.Reactivation reactivation = snapshotHolder[0].reactivate()) {
             assertThat(DummyContext.currentValue(), is("false"));
         }
         assertThat(DummyContext.currentValue(), is("true"));

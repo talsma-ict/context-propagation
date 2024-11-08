@@ -18,8 +18,6 @@ package nl.talsmasoftware.context.core.function;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.core.ContextManagers;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -49,7 +47,7 @@ public class BooleanSupplierWithContext extends WrapperWithContextAndConsumer<Bo
 
     @Override
     public boolean getAsBoolean() {
-        try (Closeable context = snapshot().reactivate()) {
+        try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
             try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                 LOGGER.log(Level.FINEST, "Delegating getAsBoolean method with {0} to {1}.", new Object[]{context, delegate()});
                 return delegate().getAsBoolean();
@@ -60,8 +58,6 @@ public class BooleanSupplierWithContext extends WrapperWithContextAndConsumer<Bo
                     contextSnapshotConsumer.accept(resultSnapshot);
                 }
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage(), e);
         }
     }
 

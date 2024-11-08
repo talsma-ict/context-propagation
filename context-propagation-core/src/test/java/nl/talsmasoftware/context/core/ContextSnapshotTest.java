@@ -20,8 +20,6 @@ import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.dummy.DummyContextManager;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
@@ -39,7 +37,7 @@ public class ContextSnapshotTest {
     }
 
     @Test
-    public void testSnapshotReactivate() throws IOException {
+    public void testSnapshotReactivate() {
         try (Context<String> ctx = MGR.initializeNewContext("Old value")) {
             ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
             try (Context<String> ctx2 = MGR.initializeNewContext("New value")) {

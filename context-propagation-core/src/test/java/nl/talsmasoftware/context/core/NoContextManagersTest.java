@@ -23,9 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.Closeable;
 import java.io.File;
-import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -50,21 +48,21 @@ public class NoContextManagersTest {
     }
 
     @Test
-    public void testReactivate_withoutContextManagers() throws IOException {
+    public void testReactivate_withoutContextManagers() {
         Context<String> ctx1 = new DummyContext("foo");
         ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
         ctx1.close();
 
-        Closeable reactivated = snapshot.reactivate();
+        ContextSnapshot.Reactivation reactivated = snapshot.reactivate();
         reactivated.close();
     }
 
     @Test
-    public void testCreateSnapshot_withoutContextManagers() throws IOException {
+    public void testCreateSnapshot_withoutContextManagers() {
         ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
         assertThat(snapshot, is(notNullValue()));
 
-        Closeable reactivated = snapshot.reactivate();
+        ContextSnapshot.Reactivation reactivated = snapshot.reactivate();
         assertThat(reactivated, is(notNullValue()));
         reactivated.close();
     }

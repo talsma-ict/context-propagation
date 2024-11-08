@@ -24,8 +24,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -173,7 +171,7 @@ class Log4j2ThreadContextManagerTest {
     }
 
     @Test
-    void testSnapshotRestorationAfterClosingReactivatedSnapshot() throws IOException {
+    void testSnapshotRestorationAfterClosingReactivatedSnapshot() {
         String mapKey1 = "map1";
         ThreadContext.put(mapKey1, "value1");
         ThreadContext.push("stack1");
@@ -192,7 +190,7 @@ class Log4j2ThreadContextManagerTest {
         String mapKey2 = "map2";
         ThreadContext.put(mapKey2, "value2");
 
-        Closeable reactivation = snapshot.reactivate();
+        ContextSnapshot.Reactivation reactivation = snapshot.reactivate();
         assertThat("ThreadContext changed by reactivation", ThreadContext.get(mapKey1), equalTo("value1"));
         assertThat("Existing ThreadContext data should not have been cleared", ThreadContext.get(mapKey2), equalTo("value2"));
         assertThat(ThreadContext.getContext().size(), is(2));

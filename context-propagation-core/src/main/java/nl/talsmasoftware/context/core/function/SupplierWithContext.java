@@ -18,8 +18,6 @@ package nl.talsmasoftware.context.core.function;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.core.ContextManagers;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -48,7 +46,7 @@ public class SupplierWithContext<T> extends WrapperWithContextAndConsumer<Suppli
 
     @Override
     public T get() {
-        try (Closeable context = snapshot().reactivate()) {
+        try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
             try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                 LOGGER.log(Level.FINEST, "Delegating get method with {0} to {1}.", new Object[]{context, delegate()});
                 return delegate().get();
@@ -59,8 +57,6 @@ public class SupplierWithContext<T> extends WrapperWithContextAndConsumer<Suppli
                     contextSnapshotConsumer.accept(resultSnapshot);
                 }
             }
-        } catch (IOException e) {
-            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 }

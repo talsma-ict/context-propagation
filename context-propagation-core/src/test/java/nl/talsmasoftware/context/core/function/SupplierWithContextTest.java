@@ -23,8 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -76,7 +74,7 @@ public class SupplierWithContextTest {
     }
 
     @Test
-    public void testGetWithSnapshotConsumer() throws ExecutionException, InterruptedException, IOException {
+    public void testGetWithSnapshotConsumer() throws ExecutionException, InterruptedException {
         DummyContext.setCurrentValue("Old value");
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
 
@@ -93,7 +91,7 @@ public class SupplierWithContextTest {
 
         verify(snapshot).reactivate();
         assertThat(DummyContext.currentValue(), is("Old value"));
-        try (Closeable reactivation = snapshotHolder[0].reactivate()) {
+        try (ContextSnapshot.Reactivation reactivation = snapshotHolder[0].reactivate()) {
             assertThat(DummyContext.currentValue(), is("New value"));
         }
     }

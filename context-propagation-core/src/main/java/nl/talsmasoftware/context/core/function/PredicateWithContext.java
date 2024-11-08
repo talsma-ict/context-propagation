@@ -18,8 +18,6 @@ package nl.talsmasoftware.context.core.function;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.core.ContextManagers;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -51,7 +49,7 @@ public class PredicateWithContext<T> extends WrapperWithContextAndConsumer<Predi
 
     @Override
     public boolean test(T t) {
-        try (Closeable context = snapshot().reactivate()) {
+        try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
             try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                 LOGGER.log(Level.FINEST, "Delegating test method with {0} to {1}.", new Object[]{context, delegate()});
                 return delegate().test(t);
@@ -62,8 +60,6 @@ public class PredicateWithContext<T> extends WrapperWithContextAndConsumer<Predi
                     contextSnapshotConsumer.accept(resultSnapshot);
                 }
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
@@ -71,7 +67,7 @@ public class PredicateWithContext<T> extends WrapperWithContextAndConsumer<Predi
     public Predicate<T> and(Predicate<? super T> other) {
         requireNonNull(other, "Cannot combine predicate with 'and' <null>.");
         return (t) -> {
-            try (Closeable context = snapshot().reactivate()) {
+            try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
                 try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                     LOGGER.log(Level.FINEST, "Delegating 'and' method with {0} to {1}.", new Object[]{context, delegate()});
                     return delegate().test(t) && other.test(t);
@@ -82,8 +78,6 @@ public class PredicateWithContext<T> extends WrapperWithContextAndConsumer<Predi
                         contextSnapshotConsumer.accept(resultSnapshot);
                     }
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e.getMessage(), e);
             }
         };
     }
@@ -92,7 +86,7 @@ public class PredicateWithContext<T> extends WrapperWithContextAndConsumer<Predi
     public Predicate<T> or(Predicate<? super T> other) {
         requireNonNull(other, "Cannot combine predicate with 'or' <null>.");
         return (t) -> {
-            try (Closeable context = snapshot().reactivate()) {
+            try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
                 try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                     LOGGER.log(Level.FINEST, "Delegating 'or' method with {0} to {1}.", new Object[]{context, delegate()});
                     return delegate().test(t) || other.test(t);
@@ -103,8 +97,6 @@ public class PredicateWithContext<T> extends WrapperWithContextAndConsumer<Predi
                         contextSnapshotConsumer.accept(resultSnapshot);
                     }
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e.getMessage(), e);
             }
         };
     }

@@ -23,8 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
@@ -98,7 +96,7 @@ public class BinaryOperatorWithContextTest {
     }
 
     @Test
-    public void testApplyWithSnapshotConsumer() throws InterruptedException, IOException {
+    public void testApplyWithSnapshotConsumer() throws InterruptedException {
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
         DummyContext.setCurrentValue("Old value");
 
@@ -111,7 +109,7 @@ public class BinaryOperatorWithContextTest {
         t.start();
         t.join();
         assertThat(DummyContext.currentValue(), is("Old value"));
-        try (Closeable reactivation = snapshotHolder[0].reactivate()) {
+        try (ContextSnapshot.Reactivation reactivation = snapshotHolder[0].reactivate()) {
             assertThat(DummyContext.currentValue(), is("New value"));
         }
         assertThat(DummyContext.currentValue(), is("Old value"));
