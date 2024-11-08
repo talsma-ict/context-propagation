@@ -20,7 +20,6 @@ import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.dummy.DummyContextManager;
 import org.junit.jupiter.api.Test;
 
-import java.io.Closeable;
 import java.io.IOException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -36,9 +35,7 @@ public class ContextSnapshotTest {
 
     @Test
     public void testSnapshotToString() {
-        try (Context<String> ctx = MGR.initializeNewContext("Dummy value")) {
-            assertThat(ContextManagers.createContextSnapshot(), hasToString(startsWith("ContextSnapshot{size=")));
-        }
+        assertThat(ContextManagers.createContextSnapshot(), hasToString(startsWith("ContextSnapshot{size=")));
     }
 
     @Test
@@ -48,9 +45,9 @@ public class ContextSnapshotTest {
             try (Context<String> ctx2 = MGR.initializeNewContext("New value")) {
                 assertThat(MGR.getActiveContextValue(), is("New value"));
 
-                try (Closeable reactivation = snapshot.reactivate()) {
+                try (ContextSnapshot.Reactivation reactivation = snapshot.reactivate()) {
                     assertThat(MGR.getActiveContextValue(), is("Old value"));
-                    assertThat(reactivation, hasToString(startsWith("ReactivatedContext{size=")));
+                    assertThat(reactivation, hasToString(startsWith("ContextSnapshot.Reactivation{size=")));
                 }
 
                 assertThat(MGR.getActiveContextValue(), is("New value"));

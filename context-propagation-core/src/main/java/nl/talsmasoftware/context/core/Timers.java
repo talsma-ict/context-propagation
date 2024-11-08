@@ -25,7 +25,7 @@ final class Timers {
     private static final Logger TIMING_LOGGER = Logger.getLogger(Timers.class.getName());
 
     static void timed(long durationNanos, Class<?> type, String method) {
-        for (ContextTimer delegate : ContextManagers.getContextTimers()) {
+        for (ContextTimer delegate : ServiceCache.cached(ContextTimer.class)) {
             delegate.update(type, method, durationNanos, TimeUnit.NANOSECONDS);
         }
         if (TIMING_LOGGER.isLoggable(Level.FINEST)) {
