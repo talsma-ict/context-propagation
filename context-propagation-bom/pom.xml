@@ -177,6 +177,24 @@
 
             <dependency>
                 <groupId>${project.groupId}.managers</groupId>
+                <artifactId>context-manager-opentracing</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}.managers</groupId>
+                <artifactId>context-manager-opentracing</artifactId>
+                <version>${project.version}</version>
+                <classifier>javadoc</classifier>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}.managers</groupId>
+                <artifactId>context-manager-opentracing</artifactId>
+                <version>${project.version}</version>
+                <classifier>sources</classifier>
+            </dependency>
+
+            <dependency>
+                <groupId>${project.groupId}.managers</groupId>
                 <artifactId>context-manager-servletrequest</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -216,23 +234,6 @@
 
 
 
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>opentracing-span-propagation</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>opentracing-span-propagation</artifactId>
-                <version>${project.version}</version>
-                <classifier>javadoc</classifier>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>opentracing-span-propagation</artifactId>
-                <version>${project.version}</version>
-                <classifier>sources</classifier>
-            </dependency>
 
             <dependency>
                 <groupId>${project.groupId}</groupId>
