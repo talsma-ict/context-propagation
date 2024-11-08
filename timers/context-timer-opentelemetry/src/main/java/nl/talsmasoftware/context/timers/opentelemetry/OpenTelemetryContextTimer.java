@@ -15,14 +15,21 @@
  */
 package nl.talsmasoftware.context.timers.opentelemetry;
 
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.Span;
+import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.api.ContextTimer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static io.opentelemetry.api.common.AttributeKey.stringKey;
 
 public class OpenTelemetryContextTimer implements ContextTimer {
     private static final Logger LOGGER = Logger.getLogger(OpenTelemetryContextTimer.class.getName());
@@ -30,8 +37,18 @@ public class OpenTelemetryContextTimer implements ContextTimer {
     private static final String INSTRUMENTATION_VERSION = readVersion();
 
     @Override
-    public void update(Class<?> type, String method, long duration, TimeUnit unit) {
-//        GlobalOpenTelemetry.getTracer()
+    public void update(Class<?> type, String method, long duration, TimeUnit unit, Throwable error) {
+        if (mustTrace(type)) {
+            Span span = GlobalOpenTelemetry.getTracer(INSTRUMENTATION_SCOPE, INSTRUMENTATION_VERSION)
+                    .spanBuilder(type.getSimpleName() + "." + method)
+                    .setStartTimestamp(Instant.now().minusNanos(unit.toNanos(duration)))
+                    .setAttribute("context.thread", Thread.currentThread().getName())
+                    .startSpan();
+            if (error != null) {
+                span.recordException(error, Attributes.of(stringKey("exception.message"), error.getMessage()));
+            }
+            span.end();
+        }
     }
 
     private static String readVersion() {
@@ -44,5 +61,10 @@ public class OpenTelemetryContextTimer implements ContextTimer {
             LOGGER.log(Level.WARNING, e, () -> "Error obtaining version from build metadata (" + path + "): " + e.getMessage());
             return null;
         }
+    }
+
+    private static boolean mustTrace(Class<?> type) {
+        return ContextSnapshot.class.isAssignableFrom(type)
+                || "nl.talsmasoftware.context.core.ContextManagers".equals(type.getName());
     }
 }
