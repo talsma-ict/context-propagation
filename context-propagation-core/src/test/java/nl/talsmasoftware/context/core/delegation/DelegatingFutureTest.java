@@ -49,7 +49,7 @@ import static org.mockito.Mockito.when;
  */
 public class DelegatingFutureTest {
 
-    private static class TestDelegatingFuture extends nl.talsmasoftware.context.core.delegation.DelegatingFuture<Object> {
+    private static class TestDelegatingFuture extends DelegatingFuture<Object> {
         private TestDelegatingFuture(Future<Object> delegate) {
             super(delegate);
         }
