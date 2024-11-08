@@ -21,7 +21,6 @@ import nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService;
 import nl.talsmasoftware.context.dummy.DummyContext;
 import nl.talsmasoftware.context.dummy.DummyContextManager;
 import nl.talsmasoftware.context.dummy.ThrowingContextManager;
-import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,37 +81,37 @@ public class ContextManagersTest {
     @Test
     public void testSnapshot_inSameThread() {
         dummyManager.clear();
-        MatcherAssert.assertThat(DummyContext.currentValue(), is(nullValue()));
+        assertThat(DummyContext.currentValue(), is(nullValue()));
 
         DummyContext ctx1 = new DummyContext("initial value");
-        MatcherAssert.assertThat(DummyContext.currentValue(), is("initial value"));
+        assertThat(DummyContext.currentValue(), is("initial value"));
 
         DummyContext ctx2 = new DummyContext("second value");
-        MatcherAssert.assertThat(DummyContext.currentValue(), is("second value"));
+        assertThat(DummyContext.currentValue(), is("second value"));
 
         ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
-        MatcherAssert.assertThat(DummyContext.currentValue(), is("second value")); // No context change because of snapshot.
+        assertThat(DummyContext.currentValue(), is("second value")); // No context change because of snapshot.
 
         DummyContext ctx3 = new DummyContext("third value");
-        MatcherAssert.assertThat(DummyContext.currentValue(), is("third value"));
+        assertThat(DummyContext.currentValue(), is("third value"));
 
         // Reactivate snapshot: ctx1 -> ctx2 -> ctx3 -> ctx2'
         ContextSnapshot.Reactivation reactivation = snapshot.reactivate();
-        MatcherAssert.assertThat(DummyContext.currentValue(), is("second value"));
+        assertThat(DummyContext.currentValue(), is("second value"));
 
         reactivation.close();
-        MatcherAssert.assertThat(DummyContext.currentValue(), is("third value")); // back to ctx3, NOT ctx1 !!
+        assertThat(DummyContext.currentValue(), is("third value")); // back to ctx3, NOT ctx1 !!
 
         // out-of-order closing!
         ctx2.close();
-        MatcherAssert.assertThat(DummyContext.currentValue(), is("third value")); // back to ctx3, NOT ctx1 !!
+        assertThat(DummyContext.currentValue(), is("third value")); // back to ctx3, NOT ctx1 !!
 
         ctx3.close();
-        MatcherAssert.assertThat(DummyContext.currentValue(), is("initial value")); // back to ctx1 because ctx2 is closed
+        assertThat(DummyContext.currentValue(), is("initial value")); // back to ctx1 because ctx2 is closed
 
-        MatcherAssert.assertThat(ctx1.isClosed(), is(false));
-        MatcherAssert.assertThat(ctx2.isClosed(), is(true));
-        MatcherAssert.assertThat(ctx3.isClosed(), is(true));
+        assertThat(ctx1.isClosed(), is(false));
+        assertThat(ctx2.isClosed(), is(true));
+        assertThat(ctx3.isClosed(), is(true));
         ctx1.close();
     }
 
@@ -120,10 +119,10 @@ public class ContextManagersTest {
     public void testSnapshotThreadPropagation() throws ExecutionException, InterruptedException {
         DummyContext.reset();
         ExecutorService threadpool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
-        MatcherAssert.assertThat(DummyContext.currentValue(), is(nullValue()));
+        assertThat(DummyContext.currentValue(), is(nullValue()));
 
         DummyContext ctx1 = new DummyContext("initial value");
-        MatcherAssert.assertThat(DummyContext.currentValue(), is("initial value"));
+        assertThat(DummyContext.currentValue(), is("initial value"));
         Future<String> threadResult = threadpool.submit(new Callable<String>() {
             public String call() throws Exception {
                 return DummyContext.currentValue();
@@ -141,7 +140,7 @@ public class ContextManagersTest {
                 return res + ", " + DummyContext.currentValue();
             }
         });
-        MatcherAssert.assertThat(DummyContext.currentValue(), is("second value"));
+        assertThat(DummyContext.currentValue(), is("second value"));
         assertThat(threadResult.get(), is("second value, in-thread value, second value"));
 
         ctx2.close();
@@ -177,11 +176,11 @@ public class ContextManagersTest {
         ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
         ctx.close();
 
-        MatcherAssert.assertThat(DummyContext.currentValue(), is(nullValue()));
+        assertThat(DummyContext.currentValue(), is(nullValue()));
         ContextSnapshot.Reactivation reactivation = snapshot.reactivate();
-        MatcherAssert.assertThat(DummyContext.currentValue(), is("blah"));
+        assertThat(DummyContext.currentValue(), is("blah"));
         reactivation.close();
-        MatcherAssert.assertThat(DummyContext.currentValue(), is(nullValue()));
+        assertThat(DummyContext.currentValue(), is(nullValue()));
     }
 
     @Test
@@ -193,18 +192,18 @@ public class ContextManagersTest {
         ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
         ThrowingContextManager.onInitialize = reactivationException;
 
-        MatcherAssert.assertThat(DummyContext.currentValue(), is("foo"));
-        MatcherAssert.assertThat(mgr.getActiveContextValue(), is("bar"));
+        assertThat(DummyContext.currentValue(), is("foo"));
+        assertThat(mgr.getActiveContextValue(), is("bar"));
         ctx1.close();
         ctx2.close();
 
-        MatcherAssert.assertThat(DummyContext.currentValue(), is(nullValue()));
-        MatcherAssert.assertThat(mgr.getActiveContextValue(), is(nullValue()));
+        assertThat(DummyContext.currentValue(), is(nullValue()));
+        assertThat(mgr.getActiveContextValue(), is(nullValue()));
         RuntimeException expected = assertThrows(RuntimeException.class, snapshot::reactivate);
 
         // foo + bar mustn't be set after exception!
-        MatcherAssert.assertThat(DummyContext.currentValue(), is(nullValue()));
-        MatcherAssert.assertThat(mgr.getActiveContextValue(), is(nullValue()));
+        assertThat(DummyContext.currentValue(), is(nullValue()));
+        assertThat(mgr.getActiveContextValue(), is(nullValue()));
     }
 
     @Test
