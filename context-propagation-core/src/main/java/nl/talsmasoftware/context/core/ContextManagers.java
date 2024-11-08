@@ -21,7 +21,6 @@ import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.api.ContextSnapshot.Reactivation;
 
 import java.util.List;
-import java.util.ListIterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -65,11 +64,11 @@ public final class ContextManagers {
         final List<ContextManager> managers = ServiceCache.cached(ContextManager.class); // Cached list is immutable
         final Object[] values = new Object[managers.size()];
 
-        for (ListIterator<ContextManager> it = managers.listIterator(); it.hasNext(); ) {
-            final ContextManager manager = it.next();
+        for (int i = 0; i < values.length; i++) {
+            final ContextManager manager = managers.get(i);
             long managerStart = System.nanoTime();
             try {
-                values[it.previousIndex()] = getActiveContextValue(manager);
+                values[i] = getActiveContextValue(manager);
                 Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "getActiveContext");
             } catch (RuntimeException rte) {
                 LOGGER.log(Level.WARNING, "Error obtaining active context from " + manager + " (in thread " + Thread.currentThread().getName() + ").", rte);
@@ -170,6 +169,7 @@ public final class ContextManagers {
      */
     @SuppressWarnings("rawtypes")
     private static final class ContextSnapshotImpl implements ContextSnapshot {
+        // TODO extract this inner class?
         private final List<ContextManager> managers;
         private final Object[] values;
 
@@ -181,16 +181,17 @@ public final class ContextManagers {
         public Reactivation reactivate() {
             final long start = System.nanoTime();
             final Context[] reactivatedContexts = new Context[managers.size()];
+
             try {
-                for (ListIterator<ContextManager> it = managers.listIterator(); it.hasNext(); ) {
-                    final ContextManager manager = it.next();
-                    final Object value = values[it.previousIndex()];
-                    reactivatedContexts[it.previousIndex()] = value != null ? reactivate(manager, value) : null;
+                for (int i = 0; i < values.length; i++) {
+                    reactivatedContexts[i] = reactivate(managers.get(i), values[i]);
                 }
+
                 ReactivationImpl reactivation = new ReactivationImpl(reactivatedContexts);
                 Timers.timed(System.nanoTime() - start, nl.talsmasoftware.context.api.ContextSnapshot.class, "reactivate");
                 return reactivation;
             } catch (RuntimeException reactivationException) {
+                // TODO think about simplifying by catching & handling in reactivate(manager, value) method
                 for (Context alreadyReactivated : reactivatedContexts) {
                     if (alreadyReactivated != null) try {
                         if (LOGGER.isLoggable(Level.FINEST)) {
@@ -210,6 +211,7 @@ public final class ContextManagers {
         @SuppressWarnings("unchecked") // As we got the values from the managers themselves, they must also accept them!
         private Context reactivate(ContextManager contextManager, Object snapshotValue) {
             long start = System.nanoTime();
+            if (snapshotValue == null) return null;
             Context reactivated = contextManager.initializeNewContext(snapshotValue);
             if (LOGGER.isLoggable(Level.FINEST)) {
                 LOGGER.finest("Context reactivated from snapshot by " + contextManager + ": " + reactivated + ".");
@@ -231,6 +233,7 @@ public final class ContextManagers {
      */
     @SuppressWarnings("rawtypes")
     private static final class ReactivationImpl implements Reactivation {
+        // TODO extract this inner class?
         private final Context[] reactivated;
 
         private ReactivationImpl(Context[] reactivated) {
