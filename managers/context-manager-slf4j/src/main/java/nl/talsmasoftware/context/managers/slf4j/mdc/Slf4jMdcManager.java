@@ -44,6 +44,32 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author Sjoerd Talsma
  */
 public class Slf4jMdcManager implements ContextManager<Map<String, String>> {
+    /**
+     * Singleton instance of this class.
+     */
+    private static final Slf4jMdcManager INSTANCE = new Slf4jMdcManager();
+
+    /**
+     * Returns the singleton instance of the {@code Slf4jMdcManager}.
+     * <p>
+     * The ServiceLoader supports a static {@code provider()} method to resolve services since Java 9.
+     *
+     * @return The Slf4j {@code MDC} manager.
+     */
+    public static Slf4jMdcManager provider() {
+        return INSTANCE;
+    }
+
+    /**
+     * Creates a new context manager.
+     *
+     * @see #provider()
+     * @deprecated This constructor only exists for usage by Java 8 {@code ServiceLoader}. The singleton instance
+     * obtained from {@link #provider()} should be used to avoid unnecessary instantiations.
+     */
+    @Deprecated
+    public Slf4jMdcManager() {
+    }
 
     /**
      * Initializes a new MDC context populated by the specified values.

@@ -79,7 +79,7 @@ public class SpringSecurityContextManagerTest {
 
     @Test
     public void testWithoutAnyAuthentication() {
-        assertThat(new SpringSecurityContextManager().getActiveContextValue(), is(nullValue()));
+        assertThat(SpringSecurityContextManager.provider().getActiveContextValue(), is(nullValue()));
     }
 
     @Test
@@ -115,10 +115,10 @@ public class SpringSecurityContextManagerTest {
     @Test
     public void testClearableImplementation() {
         setAuthentication("Vincent Vega");
-        assertThat(new SpringSecurityContextManager().getActiveContextValue().getName(), is("Vincent Vega"));
+        assertThat(SpringSecurityContextManager.provider().getActiveContextValue().getName(), is("Vincent Vega"));
 
         ContextManagers.clearActiveContexts();
-        assertThat(new SpringSecurityContextManager().getActiveContextValue(), is(nullValue()));
+        assertThat(SpringSecurityContextManager.provider().getActiveContextValue(), is(nullValue()));
     }
 
 }

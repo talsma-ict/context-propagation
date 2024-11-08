@@ -26,6 +26,34 @@ import java.util.Locale;
  * @author Sjoerd Talsma
  */
 public final class LocaleContextManager implements ContextManager<Locale> {
+    /**
+     * Singleton instance of this class.
+     */
+    private static final LocaleContextManager INSTANCE = new LocaleContextManager();
+
+    /**
+     * Returns the singleton instance of the {@code LocaleContextManager}.
+     *
+     * <p>
+     * The ServiceLoader supports a static {@code provider()} method to resolve services since Java 9.
+     *
+     * @return The LocaleContext manager.
+     * @see LocaleContext
+     */
+    public static LocaleContextManager provider() {
+        return INSTANCE;
+    }
+
+    /**
+     * Creates a new context manager.
+     *
+     * @see #provider()
+     * @deprecated This constructor only exists for usage by Java 8 {@code ServiceLoader}. The singleton instance
+     * obtained from {@link #provider()} should be used to avoid unnecessary instantiations.
+     */
+    @Deprecated
+    public LocaleContextManager() {
+    }
 
     /**
      * Registers the given {@linkplain Locale} value as the current Locale for the active thread

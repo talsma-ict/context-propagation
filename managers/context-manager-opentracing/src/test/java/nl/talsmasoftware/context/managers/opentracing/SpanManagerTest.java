@@ -210,27 +210,27 @@ public class SpanManagerTest {
     public void testClearingAllContexts() {
         Span span = mockTracer.buildSpan("test-span").start();
         Scope scope = mockTracer.scopeManager().activate(span);
-        assertThat(new SpanManager().getActiveContextValue(), is(sameInstance(span)));
+        assertThat(SpanManager.provider().getActiveContextValue(), is(sameInstance(span)));
 
         ContextManagers.clearActiveContexts();
         // TODO Test after this is merged: https://github.com/opentracing/opentracing-java/pull/313
-//        assertThat(new SpanManager().getActiveContext(), is(nullValue()));
+        // assertThat(SpanManager.provider().getActiveContextValue(), is(nullValue()));
     }
 
     @Test
     public void testSpanManagerToString() {
-        assertThat(new SpanManager(), hasToString("SpanManager"));
+        assertThat(SpanManager.provider(), hasToString("SpanManager"));
     }
 
     @Test
     public void testSpanContextToString() {
         Span span = mockTracer.buildSpan("test-span").start();
-        assertThat(new SpanManager().getActiveContextValue(), nullValue());
+        assertThat(SpanManager.provider().getActiveContextValue(), nullValue());
 
         Scope scope = mockTracer.scopeManager().activate(span);
-        assertThat(new SpanManager().getActiveContextValue(), is(span));
+        assertThat(SpanManager.provider().getActiveContextValue(), is(span));
 
         scope.close();
-        assertThat(new SpanManager().getActiveContextValue(), nullValue());
+        assertThat(SpanManager.provider().getActiveContextValue(), nullValue());
     }
 }

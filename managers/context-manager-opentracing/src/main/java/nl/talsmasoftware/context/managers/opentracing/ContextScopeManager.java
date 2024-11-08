@@ -54,6 +54,34 @@ import nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext;
  * @since 1.0.6
  */
 public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
+    /**
+     * Singleton instance of this class.
+     */
+    private static final ContextScopeManager INSTANCE = new ContextScopeManager();
+
+    /**
+     * Returns the singleton instance of the {@code ContextScopeManager}.
+     *
+     * <p>
+     * The ServiceLoader supports a static {@code provider()} method to resolve services since Java 9.
+     *
+     * @return The OpenTracing scope manager.
+     */
+    public static ContextScopeManager provider() {
+        return INSTANCE;
+    }
+
+    /**
+     * Creates a new context manager.
+     *
+     * @see #provider()
+     * @deprecated This constructor only exists for usage by Java 8 {@code ServiceLoader}. The singleton instance
+     * obtained from {@link #provider()} should be used to avoid unnecessary instantiations.
+     */
+    @Deprecated
+    public ContextScopeManager() {
+    }
+
     @Override
     public Scope activate(Span span) {
         return new ThreadLocalSpanContext(span);
