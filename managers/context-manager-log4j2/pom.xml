@@ -23,10 +23,12 @@
         <groupId>nl.talsmasoftware.context</groupId>
         <artifactId>context-propagation</artifactId>
         <version>2.0.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <!-- Artifact identification -->
-    <artifactId>log4j2-propagation</artifactId>
+    <groupId>nl.talsmasoftware.context.managers</groupId>
+    <artifactId>context-manager-log4j2</artifactId>
     <name>Propagation of Log4j 2 ThreadContext</name>
     <packaging>jar</packaging>
 
@@ -37,7 +39,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>${project.parent.groupId}</groupId>
             <artifactId>context-propagation-api</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -48,15 +50,15 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${log4j2.version}</version>
+            <groupId>${project.parent.groupId}</groupId>
+            <artifactId>context-propagation-core</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>context-propagation-core</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j2.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
