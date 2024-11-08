@@ -19,13 +19,9 @@ import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextManager;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.api.ContextSnapshot.Reactivation;
-import nl.talsmasoftware.context.api.ContextTimer;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.ServiceLoader;
+import java.util.ListIterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,15 +38,6 @@ import java.util.logging.Logger;
  */
 public final class ContextManagers {
     private static final Logger LOGGER = Logger.getLogger(ContextManagers.class.getName());
-
-    /**
-     * Sometimes a single, fixed classloader may be necessary (e.g. #97)
-     */
-    private static volatile ClassLoader classLoaderOverride = null;
-
-    private static volatile List<ContextManager<?>> contextManagers = null;
-
-    private static volatile List<ContextTimer> contextTimers = null;
 
     /**
      * Private constructor to avoid instantiation of this class.
@@ -72,32 +59,26 @@ public final class ContextManagers {
      * @return A new snapshot that can be reactivated elsewhere (e.g. a background thread)
      * within a try-with-resources construct.
      */
+    @SuppressWarnings("rawtypes")
     public static nl.talsmasoftware.context.api.ContextSnapshot createContextSnapshot() {
         final long start = System.nanoTime();
-        final List<ContextManager<?>> managers = new LinkedList<>();
-        final List<Object> values = new LinkedList<>();
-        Long managerStart = null;
-        for (ContextManager<?> manager : getContextManagers()) {
-            managerStart = System.nanoTime();
+        final List<ContextManager> managers = ServiceCache.cached(ContextManager.class);
+        final Object[] values = new Object[managers.size()];
+
+        for (ListIterator<ContextManager> it = managers.listIterator(); it.hasNext(); ) {
+            final ContextManager manager = it.next();
+            long managerStart = System.nanoTime();
             try {
-                final Object activeContextValue = manager.getActiveContextValue();
-                if (activeContextValue != null) {
-                    values.add(activeContextValue);
-                    managers.add(manager);
-                    if (LOGGER.isLoggable(Level.FINEST)) {
-                        LOGGER.finest("Active context value of " + manager + " added to new snapshot: " + activeContextValue);
-                    }
-                    Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "getActiveContext");
-                } else if (LOGGER.isLoggable(Level.FINEST)) {
-                    LOGGER.log(Level.FINEST, "There is no active context for " + manager + " in this snapshot.");
-                }
+                values[it.previousIndex()] = getActiveContextValue(manager);
+                Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "getActiveContext");
             } catch (RuntimeException rte) {
-                LOGGER.log(Level.WARNING, "Exception obtaining active context from " + manager + " for snapshot.", rte);
+                LOGGER.log(Level.WARNING, "Error obtaining active context from " + manager + " (in thread " + Thread.currentThread().getName() + ").", rte);
                 Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "getActiveContext.exception");
             }
         }
+
         final ContextSnapshotImpl result = new ContextSnapshotImpl(managers, values);
-        if (managerStart == null && LOGGER.isLoggable(Level.FINER)) {
+        if (managers.isEmpty() && LOGGER.isLoggable(Level.FINER)) {
             LOGGER.finer(result + " was created but no ContextManagers were found! "
                     + " Thead=" + Thread.currentThread()
                     + ", ContextClassLoader=" + Thread.currentThread().getContextClassLoader());
@@ -126,17 +107,14 @@ public final class ContextManagers {
     public static void clearActiveContexts() {
         final long start = System.nanoTime();
         Long managerStart = null;
-        for (ContextManager<?> manager : getContextManagers()) {
+        for (ContextManager<?> manager : ServiceCache.cached(ContextManager.class)) {
             managerStart = System.nanoTime();
             try {
-                manager.clear();
-                if (LOGGER.isLoggable(Level.FINEST)) {
-                    LOGGER.finest("Active context of " + manager + " was cleared.");
-                }
+                clear(manager);
                 Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "clear");
             } catch (RuntimeException rte) {
-                LOGGER.log(Level.WARNING, "Exception clearing active context from " + manager + ".", rte);
-                contextManagers = null;
+                LOGGER.log(Level.WARNING, "Error clearing active context from " + manager + ".", rte);
+                ServiceCache.clear();
                 Timers.timed(System.nanoTime() - managerStart, manager.getClass(), "clear.exception");
             }
         }
@@ -170,48 +148,20 @@ public final class ContextManagers {
      * @since 1.0.5
      */
     public static synchronized void useClassLoader(ClassLoader classLoader) {
-        if (classLoaderOverride == classLoader) {
-            LOGGER.finest(() -> "Maintaining classloader override as " + classLoader + " (unchanged)");
-            return;
-        }
-        LOGGER.fine(() -> "Updating classloader override to " + classLoader + " (was: " + classLoaderOverride + ")");
-        classLoaderOverride = classLoader;
-        contextManagers = null;
-        contextTimers = null;
+        ServiceCache.useClassLoader(classLoader);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static List<ContextManager<?>> getContextManagers() {
-        if (contextManagers == null) {
-            synchronized (ContextManagers.class) {
-                if (contextManagers == null) {
-                    contextManagers = (List) load(ContextManager.class);
-                }
-            }
-        }
-        return contextManagers;
+    private static Object getActiveContextValue(ContextManager<?> manager) {
+        final Object activeContextValue = manager.getActiveContextValue();
+        LOGGER.finest(() -> activeContextValue == null
+                ? "There is no active context value for " + manager + " (in thread " + Thread.currentThread().getName() + ")."
+                : "Active context value of " + manager + " in " + Thread.currentThread().getName() + ": " + activeContextValue);
+        return activeContextValue;
     }
 
-    static List<ContextTimer> getContextTimers() {
-        if (contextTimers == null) {
-            synchronized (ContextManagers.class) {
-                if (contextTimers == null) {
-                    contextTimers = load(ContextTimer.class);
-                }
-            }
-        }
-        return contextTimers;
-    }
-
-    private static <T> List<T> load(Class<T> type) {
-        ArrayList<T> list = new ArrayList<>();
-        if (classLoaderOverride == null) {
-            ServiceLoader.load(type).forEach(list::add);
-        } else {
-            ServiceLoader.load(type, classLoaderOverride).forEach(list::add);
-        }
-        list.trimToSize();
-        return Collections.unmodifiableList(list);
+    private static void clear(ContextManager<?> manager) {
+        manager.clear();
+        LOGGER.finest(() -> "Active context of " + manager + " was cleared.");
     }
 
     /**
@@ -219,22 +169,23 @@ public final class ContextManagers {
      * snapshot in each corresponding {@link ContextManager}.
      */
     @SuppressWarnings("rawtypes")
-    private static final class ContextSnapshotImpl implements nl.talsmasoftware.context.api.ContextSnapshot {
-        private static final ContextManager[] MANAGER_ARRAY = new ContextManager[0];
-        private final ContextManager[] managers;
+    private static final class ContextSnapshotImpl implements ContextSnapshot {
+        private final List<ContextManager> managers;
         private final Object[] values;
 
-        private ContextSnapshotImpl(List<ContextManager<?>> managers, List<Object> values) {
-            this.managers = managers.toArray(MANAGER_ARRAY);
-            this.values = values.toArray();
+        private ContextSnapshotImpl(List<ContextManager> managers, Object[] values) {
+            this.managers = managers;
+            this.values = values;
         }
 
         public Reactivation reactivate() {
             final long start = System.nanoTime();
-            final List<Context<?>> reactivatedContexts = new ArrayList<Context<?>>(managers.length);
+            final Context[] reactivatedContexts = new Context[managers.size()];
             try {
-                for (int i = 0; i < managers.length && i < values.length; i++) {
-                    reactivatedContexts.add(reactivate(managers[i], values[i]));
+                for (ListIterator<ContextManager> it = managers.listIterator(); it.hasNext(); ) {
+                    final ContextManager manager = it.next();
+                    final Object value = values[it.previousIndex()];
+                    reactivatedContexts[it.previousIndex()] = value != null ? reactivate(manager, value) : null;
                 }
                 ReactivationImpl reactivation = new ReactivationImpl(reactivatedContexts);
                 Timers.timed(System.nanoTime() - start, nl.talsmasoftware.context.api.ContextSnapshot.class, "reactivate");
@@ -251,7 +202,7 @@ public final class ContextManagers {
                         reactivationException.addSuppressed(rte);
                     }
                 }
-                contextManagers = null;
+                ServiceCache.clear();
                 throw reactivationException;
             }
         }
@@ -269,7 +220,7 @@ public final class ContextManagers {
 
         @Override
         public String toString() {
-            return "ContextSnapshot{size=" + managers.length + '}';
+            return "ContextSnapshot{size=" + managers.size() + '}';
         }
     }
 
@@ -278,18 +229,19 @@ public final class ContextManagers {
      * when it is closed itself.<br>
      * This context contains no meaningful value in itself and purely exists to close the reactivated contexts.
      */
+    @SuppressWarnings("rawtypes")
     private static final class ReactivationImpl implements Reactivation {
-        private final List<Context<?>> reactivated;
+        private final Context[] reactivated;
 
-        private ReactivationImpl(List<Context<?>> reactivated) {
+        private ReactivationImpl(Context[] reactivated) {
             this.reactivated = reactivated;
         }
 
         public void close() {
             RuntimeException closeException = null;
             // close in reverse order of reactivation
-            for (int i = this.reactivated.size() - 1; i >= 0; i--) {
-                Context<?> reactivated = this.reactivated.get(i);
+            for (int i = this.reactivated.length - 1; i >= 0; i--) {
+                Context<?> reactivated = this.reactivated[i];
                 if (reactivated != null) try {
                     reactivated.close();
                 } catch (RuntimeException rte) {
@@ -302,7 +254,7 @@ public final class ContextManagers {
 
         @Override
         public String toString() {
-            return "ContextSnapshot.Reactivation{size=" + reactivated.size() + '}';
+            return "ContextSnapshot.Reactivation{size=" + reactivated.length + '}';
         }
     }
 }
