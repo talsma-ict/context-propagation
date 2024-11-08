@@ -39,10 +39,6 @@
         <module>context-propagation-api</module>
         <module>context-propagation-core</module>
 
-        <module>timers/context-timer-metrics</module>
-        <module>timers/context-timer-micrometer</module>
-        <module>timers/context-timer-opentracing</module>
-
         <module>managers/context-manager-locale</module>
         <module>managers/context-manager-log4j2</module>
         <module>managers/context-manager-opentelemetry</module>
@@ -50,6 +46,11 @@
         <module>managers/context-manager-servletrequest</module>
         <module>managers/context-manager-slf4j</module>
         <module>managers/context-manager-spring-security</module>
+
+        <module>timers/context-timer-metrics</module>
+        <module>timers/context-timer-micrometer</module>
+        <module>timers/context-timer-opentelemetry</module>
+        <module>timers/context-timer-opentracing</module>
     </modules>
 
     <licenses>
@@ -409,6 +410,13 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>io.opentelemetry</groupId>
+                <artifactId>opentelemetry-bom</artifactId>
+                <version>1.39.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>

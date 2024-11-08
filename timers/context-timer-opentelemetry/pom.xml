@@ -29,15 +29,14 @@
     </parent>
 
     <!-- Artifact identification -->
-    <groupId>nl.talsmasoftware.context.managers</groupId>
-    <artifactId>context-manager-opentelemetry</artifactId>
-    <name>Propagation of OpenTelemetry Context</name>
+    <groupId>nl.talsmasoftware.context.timers</groupId>
+    <artifactId>context-timer-opentelemetry</artifactId>
+    <name>Context timer (opentelemetry)</name>
     <packaging>jar</packaging>
 
     <properties>
-        <project.moduleName>${project.groupId}.opentelemetry</project.moduleName>
+        <project.moduleName>${project.groupId}.metrics</project.moduleName>
         <root.basedir>${project.parent.basedir}</root.basedir>
-        <project.javadoc.version>8</project.javadoc.version>
     </properties>
 
     <dependencies>
@@ -48,7 +47,8 @@
         </dependency>
         <dependency>
             <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-context</artifactId>
+            <artifactId>opentelemetry-api</artifactId>
         </dependency>
     </dependencies>
+
 </project>
