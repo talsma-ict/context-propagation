@@ -44,6 +44,7 @@ public interface ContextManager<T> {
      *
      * @return The value of the active context, or {@code null} if no context is active.
      * @see Context#getValue()
+     * @since 2.0.0
      */
     T getActiveContextValue();
 
@@ -61,6 +62,8 @@ public interface ContextManager<T> {
      *
      * <p>
      * This method normally should only get called by {@code ContextManagers.clearActiveContexts()}.
+     *
+     * @since 2.0.0
      */
     void clear();
 

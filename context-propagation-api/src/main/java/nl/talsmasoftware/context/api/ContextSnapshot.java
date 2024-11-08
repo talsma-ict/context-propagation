@@ -66,6 +66,8 @@ public interface ContextSnapshot {
      *
      * <p>
      * It is <strong>strongly advised</strong> to only use reactivation with try-with-resources code blocks.
+     *
+     * @since 2.0.0
      */
     interface Reactivation extends Closeable {
         /**
