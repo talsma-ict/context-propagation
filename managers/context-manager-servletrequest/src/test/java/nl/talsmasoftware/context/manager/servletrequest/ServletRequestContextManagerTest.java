@@ -45,31 +45,31 @@ public class ServletRequestContextManagerTest {
 
     @BeforeEach
     public void init() {
-        new ServletRequestContextManager().clear();
+        ServletRequestContextManager.provider().clear();
         threadpool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
     }
 
     @AfterEach
     public void cleanup() {
         threadpool.shutdown();
-        new ServletRequestContextManager().clear();
+        ServletRequestContextManager.provider().clear();
     }
 
     @Test
     public void testContextManagerToStringValue() {
-        assertThat(new ServletRequestContextManager(), hasToString(ServletRequestContextManager.class.getSimpleName()));
+        assertThat(ServletRequestContextManager.provider(), hasToString(ServletRequestContextManager.class.getSimpleName()));
     }
 
     @Test
     public void testGetActiveContext() {
-        assertThat(new ServletRequestContextManager().getActiveContextValue(), is(nullValue()));
+        assertThat(ServletRequestContextManager.provider().getActiveContextValue(), is(nullValue()));
 
         final ServletRequest request = mock(ServletRequest.class);
-        Context<ServletRequest> ctx = new ServletRequestContextManager().initializeNewContext(request);
+        Context<ServletRequest> ctx = ServletRequestContextManager.provider().initializeNewContext(request);
 
-        assertThat(new ServletRequestContextManager().getActiveContextValue(), is(sameInstance(request)));
+        assertThat(ServletRequestContextManager.provider().getActiveContextValue(), is(sameInstance(request)));
         ctx.close();
-        assertThat(new ServletRequestContextManager().getActiveContextValue(), is(nullValue()));
+        assertThat(ServletRequestContextManager.provider().getActiveContextValue(), is(nullValue()));
     }
 
     @Test
@@ -77,7 +77,7 @@ public class ServletRequestContextManagerTest {
         assertThat(ServletRequestContextManager.currentServletRequest(), is(nullValue()));
 
         final ServletRequest request = mock(ServletRequest.class);
-        Context<ServletRequest> ctx = new ServletRequestContextManager().initializeNewContext(request);
+        Context<ServletRequest> ctx = ServletRequestContextManager.provider().initializeNewContext(request);
 
         assertThat(ServletRequestContextManager.currentServletRequest(), is(sameInstance(request)));
         ctx.close();
@@ -87,18 +87,18 @@ public class ServletRequestContextManagerTest {
     @Test
     public void testClearableImplementation() {
         final ServletRequest request = mock(ServletRequest.class);
-        Context<ServletRequest> ctx = new ServletRequestContextManager().initializeNewContext(request);
+        Context<ServletRequest> ctx = ServletRequestContextManager.provider().initializeNewContext(request);
         assertThat(ctx.getValue(), is(sameInstance(request)));
-        assertThat(new ServletRequestContextManager().getActiveContextValue(), is(sameInstance(request)));
+        assertThat(ServletRequestContextManager.provider().getActiveContextValue(), is(sameInstance(request)));
 
         ContextManagers.clearActiveContexts();
         assertThat(ctx.getValue(), is(nullValue())); // must have been closed
-        assertThat(new ServletRequestContextManager().getActiveContextValue(), is(nullValue()));
+        assertThat(ServletRequestContextManager.provider().getActiveContextValue(), is(nullValue()));
     }
 
     @Test
     public void testPropagationInOtherThreads() throws ExecutionException, InterruptedException {
-        ServletRequestContextManager manager = new ServletRequestContextManager();
+        ServletRequestContextManager manager = ServletRequestContextManager.provider();
         ServletRequest request1 = mock(ServletRequest.class);
         ServletRequest request2 = mock(ServletRequest.class);
 
@@ -128,7 +128,7 @@ public class ServletRequestContextManagerTest {
 
     @Test
     public void testServletRequestContextToString() {
-        ServletRequestContextManager manager = new ServletRequestContextManager();
+        ServletRequestContextManager manager = ServletRequestContextManager.provider();
         assertThat(manager.getActiveContextValue(), nullValue());
 
         ServletRequest request = mock(ServletRequest.class);

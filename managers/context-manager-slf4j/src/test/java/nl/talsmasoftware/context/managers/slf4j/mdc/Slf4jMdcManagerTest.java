@@ -94,12 +94,12 @@ public class Slf4jMdcManagerTest {
 
     @Test
     public void testSlf4jMdcManagerToString() {
-        assertThat(new Slf4jMdcManager(), hasToString("Slf4jMdcManager"));
+        assertThat(Slf4jMdcManager.provider(), hasToString("Slf4jMdcManager"));
     }
 
     @Test
     public void testSlf4jMdcContextToString() {
-        Slf4jMdcManager mgr = new Slf4jMdcManager();
+        Slf4jMdcManager mgr = Slf4jMdcManager.provider();
         MDC.put("dummy", "value");
         Map<String, String> mdc = MDC.getCopyOfContextMap();
         assertThat(mgr.getActiveContextValue(), equalTo(mdc));

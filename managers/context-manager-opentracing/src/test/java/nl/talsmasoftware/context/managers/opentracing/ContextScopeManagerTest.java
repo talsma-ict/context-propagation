@@ -51,7 +51,7 @@ public class ContextScopeManagerTest {
     public void registerMockGlobalTracer() {
         GlobalTracerTestUtil.resetGlobalTracer();
         assertThat("Pre-existing GlobalTracer", GlobalTracer.isRegistered(), is(false));
-        scopeManager = new ContextScopeManager();
+        scopeManager = ContextScopeManager.provider();
         GlobalTracer.register(mockTracer = new MockTracer(scopeManager));
         threadpool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
     }

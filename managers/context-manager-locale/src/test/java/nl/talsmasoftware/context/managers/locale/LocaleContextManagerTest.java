@@ -46,7 +46,7 @@ public class LocaleContextManagerTest {
     private static final Locale GERMAN = Locale.GERMANY;
 
     private static final Locale DEFAULT_LOCALE = Locale.getDefault();
-    private static final LocaleContextManager MANAGER = new LocaleContextManager();
+    private static final LocaleContextManager MANAGER = LocaleContextManager.provider();
 
     private ExecutorService threadpool;
 

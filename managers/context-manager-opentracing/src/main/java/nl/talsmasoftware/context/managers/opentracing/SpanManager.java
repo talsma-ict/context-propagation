@@ -32,6 +32,33 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author Sjoerd Talsma
  */
 public class SpanManager implements ContextManager<Span> {
+    /**
+     * Singleton instance of this class.
+     */
+    private static final SpanManager INSTANCE = new SpanManager();
+
+    /**
+     * Returns the singleton instance of the {@code SpanManager}.
+     *
+     * <p>
+     * The ServiceLoader supports a static {@code provider()} method to resolve services since Java 9.
+     *
+     * @return The OpenTracing Span context manager.
+     */
+    public static SpanManager provider() {
+        return INSTANCE;
+    }
+
+    /**
+     * Creates a new context manager.
+     *
+     * @see #provider()
+     * @deprecated This constructor only exists for usage by Java 8 {@code ServiceLoader}. The singleton instance
+     * obtained from {@link #provider()} should be used to avoid unnecessary instantiations.
+     */
+    @Deprecated
+    public SpanManager() {
+    }
 
     /**
      * Return the {@link GlobalTracer#activeSpan() active span}.
