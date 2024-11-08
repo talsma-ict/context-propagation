@@ -26,8 +26,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -82,7 +80,7 @@ public class ContextManagersTest {
     }
 
     @Test
-    public void testSnapshot_inSameThread() throws IOException {
+    public void testSnapshot_inSameThread() {
         dummyManager.clear();
         MatcherAssert.assertThat(DummyContext.currentValue(), is(nullValue()));
 
@@ -99,7 +97,7 @@ public class ContextManagersTest {
         MatcherAssert.assertThat(DummyContext.currentValue(), is("third value"));
 
         // Reactivate snapshot: ctx1 -> ctx2 -> ctx3 -> ctx2'
-        Closeable reactivation = snapshot.reactivate();
+        ContextSnapshot.Reactivation reactivation = snapshot.reactivate();
         MatcherAssert.assertThat(DummyContext.currentValue(), is("second value"));
 
         reactivation.close();
@@ -173,14 +171,14 @@ public class ContextManagersTest {
     }
 
     @Test
-    public void testCreateSnapshot_ExceptionHandling() throws IOException {
+    public void testCreateSnapshot_ExceptionHandling() {
         ThrowingContextManager.onGet = new IllegalStateException("No active context!");
         Context<String> ctx = new DummyContext("blah");
         ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
         ctx.close();
 
         MatcherAssert.assertThat(DummyContext.currentValue(), is(nullValue()));
-        Closeable reactivation = snapshot.reactivate();
+        ContextSnapshot.Reactivation reactivation = snapshot.reactivate();
         MatcherAssert.assertThat(DummyContext.currentValue(), is("blah"));
         reactivation.close();
         MatcherAssert.assertThat(DummyContext.currentValue(), is(nullValue()));

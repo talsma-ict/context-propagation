@@ -59,7 +59,7 @@ public final class ContextManagers {
      * within a try-with-resources construct.
      */
     @SuppressWarnings("rawtypes")
-    public static nl.talsmasoftware.context.api.ContextSnapshot createContextSnapshot() {
+    public static ContextSnapshot createContextSnapshot() {
         final long start = System.nanoTime();
         final List<ContextManager> managers = ServiceCache.cached(ContextManager.class); // Cached list is immutable
         final Object[] values = new Object[managers.size()];
@@ -188,7 +188,7 @@ public final class ContextManagers {
                 }
 
                 ReactivationImpl reactivation = new ReactivationImpl(reactivatedContexts);
-                Timers.timed(System.nanoTime() - start, nl.talsmasoftware.context.api.ContextSnapshot.class, "reactivate");
+                Timers.timed(System.nanoTime() - start, ContextSnapshot.class, "reactivate");
                 return reactivation;
             } catch (RuntimeException reactivationException) {
                 // TODO think about simplifying by catching & handling in reactivate(manager, value) method

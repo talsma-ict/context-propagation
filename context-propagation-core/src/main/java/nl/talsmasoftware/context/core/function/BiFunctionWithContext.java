@@ -18,8 +18,6 @@ package nl.talsmasoftware.context.core.function;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.core.ContextManagers;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -52,7 +50,7 @@ public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndC
 
     @Override
     public OUT apply(IN1 in1, IN2 in2) {
-        try (Closeable context = snapshot().reactivate()) {
+        try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
             try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                 LOGGER.log(Level.FINEST, "Delegating apply method with {0} to {1}.", new Object[]{context, delegate()});
                 return delegate().apply(in1, in2);
@@ -63,8 +61,6 @@ public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndC
                     contextSnapshotConsumer.accept(resultSnapshot);
                 }
             }
-        } catch (IOException e) {
-            throw new RuntimeException(e.getMessage(), e);
         }
     }
 
@@ -72,7 +68,7 @@ public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndC
     public <V> BiFunction<IN1, IN2, V> andThen(Function<? super OUT, ? extends V> after) {
         requireNonNull(after, "Cannot post-process bi-function with after function <null>.");
         return (IN1 in1, IN2 in2) -> {
-            try (Closeable context = snapshot().reactivate()) {
+            try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
                 try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                     LOGGER.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});
                     return after.apply(delegate().apply(in1, in2));
@@ -83,8 +79,6 @@ public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndC
                         contextSnapshotConsumer.accept(resultSnapshot);
                     }
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e.getMessage(), e);
             }
         };
     }

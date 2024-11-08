@@ -18,8 +18,6 @@ package nl.talsmasoftware.context.core.function;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.core.ContextManagers;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -50,7 +48,7 @@ public class FunctionWithContext<IN, OUT> extends WrapperWithContextAndConsumer<
     }
 
     public OUT apply(IN in) {
-        try (Closeable context = snapshot().reactivate()) {
+        try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
             try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                 LOGGER.log(Level.FINEST, "Delegating apply method with {0} to {1}.", new Object[]{context, delegate()});
                 return delegate().apply(in);
@@ -61,15 +59,13 @@ public class FunctionWithContext<IN, OUT> extends WrapperWithContextAndConsumer<
                     contextSnapshotConsumer.accept(resultSnapshot);
                 }
             }
-        } catch (IOException e) {
-            throw new IllegalStateException("Error closing snapshot reactivation: " + e.getMessage(), e);
         }
     }
 
     public <V> Function<V, OUT> compose(Function<? super V, ? extends IN> before) {
         requireNonNull(before, "Cannot compose with before function <null>.");
         return (V v) -> {
-            try (Closeable context = snapshot().reactivate()) {
+            try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
                 try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                     LOGGER.log(Level.FINEST, "Delegating compose method with {0} to {1}.", new Object[]{context, delegate()});
                     return delegate().apply(before.apply(v));
@@ -80,8 +76,6 @@ public class FunctionWithContext<IN, OUT> extends WrapperWithContextAndConsumer<
                         contextSnapshotConsumer.accept(resultSnapshot);
                     }
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e.getMessage(), e);
             }
         };
     }
@@ -89,7 +83,7 @@ public class FunctionWithContext<IN, OUT> extends WrapperWithContextAndConsumer<
     public <V> Function<IN, V> andThen(Function<? super OUT, ? extends V> after) {
         requireNonNull(after, "Cannot transform with after function <null>.");
         return (IN in) -> {
-            try (Closeable context = snapshot().reactivate()) {
+            try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
                 try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                     LOGGER.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});
                     return after.apply(delegate().apply(in));
@@ -100,8 +94,6 @@ public class FunctionWithContext<IN, OUT> extends WrapperWithContextAndConsumer<
                         contextSnapshotConsumer.accept(resultSnapshot);
                     }
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e.getMessage(), e);
             }
         };
     }
