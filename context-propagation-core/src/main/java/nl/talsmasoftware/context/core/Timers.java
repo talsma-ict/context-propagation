@@ -24,9 +24,9 @@ import java.util.logging.Logger;
 final class Timers {
     private static final Logger TIMING_LOGGER = Logger.getLogger(Timers.class.getName());
 
-    static void timed(long durationNanos, Class<?> type, String method) {
+    static void timed(long durationNanos, Class<?> type, String method, Throwable error) {
         for (ContextTimer delegate : ServiceCache.cached(ContextTimer.class)) {
-            delegate.update(type, method, durationNanos, TimeUnit.NANOSECONDS);
+            delegate.update(type, method, durationNanos, TimeUnit.NANOSECONDS, error);
         }
         if (TIMING_LOGGER.isLoggable(Level.FINEST)) {
             TIMING_LOGGER.log(Level.FINEST, "{0}.{1}: {2,number}ns", new Object[]{type.getName(), method, durationNanos});

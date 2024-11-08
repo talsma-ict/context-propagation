@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -47,12 +48,14 @@ public class MetricsContextTimerTest {
     @BeforeEach
     @AfterEach
     @SuppressWarnings("unchecked")
-    public void resetCacheAndRegistry() {
+    public void resetCachesAndRegistry() {
         try {
-            // Reflect and clear the cache
-            Field cache = MetricsContextTimer.class.getDeclaredField("TIMERS");
-            cache.setAccessible(true);
-            ((Map) cache.get(null)).clear();
+            // Reflect and clear the caches
+            for (String name : Arrays.asList("CACHED_TIMERS", "CACHED_ERRORS")) {
+                Field cache = MetricsContextTimer.class.getDeclaredField(name);
+                cache.setAccessible(true);
+                ((Map) cache.get(null)).clear();
+            }
 
             // Clear all shared registries
             SharedMetricRegistries.clear();
@@ -131,7 +134,7 @@ public class MetricsContextTimerTest {
         MetricsContextTimer metricsContextTimer = new MetricsContextTimer();
         assertThat(metricsContextTimer, hasToString("MetricsContextTimer{timers=[]}"));
 
-        metricsContextTimer.update(getClass(), "method", 1, TimeUnit.SECONDS);
+        metricsContextTimer.update(getClass(), "method", 1, TimeUnit.SECONDS, null);
         assertThat(metricsContextTimer,
                 hasToString("MetricsContextTimer{timers=[" + getClass().getName() + ".method]}"));
     }

@@ -16,13 +16,15 @@
 package nl.talsmasoftware.context.timers.opentracing;
 
 import io.opentracing.Span;
+import io.opentracing.log.Fields;
+import io.opentracing.tag.Tags;
 import io.opentracing.util.GlobalTracer;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.api.ContextTimer;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import static java.util.Collections.singletonMap;
 
 /**
  * This {@link ContextTimer} uses the {@code Opentracing API} to report timing statistics of context switches.
@@ -35,20 +37,27 @@ public class OpentracingContextTimer implements ContextTimer {
     private static final String LOG_FIELD_THREAD = "context.thread";
 
     @Override
-    public void update(Class<?> type, String method, long duration, TimeUnit unit) {
+    public void update(Class<?> type, String method, long duration, TimeUnit unit, Throwable error) {
         if (GlobalTracer.isRegistered() && reportContextSwitchesFor(type)) {
             String operationName = type.getSimpleName() + "." + method;
             long finishedMicros = System.currentTimeMillis() * 1000;
             long startTimestampMicros = finishedMicros - unit.toMicros(duration);
             Span span = GlobalTracer.get().buildSpan(operationName).withStartTimestamp(startTimestampMicros).start();
             try {
+                Map<String, Object> log = new LinkedHashMap<>();
                 if ("createContextSnapshot".equals(method)) {
-                    span.log("New context snapshot created");
-                    span.log(singletonMap(LOG_FIELD_THREAD, Thread.currentThread().getName()));
+                    log.put(Fields.EVENT, "New context snapshot created");
                 } else if ("reactivate".equals(method)) {
-                    span.log("Context snapshot reactivated");
-                    span.log(singletonMap(LOG_FIELD_THREAD, Thread.currentThread().getName()));
+                    log.put(Fields.EVENT, "Context snapshot reactivated");
                 }
+                if (error != null) {
+                    Tags.ERROR.set(span, true);
+                    log.put(Fields.EVENT, "error");
+                    log.put(Fields.MESSAGE, error.getMessage());
+                    log.put(Fields.ERROR_OBJECT, error);
+                }
+                log.put(LOG_FIELD_THREAD, Thread.currentThread().getName());
+                span.log(log);
             } finally {
                 span.finish(finishedMicros);
             }

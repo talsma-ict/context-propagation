@@ -34,9 +34,10 @@ public class MicrometerContextTimer implements ContextTimer {
      * @param method   The method being called
      * @param duration The duration of the method
      * @param unit     The unit of the duration
+     * @param error    Optional error that occurred when calling the method.
      */
     @Override
-    public void update(Class<?> type, String method, long duration, TimeUnit unit) {
+    public void update(Class<?> type, String method, long duration, TimeUnit unit, Throwable error) {
         Metrics.timer(type.getName() + "." + method).record(duration, unit);
     }
 

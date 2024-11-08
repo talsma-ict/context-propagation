@@ -38,7 +38,7 @@ import java.io.Closeable;
  * {@link Reactivation#close()}.
  *
  * @author Sjoerd Talsma
- * @since 1.1.0
+ * @since 2.0.0
  */
 public interface ContextSnapshot {
 
