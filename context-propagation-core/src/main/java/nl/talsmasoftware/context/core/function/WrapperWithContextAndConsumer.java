@@ -23,17 +23,21 @@ import java.util.function.Supplier;
 
 /**
  * A {@linkplain WrapperWithContext} that takes an additional {@link Consumer} accepting a result snapshot,
- * captured after the function end.
+ * to be captured at the end of the function.
  *
  * <p>
- * This consumer is optional. All clients should avoid taking unnecessary snapshots if the consumer is {@code null}.
+ * This consumer is optional.<br>
+ * All subclasses <strong>must</strong> avoid capturing unnecessary snapshots if the consumer is {@code null}.
  *
  * @param <T> The type of the wrapped delegate object.
  */
 abstract class WrapperWithContextAndConsumer<T> extends WrapperWithContext<T> {
 
     /**
-     * The context snapshot consumer to provide a new snapshot to after the function is completed, may be {@code null}.
+     * The context snapshot consumer to provide a new snapshot to after the function is complete.
+     *
+     * <p>
+     * This consumer may be {@code null} in which case <strong>no new snapshot</strong> must be captured.
      */
     protected final Consumer<ContextSnapshot> contextSnapshotConsumer;
 
