@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2022 Talsma ICT
+ * Copyright 2016-2024 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 /**
  * Propagate the {@linkplain org.apache.logging.log4j.ThreadContext Log4j 2 ThreadContext}
  * data from one thread to another.
  */
-package nl.talsmasoftware.context.log4j2.threadcontext;
+package nl.talsmasoftware.context.managers.log4j2.threadcontext;
