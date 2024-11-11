@@ -56,24 +56,6 @@
                 <version>${project.version}</version>
             </dependency>
 
-            <!-- Context timer versions -->
-
-            <dependency>
-                <groupId>${project.groupId}.timers</groupId>
-                <artifactId>context-timer-metrics</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}.timers</groupId>
-                <artifactId>context-timer-micrometer</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}.timers</groupId>
-                <artifactId>context-timer-opentracing</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
             <!-- Context manager implementation versions. -->
 
             <dependency>
@@ -84,6 +66,11 @@
             <dependency>
                 <groupId>${project.groupId}.managers</groupId>
                 <artifactId>context-manager-log4j2</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}.managers</groupId>
+                <artifactId>context-manager-opentelemetry</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -104,6 +91,29 @@
             <dependency>
                 <groupId>${project.groupId}.managers</groupId>
                 <artifactId>context-manager-spring-security</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- Context timer versions -->
+
+            <dependency>
+                <groupId>${project.groupId}.timers</groupId>
+                <artifactId>context-timer-metrics</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}.timers</groupId>
+                <artifactId>context-timer-micrometer</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}.timers</groupId>
+                <artifactId>context-timer-opentelemetry</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}.timers</groupId>
+                <artifactId>context-timer-opentracing</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
