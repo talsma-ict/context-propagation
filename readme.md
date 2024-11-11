@@ -69,7 +69,7 @@ ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
 In the code of your background thread, activate the snapshot to have all ThreadLocal
 context values set as they were captured:
 ```java
-try (Context<Void> reactivation = snapshot.reactivate()) {
+try (ContextSnapshot.Reactivation reactivation = snapshot.reactivate()) {
     // All ThreadLocal values from the snapshot are available within this block
 }
 ```
