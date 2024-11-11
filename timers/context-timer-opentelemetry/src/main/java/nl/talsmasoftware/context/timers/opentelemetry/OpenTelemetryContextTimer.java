@@ -24,6 +24,7 @@ import nl.talsmasoftware.context.api.ContextTimer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -34,20 +35,21 @@ import static io.opentelemetry.api.common.AttributeKey.stringKey;
 public class OpenTelemetryContextTimer implements ContextTimer {
     private static final Logger LOGGER = Logger.getLogger(OpenTelemetryContextTimer.class.getName());
     private static final String INSTRUMENTATION_SCOPE = "nl.talsmasoftware.context";
-    private static final String INSTRUMENTATION_VERSION = readVersion();
+    private static final String INSTRUMENTATION_VERSION = Optional.ofNullable(readVersion()).orElse("2.0.0");
 
     @Override
     public void update(Class<?> type, String method, long duration, TimeUnit unit, Throwable error) {
         if (mustTrace(type)) {
+            Instant timestamp = Instant.now();
             Span span = GlobalOpenTelemetry.getTracer(INSTRUMENTATION_SCOPE, INSTRUMENTATION_VERSION)
                     .spanBuilder(type.getSimpleName() + "." + method)
-                    .setStartTimestamp(Instant.now().minusNanos(unit.toNanos(duration)))
+                    .setStartTimestamp(timestamp.minusNanos(unit.toNanos(duration)))
                     .setAttribute("context.thread", Thread.currentThread().getName())
                     .startSpan();
             if (error != null) {
                 span.recordException(error, Attributes.of(stringKey("exception.message"), error.getMessage()));
             }
-            span.end();
+            span.end(timestamp);
         }
     }
 
@@ -57,7 +59,7 @@ public class OpenTelemetryContextTimer implements ContextTimer {
             Properties properties = new Properties();
             properties.load(stream);
             return properties.getProperty("version");
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException e) {
             LOGGER.log(Level.WARNING, e, () -> "Error obtaining version from build metadata (" + path + "): " + e.getMessage());
             return null;
         }
