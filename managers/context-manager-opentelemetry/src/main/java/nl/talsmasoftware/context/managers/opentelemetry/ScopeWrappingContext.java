@@ -18,13 +18,28 @@ package nl.talsmasoftware.context.managers.opentelemetry;
 import io.opentelemetry.context.Scope;
 import nl.talsmasoftware.context.api.Context;
 
+/**
+ * Context wrapping an {@linkplain Scope OpenTelemetry Scope}, closing it when the context is closed.
+ *
+ * @param <T> The type of the contained value, left for the subclass to provide.
+ */
 abstract class ScopeWrappingContext<T> implements Context<T> {
     private final Scope scope;
 
+    /**
+     * Creates a new context responsible for closing the provided {@linkplain Scope}.
+     *
+     * @param scope the opentelemetry scope to wrap.
+     */
     ScopeWrappingContext(Scope scope) {
         this.scope = scope;
     }
 
+    /**
+     * Closes the wrapped {@linkplain Scope OpenTelemetry Scope}.
+     *
+     * @see Scope#close()
+     */
     public void close() {
         scope.close();
     }
