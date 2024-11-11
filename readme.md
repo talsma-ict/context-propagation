@@ -109,22 +109,6 @@ out of the box by this context-propagation library:
 Adding your own `Context` type is possible
 by [creating your own context manager](context-propagation/README.md#creating-your-own-context-manager).
 
-## Caching
-
-By default the `ContextManagers` class caches the context manager instances it finds
-per _classloader_.
-Since the cache is per classloader, this should work satisfactory
-for applications with simple classloader hierarchies (e.g. _dropwizard_) 
-and also for complex hierarchies (_spring boot_, _JEE_ and the like).
-
-### Disable caching
-
-If however, you wish to disable caching of the context manager instances, you can set either:
-- the java system property `talsmasoftware.context.caching`, or
-- the environment variable `TALSMASOFTWARE_CONTEXT_CACHING`
-
-The values `false` or `0` will _disable_ caching.
-
 ## Building jars with dependencies
 
 When using a build tool or plugin to create an 'uber-jar', i.e. a jar file with all
