@@ -36,7 +36,6 @@
     <properties>
         <project.moduleName>${project.groupId}.slf4j</project.moduleName>
         <root.basedir>${project.parent.basedir}</root.basedir>
-        <project.javadoc.version>8</project.javadoc.version>
     </properties>
 
     <dependencies>

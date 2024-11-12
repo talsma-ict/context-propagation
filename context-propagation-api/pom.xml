@@ -34,7 +34,6 @@
     <properties>
         <project.moduleName>${project.groupId}.api</project.moduleName>
         <root.basedir>${project.parent.basedir}</root.basedir>
-        <project.javadoc.version>8</project.javadoc.version>
 
         <javax.annotation-api.version>1.3.2</javax.annotation-api.version>
     </properties>
