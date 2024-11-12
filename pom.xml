@@ -242,6 +242,10 @@
                             <url>https://javadoc.io/page/${project.groupId}/context-propagation/${project.version}</url>
                         </offlineLink>
                         <offlineLink>
+                            <location>${root.basedir}/.mvn/javadoc/log4j-api</location>
+                            <url>https://logging.apache.org/log4j/2.x/javadoc/log4j-api</url>
+                        </offlineLink>
+                        <offlineLink>
                             <location>${root.basedir}/.mvn/javadoc/metrics-core</location>
                             <url>https://www.javadoc.io/page/io.dropwizard.metrics/metrics-core/${metrics.version}</url>
                         </offlineLink>
