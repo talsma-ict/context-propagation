@@ -14,38 +14,72 @@
  * limitations under the License.
  */
 /**
- * Main package defining the core {@code context-propagation} concepts in this library
- *
- * <h2>{@linkplain nl.talsmasoftware.context.api.Context}</h2>
- * <p>
- * A {@linkplain nl.talsmasoftware.context.api.Context context} contains
- * a {@linkplain nl.talsmasoftware.context.api.Context#getValue() value}.<br>
- * There can be one active context per thread. A context remains active until it is closed or another context
- * is activated in that thread.
- *
- * <p>
- * An {@linkplain nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext AbstractThreadLocalContext}
- * base class is provided that supports nested contexts and provides predictable behaviour for out-of-order closing.
- *
- * <h2>{@linkplain nl.talsmasoftware.context.api.ContextManager}</h2>
- * <p>
- * Manages the active context.
- * Can {@linkplain nl.talsmasoftware.context.api.ContextManager#initializeNewContext(Object) initialize a new context}
- * and provides access to
- * the {@linkplain nl.talsmasoftware.context.api.ContextManager#getActiveContextValue() active context value}.
- *
- * <h2>{@linkplain nl.talsmasoftware.context.api.ContextSnapshot}</h2>
- * <p>
- * A snapshot contains the current value from all known context managers.<br>
- * These values can be reactivated in another thread.<br>
- * Reactivated snapshots must be closed to avoid leaking context.
+ * Core implementation classes of this library.
  *
  * <p>
  * All context aware utility classes in this library are tested to make sure they reactivate and close snapshots in a safe way.
  *
- * <h2>{@linkplain nl.talsmasoftware.context.core.ContextManagers}</h2>
+ * <h2>{@linkplain nl.talsmasoftware.context.core.concurrent concurrent}</h2>
  * <p>
- * Utility class that detects available context managers and lets you take a snapshot of all active contexts at once.
+ * Concurrent classes that will automatically propagate a context snapshot into other threads,
+ * making sure the reactivation gets closed after the work is done.
+ * <ul>
+ *     <li>{@linkplain nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService ContextAwareExecutorService}
+ *     that wraps an existing {@code ExecutorService},
+ *     propagating a {@linkplain nl.talsmasoftware.context.api.ContextSnapshot context snapshot} for every submitted task.
+ *     <li>{@linkplain nl.talsmasoftware.context.core.concurrent.ContextAwareCompletableFuture ContextAwareCompletableFuture}
+ *     that propagates the {@linkplain nl.talsmasoftware.context.api.ContextSnapshot context snapshot}
+ *     across its completion stages.
+ * </ul>
+ *
+ * <h2>{@linkplain nl.talsmasoftware.context.core.function function}</h2>
+ * <p>
+ * Functional interfaces that reactivate a {@linkplain nl.talsmasoftware.context.api.ContextSnapshot context snapshot}
+ * during their execution and safely close the reactivation after the work is done.
+ * <ul>
+ *     <li>{@linkplain nl.talsmasoftware.context.core.function.RunnableWithContext RunnableWithContext}
+ *     <li>{@linkplain nl.talsmasoftware.context.core.function.BiConsumerWithContext BiConsumerWithContext}
+ *     <li>{@linkplain nl.talsmasoftware.context.core.function.BiFunctionWithContext BiFunctionWithContext}
+ *     <li>{@linkplain nl.talsmasoftware.context.core.function.BinaryOperatorWithContext BinaryOperatorWithContext}
+ *     <li>{@linkplain nl.talsmasoftware.context.core.function.BiPredicateWithContext BiPredicateWithContext}
+ *     <li>{@linkplain nl.talsmasoftware.context.core.function.BooleanSupplierWithContext BooleanSupplierWithContext}
+ *     <li>{@linkplain nl.talsmasoftware.context.core.function.ConsumerWithContext ConsumerWithContext}
+ *     <li>{@linkplain nl.talsmasoftware.context.core.function.FunctionWithContext FunctionWithContext}
+ *     <li>{@linkplain nl.talsmasoftware.context.core.function.PredicateWithContext PredicateWithContext}
+ *     <li>{@linkplain nl.talsmasoftware.context.core.function.SupplierWithContext SupplierWithContext}
+ *     <li>{@linkplain nl.talsmasoftware.context.core.function.UnaryOperatorWithContext UnaryOperatorWithContext}
+ * </ul>
+ *
+ * <h2>{@linkplain nl.talsmasoftware.context.core.delegation delegation}</h2>
+ * <p>
+ * Base classes that are easy to extend by overriding one or only a few methods
+ * without having to manually delegate all standard behaviour to a wrapped delegate.
+ *
+ * <h2>{@linkplain nl.talsmasoftware.context.core.threadlocal threadlocal}</h2>
+ * <p>
+ * ThreadLocal utilities.
+ * <ul>
+ *     <li>{@linkplain nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext AbstractThreadLocalContext}
+ *     providing a base class to extend, providing:
+ *     <ul>
+ *         <li>A {@linkplain java.lang.ThreadLocal ThreadLocal} instance per subclass.
+ *         <li>Predictable behaviour on out-of-sequence closing. Even though this should not happen with correct use
+ *         of the library, it is a good idea to be resilient when things go different anyway.
+ *         Our implementation guarantees that no closed context is ever propagated to another thread.
+ *     </ul>
+ * </ul>
+ *
+ * <h2>{@linkplain nl.talsmasoftware.context.core.ContextManagers ContextManagers}</h2>
+ * <p>
+ * Utility class to interact with all detected {@linkplain nl.talsmasoftware.context.api.ContextManager ContextManager}
+ * implementations at once, combining all
+ * their {@linkplain nl.talsmasoftware.context.api.ContextManager#getActiveContextValue() active context values}
+ * into a single {@linkplain nl.talsmasoftware.context.api.ContextSnapshot context snapshot} that can be reactivated
+ * in another thread.
+ * <p>
+ * Although this utility class is public and it is allowed to interact with it,
+ * it is advised to use one of the <em>ContextAware..</em> or <em>..WithContext</em> classes instead.<br>
+ * They make it much easier to close the reactivated snapshot again in a proper manner.
  *
  * @author Sjoerd Talsma
  */
