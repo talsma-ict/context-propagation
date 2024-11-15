@@ -14,19 +14,30 @@
  * limitations under the License.
  */
 /**
- * Layered code for delegation such as {@code CallMappingExecutorService}.
+ * Base classes for delegation.
  *
- * <h2>{@linkplain nl.talsmasoftware.context.core.delegation.Wrapper}</h2>
  * <p>
- * The base class for any delegation in this package.
- * Any wrapper contains an implementation of {@code hashCode}, {@code equals}
+ * These delegators classes are layered, providing increasing level of functionality.<br>
+ * {@linkplain nl.talsmasoftware.context.core.delegation.Wrapper Wrapper} is the base class for all other delegators.<br>
+ * The {@linkplain  nl.talsmasoftware.context.core.delegation.CallMappingExecutorService CallMappingExecutorService}
+ * has the highest implementation level in this package.
+ *
+ * <h2>{@linkplain nl.talsmasoftware.context.core.delegation.Wrapper Wrapper}</h2>
+ * <p>
+ * Base class for any delegation in this package.<br>
+ * Wrappers provide an accessors for the delegate object to their subclasses:
+ * {@linkplain nl.talsmasoftware.context.core.delegation.Wrapper#delegate() delegate()}.<br>
+ * Any wrapper further contains an implementation of {@code hashCode}, {@code equals}
  * and {@code toString} based on the actual class and the wrapped instance.
- * A wrapper has two accessors for the delegate object: {@code delegate()}
- * and {@code nonNullDelegate()}. The latter validates that the delegate is non-null.
  *
+ * <h2>{@linkplain nl.talsmasoftware.context.core.delegation.WrapperWithContext WrapperWithContext}</h2>
  * <p>
- * The {@linkplain nl.talsmasoftware.context.core.delegation.WrapperWithContext} is
- * just a wrapper that also contains a context snapshot (or a supplier for it).
+ * Just a wrapper that also contains either a context snapshot or a supplier for it.
+ *
+ * <h2>{@linkplain nl.talsmasoftware.context.core.delegation.DelegatingFuture DelegatingFuture}</h2>
+ * <p>
+ * Future that passes all operations to a delegate future.<br>
+ * It allows the result of the to future to be wrapped using an overridable  {@code wrapResult} method.
  *
  * <h2>{@linkplain nl.talsmasoftware.context.core.delegation.CallMappingExecutorService}</h2>
  * <p>
