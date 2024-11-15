@@ -85,7 +85,7 @@ public final class LocaleContext implements Context<Locale> {
      * Sets the current locale on the current thread until {@linkplain Context#close()} is called.
      *
      * @param locale The locale to become the current locale.
-     * @return The context to restore the previous locale with upon {@code close()}.
+     * @return The context to restore the previous locale upon {@code close()}.
      */
     public static Context<Locale> set(Locale locale) {
         return new LocaleContext(locale);

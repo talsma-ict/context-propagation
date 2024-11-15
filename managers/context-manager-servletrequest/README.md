@@ -10,13 +10,13 @@ if the `ServletRequestContextFilter` was applied to the inbound request.
 ## How to use this library
 
 1. Add it to your classpath.
-  ```xml
-  <dependency>
-      <groupId>nl.talsmasoftware.context</groupId>
-      <artifactId>servletrequest-propagation</artifactId>
-      <version>[see Maven badge above]</version>
-  </dependency>
-  ```
+   ```xml
+   <dependency>
+       <groupId>nl.talsmasoftware.context</groupId>
+       <artifactId>servletrequest-propagation</artifactId>
+       <version>[see Maven badge above]</version>
+   </dependency>
+   ```
 
 2. Include the `ServletRequestContextFilter` in your application.
 
