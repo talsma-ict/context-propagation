@@ -18,7 +18,6 @@ package nl.talsmasoftware.context.core.delegation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -74,18 +73,14 @@ public abstract class DelegatingExecutorService extends Wrapper<ExecutorService>
      * @see #wrap(Callable)
      */
     protected <T> Collection<? extends Callable<T>> wrapTasks(Collection<? extends Callable<T>> tasks) {
-        Collection<? extends Callable<T>> wrappedTasks = tasks;
         if (tasks != null && !tasks.isEmpty()) {
-            boolean modification = false;
-            final List<Callable<T>> copy = new ArrayList<Callable<T>>(tasks.size());
+            final List<Callable<T>> wrappedTasks = new ArrayList<>(tasks.size());
             for (Callable<T> task : tasks) {
-                final Callable<T> wrapped = wrap(task);
-                modification |= (task == wrapped || Objects.equals(task, wrapped));
-                copy.add(wrapped);
+                wrappedTasks.add(wrap(task));
             }
-            if (modification) wrappedTasks = copy;
+            tasks = wrappedTasks;
         }
-        return wrappedTasks;
+        return tasks;
     }
 
     /**
