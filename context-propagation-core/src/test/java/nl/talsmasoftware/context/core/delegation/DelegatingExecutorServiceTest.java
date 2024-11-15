@@ -147,7 +147,7 @@ public class DelegatingExecutorServiceTest {
 
         assertThat(subject.invokeAll(calls), is(equalTo(result)));
 
-        verify(delegate).invokeAll(same(calls));
+        verify(delegate).invokeAll(eq(calls));
     }
 
     @Test
@@ -158,7 +158,7 @@ public class DelegatingExecutorServiceTest {
 
         assertThat(subject.invokeAll(calls, 2364L, MILLISECONDS), is(equalTo(result)));
 
-        verify(delegate).invokeAll(same(calls), eq(2364L), eq(MILLISECONDS));
+        verify(delegate).invokeAll(eq(calls), eq(2364L), eq(MILLISECONDS));
     }
 
     @Test

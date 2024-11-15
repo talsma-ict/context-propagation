@@ -16,12 +16,6 @@
 /**
  * Base classes for delegation.
  *
- * <p>
- * These delegators classes are layered, providing increasing level of functionality.<br>
- * {@linkplain nl.talsmasoftware.context.core.delegation.Wrapper Wrapper} is the base class for all other delegators.<br>
- * The {@linkplain  nl.talsmasoftware.context.core.delegation.CallMappingExecutorService CallMappingExecutorService}
- * has the highest implementation level in this package.
- *
  * <h2>{@linkplain nl.talsmasoftware.context.core.delegation.Wrapper Wrapper}</h2>
  * <p>
  * Base class for any delegation in this package.<br>
@@ -38,12 +32,5 @@
  * <p>
  * Future that passes all operations to a delegate future.<br>
  * It allows the result of the to future to be wrapped using an overridable  {@code wrapResult} method.
- *
- * <h2>{@linkplain nl.talsmasoftware.context.core.delegation.CallMappingExecutorService}</h2>
- * <p>
- * A {@linkplain nl.talsmasoftware.context.core.delegation.DelegatingExecutorService} that maps
- * all {@linkplain java.lang.Runnable} tasks in {@linkplain java.util.concurrent.Callable}
- * objects, providing a base executor service that can wrap any background task
- * by implementing a single {@code map(Callable)} method.
  */
 package nl.talsmasoftware.context.core.delegation;

@@ -31,7 +31,7 @@ import java.util.concurrent.TimeoutException;
  * The class also provides overridable <code>wrapper</code> methods for all complex input (e.g. {@link Callable}, {@link Runnable})
  * and result types (e.g. {@link Future}).
  * <p>
- * Although this class does implements <em>all</em> required methods of {@link ExecutorService} it is still declared
+ * Although this class does implement <em>all</em> required methods of {@link ExecutorService} it is still declared
  * as an <em>abstract</em> class.<br>
  * This is because it does not provide any value in itself.
  *
@@ -73,14 +73,10 @@ public abstract class DelegatingExecutorService extends Wrapper<ExecutorService>
      * @see #wrap(Callable)
      */
     protected <T> Collection<? extends Callable<T>> wrapTasks(Collection<? extends Callable<T>> tasks) {
-        if (tasks != null && !tasks.isEmpty()) {
-            final List<Callable<T>> wrappedTasks = new ArrayList<>(tasks.size());
-            for (Callable<T> task : tasks) {
-                wrappedTasks.add(wrap(task));
-            }
-            tasks = wrappedTasks;
-        }
-        return tasks;
+        if (tasks == null) return null;
+        final List<Callable<T>> wrappedTasks = new ArrayList<>(tasks.size());
+        for (Callable<T> task : tasks) wrappedTasks.add(wrap(task));
+        return wrappedTasks;
     }
 
     /**
@@ -94,7 +90,7 @@ public abstract class DelegatingExecutorService extends Wrapper<ExecutorService>
      */
     protected <T> List<Future<T>> wrapFutures(Collection<? extends Future<T>> futures) {
         if (futures == null) return null;
-        final List<Future<T>> wrappedFutures = new ArrayList<Future<T>>(futures.size());
+        final List<Future<T>> wrappedFutures = new ArrayList<>(futures.size());
         for (Future<T> future : futures) wrappedFutures.add(wrap(future));
         return wrappedFutures;
     }
