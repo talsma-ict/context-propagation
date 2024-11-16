@@ -36,10 +36,15 @@ import java.util.function.Supplier;
 import static java.util.Objects.requireNonNull;
 
 /**
- * This class extends the standard {@link CompletableFuture} that was introduced in java version 8.
+ * {@linkplain CompletableFuture} that makes every successive call with a reactivated
+ * {@linkplain ContextSnapshot context snapshot} taken from the submitting thread.
+ *
  * <p>
- * The class is a 'normal' Completable Future, but every successive call made on the result will be made within the
- * {@link ContextSnapshot context during creation} of this {@link ContextAwareCompletableFuture}.
+ * Snapshots are properly closed after running the function body.
+ *
+ * <p>
+ * The implementation allows the creator to {@linkplain #takeNewSnapshot() take a new snapshot} to propagate
+ * after each completion stage. Please be aware that this may cause relatively high overhead.
  *
  * @author Sjoerd Talsma
  */

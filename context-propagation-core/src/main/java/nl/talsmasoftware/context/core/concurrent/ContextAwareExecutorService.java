@@ -24,23 +24,23 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 /**
- * {@code ExecutorService} propagating a {@linkplain nl.talsmasoftware.context.api.ContextSnapshot ContextSnapshot}
- * to submitted tasks. Any existing {@linkplain java.util.concurrent.ExecutorService ExecutorService} can be used
- * * as a delegate, including those from the {@linkplain java.util.concurrent.Executors Executors} utility class.
- * <p>
- * Executor service that wraps another executor service, making sure background tasks operates 'within'
- * a context snapshot taken from the submitting thread.
+ * Executor service that wraps another {@linkplain ExecutorService}, making sure background tasks operate 'within'
+ * a {@linkplain ContextSnapshot context snapshot} taken from the submitting thread.
  *
  * <p>
- * The executor service will make sure to close the reactivated snapshot again after the code in the task is finished,
+ * Any existing {@linkplain ExecutorService} can be used as a delegate, including those from
+ * the {@linkplain java.util.concurrent.Executors Executors} utility class.
+ *
+ * <p>
+ * The executor service will make sure to close each reactivated snapshot again after the code in the task is finished,
  * even if it throws an exception.
  *
  * <p>
- * Both {@link Callable} and {@link Runnable} tasks are mapped.
+ * Both {@link Callable} and {@link Runnable} tasks are wrapped.
  *
  * @author Sjoerd Talsma
  */
-public class ContextAwareExecutorService extends DelegatingExecutorService {
+public class ContextAwareExecutorService extends DelegatingExecutorService implements ExecutorService{
     public ContextAwareExecutorService(ExecutorService delegate) {
         super(delegate);
     }

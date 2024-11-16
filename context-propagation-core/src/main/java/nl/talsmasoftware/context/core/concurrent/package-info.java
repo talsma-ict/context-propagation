@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 /**
- * Classes adding context support to concurrent usage.
- *
- * <p>
+ * ThreadLocal context management in concurrent applications.
  *
  * <h2>{@linkplain nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService ContextAwareExecutorService}</h2>
  * <p>
- * An {@code ExecutorService} that propagates a {@linkplain nl.talsmasoftware.context.api.ContextSnapshot ContextSnapshot}
- * to submitted tasks. Any existing {@linkplain java.util.concurrent.ExecutorService ExecutorService} can be used
- * as a delegate, including those from the {@linkplain java.util.concurrent.Executors Executors} utility class.
+ * Executor service that wraps another {@linkplain java.util.concurrent.ExecutorService ExecutorService},
+ * making sure background tasks operate 'within'
+ * a {@linkplain nl.talsmasoftware.context.api.ContextSnapshot context snapshot} taken from the submitting thread.
  *
  * <h2>{@linkplain nl.talsmasoftware.context.core.concurrent.ContextAwareCompletableFuture ContextAwareCompletableFuture}</h2>
  * <p>
- *
+ * {@linkplain java.util.concurrent.CompletableFuture CompletableFuture} that runs every successive call with a reactivated
+ * {@linkplain nl.talsmasoftware.context.api.ContextSnapshot context snapshot} taken from the submitting thread.
  */
 package nl.talsmasoftware.context.core.concurrent;

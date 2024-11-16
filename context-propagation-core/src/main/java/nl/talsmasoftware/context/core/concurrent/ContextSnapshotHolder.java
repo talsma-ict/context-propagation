@@ -44,6 +44,16 @@ final class ContextSnapshotHolder implements Consumer<ContextSnapshot>, Supplier
     }
 
     /**
+     * Returns the current snapshot, normally to activate when beginning a new completion stage.
+     *
+     * @return The held snapshot (must never be {@code null})
+     */
+    @Override
+    public ContextSnapshot get() {
+        return snapshot;
+    }
+
+    /**
      * Accept a new snapshot (i.e. after a single stage is completed) to be propagated
      * into another completion stage.
      *
@@ -52,16 +62,6 @@ final class ContextSnapshotHolder implements Consumer<ContextSnapshot>, Supplier
     @Override
     public void accept(ContextSnapshot snapshot) {
         this.snapshot = requireNonNull(snapshot, "Context snapshot is <null>.");
-    }
-
-    /**
-     * Returns the current snapshot, normally to activate when beginning a new completion stage.
-     *
-     * @return The held snapshot (should never be {@code null})
-     */
-    @Override
-    public ContextSnapshot get() {
-        return snapshot;
     }
 
 }
