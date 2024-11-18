@@ -8,7 +8,7 @@ default OpenTelemetry Context storage.
 
 Obtaining the current context value is delegated to
 `io.opentelemetry.context.Context.current()`.
-Intializing a new context value is delegated to
+Initializing a new context value is delegated to
 `io.opentelemetry.context.Context.makeCurrent()`.
 
 Adding the `context-manager-opentelemetry` jar to the classpath

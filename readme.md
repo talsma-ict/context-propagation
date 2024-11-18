@@ -11,7 +11,7 @@
 > 
 > This is  the development branch for the v2 version of this library.
 > All breaking changes to the library must go in this branch.
-> - Java version bumped to Java8 mimimum
+> - Java version bumped to Java8 minimum
 > - `ContextManager.getActiveContext()` replaced by `getActiveContextValue()`.
 > - `ContextManager.clear()` will require an implementation.
 > - All `@Deprecated(forRemoval=true)` is to be removed.
@@ -36,7 +36,7 @@ cleanup after execution finishes:
 
 Abstraction containing a value in the context of a _thread_. 
 The most common implementation in Java is a ThreadLocal value.
-The library provies an `AbstractThreadLocalContext` base class 
+The library provides an `AbstractThreadLocalContext` base class 
 that features nesting values and predictable behaviour for out-of-order closing.
 
 For each context type, there can only be one _active_ context per thread at any time.
@@ -107,7 +107,7 @@ out of the box by this context-propagation library:
 ## Custom contexts
 
 Adding your own `Context` type is possible
-by [creating your own context manager](context-propagation/README.md#creating-your-own-context-manager).
+by [creating your own context manager](context-propagation-api/README.md#creating-your-own-context-manager).
 
 ## Building jars with dependencies
 
@@ -117,7 +117,7 @@ provider configuration files under `META-INF/services` are either preserved or
 merged. Otherwise Java's `ServiceLoader` will not be able to find the context
 implementations of this library.
 
-In case your are using the Maven Shade Plugin, you can use the
+In case you are using the Maven Shade Plugin, you can use the
 [`ServicesResourceTransformer`](https://maven.apache.org/plugins/maven-shade-plugin/examples/resource-transformers.html#ServicesResourceTransformer)
 for this task.
 
@@ -134,7 +134,7 @@ On a development machine, you can get timing for each snapshot by turning on log
 for `nl.talsmasoftware.context.core.Timers` at `FINEST` or `TRACE` level 
 (depending on your logger of choice).
 Please **do not** turn this on in production as the logging overhead will most likely
-have a noticable impact on your application.
+have a noticeable impact on your application.
 
 ### Metrics reporting
 
@@ -165,15 +165,15 @@ configure various timers in the global default metric registry of your applicati
   [javadoc]: https://www.javadoc.io/doc/nl.talsmasoftware.context/context-propagation-root
 
 
-  [servletrequest propagation]: servletrequest-propagation
-  [slf4j mdc propagation]: slf4j-propagation
-  [log4j2 thread context propagation]: log4j2-propagation
-  [locale context]: locale-context
-  [spring security context]: spring-security-context
-  [opentracing span propagation]: opentracing-span-propagation
-  [context propagation metrics]: context-propagation-metrics
-  [context propagation micrometer]: context-propagation-micrometer
+  [servletrequest propagation]: managers/context-manager-servletrequest
+  [slf4j mdc propagation]: managers/context-manager-slf4j
+  [log4j2 thread context propagation]: managers/context-manager-log4j2
+  [locale context]: managers/context-manager-locale
+  [spring security context]: managers/context-manager-spring-security
+  [opentracing span propagation]: managers/context-manager-opentracing
+  [context propagation metrics]: timers/context-timer-metrics
+  [context propagation micrometer]: timers/context-timer-micrometer
   [micrometer]: https://micrometer.io
   
   [ContextAwareExecutorService]: https://javadoc.io/doc/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/executors/ContextAwareExecutorService.html
-  [ContextAwareCompletableFuture]: context-propagation-java8#contextawarecompletablefuture
+  [ContextAwareCompletableFuture]: context-propagation-core/README.md#contextawarecompletablefuture

@@ -9,13 +9,13 @@ allowing a configured `Locale` to be propagated.
 ## How to use this module
 
 1. Add it to your classpath.
-  ```xml
-  <dependency>
-      <groupId>nl.talsmasoftware.context</groupId>
-      <artifactId>locale-context</artifactId>
-      <version>[see Maven badge above]</version>
-  </dependency>
-  ```  
+   ```xml
+   <dependency>
+       <groupId>nl.talsmasoftware.context</groupId>
+       <artifactId>locale-context</artifactId>
+       <version>[see Maven badge above]</version>
+   </dependency>
+   ```  
 2. Make sure to use the `ContextAwareExecutorService` as your threadpool.
 3. Set the current Locale for some block of code:
    ```java
@@ -28,11 +28,11 @@ allowing a configured `Locale` to be propagated.
    } 
    ```
 4. Use the LocaleContext anywhere in your application:
-  ```java
-  private void someMethod() {
-      Locale locale = LocaleContextManager.getCurrentLocaleOrDefault();
-  } 
-  ```
+   ```java
+   private void someMethod() {
+       Locale locale = LocaleContextManager.getCurrentLocaleOrDefault();
+   } 
+   ```
 
 
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/locale-context

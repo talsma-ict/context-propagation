@@ -71,7 +71,7 @@ public final class ContextManagers {
         final ContextSnapshotImpl result = new ContextSnapshotImpl(managers, values);
         if (managers.isEmpty() && LOGGER.isLoggable(Level.FINER)) {
             LOGGER.finer(result + " was created but no ContextManagers were found! "
-                    + " Thead=" + Thread.currentThread()
+                    + " Thread=" + Thread.currentThread()
                     + ", ContextClassLoader=" + Thread.currentThread().getContextClassLoader());
         }
         Timers.timed(System.nanoTime() - start, ContextManagers.class, "createContextSnapshot", null);
