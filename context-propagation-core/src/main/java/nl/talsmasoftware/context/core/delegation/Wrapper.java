@@ -54,17 +54,39 @@ public abstract class Wrapper<T> {
      * Determines if this class is a wrapper of the specified object.
      *
      * @param other The object to check for being the delegate of this wrapper.
-     * @return {@code true} is this wrapper has the given object as its delegate.
+     * @return {@code true} if this wrapper has the given object as its delegate.
      */
     public boolean isWrapperOf(T other) {
         return delegate().equals(other);
     }
 
+    /**
+     * Returns a hash code value for the object.
+     *
+     * <p>
+     * The hash code is based on the hash code of the delegate.
+     *
+     * @return Hashcode of the delegate.
+     * @see #delegate()
+     */
     @Override
     public int hashCode() {
         return delegate().hashCode();
     }
 
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     *
+     * <p>
+     * Another object is considered equal to a wrapper if:
+     * <ul>
+     *     <li>The other object is an instance of the same {@code Wrapper} class.
+     *     <li>The delegate is equal to the delegate of the other object.
+     * </ul>
+     *
+     * @param other The other object to compare with.
+     * @return {@code true} if the other object is the same wrapper class and their delegates are equal.
+     */
     @Override
     public boolean equals(Object other) {
         return this == other
@@ -72,6 +94,8 @@ public abstract class Wrapper<T> {
     }
 
     /**
+     * Returns a string representation of the object.
+     *
      * @return The class name and the delegate string representation.
      */
     @Override

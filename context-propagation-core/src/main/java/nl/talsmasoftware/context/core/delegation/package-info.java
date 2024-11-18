@@ -14,23 +14,34 @@
  * limitations under the License.
  */
 /**
- * Base classes for delegation.
+ * Delegation base classes.
+ *
+ * <p>
+ * These base classes provide full implementations where behaviour is delegated to a wrapped delegate,
+ * providing overridable <em>wrap</em> methods to influence behaviour in a consistent way.
  *
  * <h2>{@linkplain nl.talsmasoftware.context.core.delegation.Wrapper Wrapper}</h2>
  * <p>
  * Base class for any delegation in this package.<br>
- * Wrappers provide an accessors for the delegate object to their subclasses:
- * {@linkplain nl.talsmasoftware.context.core.delegation.Wrapper#delegate() delegate()}.<br>
- * Any wrapper further contains an implementation of {@code hashCode}, {@code equals}
- * and {@code toString} based on the actual class and the wrapped instance.
+ * Wrappers provide an {@linkplain nl.talsmasoftware.context.core.delegation.Wrapper#delegate() accessor}
+ * for the delegate object to their subclasses.<br>
+ * Any wrapper contains an implementation of {@linkplain java.lang.Object#hashCode() hashCode},
+ * {@linkplain java.lang.Object#equals(java.lang.Object) equals}
+ * and {@linkplain java.lang.Object#toString() toString} based on the actual class and the wrapped instance.
  *
  * <h2>{@linkplain nl.talsmasoftware.context.core.delegation.WrapperWithContext WrapperWithContext}</h2>
  * <p>
- * Just a wrapper that also contains either a context snapshot or a supplier for it.
+ * A wrapper containing also a {@linkplain nl.talsmasoftware.context.api.ContextSnapshot context snapshot}
+ * besides a delegate.
  *
  * <h2>{@linkplain nl.talsmasoftware.context.core.delegation.DelegatingFuture DelegatingFuture}</h2>
  * <p>
- * Future that passes all operations to a delegate future.<br>
- * It allows the result of the to future to be wrapped using an overridable  {@code wrapResult} method.
+ * A {@linkplain java.util.concurrent.Future future} that delegates all operations,
+ * allowing the result or error to be wrapped.
+ *
+ * <h2>{@linkplain nl.talsmasoftware.context.core.delegation.DelegatingExecutorService DelegatingExecutorService}</h2>
+ * <p>
+ * An {@linkplain java.util.concurrent.ExecutorService ExecutorService} delegating all scheduling operations,
+ * providing a consistent way to {@code wrap} the scheduled tasks and resulting futures.
  */
 package nl.talsmasoftware.context.core.delegation;
