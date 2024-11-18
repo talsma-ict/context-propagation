@@ -18,7 +18,7 @@ Add the following dependency to your classpath:
 
 ## Applicability
 
-By far the easiest use of the context propagation libary is using the
+By far the easiest use of the context propagation library is using the
 [`ContextAwareExecutorService`][ContextAwareExecutorService].
 
 If that is not a possibility, the following java functional interface wrappers
@@ -26,7 +26,7 @@ in this java 8 module may be of help to you:
 
 ## Functional interfaces
 
-The easiest use of the context propagation libary is using the
+The easiest use of the context propagation library is using the
 [`ContextAwareExecutorService`][ContextAwareExecutorService].
 
 If that is not a possibility, you can use the following java functional interface wrappers
@@ -80,7 +80,7 @@ test cases that demonstrate the behaviour of this complex class.
 ### Caveats
 
 Please be aware that:
-1. in almost all circumstances it's preferrable 
+1. in almost all circumstances it's preferable 
    to choose `ContextAwareExecutorService` over `ContextAwareCompletableFuture`.
 2. neither the standard `CompletableFuture` nor this context-aware version
    will attempt to cancel or interrupt an ongoing process when cancelled.
