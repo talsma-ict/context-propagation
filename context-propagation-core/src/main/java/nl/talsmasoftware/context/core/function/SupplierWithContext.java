@@ -24,26 +24,86 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * A wrapper for {@link Supplier} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
- * calling a delegate.
+ * {@linkplain Supplier} that {@linkplain ContextSnapshot#reactivate() reactivates a context snapshot}
+ * while getting the value.
  *
+ * <p>
+ * Implemented as a {@linkplain nl.talsmasoftware.context.core.delegation.Wrapper wrapper} for {@link Supplier}.
+ *
+ * <p>
+ * The reactivated context snapshot will be safely closed after the delegate supplier has been called.
+ *
+ * @param <T> the type of the result of the function.
  * @author Sjoerd Talsma
  */
 public class SupplierWithContext<T> extends WrapperWithContextAndConsumer<Supplier<T>> implements Supplier<T> {
     private static final Logger LOGGER = Logger.getLogger(SupplierWithContext.class.getName());
 
+    /**
+     * Creates a new supplier that performs the following steps, in-order:
+     * <ol>
+     * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
+     * <li>supply the value by calling the delegate
+     * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
+     * </ol>
+     *
+     * @param snapshot Context snapshot to run the delegate task in.
+     * @param delegate The delegate supplier to get the value from.
+     */
     public SupplierWithContext(ContextSnapshot snapshot, Supplier<T> delegate) {
         this(snapshot, delegate, null);
     }
 
+    /**
+     * Creates a new supplier that performs the following steps, in-order:
+     * <ol>
+     * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
+     * <li>supply the value by calling the delegate
+     * <li><em>if snapshot consumer is non-null,</em>
+     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
+     * </ol>
+     *
+     * @param snapshot         Context snapshot to run the delegate task in.
+     * @param delegate         The delegate supplier to get the value from.
+     * @param snapshotConsumer Consumer accepting the resulting context snapshot after the delegate task ran
+     *                         (optional, may be {@code null}).
+     */
     public SupplierWithContext(ContextSnapshot snapshot, Supplier<T> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
         super(snapshot, delegate, snapshotConsumer);
     }
 
+    /**
+     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and -consumer.
+     *
+     * <p>
+     * This constructor is not for general use. Care must be taken to capture the context snapshot <em>before</em> the
+     * consumer is called, otherwise the snapshot being reactivated would effectively update the context
+     * to the same values just captured.
+     *
+     * @param snapshotSupplier Supplier for the context snapshot that was previously captured.
+     * @param delegate         The delegate supplier to get the value from.
+     * @param snapshotConsumer Consumer accepting the resulting context snapshot after the delegate task ran
+     *                         (optional, may be {@code null}).
+     */
     protected SupplierWithContext(Supplier<ContextSnapshot> snapshotSupplier, Supplier<T> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
         super(snapshotSupplier, delegate, snapshotConsumer);
     }
 
+    /**
+     * Gets the result from the delegate supplier within a reactivated context snapshot.
+     *
+     * <p>
+     * The implementation performs the following steps, in-order:
+     * <ol>
+     * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
+     * <li>get the result from the delegate supplier
+     * <li><em>if context snapshot consumer is non-null,</em>
+     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
+     * <li>return the result</li>
+     * </ol>
+     */
     @Override
     public T get() {
         try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {

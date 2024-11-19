@@ -17,23 +17,30 @@
  * Functional interface wrappers that apply context snapshots to the mapped functions.
  *
  * <p>
- * The following functional interfaces are available:
+ * The following context-aware java functional interface equivalents are available:
  * <ul>
- * <li>{@link nl.talsmasoftware.context.core.function.BiConsumerWithContext}
- * <li>{@link nl.talsmasoftware.context.core.function.BiFunctionWithContext}
- * <li>{@link nl.talsmasoftware.context.core.function.BinaryOperatorWithContext}
- * <li>{@link nl.talsmasoftware.context.core.function.BiPredicateWithContext}
- * <li>{@link nl.talsmasoftware.context.core.function.BooleanSupplierWithContext}
- * <li>{@link nl.talsmasoftware.context.core.function.ConsumerWithContext}
- * <li>{@link nl.talsmasoftware.context.core.function.FunctionWithContext}
- * <li>{@link nl.talsmasoftware.context.core.function.PredicateWithContext}
  * <li>{@link nl.talsmasoftware.context.core.function.RunnableWithContext}
+ * Runnable that reactivates a context snapshot during the task.
  * <li>{@link nl.talsmasoftware.context.core.function.SupplierWithContext}
+ * Supplier that reactivates a context snapshot while getting the value.
+ * <li>{@link nl.talsmasoftware.context.core.function.ConsumerWithContext}
+ * Consumer that reactivates a context snapshot while passing the value.
+ * <li>{@link nl.talsmasoftware.context.core.function.FunctionWithContext}
+ * Function that reactivates a context snapshot when applying the function.
+ * <li>{@link nl.talsmasoftware.context.core.function.PredicateWithContext}
+ * Predicate that reactivates a context snapshot when testing the predicate.
  * <li>{@link nl.talsmasoftware.context.core.function.UnaryOperatorWithContext}
+ * Operator that reactivates a context snapshot when applying the operator.
+ * <li>{@link nl.talsmasoftware.context.core.function.BinaryOperatorWithContext}
+ * Binary operator that reactivates a context snapshot when applying the operator.
+ * <li>{@link nl.talsmasoftware.context.core.function.BiFunctionWithContext}
+ * BiFunction that reactivates a context snapshot when applying the function.
+ * <li>{@link nl.talsmasoftware.context.core.function.BiConsumerWithContext}
+ * BiConsumer that reactivates a context snapshot while passing the values.
+ * <li>{@link nl.talsmasoftware.context.core.function.BiPredicateWithContext}
+ * BiPredicate that reactivates a context snapshot while passing the values.
+ * <li>{@link nl.talsmasoftware.context.core.function.BooleanSupplierWithContext}
+ * Boolean supplier that reactivates a context snapshot while getting the outcome.
  * </ul>
- *
- * <p>
- * The base class {@link nl.talsmasoftware.context.core.function.WrapperWithContextAndConsumer} allows
- * capturing a new context snapshot after the function has finished.
  */
 package nl.talsmasoftware.context.core.function;

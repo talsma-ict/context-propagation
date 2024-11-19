@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
- * ThreadLocal context management in concurrent applications.
+ * Context management for ThreadLocal values in concurrent applications.
  *
  * <h2>{@linkplain nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService ContextAwareExecutorService}</h2>
  * <p>
