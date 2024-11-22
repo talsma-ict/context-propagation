@@ -24,10 +24,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Manager to propagate the Log4j 2 {@link ThreadContext} data from one thread to another.
+ *
  * <p>
  * Calling {@link #clear()} will clear the {@code ThreadContext} data of the current thread.<br>
  * Methods of this manager may have no effect when the {@code ThreadContext} has been disabled
  * (see <a href="https://logging.apache.org/log4j/2.x/manual/thread-context.html#Configuration">Log4j 2 manual</a>).
+ *
  * <p>
  * Initializing a new context through {@link #initializeNewContext(Log4j2ThreadContextSnapshot)} will
  * add the context data on top of the existing one, if any: {@code ThreadContext} stack values
@@ -38,15 +40,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * This means that closing nested contexts out-of-order will probably result in an undesirable state.<br>
  * It is therefore strongly advised to use Java's {@code try-with-resources} statement to ensure proper
  * closing when nesting {@code ThreadContext} contexts.
+ *
  * <p>
  * This manager and the contexts it creates are not suited to create {@code ThreadContext} 'scopes'
  * within the same thread. Log4j 2's {@link CloseableThreadContext} should be used for that instead.
+ *
  * <p>
  * Log4j 2 supports making {@code ThreadContext} inheritable, i.e. to have it use
  * {@link InheritableThreadLocal}. In some cases this might solve the problem of propagating
  * context from one thread to another. However in all cases where threads are reused (such
  * as thread pool executors) this will not work. It is therefore recommended to always
  * prefer using this library to cover all use cases.
+ *
  * <p>
  * As with all manager implementations of this library there is usually no need to directly
  * interact with the manager classes. Instead Java's {@code ServiceLoader} makes sure they

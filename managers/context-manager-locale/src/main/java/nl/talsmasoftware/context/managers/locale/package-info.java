@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
- * Current {@linkplain java.util.Locale Locale} holder and manager.
+ * Manager and holder for a current {@linkplain java.util.Locale Locale}.
  *
  * <p>
  * Setting a current locale can be done using {@linkplain nl.talsmasoftware.context.managers.locale.CurrentLocaleHolder#set(java.util.Locale)}
