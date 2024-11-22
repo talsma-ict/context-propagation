@@ -28,7 +28,7 @@
  * </ul>
  *
  * <p>
- * Adding the {@code context-manager-opentelemetry} library to the classpath will automatically
+ * Adding the {@code context-manager-opentracing} library to the classpath will automatically
  * include the {@linkplain io.opentracing.Span active Span}
  * in {@linkplain nl.talsmasoftware.context.api.ContextSnapshot ContextSnapshots}.
  * This propagates the context to other threads using the
