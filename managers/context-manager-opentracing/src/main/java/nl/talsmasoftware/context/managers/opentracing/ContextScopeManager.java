@@ -23,7 +23,7 @@ import nl.talsmasoftware.context.api.ContextManager;
 import nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext;
 
 /**
- * Our own implementation of the opentracing {@linkplain ScopeManager}.
+ * A {@linkplain ThreadLocal} based {@linkplain ScopeManager} implementation.
  *
  * <p>
  * Manages opentracing {@linkplain Scope} and allows it to be nested within another active scope,
@@ -82,11 +82,22 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
     public ContextScopeManager() {
     }
 
+    /**
+     * Set the specified Span as the active instance for the current context (usually a thread).
+     *
+     * @param span the {@link Span} that should become the {@link #activeSpan()}
+     * @return The scope that <strong>must be</strong> closed in the same thread
+     */
     @Override
     public Scope activate(Span span) {
         return new ThreadLocalSpanContext(span);
     }
 
+    /**
+     * Return the currently active {@linkplain Span}.
+     *
+     * @return The active {@linkplain Span}, or {@code null} if none could be found.
+     */
     @Override
     public Span activeSpan() {
         return ThreadLocalSpanContext.currentSpan();
@@ -105,17 +116,27 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
         return (Context<Span>) activate(value);
     }
 
+    /**
+     * Returns the {@linkplain #activeSpan() active Span}.
+     *
+     * @return The active {@linkplain Span} or {@code null} if none could be found.
+     */
     @Override
     public Span getActiveContextValue() {
         return activeSpan();
     }
 
+    /**
+     * Clears <em>all</em> active spans from the current thread, including any parent contexts that may exist.
+     */
     @Override
     public void clear() {
         ThreadLocalSpanContext.remove();
     }
 
     /**
+     * String representation for this scope manager.
+     *
      * @return String representation for this context manager.
      */
     public String toString() {
