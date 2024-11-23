@@ -22,12 +22,12 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * A {@linkplain WrapperWithContext} that takes an additional {@link Consumer} accepting a result snapshot,
+ * A {@linkplain WrapperWithContext} that takes an additional {@link Consumer} accepting a resulting snapshot,
  * to be captured at the end of the function.
  *
  * <p>
  * This consumer is optional.<br>
- * All subclasses <strong>must</strong> avoid capturing unnecessary snapshots if the consumer is {@code null}.
+ * All subclasses <strong>must</strong> avoid capturing unnecessary snapshots if the snapshot consumer is {@code null}.
  *
  * @param <T> The type of the wrapped delegate object.
  */

@@ -19,8 +19,11 @@ import nl.talsmasoftware.context.api.ContextSnapshot;
 
 import java.util.function.Supplier;
 
+import static java.util.Objects.requireNonNull;
+
 /**
- * Wrapper that contains a context snapshot.
+ * A {@linkplain Wrapper wrapper} containing a {@linkplain #snapshot() context snapshot}
+ * besides a {@linkplain #delegate() delegate}.
  *
  * @author Sjoerd Talsma
  */
@@ -38,10 +41,7 @@ public abstract class WrapperWithContext<T> extends Wrapper<T> {
     protected WrapperWithContext(final ContextSnapshot snapshot, final T delegate) {
         super(delegate);
         this.supplier = null;
-        this.snapshot = snapshot;
-        if (snapshot == null) {
-            throw new NullPointerException("No context snapshot provided to " + this + '.');
-        }
+        this.snapshot = requireNonNull(snapshot, () -> "No context snapshot provided to " + this + '.');
     }
 
     /**
@@ -63,11 +63,8 @@ public abstract class WrapperWithContext<T> extends Wrapper<T> {
      */
     protected WrapperWithContext(Supplier<ContextSnapshot> supplier, T delegate) {
         super(delegate);
-        this.supplier = supplier;
+        this.supplier = requireNonNull(supplier, () -> "No context snapshot supplier provided to " + this + '.');
         this.snapshot = null;
-        if (supplier == null) {
-            throw new NullPointerException("No context snapshot supplier provided to " + this + '.');
-        }
     }
 
     /**
@@ -76,28 +73,68 @@ public abstract class WrapperWithContext<T> extends Wrapper<T> {
      * @return The snapshot value.
      */
     protected ContextSnapshot snapshot() {
-        // Note: Double-checked locking works fine in recent JDKs
+        // Note: Double-checked locking works fine in modern JDKs
         // Discussion here: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590407
-        if (snapshot == null && supplier != null) synchronized (this) {
-            if (snapshot == null) snapshot = supplier.get();
-            if (snapshot == null) throw new NullPointerException("Context snapshot is <null>.");
+        if (snapshot == null && supplier != null) {
+            synchronized (this) {
+                if (snapshot == null) {
+                    snapshot = requireNonNull(supplier.get(), "Context snapshot is <null>.");
+                }
+            }
         }
         return snapshot;
     }
 
+    /**
+     * Returns a hash code value for the object.
+     *
+     * <p>
+     * The hash code is based on:
+     * <ul>
+     *     <li>The hash code of the delegate.
+     *     <li>The hash code of the snapshot.
+     * </ul>
+     *
+     * @return Hashcode based on the hascodes of both the delegate and context snapshot.
+     * @see #delegate()
+     * @see #snapshot()
+     */
     @Override
     public int hashCode() {
         return 31 * super.hashCode() + snapshot().hashCode();
     }
 
+    /**
+     * Indicates whether some other object is "equal to" this one.
+     *
+     * <p>
+     * Another object is considered equal to a wrapper if:
+     * <ul>
+     *     <li>The other object is an instance of the same {@code Wrapper} class.
+     *     <li>The delegate is equal to the delegate of the other object.
+     *     <li>The context snapshot is equal to the snapshot of the other context object.</li>
+     * </ul>
+     *
+     * @param other The other object to compare with.
+     * @return {@code true} if the other object is the same wrapper class and its delegate and context snapshots are equal.
+     * @see #delegate()
+     * @see #snapshot()
+     */
     @Override
     public boolean equals(Object other) {
         return this == other || (super.equals(other) && snapshot().equals(((WrapperWithContext<?>) other).snapshot()));
     }
 
+    /**
+     * Returns a string representation of the object.
+     *
+     * @return The class name, delegate representation and
+     * optionally the context snapshot (only if it was already eagerly evaluated).
+     */
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{delegate=" + delegate() + (snapshot == null ? "" : ", " + snapshot) + '}';
+        return snapshot == null ? super.toString()
+                : getClass().getSimpleName() + "{delegate=" + delegate() + ", " + snapshot + "}";
     }
 
 }

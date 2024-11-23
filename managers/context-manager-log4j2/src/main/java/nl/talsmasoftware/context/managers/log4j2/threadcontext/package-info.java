@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
- * Propagate the {@linkplain org.apache.logging.log4j.ThreadContext Log4j 2 ThreadContext}
- * data from one thread to another.
+ * Manager to propagate the {@link org.apache.logging.log4j.ThreadContext Log4j 2 ThreadContext} from one thread
+ * to another.
  */
 package nl.talsmasoftware.context.managers.log4j2.threadcontext;

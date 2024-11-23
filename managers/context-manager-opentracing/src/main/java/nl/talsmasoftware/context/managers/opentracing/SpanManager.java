@@ -24,10 +24,16 @@ import nl.talsmasoftware.context.api.ContextManager;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Manager for <a href="http://opentracing.io/">OpenTracing</a> {@linkplain Span}.
+ * Manager to propagate {@linkplain Span OpenTracing span} from one thread to another.
  *
  * <p>
- * Management of {@linkplain Span spans} is delegated to the {@linkplain GlobalTracer}.
+ * Management of {@linkplain Span spans} is delegated to the configured {@linkplain GlobalTracer}.
+ * <ul>
+ *     <li>Obtaining the current context value is delegated to
+ *     {@linkplain io.opentracing.Tracer#activeSpan() active span}.
+ *     <li>Intializing a new context value is delegated to
+ *     {@linkplain GlobalTracer#activateSpan(Span)}.
+ * </ul>
  *
  * @author Sjoerd Talsma
  */
@@ -70,6 +76,9 @@ public class SpanManager implements ContextManager<Span> {
         return activeSpan();
     }
 
+    /**
+     * Does nothing, OpenTracing API does not support clearing the span.
+     */
     @Override
     public void clear() {
         // Opentracing API does not support clearing the span.
@@ -99,6 +108,12 @@ public class SpanManager implements ContextManager<Span> {
     }
 
     /**
+     * Returns a string representation of the object.
+     *
+     * <p>
+     * In this case, it is merely the simple class name as this span manager delegates to {@linkplain GlobalTracer}
+     * and therefore has no state or configuration to represent.
+     *
      * @return Simple class name as this class carries no internal state.
      */
     @Override

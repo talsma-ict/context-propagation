@@ -16,29 +16,83 @@
 package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
+import nl.talsmasoftware.context.core.ContextManagers;
 
 import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * A wrapper for {@link BinaryOperator} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
- * calling a delegate.
+ * {@linkplain BinaryOperator Binary operator} that {@linkplain ContextSnapshot#reactivate() reactivates a context snapshot}
+ * when {@linkplain BiFunctionWithContext#apply(Object, Object) applying} the operator.
  *
+ * <p>
+ * Implemented as a {@linkplain nl.talsmasoftware.context.core.delegation.Wrapper wrapper} for {@link BinaryOperator}.
+ *
+ * <p>
+ * The reactivated context snapshot will be safely closed after the delegate function has been applied.
+ *
+ * @param <T> the type of the operands and result of the operator.
  * @author Sjoerd Talsma
  */
 public class BinaryOperatorWithContext<T> extends BiFunctionWithContext<T, T, T> implements BinaryOperator<T> {
-
+    /**
+     * Creates a new binary operator with context.
+     *
+     * <p>
+     * This binary operator performs the following steps, in-order:
+     * <ol>
+     * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
+     * <li>apply the delegate binary operator
+     * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
+     * <li>return the result from the delegate operator call (or throw runtime exception if the delegate did).
+     * </ol>
+     *
+     * @param snapshot Context snapshot to apply the delegate operator in.
+     * @param delegate The delegate binary operator to apply.
+     */
     public BinaryOperatorWithContext(ContextSnapshot snapshot, BinaryOperator<T> delegate) {
         this(snapshot, delegate, null);
     }
 
-    public BinaryOperatorWithContext(ContextSnapshot snapshot, BinaryOperator<T> delegate, Consumer<ContextSnapshot> consumer) {
-        super(snapshot, delegate, consumer);
+    /**
+     * Creates a new binary operator with context.
+     *
+     * <p>
+     * This binary operator performs the following steps, in-order:
+     * <ol>
+     * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
+     * <li>apply the delegate binary operator
+     * <li><em>if snapshot consumer is non-null,</em>
+     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
+     * <li>return the result from the delegate operator call (or throw runtime exception if the delegate did).
+     * </ol>
+     *
+     * @param snapshot         Context snapshot to apply the delegate operator in.
+     * @param delegate         The delegate binary operator to apply.
+     * @param snapshotConsumer Consumer accepting the resulting context snapshot after the delegate operator was applied
+     *                         (optional, may be {@code null}).
+     */
+    public BinaryOperatorWithContext(ContextSnapshot snapshot, BinaryOperator<T> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
+        super(snapshot, delegate, snapshotConsumer);
     }
 
-    protected BinaryOperatorWithContext(Supplier<ContextSnapshot> supplier, BinaryOperator<T> delegate, Consumer<ContextSnapshot> consumer) {
-        super(supplier, delegate, consumer);
+    /**
+     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and -consumer.
+     *
+     * <p>
+     * This constructor is not for general use. Care must be taken to capture the context snapshot <em>before</em> the
+     * function is called, otherwise the snapshot being reactivated would effectively update the context
+     * to the same values just captured.
+     *
+     * @param snapshotSupplier Supplier for the context snapshot that was previously captured.
+     * @param delegate         The delegate binary operator to apply.
+     * @param snapshotConsumer Consumer accepting the resulting context snapshot after the delegate task ran
+     *                         (optional, may be {@code null}).
+     */
+    protected BinaryOperatorWithContext(Supplier<ContextSnapshot> snapshotSupplier, BinaryOperator<T> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
+        super(snapshotSupplier, delegate, snapshotConsumer);
     }
 
 }

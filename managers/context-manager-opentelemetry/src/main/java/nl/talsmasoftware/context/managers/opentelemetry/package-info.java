@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 /**
- * OpenTelemetry context propagation library.
+ * Manager to propagate {@linkplain io.opentelemetry.context.Context OpenTelemetry context}
+ * from one thread to another.
  *
  * <p>
- * Context Manager that delegates {@linkplain java.lang.ThreadLocal ThreadLocal} management to the
- * default {@linkplain io.opentelemetry.context.Context OpenTelemetry Context} storage.
+ * The ContextManager delegates {@linkplain java.lang.ThreadLocal ThreadLocal} management to the
+ * default {@linkplain io.opentelemetry.context.Context OpenTelemetry Context} storage.<br>
+ * <ul>
+ *     <li>Obtaining the current context value is delegated to
+ *     {@linkplain io.opentelemetry.context.Context#current()}.
+ *     <li>Intializing a new context value is delegated to
+ *     {@linkplain io.opentelemetry.context.Context#makeCurrent()}.
+ * </ul>
  *
  * <p>
- * Obtaining the current context value is delegated to
- * {@linkplain io.opentelemetry.context.Context#current()}.
- * Intializing a new context value is delegated to
- * {@linkplain io.opentelemetry.context.Context#makeCurrent()}.
- *
- * <p>
- * Adding the {@code context-manager-opentelemetry} jar to the classpath
+ * Adding the {@code context-manager-opentelemetry} library to the classpath
  * is all that is needed to include the {@link io.opentelemetry.context.Context OpenTelemetry Context}
  * in {@linkplain nl.talsmasoftware.context.api.ContextSnapshot ContextSnapshots}.
  * This propagates the context to other threads using the
  * {@code ContextAwareExecutorService} or {@code ContextAwareCompletableFuture}.
+ *
  * <p>
  * Also, any function <em>..WithContext</em> in the {@code nl.talsmasoftware.context.core.function} package
  * automatically activates the context snapshot around the function body.

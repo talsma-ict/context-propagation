@@ -25,8 +25,14 @@ import java.util.logging.Logger;
 
 /**
  * Abstract base class maintaining a shared, static {@link ThreadLocal} instance for each concrete subclass.
+ *
+ * <p>
  * This threadlocal can be accessed by subclasses through the protected method:
  * {@link #threadLocalInstanceOf(Class)}.
+ *
+ * <p>
+ * The {@linkplain #close()} implementation supports out-of-sequence closing by skipping already-closed contexts
+ * when restoring the 'previous' context.
  *
  * @author Sjoerd Talsma
  */

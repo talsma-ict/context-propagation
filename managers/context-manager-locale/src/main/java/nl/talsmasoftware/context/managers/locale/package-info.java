@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 /**
- * Maintain a current {@linkplain java.util.Locale Locale} context.
+ * Manager and holder for a current {@linkplain java.util.Locale Locale}.
  *
  * <p>
- * Setting a current locale can be done using the {@linkplain nl.talsmasoftware.context.managers.locale.LocaleContextManager}:
+ * Setting a current locale can be done using {@linkplain nl.talsmasoftware.context.managers.locale.CurrentLocaleHolder#set(java.util.Locale)}
  * <pre>{@code
- * private static LocaleContextManager localeContextManager = new LocaleContextManager();
- *
  * private void runWithLocale(Locale locale, Runnable someCode) {
- *     try (Context<Locale> ctx = localeContextManager.initializeNewContext(locale)) {
+ *     try (Context<Locale> ctx = CurrentLocaleHolder.set(locale)) {
  *         someCode.run();
  *     }
  * }
@@ -32,9 +30,16 @@
  * Obtaining the current locale works similar:
  * <pre>{@code
  * private void someCode() {
- *     Locale currentLocale = LocaleContextManager.getCurrentLocaleOrDefault();
+ *     Optional<Locale> currentLocale = CurrentLocaleHolder.get();
+ *     Locale currentOrDefaultLocale = CurrentLocaleHolder.getOrDefault(); // short for get().orElseGet(Locale::getDefault)
  *     // ...
  * }
  * }</pre>
+ *
+ * <p>
+ * The supplied {@linkplain nl.talsmasoftware.context.managers.locale.CurrentLocaleManager CurrentLocaleManager} will
+ * make sure the current locale is propagated into threads that support the
+ * {@linkplain nl.talsmasoftware.context.api.ContextManager ContextManager} framework,
+ * such as code using {@code ContextAwareExecutorService} or {@code ContextAwareCompletableFuture}.
  */
 package nl.talsmasoftware.context.managers.locale;

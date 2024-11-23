@@ -20,12 +20,16 @@ import nl.talsmasoftware.context.core.ContextManagers;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * A wrapper for {@link Runnable} that {@link ContextSnapshot#reactivate() reactivates a context snapshot} before
- * calling a delegate.
+ * {@linkplain Runnable} that {@linkplain ContextSnapshot#reactivate() reactivates a context snapshot} during the task.
+ *
+ * <p>
+ * Implemented as a {@linkplain nl.talsmasoftware.context.core.delegation.Wrapper Wrapper} for {@linkplain Runnable}.
+ *
+ * <p>
+ * The reactivated context snapshot will be safely closed after the task has completed.
  *
  * @author Sjoerd Talsma
  */
@@ -35,12 +39,13 @@ public class RunnableWithContext extends WrapperWithContextAndConsumer<Runnable>
     /**
      * Creates a new runnable that performs the following steps, in-order:
      * <ol>
-     * <li>first {@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
-     * <li>then run the delegate
+     * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
+     * <li>run the delegate task
+     * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * </ol>
      *
-     * @param snapshot A snapshot for the contexts to run the delegate in.
-     * @param delegate The delegate to run.
+     * @param snapshot Context snapshot to run the delegate task in.
+     * @param delegate The delegate task to run.
      * @see #RunnableWithContext(ContextSnapshot, Runnable, Consumer)
      */
     public RunnableWithContext(ContextSnapshot snapshot, Runnable delegate) {
@@ -50,34 +55,62 @@ public class RunnableWithContext extends WrapperWithContextAndConsumer<Runnable>
     /**
      * Creates a new runnable that performs the following steps, in-order:
      * <ol>
-     * <li>first {@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
-     * <li>then run the delegate
-     * <li>finally, <em>if a consumer was provided</em>
-     * {@linkplain ContextManagers#createContextSnapshot() capture a new ContextSnapshot}
+     * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
+     * <li>run the delegate task
+     * <li><em>if snapshot consumer is non-null,</em>
+     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * </ol>
      *
-     * @param snapshot A snapshot for the contexts to run the delegate in.
-     * @param delegate The delegate to run.
-     * @param consumer An optional consumer for the resulting contexts after the delegate ran (in case it changed)
+     * @param snapshot         Context snapshot to run the delegate task in.
+     * @param delegate         The delegate task to run.
+     * @param snapshotConsumer Consumer accepting the resulting context snapshot after the delegate task ran
+     *                         (optional, may be {@code null}).
      */
-    public RunnableWithContext(ContextSnapshot snapshot, Runnable delegate, Consumer<ContextSnapshot> consumer) {
-        super(snapshot, delegate, consumer);
+    public RunnableWithContext(ContextSnapshot snapshot, Runnable delegate, Consumer<ContextSnapshot> snapshotConsumer) {
+        super(snapshot, delegate, snapshotConsumer);
     }
 
-    protected RunnableWithContext(Supplier<ContextSnapshot> supplier, Runnable delegate, Consumer<ContextSnapshot> consumer) {
-        super(supplier, delegate, consumer);
+    /**
+     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and -consumer.
+     *
+     * <p>
+     * This constructor is not for general use. Care must be taken to capture the context snapshot <em>before</em> the
+     * consumer is called, otherwise the snapshot being reactivated would effectively update the context
+     * to the same values just captured.
+     *
+     * @param snapshotSupplier Supplier for the context snapshot that was previously captured.
+     * @param delegate         The delegate task to run.
+     * @param snapshotConsumer Consumer accepting the resulting context snapshot after the delegate task ran
+     *                         (optional, may be {@code null}).
+     */
+    protected RunnableWithContext(Supplier<ContextSnapshot> snapshotSupplier, Runnable delegate, Consumer<ContextSnapshot> snapshotConsumer) {
+        super(snapshotSupplier, delegate, snapshotConsumer);
     }
 
+    /**
+     * Run the delegate task in a reactivated context snapshot.
+     *
+     * <p>
+     * The implementation performs the following steps, in-order:
+     * <ol>
+     * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
+     * <li>run the delegate task
+     * <li><em>if context snapshot consumer is non-null,</em>
+     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
+     * </ol>
+     */
     @Override
     public void run() {
         try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
             try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                LOGGER.log(Level.FINEST, "Delegating run method with {0} to {1}.", new Object[]{context, delegate()});
+                LOGGER.finest(() -> "Delegating run method with " + context + " to " + delegate() + ".");
                 delegate().run();
             } finally {
                 if (contextSnapshotConsumer != null) {
                     ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
-                    LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
+                    LOGGER.finest(() -> "Captured context snapshot after delegation: " + resultSnapshot + ".");
                     contextSnapshotConsumer.accept(resultSnapshot);
                 }
             }

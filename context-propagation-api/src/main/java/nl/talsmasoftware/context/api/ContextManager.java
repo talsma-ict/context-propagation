@@ -16,10 +16,10 @@
 package nl.talsmasoftware.context.api;
 
 /**
- * The service definition a {@linkplain Context} manager.
+ * {@linkplain Context} manager service.
  *
  * <p>
- * Implementations must be made available as <em>service provider</em>.<br>
+ * Implementations must be made available through the {@linkplain java.util.ServiceLoader ServiceLoader}.<br>
  * For details how to make your implementation available, please see the documentation of {@link java.util.ServiceLoader}.
  *
  * @param <T> type of the context value

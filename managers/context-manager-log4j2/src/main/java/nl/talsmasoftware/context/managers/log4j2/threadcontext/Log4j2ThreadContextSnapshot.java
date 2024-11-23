@@ -20,7 +20,7 @@ import org.apache.logging.log4j.ThreadContext;
 import java.util.Map;
 
 /**
- * Snapshot of the data from the Log4j 2 {@link ThreadContext} of a specific thread at a certain point in the past.
+ * Snapshot of the data from the {@link ThreadContext Log4j 2 ThreadContext} of a specific thread at a certain point in the past.
  */
 public class Log4j2ThreadContextSnapshot {
     private final Map<String, String> contextMap;

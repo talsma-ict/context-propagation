@@ -1,1 +1,1 @@
-nl.talsmasoftware.context.managers.locale.LocaleContextManager
+nl.talsmasoftware.context.managers.locale.CurrentLocaleManager

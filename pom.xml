@@ -91,9 +91,8 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- Allow Java 5 bytecode modules to provide compiler arguments to suppress java version deprecation warnings -->
-        <project.compiler.argument/>
 
+        <micrometer.version>1.14.1</micrometer.version>
         <metrics.version>4.2.28</metrics.version>
         <opentelemetry.version>1.44.1</opentelemetry.version>
         <opentracing-api.version>0.33.0</opentracing-api.version>
@@ -152,7 +151,6 @@
                 <configuration>
                     <encoding>${project.build.sourceEncoding}</encoding>
                     <showDeprecation>true</showDeprecation>
-                    <compilerArgument>${project.compiler.argument}</compilerArgument>
                 </configuration>
             </plugin>
             <plugin>
@@ -216,17 +214,6 @@
                         <goals>
                             <goal>aggregate-jar</goal>
                         </goals>
-                        <configuration>
-                            <doclet>nl.talsmasoftware.umldoclet.UMLDoclet</doclet>
-                            <docletArtifact>
-                                <groupId>nl.talsmasoftware</groupId>
-                                <artifactId>umldoclet</artifactId>
-                                <version>${umldoclet.version}</version>
-                            </docletArtifact>
-                            <additionalOptions>
-                                <additionalOption>-createPumlFiles</additionalOption>
-                            </additionalOptions>
-                        </configuration>
                     </execution>
                     <execution>
                         <id>module-javadoc</id>
@@ -240,39 +227,59 @@
                     <jdkToolchain>
                         <version>${project.javadoc.version}</version>
                     </jdkToolchain>
-                    <links>
-                        <link>https://www.slf4j.org/api</link>
-                        <link>https://metrics.dropwizard.io/4.0.0/apidocs</link>
-                    </links>
+                    <doclet>nl.talsmasoftware.umldoclet.UMLDoclet</doclet>
+                    <docletArtifact>
+                        <groupId>nl.talsmasoftware</groupId>
+                        <artifactId>umldoclet</artifactId>
+                        <version>${umldoclet.version}</version>
+                    </docletArtifact>
+                    <additionalOptions>
+                        <additionalOption>-createPumlFiles</additionalOption>
+                    </additionalOptions>
                     <offlineLinks>
                         <offlineLink>
-                            <url>
-                                https://javadoc.io/page/${project.groupId}/context-propagation-root/${project.version}
-                            </url>
                             <location>${root.basedir}/.mvn/javadoc</location>
+                            <url>https://javadoc.io/page/${project.groupId}/context-propagation/${project.version}</url>
                         </offlineLink>
                         <offlineLink>
-                            <url>https://javadoc.io/page/io.opentracing/opentracing-api/${opentracing-api.version}</url>
-                            <location>${root.basedir}/.mvn/javadoc/opentracing-api</location>
+                            <location>${root.basedir}/.mvn/javadoc/log4j-api</location>
+                            <url>https://logging.apache.org/log4j/2.x/javadoc/log4j-api</url>
                         </offlineLink>
                         <offlineLink>
-                            <url>https://javadoc.io/page/io.opentracing/opentracing-util/${opentracing-api.version}
-                            </url>
-                            <location>${root.basedir}/.mvn/javadoc/opentracing-util</location>
+                            <location>${root.basedir}/.mvn/javadoc/metrics-core</location>
+                            <url>https://www.javadoc.io/page/io.dropwizard.metrics/metrics-core/${metrics.version}</url>
                         </offlineLink>
                         <offlineLink>
-                            <url>
-                                https://javadoc.io/page/org.springframework.security/spring-security-core/${spring-security.version}
-                            </url>
-                            <location>${root.basedir}/.mvn/javadoc/spring-security-core</location>
-                        </offlineLink>
-                        <offlineLink>
-                            <url>https://javadoc.io/page/javax.servlet/javax.servlet-api/${servlet-api.version}</url>
-                            <location>${root.basedir}/.mvn/javadoc/servlet-api</location>
-                        </offlineLink>
-                        <offlineLink>
-                            <url>https://www.javadoc.io/page/io.micrometer/micrometer-core/1.3.2</url>
                             <location>${root.basedir}/.mvn/javadoc/micrometer-core</location>
+                            <url>https://www.javadoc.io/page/io.micrometer/micrometer-core/${micrometer.version}</url>
+                        </offlineLink>
+                        <offlineLink>
+                            <location>${root.basedir}/.mvn/javadoc/opentelemetry-api</location>
+                            <url>https://www.javadoc.io/page/io.opentelemetry/opentelemetry-api/${opentelemetry.version}</url>
+                        </offlineLink>
+                        <offlineLink>
+                            <location>${root.basedir}/.mvn/javadoc/opentelemetry-context</location>
+                            <url>https://www.javadoc.io/page/io.opentelemetry/opentelemetry-context/${opentelemetry.version}</url>
+                        </offlineLink>
+                        <offlineLink>
+                            <location>${root.basedir}/.mvn/javadoc/opentracing-api</location>
+                            <url>https://javadoc.io/page/io.opentracing/opentracing-api/${opentracing-api.version}</url>
+                        </offlineLink>
+                        <offlineLink>
+                            <location>${root.basedir}/.mvn/javadoc/opentracing-util</location>
+                            <url>https://javadoc.io/page/io.opentracing/opentracing-util/${opentracing-api.version}</url>
+                        </offlineLink>
+                        <offlineLink>
+                            <location>${root.basedir}/.mvn/javadoc/servlet-api</location>
+                            <url>https://javadoc.io/page/javax.servlet/javax.servlet-api/${servlet-api.version}</url>
+                        </offlineLink>
+                        <offlineLink>
+                            <location>${root.basedir}/.mvn/javadoc/slf4j-api</location>
+                            <url>https://www.javadoc.io/page/org.slf4j/slf4j-api/${slf4j.version}</url>
+                        </offlineLink>
+                        <offlineLink>
+                            <location>${root.basedir}/.mvn/javadoc/spring-security-core</location>
+                            <url>https://javadoc.io/page/org.springframework.security/spring-security-core/${spring-security.version}</url>
                         </offlineLink>
                     </offlineLinks>
                 </configuration>

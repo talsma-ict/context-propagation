@@ -13,9 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.manager.servletrequest;
+package nl.talsmasoftware.context.managers.servletrequest;
 
 import nl.talsmasoftware.context.api.Context;
+import nl.talsmasoftware.context.api.ContextManager;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -28,8 +29,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Servlet {@link Filter} that registers the current {@link ServletRequest} with the
- * {@link ServletRequestContextManager} to become the
+ * Servlet {@link Filter} that registers the current {@link ServletRequest} to become the
  * {@link ServletRequestContextManager#getActiveContextValue() active context value}
  * while the filter is active.
  *
@@ -37,15 +37,39 @@ import java.util.logging.Logger;
  */
 public class ServletRequestContextFilter implements Filter {
     private static final Logger LOGGER = Logger.getLogger(ServletRequestContextFilter.class.getName());
+    private static final ContextManager<ServletRequest> MANAGER = ServletRequestContextManager.provider();
 
+    /**
+     * Called by the web container to indicate to a filter that it is being placed into service.
+     *
+     * <p>
+     * This filter does not need to initialize.
+     *
+     * @param filterConfig a {@code FilterConfig} object containing the filter's configuration and initialization parameters
+     */
     public void init(FilterConfig filterConfig) {
         // no-op
     }
 
+    /**
+     * Filter the request by initializing a new {@linkplain Context} for the request, making sure to close it after
+     * the request finishes.
+     *
+     * <p>
+     * For {@linkplain ServletRequest#isAsyncStarted() asynchronous} requests,
+     * an {@linkplain javax.servlet.AsyncListener AsyncListenr} is added taking care of the servlet context
+     * in the asynchronous handling.
+     *
+     * @param request  the <code>ServletRequest</code> object contains the client's request
+     * @param response the <code>ServletResponse</code> object contains the filter's response
+     * @param chain    the <code>FilterChain</code> for invoking the next filter or the resource
+     * @throws IOException      In case an IO exception was thrown further down the filter chain.
+     * @throws ServletException In case a servlet exception was thrown further down the filter chain.
+     */
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         // Automatically becomes the new active context.
-        try (Context<ServletRequest> context = new ServletRequestContext(request)) {
+        try (Context<ServletRequest> context = MANAGER.initializeNewContext(request)) {
 
             if (request.isAsyncStarted()) try {
                 request.getAsyncContext().addListener(new ServletRequestContextAsyncListener());
@@ -60,10 +84,21 @@ public class ServletRequestContextFilter implements Filter {
         }
     }
 
+    /**
+     * Called by the web container to indicate to a filter that it is being taken out of service.
+     *
+     * <p>
+     * This filter does not need to clean up before shutdown.
+     */
     public void destroy() {
         // no-op
     }
 
+    /**
+     * Returns a string representation of this filter.
+     *
+     * @return The simple class name of this servlet filter.
+     */
     @Override
     public String toString() {
         return getClass().getSimpleName();

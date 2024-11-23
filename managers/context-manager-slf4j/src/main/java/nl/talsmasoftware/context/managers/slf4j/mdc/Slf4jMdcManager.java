@@ -23,18 +23,18 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Manager to propagate the SLF4J {@link MDC} content from one thread to another.
+ * Manager to propagate the Slf4J {@linkplain MDC MDC context map} from one thread to another.
  *
  * <p>
  * As {@link MDC} already manages its own thread-local state,
- * getting the active context is 100% delegated to the MDC.
+ * getting the active context is fully delegated to the MDC.
  *
  * <p>
  * Closing a context returned form {@link #initializeNewContext(Map)} restores the MDC
  * to the values it had before the context was created.<br>
  * This means that closing nested contexts out-of-order will probably result in an undesirable state.<br>
  * It is therefore strongly advised to use Java's {@code try-with-resources} mechanism to ensure proper
- * closing when nesting new MDC contexts.
+ * closing of nested MDC contexts.
  *
  * <p>
  * This manager does not implement the optional {@link #clear()} method.
@@ -73,9 +73,11 @@ public class Slf4jMdcManager implements ContextManager<Map<String, String>> {
 
     /**
      * Initializes a new MDC context populated by the specified values.
+     *
      * <p>
      * The given values will become the active MDC values for the current thread.<br>
      * Closing the resulting context will restore the MDC to the state it had just before this call.
+     *
      * <p>
      * Please be aware that this may overwrite changes made to the MDC from other code.
      *
@@ -89,11 +91,9 @@ public class Slf4jMdcManager implements ContextManager<Map<String, String>> {
 
     /**
      * Returns the active MDC values from the current thread.
-     * <p>
-     * <strong>Please note:</strong> <em>Because these values are managed by MDC itself and not by us,
-     * closing the resulting context has no effect.</em>
      *
-     * @return Context containing the active MDC values.
+     * @return The active MDC values.
+     * @see MDC#getCopyOfContextMap()
      */
     public Map<String, String> getActiveContextValue() {
         return MDC.getCopyOfContextMap();
@@ -112,18 +112,11 @@ public class Slf4jMdcManager implements ContextManager<Map<String, String>> {
         // no-op
     }
 
-    private static Map<String, String> currentMdc() {
-        return MDC.getCopyOfContextMap();
-    }
-
-    private static void setMdc(Map<String, String> mdc) {
-        if (mdc == null) {
-            MDC.clear();
-        } else {
-            MDC.setContextMap(mdc);
-        }
-    }
-
+    /**
+     * String representation of this context manager.
+     *
+     * @return The simple class name since this manager of itself contains no state.
+     */
     @Override
     public String toString() {
         return getClass().getSimpleName();
@@ -135,13 +128,13 @@ public class Slf4jMdcManager implements ContextManager<Map<String, String>> {
 
         private Slf4jMdcContext(Map<String, String> value) {
             // Capture current MDC as 'previous' and make the given values the 'new current' MDC.
-            this.previous = currentMdc();
+            this.previous = MDC.getCopyOfContextMap();
             setMdc(value);
             this.closed = new AtomicBoolean(false);
         }
 
         public Map<String, String> getValue() {
-            return currentMdc();
+            return MDC.getCopyOfContextMap();
         }
 
         public void close() {
@@ -154,6 +147,14 @@ public class Slf4jMdcManager implements ContextManager<Map<String, String>> {
         public String toString() {
             Map<String, String> mdc = getValue();
             return closed.get() ? "Slf4jMdcContext{closed}" : "Slf4jMdcContext" + (mdc == null ? "{}" : mdc);
+        }
+
+        private static void setMdc(Map<String, String> mdc) {
+            if (mdc == null) {
+                MDC.clear();
+            } else {
+                MDC.setContextMap(mdc);
+            }
         }
     }
 }
