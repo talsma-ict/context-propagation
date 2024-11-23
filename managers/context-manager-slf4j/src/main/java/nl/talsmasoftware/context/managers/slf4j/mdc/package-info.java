@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 /**
- * Propagate the {@linkplain org.slf4j.MDC SLF4J MDC} content from one thread to another.
+ * Manager to propagate the Slf4J {@linkplain org.slf4j.MDC MDC context map} from one thread to another.
  *
  * <p>
- * This context manager maintains no threadlocal state of its own,
+ * This context manager maintains no ThreadLocal state of its own,
  * instead it propagates the
  * existing {@linkplain org.slf4j.MDC#getCopyOfContextMap() MDC context map}
  * into each {@linkplain nl.talsmasoftware.context.api.ContextSnapshot context snapshot}
