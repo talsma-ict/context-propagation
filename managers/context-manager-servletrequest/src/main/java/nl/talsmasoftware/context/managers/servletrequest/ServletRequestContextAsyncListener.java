@@ -15,31 +15,60 @@
  */
 package nl.talsmasoftware.context.managers.servletrequest;
 
+import nl.talsmasoftware.context.api.ContextManager;
+
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
+import javax.servlet.ServletRequest;
 
 /**
- * An async listener that creates servlet request context when requests
- * are started and clears the context on completion.
+ * An {@linkplain AsyncListener async listener} that creates servlet request contexts when requests
+ * are started and clears them on completion.
  *
  * @author Sjoerd Talsma
  */
 final class ServletRequestContextAsyncListener implements AsyncListener {
+    private static final ContextManager<ServletRequest> MANAGER = ServletRequestContextManager.provider();
 
+    /**
+     * Registers itself for future updates and initializes the supplied servlet request as the current servlet request
+     * on the async thread.
+     *
+     * @param event the AsyncEvent indicating that a new asynchronous cycle is being initiated.
+     * @see ServletRequestContextManager#initializeNewContext(ServletRequest)
+     */
     public void onStartAsync(AsyncEvent event) {
         event.getAsyncContext().addListener(this);
-        new ServletRequestContext(event.getSuppliedRequest()); // Become the new active context
+        MANAGER.initializeNewContext(event.getSuppliedRequest());
     }
 
+    /**
+     * {@linkplain ServletRequestContextManager#clear() Clears} the servlet request context again
+     * after the request ends by completion.
+     *
+     * @param event the AsyncEvent indicating that an asynchronous operation has been completed
+     */
     public void onComplete(AsyncEvent event) {
-        ServletRequestContext.clear();
+        MANAGER.clear();
     }
 
+    /**
+     * {@linkplain ServletRequestContextManager#clear() Clears} the servlet request context again
+     * after the request ends by timeout.
+     *
+     * @param event the AsyncEvent indicating that an asynchronous operation has timed out
+     */
     public void onTimeout(AsyncEvent event) {
-        ServletRequestContext.clear();
+        MANAGER.clear();
     }
 
+    /**
+     * {@linkplain ServletRequestContextManager#clear() Clears} the servlet request context again
+     * after the request ends by an error.
+     *
+     * @param event the AsyncEvent indicating that an asynchronous operation has failed to complete
+     */
     public void onError(AsyncEvent event) {
-        ServletRequestContext.clear();
+        MANAGER.clear();
     }
 }
