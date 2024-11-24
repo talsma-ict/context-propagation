@@ -24,8 +24,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * A context manager that propagates spring-security {@link Authentication} objects
- * into background threads using the {@code ContextAwareExecutorService}.
+ * Manager to propagate the {@linkplain Authentication Spring Security Authentication}
+ * from one thread to another.
+ *
  * <p>
  * Management of the authentication is fully delegated to the Spring {@link SecurityContextHolder},
  * so no additional {@link java.lang.ThreadLocal} variables are used.
