@@ -37,6 +37,7 @@ import static java.util.Collections.singleton;
  * A {@link ContextTimer} that locates an appropriate
  * {@link SharedMetricRegistries shared metric registry}.<br/>
  * It registers a new {@link Timer} for context switches and updates it for each context switch.
+ *
  * <p>
  * <dl>
  *     <dt>Shared metric registry resolution</dt>
@@ -59,6 +60,7 @@ import static java.util.Collections.singleton;
  *         </ol>
  *     </dd>
  * </dl>
+ *
  * <p>
  * Timers are created once and will not be retroactively registered to other shared registries.
  *
