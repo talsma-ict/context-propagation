@@ -32,11 +32,38 @@ import java.util.logging.Logger;
 
 import static io.opentelemetry.api.common.AttributeKey.stringKey;
 
+/**
+ * {@link nl.talsmasoftware.context.api.ContextTimer Context timer} that
+ * creates a {@linkplain io.opentelemetry.api.trace.Span Span}
+ * using the {@linkplain io.opentelemetry.api.GlobalOpenTelemetry GlobalOpenTelemetry}
+ * for context switches.
+ *
+ * <p>
+ * Individual {@linkplain nl.talsmasoftware.context.api.ContextManager context managers}
+ * are <strong>not</strong> traced, only the operations regarding {@linkplain ContextSnapshot}
+ * are traced.
+ *
+ * @author Sjoerd Talsma
+ */
 public class OpenTelemetryContextTimer implements ContextTimer {
     private static final Logger LOGGER = Logger.getLogger(OpenTelemetryContextTimer.class.getName());
     private static final String INSTRUMENTATION_SCOPE = "nl.talsmasoftware.context";
     private static final String INSTRUMENTATION_VERSION = Optional.ofNullable(readVersion()).orElse("2.0.0");
 
+    /**
+     * Creates a {@linkplain Span} using the {@linkplain GlobalOpenTelemetry} for context switches.
+     *
+     * <p>
+     * Individual {@linkplain nl.talsmasoftware.context.api.ContextManager context managers}
+     * are <strong>not</strong> traced, only the operations regarding {@linkplain ContextSnapshot}
+     * are traced.
+     *
+     * @param type     Class that was called
+     * @param method   Method that was called
+     * @param duration Duration of the call
+     * @param unit     Unit of the duration
+     * @param error    Error that was thrown in the call (optional, normally {@code null})
+     */
     @Override
     public void update(Class<?> type, String method, long duration, TimeUnit unit, Throwable error) {
         if (mustTrace(type)) {
