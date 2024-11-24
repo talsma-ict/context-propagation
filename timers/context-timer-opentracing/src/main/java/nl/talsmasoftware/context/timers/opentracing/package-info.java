@@ -15,8 +15,8 @@
  */
 /**
  * {@link nl.talsmasoftware.context.api.ContextTimer Context timer} that
- * creates a {@linkplain io.opentelemetry.api.trace.Span Span}
- * using the {@linkplain io.opentelemetry.api.GlobalOpenTelemetry GlobalOpenTelemetry}
+ * creates a {@linkplain io.opentracing.Span Span}
+ * using the {@linkplain io.opentracing.util.GlobalTracer GlobalTracer}
  * for context switches.
  *
  * <p>
@@ -25,5 +25,5 @@
  * regarding {@linkplain nl.talsmasoftware.context.api.ContextSnapshot ContextSnapshot}
  * are traced.
  */
-package nl.talsmasoftware.context.timers.opentelemetry;
+package nl.talsmasoftware.context.timers.opentracing;
 

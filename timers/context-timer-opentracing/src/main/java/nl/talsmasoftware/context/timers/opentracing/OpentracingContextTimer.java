@@ -27,7 +27,13 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
- * This {@link ContextTimer} uses the {@code Opentracing API} to report timing statistics of context switches.
+ * {@link ContextTimer Context timer} that creates a {@linkplain Span Span}
+ * using the {@linkplain GlobalTracer GlobalTracer} for context switches.
+ *
+ * <p>
+ * Individual {@linkplain nl.talsmasoftware.context.api.ContextManager context managers}
+ * are <strong>not</strong> traced,
+ * only the operations regarding {@linkplain ContextSnapshot} are traced.
  *
  * @author Sjoerd Talsma
  */
