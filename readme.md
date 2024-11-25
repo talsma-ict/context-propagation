@@ -6,10 +6,10 @@
 > [!IMPORTANT]
 > Main focus of the 'v2' version is simplification of this library.
 > In the past, many features were added to the library. Some introduced more complexity than technically needed.  
-> Due to semantic versioning we can't break functionality for the sake of simplicity. 
+> Due to semantic versioning we can't break functionality for the sake of simplicity.
 > So for v2 we must redesign some api elements that allow simpler implementation, reducing complexity.
-> 
-> This is  the development branch for the v2 version of this library.
+>
+> This is the development branch for the v2 version of this library.
 > All breaking changes to the library must go in this branch.
 > - Java version bumped to Java8 minimum
 > - `ContextManager.getActiveContext()` replaced by `getActiveContextValue()`.
@@ -19,42 +19,46 @@
 
 # Context propagation library
 
-Propagate a snapshot of one or more `ThreadLocal` values into another thread.
+This library can capture a `ContextSnapshot` containing one or more `ThreadLocal` values.  
+This context snapshot can be _reactivated_ in another thread.
 
-This library enables automatic propagation of several well-known ThreadLocal contexts 
-by capturing a snapshot, reactivating it in another thread and ensuring proper 
-cleanup after execution finishes:
+Reactivating sets all ThreadLocal values contained by the snapshot
+in that other thread, until the reactivation is _closed_ again.
 
-- [`ContextAwareExecutorService`][ContextAwareExecutorService] 
+Application code should attempt to minimize manually capturing and closing context snapshots.  
+Instead, context can be automatically captured, reactivated and closed
+by the following _context aware_ utility classes:
+
+- [`ContextAwareExecutorService`][ContextAwareExecutorService]
   wrapping any existing `ExecutorService`.
-- [`ContextAwareCompletableFuture`][ContextAwareCompletableFuture] 
-  propagating context snapshots into each successive `CompletionStage`.
+- [`ContextAwareCompletableFuture`][ContextAwareCompletableFuture]
+  propagating context snapshots into successive `CompletionStage`.
 
 ## Terminology
 
 ### Context
 
-Abstraction containing a value in the context of a _thread_. 
-The most common implementation in Java is a ThreadLocal value.
-The library provides an `AbstractThreadLocalContext` base class 
-that features nesting values and predictable behaviour for out-of-order closing.
+Abstraction for a thread-bound value.
+Contexts can be obtained and initialized with a _ContextManager_.  
+Initialized contexts must be _closed_ from the same thread they were initialized in.
 
-For each context type, there can only be one _active_ context per thread at any time.
+For each context type, there should be a _context manager_ registered through the Java Service Loader.
+There can only be one _active_ context value per thread at any time.
 
 ### ContextManager
 
-Manages a context.
-The ContextManager API can activate a new context value and 
-provides access to the active context value.
+Manages a context by obtaining the _active_ context value
+and _initializing_ a new context.
 
 ### ContextSnapshot
 
-A snapshot contains the current value from _all_ known context managers.  
+A snapshot of the values from _all_ active contexts for the current thread,
+obtained from all detected context managers.  
 These values can be _reactivated_ in another thread.  
-Reactivated snapshots **must be closed** to avoid leaking context.  
+Reactivated snapshots **must be closed** to avoid leaking context.
 
-All _context aware_ utility classes in this library are tested 
-to make sure they reactivate _and_ close snapshots in a safe way.
+All _context aware_ utility classes in this library
+make sure they reactivate _and_ close snapshots in a safe way.
 
 ## How to use this library
 
@@ -62,16 +66,18 @@ to make sure they reactivate _and_ close snapshots in a safe way.
 
 Just before creating a new thread, capture a snapshot of all ThreadLocal context
 values:
+
 ```java
 ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
 ```
 
 In the code of your background thread, activate the snapshot to have all ThreadLocal
 context values set as they were captured:
+
 ```java
-try (ContextSnapshot.Reactivation reactivation = snapshot.reactivate()) {
-    // All ThreadLocal values from the snapshot are available within this block
-}
+try(ContextSnapshot.Reactivation reactivation = snapshot.reactivate()){
+        // All ThreadLocal values from the snapshot are available within this block
+        }
 ```
 
 ### Threadpools and ExecutorService
@@ -85,14 +91,15 @@ After the background thread finishes the snapshot is closed,
 ensuring no ThreadLocal values leak into the thread pool.
 
 The `ContextAwareExecutorService` can wrap any ExecutorService for the actual thread execution:
+
 ```java
-private static final ExecutorService THREADPOOL = 
+private static final ExecutorService THREADPOOL =
         new ContextAwareExecutorService(Executors.newCachedThreadpool());
 ```
 
 ## Supported contexts
 
-The following `ThreadLocal`-based contexts are currently supported 
+The following `ThreadLocal`-based contexts are currently supported
 out of the box by this context-propagation library:
 
 - [SLF4J MDC (Mapped Diagnostic Context)][slf4j mdc propagation]
@@ -102,7 +109,7 @@ out of the box by this context-propagation library:
 - [Locale context][locale context]
 - [ServletRequest contexts][servletrequest propagation]
 - _Yours?_ Feel free to create an issue or pull-request
-  if you believe there's a general context that was forgotten. 
+  if you believe there's a general context that was forgotten.
 
 ## Custom contexts
 
@@ -118,7 +125,8 @@ merged. Otherwise Java's `ServiceLoader` will not be able to find the context
 implementations of this library.
 
 In case you are using the Maven Shade Plugin, you can use the
-[`ServicesResourceTransformer`](https://maven.apache.org/plugins/maven-shade-plugin/examples/resource-transformers.html#ServicesResourceTransformer)
+[
+`ServicesResourceTransformer`](https://maven.apache.org/plugins/maven-shade-plugin/examples/resource-transformers.html#ServicesResourceTransformer)
 for this task.
 
 ## Performance metrics
@@ -131,7 +139,7 @@ context snapshots along with time spent in each individual `ContextManager`.
 ### Logging performance
 
 On a development machine, you can get timing for each snapshot by turning on logging
-for `nl.talsmasoftware.context.core.Timers` at `FINEST` or `TRACE` level 
+for `nl.talsmasoftware.context.core.Timers` at `FINEST` or `TRACE` level
 (depending on your logger of choice).
 Please **do not** turn this on in production as the logging overhead will most likely
 have a noticeable impact on your application.
@@ -142,7 +150,7 @@ The [context propagation metrics] module uses the excellent
 [dropwizard metrics](https://metrics.dropwizard.io/) library to
 instrument Timers for context propagation.
 
-Similarly, the [context propagation Micrometer] module adds [Micrometer] 
+Similarly, the [context propagation Micrometer] module adds [Micrometer]
 instrumentation Timers for the context propagation.
 
 Adding either of these modules to your classpath will automatically
@@ -153,27 +161,45 @@ configure various timers in the global default metric registry of your applicati
 [Apache 2.0 license](LICENSE)
 
 
-  [ci-img]: https://github.com/talsma-ict/context-propagation/actions/workflows/ci-build.yml/badge.svg
-  [ci]: https://github.com/talsma-ict/context-propagation/actions/workflows/ci-build.yml
-  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation
-  [maven]: https://search.maven.org/search?q=g:nl.talsmasoftware.context
-  [release-img]: https://img.shields.io/github/release/talsma-ict/context-propagation.svg
-  [release]: https://github.com/talsma-ict/context-propagation/releases
-  [coveralls-img]: https://coveralls.io/repos/github/talsma-ict/context-propagation/badge.svg
-  [coveralls]: https://coveralls.io/github/talsma-ict/context-propagation
-  [javadoc-img]: https://www.javadoc.io/badge/nl.talsmasoftware.context/context-propagation.svg
-  [javadoc]: https://www.javadoc.io/doc/nl.talsmasoftware.context/context-propagation-root
+[ci-img]: https://github.com/talsma-ict/context-propagation/actions/workflows/ci-build.yml/badge.svg
+
+[ci]: https://github.com/talsma-ict/context-propagation/actions/workflows/ci-build.yml
+
+[maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation
+
+[maven]: https://search.maven.org/search?q=g:nl.talsmasoftware.context
+
+[release-img]: https://img.shields.io/github/release/talsma-ict/context-propagation.svg
+
+[release]: https://github.com/talsma-ict/context-propagation/releases
+
+[coveralls-img]: https://coveralls.io/repos/github/talsma-ict/context-propagation/badge.svg
+
+[coveralls]: https://coveralls.io/github/talsma-ict/context-propagation
+
+[javadoc-img]: https://www.javadoc.io/badge/nl.talsmasoftware.context/context-propagation.svg
+
+[javadoc]: https://www.javadoc.io/doc/nl.talsmasoftware.context/context-propagation-root
 
 
-  [servletrequest propagation]: managers/context-manager-servletrequest
-  [slf4j mdc propagation]: managers/context-manager-slf4j
-  [log4j2 thread context propagation]: managers/context-manager-log4j2
-  [locale context]: managers/context-manager-locale
-  [spring security context]: managers/context-manager-spring-security
-  [opentracing span propagation]: managers/context-manager-opentracing
-  [context propagation metrics]: timers/context-timer-metrics
-  [context propagation micrometer]: timers/context-timer-micrometer
-  [micrometer]: https://micrometer.io
-  
-  [ContextAwareExecutorService]: https://javadoc.io/doc/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/executors/ContextAwareExecutorService.html
-  [ContextAwareCompletableFuture]: context-propagation-core/README.md#contextawarecompletablefuture
+[servletrequest propagation]: managers/context-manager-servletrequest
+
+[slf4j mdc propagation]: managers/context-manager-slf4j
+
+[log4j2 thread context propagation]: managers/context-manager-log4j2
+
+[locale context]: managers/context-manager-locale
+
+[spring security context]: managers/context-manager-spring-security
+
+[opentracing span propagation]: managers/context-manager-opentracing
+
+[context propagation metrics]: timers/context-timer-metrics
+
+[context propagation micrometer]: timers/context-timer-micrometer
+
+[micrometer]: https://micrometer.io
+
+[ContextAwareExecutorService]: https://javadoc.io/doc/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/executors/ContextAwareExecutorService.html
+
+[ContextAwareCompletableFuture]: context-propagation-core/README.md#contextawarecompletablefuture
