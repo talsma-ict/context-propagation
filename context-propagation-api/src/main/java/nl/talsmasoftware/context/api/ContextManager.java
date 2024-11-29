@@ -68,4 +68,35 @@ public interface ContextManager<T> {
      */
     void clear();
 
+    static void clearAll() {
+        ContextSnapshotImpl.clearActiveContexts();
+    }
+
+    /**
+     * Override the {@linkplain ClassLoader} used to lookup {@linkplain ContextManager context managers}.
+     *
+     * <p>
+     * Normally, capturing a snapshot uses the {@linkplain Thread#getContextClassLoader() Context ClassLoader} from the
+     * {@linkplain Thread#currentThread() current thread} to look up all {@linkplain ContextManager context managers}.
+     * It is possible to configure a fixed, single classloader in your application for these lookups.
+     *
+     * <p>
+     * Using this method to specify a fixed classloader will only impact
+     * <strong>new</strong> {@linkplain ContextSnapshot context snapshots}.<br>
+     * Existing snapshots will <strong>not</strong> be impacted.
+     *
+     * <p>
+     * <strong>Notes:</strong><br>
+     * <ul>
+     * <li>Please be aware that this configuration is global!
+     * <li>This will also affect the lookup of {@linkplain ContextTimer context timers}
+     * </ul>
+     *
+     * @param classLoader The single, fixed ClassLoader to use for finding context managers.
+     *                    Specify {@code null} to restore the default behaviour.
+     * @since 2.0.0
+     */
+    static void useClassLoader(ClassLoader classLoader) {
+        ServiceCache.useClassLoader(classLoader);
+    }
 }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.core;
+package nl.talsmasoftware.context.api;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,12 +27,12 @@ import java.util.logging.Logger;
  * Cache for resolved services.
  *
  * <p>
- * This is required because the ServiceLoader itself is not thread-safe due to its internal lazy iterator.
+ * This is necessary because the ServiceLoader itself is not thread-safe due to its internal lazy iterator.
  *
  * <p>
- * Although this class is in
+ * Only intended for interal use.
  */
-class ServiceCache {
+final class ServiceCache {
     private static final Logger LOGGER = Logger.getLogger(ServiceCache.class.getName());
 
     /**

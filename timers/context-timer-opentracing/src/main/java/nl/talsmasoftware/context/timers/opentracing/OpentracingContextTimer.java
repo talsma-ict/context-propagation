@@ -74,8 +74,7 @@ public class OpentracingContextTimer implements ContextTimer {
         boolean enableTracing = false;
         // Only report spans for entire snapshots, not individual context managers.
         // Could be made configurable if somebody ever asks for it.
-        if (ContextSnapshot.class.isAssignableFrom(type)
-                || "nl.talsmasoftware.context.core.ContextManagers".equals(type.getName())) {
+        if (ContextSnapshot.class.isAssignableFrom(type)) {
             final String prop = System.getProperty(SYS_ENABLED, ENV_ENABLED);
             enableTracing = "1".equals(prop) || "true".equalsIgnoreCase(prop) || "enabled".equalsIgnoreCase(prop);
         }

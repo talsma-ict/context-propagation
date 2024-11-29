@@ -18,11 +18,6 @@ package nl.talsmasoftware.context.core;
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextManager;
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.api.ContextSnapshot.Reactivation;
-
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Core implementation to allow {@link #createContextSnapshot() taking a snapshot of all contexts}.
@@ -34,9 +29,11 @@ import java.util.logging.Logger;
  *
  * @author Sjoerd Talsma
  * @since 1.1.0
+ * @deprecated No longer necessary, API provides all functionality from this class now.
  */
+@Deprecated
 public final class ContextManagers {
-    private static final Logger LOGGER = Logger.getLogger(ContextManagers.class.getName());
+//    private static final Logger LOGGER = Logger.getLogger(ContextManagers.class.getName());
 
     /**
      * Private constructor to avoid instantiation of this class.
@@ -60,22 +57,23 @@ public final class ContextManagers {
      */
     @SuppressWarnings("rawtypes")
     public static ContextSnapshot createContextSnapshot() {
-        final long start = System.nanoTime();
-        final List<ContextManager> managers = ServiceCache.cached(ContextManager.class); // Cached list is immutable
-        final Object[] values = new Object[managers.size()];
-
-        for (int i = 0; i < values.length; i++) {
-            values[i] = getActiveContextValue(managers.get(i));
-        }
-
-        final ContextSnapshotImpl result = new ContextSnapshotImpl(managers, values);
-        if (managers.isEmpty() && LOGGER.isLoggable(Level.FINER)) {
-            LOGGER.finer(result + " was created but no ContextManagers were found! "
-                    + " Thread=" + Thread.currentThread()
-                    + ", ContextClassLoader=" + Thread.currentThread().getContextClassLoader());
-        }
-        Timers.timed(System.nanoTime() - start, ContextManagers.class, "createContextSnapshot", null);
-        return result;
+        return ContextSnapshot.capture();
+//        final long start = System.nanoTime();
+//        final List<ContextManager> managers = ServiceCache.cached(ContextManager.class); // Cached list is immutable
+//        final Object[] values = new Object[managers.size()];
+//
+//        for (int i = 0; i < values.length; i++) {
+//            values[i] = getActiveContextValue(managers.get(i));
+//        }
+//
+//        final ContextSnapshotImpl result = new ContextSnapshotImpl(managers, values);
+//        if (managers.isEmpty() && LOGGER.isLoggable(Level.FINER)) {
+//            LOGGER.finer(result + " was created but no ContextManagers were found! "
+//                    + " Thread=" + Thread.currentThread()
+//                    + ", ContextClassLoader=" + Thread.currentThread().getContextClassLoader());
+//        }
+//        Timers.timed(System.nanoTime() - start, ContextManagers.class, "createContextSnapshot", null);
+//        return result;
     }
 
     /**
@@ -96,11 +94,12 @@ public final class ContextManagers {
      * this reduces the risk of memory leaks by unbalanced context calls.
      */
     public static void clearActiveContexts() {
-        final long start = System.nanoTime();
-        for (ContextManager<?> manager : ServiceCache.cached(ContextManager.class)) {
-            clear(manager);
-        }
-        Timers.timed(System.nanoTime() - start, ContextManagers.class, "clearActiveContexts", null);
+        ContextManager.clearAll();
+//        final long start = System.nanoTime();
+//        for (ContextManager<?> manager : ServiceCache.cached(ContextManager.class)) {
+//            clear(manager);
+//        }
+//        Timers.timed(System.nanoTime() - start, ContextManagers.class, "clearActiveContexts", null);
     }
 
     /**
@@ -125,163 +124,164 @@ public final class ContextManagers {
      * @since 1.0.5
      */
     public static synchronized void useClassLoader(ClassLoader classLoader) {
-        ServiceCache.useClassLoader(classLoader);
+//        ServiceCache.useClassLoader(classLoader);
+        ContextManager.useClassLoader(classLoader);
     }
 
-    private static Object getActiveContextValue(ContextManager<?> manager) {
-        final long start = System.nanoTime();
-        RuntimeException error = null;
-        try {
+//    private static Object getActiveContextValue(ContextManager<?> manager) {
+//        final long start = System.nanoTime();
+//        RuntimeException error = null;
+//        try {
+//
+//            final Object activeContextValue = manager.getActiveContextValue();
+//            LOGGER.finest(() -> activeContextValue == null
+//                    ? "There is no active context value for " + manager + " (in thread " + Thread.currentThread().getName() + ")."
+//                    : "Active context value of " + manager + " in " + Thread.currentThread().getName() + ": " + activeContextValue);
+//            return activeContextValue;
+//
+//        } catch (RuntimeException e) {
+//            LOGGER.log(Level.WARNING, e, () -> "Error obtaining active context from " + manager + " (in thread " + Thread.currentThread().getName() + ").");
+//            error = e;
+//            return null;
+//        } finally {
+//            Timers.timed(System.nanoTime() - start, manager.getClass(), "getActiveContextValue", error);
+//        }
+//    }
 
-            final Object activeContextValue = manager.getActiveContextValue();
-            LOGGER.finest(() -> activeContextValue == null
-                    ? "There is no active context value for " + manager + " (in thread " + Thread.currentThread().getName() + ")."
-                    : "Active context value of " + manager + " in " + Thread.currentThread().getName() + ": " + activeContextValue);
-            return activeContextValue;
+//    private static void clear(ContextManager<?> manager) {
+//        final long start = System.nanoTime();
+//        RuntimeException error = null;
+//        try {
+//
+//            manager.clear();
+//            LOGGER.finest(() -> "Active context of " + manager + " was cleared.");
+//
+//        } catch (RuntimeException e) {
+//            LOGGER.log(Level.WARNING, e, () -> "Error clearing active context from " + manager + "(in thread " + Thread.currentThread().getName() + ").");
+//            error = e;
+//        } finally {
+//            Timers.timed(System.nanoTime() - start, manager.getClass(), "clear", error);
+//        }
+//    }
 
-        } catch (RuntimeException e) {
-            LOGGER.log(Level.WARNING, e, () -> "Error obtaining active context from " + manager + " (in thread " + Thread.currentThread().getName() + ").");
-            error = e;
-            return null;
-        } finally {
-            Timers.timed(System.nanoTime() - start, manager.getClass(), "getActiveContextValue", error);
-        }
-    }
+//    /**
+//     * Implementation of the <code>createContextSnapshot</code> functionality that can reactivate all values from the
+//     * snapshot in each corresponding {@link ContextManager}.
+//     */
+//    @SuppressWarnings("rawtypes")
+//    private static final class ContextSnapshotImpl implements ContextSnapshot {
+//        private final List<ContextManager> managers;
+//        private final Object[] values;
+//
+//        private ContextSnapshotImpl(List<ContextManager> managers, Object[] values) {
+//            this.managers = managers;
+//            this.values = values;
+//        }
+//
+//        public Reactivation reactivate() {
+//            final long start = System.nanoTime();
+//            RuntimeException error = null;
+//            final Context[] reactivatedContexts = new Context[managers.size()];
+//            try {
+//
+//                for (int i = 0; i < values.length; i++) {
+//                    reactivatedContexts[i] = reactivate(managers.get(i), values[i]);
+//                }
+//                return new ReactivationImpl(reactivatedContexts);
+//
+//            } catch (RuntimeException reactivationException) {
+//                tryClose(reactivatedContexts, reactivationException);
+//                ServiceCache.clear();
+//                throw error = reactivationException;
+//            } finally {
+//                Timers.timed(System.nanoTime() - start, ContextSnapshot.class, "reactivate", error);
+//            }
+//        }
+//
+//        @Override
+//        public String toString() {
+//            return "ContextSnapshot{size=" + managers.size() + '}';
+//        }
+//
+//        /**
+//         * Reactivates a snapshot value for a single context manager.
+//         *
+//         * <p>
+//         * This initializes a new context with the context manager
+//         * (normally on another thread the snapshot value was captured from).
+//         *
+//         * @param contextManager The context manager to reactivate the snapshot value for.
+//         * @param snapshotValue  The snapshot value to be reactivated.
+//         * @return The context to be included in the reactivation object.
+//         */
+//        @SuppressWarnings("unchecked") // We got the value from the managers itself.
+//        private static Context reactivate(ContextManager contextManager, Object snapshotValue) {
+//            if (snapshotValue == null) return null;
+//            long start = System.nanoTime();
+//            RuntimeException error = null;
+//            try {
+//
+//                Context reactivated = contextManager.initializeNewContext(snapshotValue);
+//                LOGGER.finest(() -> "Context reactivated from snapshot by " + contextManager + ": " + reactivated + ".");
+//                return reactivated;
+//
+//            } catch (RuntimeException e) {
+//                throw error = e;
+//            } finally {
+//                Timers.timed(System.nanoTime() - start, contextManager.getClass(), "initializeNewContext", error);
+//            }
+//        }
+//
+//        /**
+//         * Try to close already-reactivated contexts when a later context manager threw an exception.
+//         *
+//         * @param reactivatedContexts The contexts that were already reactivated when the error happened.
+//         * @param reason              The error that happened.
+//         */
+//        private static void tryClose(Context[] reactivatedContexts, Throwable reason) {
+//            for (Context alreadyReactivated : reactivatedContexts) {
+//                if (alreadyReactivated != null) {
+//                    try {
+//                        alreadyReactivated.close();
+//                    } catch (RuntimeException rte) {
+//                        reason.addSuppressed(rte);
+//                    }
+//                }
+//            }
+//        }
+//    }
 
-    private static void clear(ContextManager<?> manager) {
-        final long start = System.nanoTime();
-        RuntimeException error = null;
-        try {
-
-            manager.clear();
-            LOGGER.finest(() -> "Active context of " + manager + " was cleared.");
-
-        } catch (RuntimeException e) {
-            LOGGER.log(Level.WARNING, e, () -> "Error clearing active context from " + manager + "(in thread " + Thread.currentThread().getName() + ").");
-            error = e;
-        } finally {
-            Timers.timed(System.nanoTime() - start, manager.getClass(), "clear", error);
-        }
-    }
-
-    /**
-     * Implementation of the <code>createContextSnapshot</code> functionality that can reactivate all values from the
-     * snapshot in each corresponding {@link ContextManager}.
-     */
-    @SuppressWarnings("rawtypes")
-    private static final class ContextSnapshotImpl implements ContextSnapshot {
-        private final List<ContextManager> managers;
-        private final Object[] values;
-
-        private ContextSnapshotImpl(List<ContextManager> managers, Object[] values) {
-            this.managers = managers;
-            this.values = values;
-        }
-
-        public Reactivation reactivate() {
-            final long start = System.nanoTime();
-            RuntimeException error = null;
-            final Context[] reactivatedContexts = new Context[managers.size()];
-            try {
-
-                for (int i = 0; i < values.length; i++) {
-                    reactivatedContexts[i] = reactivate(managers.get(i), values[i]);
-                }
-                return new ReactivationImpl(reactivatedContexts);
-
-            } catch (RuntimeException reactivationException) {
-                tryClose(reactivatedContexts, reactivationException);
-                ServiceCache.clear();
-                throw error = reactivationException;
-            } finally {
-                Timers.timed(System.nanoTime() - start, ContextSnapshot.class, "reactivate", error);
-            }
-        }
-
-        @Override
-        public String toString() {
-            return "ContextSnapshot{size=" + managers.size() + '}';
-        }
-
-        /**
-         * Reactivates a snapshot value for a single context manager.
-         *
-         * <p>
-         * This initializes a new context with the context manager
-         * (normally on another thread the snapshot value was captured from).
-         *
-         * @param contextManager The context manager to reactivate the snapshot value for.
-         * @param snapshotValue  The snapshot value to be reactivated.
-         * @return The context to be included in the reactivation object.
-         */
-        @SuppressWarnings("unchecked") // We got the value from the managers itself.
-        private static Context reactivate(ContextManager contextManager, Object snapshotValue) {
-            if (snapshotValue == null) return null;
-            long start = System.nanoTime();
-            RuntimeException error = null;
-            try {
-
-                Context reactivated = contextManager.initializeNewContext(snapshotValue);
-                LOGGER.finest(() -> "Context reactivated from snapshot by " + contextManager + ": " + reactivated + ".");
-                return reactivated;
-
-            } catch (RuntimeException e) {
-                throw error = e;
-            } finally {
-                Timers.timed(System.nanoTime() - start, contextManager.getClass(), "initializeNewContext", error);
-            }
-        }
-
-        /**
-         * Try to close already-reactivated contexts when a later context manager threw an exception.
-         *
-         * @param reactivatedContexts The contexts that were already reactivated when the error happened.
-         * @param reason              The error that happened.
-         */
-        private static void tryClose(Context[] reactivatedContexts, Throwable reason) {
-            for (Context alreadyReactivated : reactivatedContexts) {
-                if (alreadyReactivated != null) {
-                    try {
-                        alreadyReactivated.close();
-                    } catch (RuntimeException rte) {
-                        reason.addSuppressed(rte);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Implementation of the reactivated 'container' context that closes all reactivated contexts
-     * when it is closed itself.<br>
-     * This context contains no meaningful value in itself and purely exists to close the reactivated contexts.
-     */
-    @SuppressWarnings("rawtypes")
-    private static final class ReactivationImpl implements Reactivation {
-        private final Context[] reactivated;
-
-        private ReactivationImpl(Context[] reactivated) {
-            this.reactivated = reactivated;
-        }
-
-        public void close() {
-            RuntimeException closeException = null;
-            // close in reverse order of reactivation
-            for (int i = this.reactivated.length - 1; i >= 0; i--) {
-                Context<?> reactivated = this.reactivated[i];
-                if (reactivated != null) try {
-                    reactivated.close();
-                } catch (RuntimeException rte) {
-                    if (closeException == null) closeException = rte;
-                    else closeException.addSuppressed(rte);
-                }
-            }
-            if (closeException != null) throw closeException;
-        }
-
-        @Override
-        public String toString() {
-            return "ContextSnapshot.Reactivation{size=" + reactivated.length + '}';
-        }
-    }
+//    /**
+//     * Implementation of the reactivated 'container' context that closes all reactivated contexts
+//     * when it is closed itself.<br>
+//     * This context contains no meaningful value in itself and purely exists to close the reactivated contexts.
+//     */
+//    @SuppressWarnings("rawtypes")
+//    private static final class ReactivationImpl implements Reactivation {
+//        private final Context[] reactivated;
+//
+//        private ReactivationImpl(Context[] reactivated) {
+//            this.reactivated = reactivated;
+//        }
+//
+//        public void close() {
+//            RuntimeException closeException = null;
+//            // close in reverse order of reactivation
+//            for (int i = this.reactivated.length - 1; i >= 0; i--) {
+//                Context<?> reactivated = this.reactivated[i];
+//                if (reactivated != null) try {
+//                    reactivated.close();
+//                } catch (RuntimeException rte) {
+//                    if (closeException == null) closeException = rte;
+//                    else closeException.addSuppressed(rte);
+//                }
+//            }
+//            if (closeException != null) throw closeException;
+//        }
+//
+//        @Override
+//        public String toString() {
+//            return "ContextSnapshot.Reactivation{size=" + reactivated.length + '}';
+//        }
+//    }
 }

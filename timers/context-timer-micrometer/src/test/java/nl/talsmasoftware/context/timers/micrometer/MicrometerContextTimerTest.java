@@ -49,7 +49,7 @@ public class MicrometerContextTimerTest {
 
     @Test
     public void testCreateSnapshotInFreshApplication() {
-        Timer timer = Metrics.timer(ContextManagers.class.getName() + ".createContextSnapshot");
+        Timer timer = Metrics.timer(ContextSnapshot.class.getName() + ".capture");
         assertThat(timer.count(), is(0L));
 
         ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
