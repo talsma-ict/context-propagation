@@ -68,6 +68,27 @@ public interface ContextManager<T> {
      */
     void clear();
 
+    /**
+     * Clears all active contexts from the current thread.
+     *
+     * <p>
+     * Contexts that are 'stacked' (i.e. restore the previous state upon close)
+     * should be closed in a way that includes all 'parent' contexts as well.
+     *
+     * <p>
+     * This operation is not intended to be used by general application code
+     * as it likely breaks any 'stacked' active context that surrounding code may depend upon.
+     *
+     * <p>
+     * Appropriate use includes thread management, where threads are reused by some pooling mechanism.<br>
+     * For example, it is considered safe to clear the context when obtaining a 'fresh' thread from a
+     * thread pool (as no context expectations should exist at that point).<br>
+     * An even better strategy would be to clear the context right before returning a used thread
+     * back to the pool as this will allow any unclosed contexts to be garbage collected.<br>
+     * Besides preventing contextual issues, this reduces the risk of memory leaks by unbalanced context calls.
+     *
+     * @since 2.0.0
+     */
     static void clearAll() {
         ContextSnapshotImpl.clearActiveContexts();
     }

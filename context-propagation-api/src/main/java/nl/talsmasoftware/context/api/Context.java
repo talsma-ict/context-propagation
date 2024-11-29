@@ -46,6 +46,8 @@ import java.io.Closeable;
  */
 public interface Context<T> extends Closeable {
 
+    // TODO think about removing Context.getValue as ContextManager.getActiveContextValue() should suffice.
+
     /**
      * The value associated with this context.
      *
