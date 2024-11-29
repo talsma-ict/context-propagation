@@ -21,9 +21,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 final class ContextSnapshotImpl implements ContextSnapshot {
-    private static final Logger LOGGER = Logger.getLogger(ContextSnapshot.class.getName());
-    private static final Logger CONTEXT_LOGGER = Logger.getLogger(Context.class.getName());
-    private static final Logger TIMING_LOGGER = Logger.getLogger(ContextTimer.class.getName());
+    private static final Logger SNAPSHOT_LOGGER = Logger.getLogger(ContextSnapshot.class.getName());
+    private static final Logger MANAGER_LOGGER = Logger.getLogger(ContextManager.class.getName());
+    private static final Logger TIMER_LOGGER = Logger.getLogger(ContextTimer.class.getName());
 
     private final List<ContextManager> managers;
     private final Object[] values;
@@ -34,7 +34,7 @@ final class ContextSnapshotImpl implements ContextSnapshot {
         try {
             return new ContextSnapshotImpl();
         } catch (RuntimeException e) {
-            LOGGER.log(Level.FINEST, e, () -> "Error capturing ContextSnapshot from " + Thread.currentThread().getName() + ": " + e.getMessage());
+            SNAPSHOT_LOGGER.log(Level.FINEST, e, () -> "Error capturing ContextSnapshot from " + Thread.currentThread().getName() + ": " + e.getMessage());
             throw error = e;
         } finally {
             timed(System.nanoTime() - start, ContextSnapshot.class, "capture", error);
@@ -47,8 +47,8 @@ final class ContextSnapshotImpl implements ContextSnapshot {
         for (int i = 0; i < values.length; i++) {
             values[i] = getActiveContextValue(managers.get(i));
         }
-        if (managers.isEmpty() && LOGGER.isLoggable(Level.FINER)) {
-            LOGGER.finer(this + " was created but no ContextManagers were found! "
+        if (managers.isEmpty() && SNAPSHOT_LOGGER.isLoggable(Level.FINER)) {
+            SNAPSHOT_LOGGER.finer(this + " was created but no ContextManagers were found! "
                     + " Thread=" + Thread.currentThread()
                     + ", ContextClassLoader=" + Thread.currentThread().getContextClassLoader());
         }
@@ -144,13 +144,13 @@ final class ContextSnapshotImpl implements ContextSnapshot {
         try {
 
             final Object activeContextValue = manager.getActiveContextValue();
-            LOGGER.finest(() -> activeContextValue == null
+            SNAPSHOT_LOGGER.finest(() -> activeContextValue == null
                     ? "There is no active context value for " + manager + " (in thread " + Thread.currentThread().getName() + ")."
                     : "Active context value of " + manager + " in " + Thread.currentThread().getName() + ": " + activeContextValue);
             return activeContextValue;
 
         } catch (RuntimeException e) {
-            LOGGER.log(Level.WARNING, e, () -> "Error obtaining active context from " + manager + " (in thread " + Thread.currentThread().getName() + ").");
+            SNAPSHOT_LOGGER.log(Level.WARNING, e, () -> "Error obtaining active context from " + manager + " (in thread " + Thread.currentThread().getName() + ").");
             error = e;
             return null;
         } finally {
@@ -164,10 +164,10 @@ final class ContextSnapshotImpl implements ContextSnapshot {
         try {
 
             manager.clear();
-            CONTEXT_LOGGER.finest(() -> "Active context of " + manager + " was cleared.");
+            MANAGER_LOGGER.finest(() -> "Active context of " + manager + " was cleared.");
 
         } catch (RuntimeException e) {
-            CONTEXT_LOGGER.log(Level.WARNING, e, () -> "Error clearing active context from " + manager + "(in thread " + Thread.currentThread().getName() + ").");
+            MANAGER_LOGGER.log(Level.WARNING, e, () -> "Error clearing active context from " + manager + "(in thread " + Thread.currentThread().getName() + ").");
             error = e;
         } finally {
             timed(System.nanoTime() - start, manager.getClass(), "clear", error);
@@ -193,7 +193,7 @@ final class ContextSnapshotImpl implements ContextSnapshot {
         try {
 
             Context reactivated = contextManager.initializeNewContext(snapshotValue);
-            LOGGER.finest(() -> "Context reactivated from snapshot by " + contextManager + ": " + reactivated + ".");
+            SNAPSHOT_LOGGER.finest(() -> "Context reactivated from snapshot by " + contextManager + ": " + reactivated + ".");
             return reactivated;
 
         } catch (RuntimeException e) {
@@ -225,8 +225,8 @@ final class ContextSnapshotImpl implements ContextSnapshot {
         for (ContextTimer delegate : ServiceCache.cached(ContextTimer.class)) {
             delegate.update(type, method, durationNanos, TimeUnit.NANOSECONDS, error);
         }
-        if (TIMING_LOGGER.isLoggable(Level.FINEST)) {
-            TIMING_LOGGER.log(Level.FINEST, "{0}.{1}: {2,number}ns", new Object[]{type.getName(), method, durationNanos});
+        if (TIMER_LOGGER.isLoggable(Level.FINEST)) {
+            TIMER_LOGGER.log(Level.FINEST, "{0}.{1}: {2,number}ns", new Object[]{type.getName(), method, durationNanos});
         }
     }
 }
