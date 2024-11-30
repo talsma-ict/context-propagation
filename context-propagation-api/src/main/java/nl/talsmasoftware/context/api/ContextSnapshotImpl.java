@@ -48,9 +48,9 @@ final class ContextSnapshotImpl implements ContextSnapshot {
             values[i] = getActiveContextValue(managers.get(i));
         }
         if (managers.isEmpty() && SNAPSHOT_LOGGER.isLoggable(Level.FINER)) {
-            SNAPSHOT_LOGGER.finer(this + " was created but no ContextManagers were found! "
-                    + " Thread=" + Thread.currentThread()
-                    + ", ContextClassLoader=" + Thread.currentThread().getContextClassLoader());
+            final Thread currentThread = Thread.currentThread();
+            SNAPSHOT_LOGGER.finer(this + " was created but no ContextManagers were found! Thread="
+                    + currentThread.getName() + ", ContextClassLoader=" + currentThread.getContextClassLoader());
         }
     }
 

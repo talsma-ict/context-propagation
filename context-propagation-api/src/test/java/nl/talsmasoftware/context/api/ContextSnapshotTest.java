@@ -13,73 +13,52 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.core;
+package nl.talsmasoftware.context.api;
 
-import nl.talsmasoftware.context.api.Context;
-import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService;
 import nl.talsmasoftware.context.dummy.DummyContext;
 import nl.talsmasoftware.context.dummy.DummyContextManager;
+import nl.talsmasoftware.context.dummy.DummyContextTimer;
 import nl.talsmasoftware.context.dummy.ThrowingContextManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Sjoerd Talsma
  */
-public class ContextManagersTest {
+class ContextSnapshotTest {
     DummyContextManager dummyManager = new DummyContextManager();
 
     @BeforeEach
     @AfterEach
-    public void resetContexts() {
-        ContextManagers.clearActiveContexts();
+    void resetContexts() {
+        ContextManager.clearAll();
+        DummyContextTimer.clear();
     }
 
     @BeforeEach
     @AfterEach
-    public void resetContextClassLoader() {
-        ContextManagers.useClassLoader(null);
+    void resetContextClassLoader() {
+        ContextManager.useClassLoader(null);
     }
 
     @Test
-    public void testUnsupportedConstructor() {
-        Constructor<?>[] constructors = ContextManagers.class.getDeclaredConstructors();
-        assertThat("Number of constructors", constructors.length, is(1));
-        assertThat("Constructor parameters", constructors[0].getParameterTypes().length, is(0));
-        assertThat("Constructor accessibility", constructors[0].isAccessible(), is(false));
-        try {
-            constructors[0].setAccessible(true);
-            constructors[0].newInstance();
-            fail("Exception expected.");
-        } catch (IllegalAccessException | InstantiationException e) {
-            fail("InvocationTargetException expected.");
-        } catch (InvocationTargetException e) {
-            assertThat(e.getCause(), is(instanceOf(UnsupportedOperationException.class)));
-        }
-    }
-
-    @Test
-    public void testSnapshot_inSameThread() {
+    void testSnapshot_inSameThread() {
         dummyManager.clear();
         assertThat(DummyContext.currentValue(), is(nullValue()));
 
@@ -89,7 +68,7 @@ public class ContextManagersTest {
         DummyContext ctx2 = new DummyContext("second value");
         assertThat(DummyContext.currentValue(), is("second value"));
 
-        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        ContextSnapshot snapshot = ContextSnapshot.capture();
         assertThat(DummyContext.currentValue(), is("second value")); // No context change because of snapshot.
 
         DummyContext ctx3 = new DummyContext("third value");
@@ -116,64 +95,28 @@ public class ContextManagersTest {
     }
 
     @Test
-    public void testSnapshotThreadPropagation() throws ExecutionException, InterruptedException {
-        DummyContext.reset();
-        ExecutorService threadpool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
-        assertThat(DummyContext.currentValue(), is(nullValue()));
-
-        DummyContext ctx1 = new DummyContext("initial value");
-        assertThat(DummyContext.currentValue(), is("initial value"));
-        Future<String> threadResult = threadpool.submit(new Callable<String>() {
-            public String call() throws Exception {
-                return DummyContext.currentValue();
-            }
-        });
-        assertThat(threadResult.get(), is("initial value"));
-
-        DummyContext ctx2 = new DummyContext("second value");
-        threadResult = threadpool.submit(new Callable<String>() {
-            public String call() throws Exception {
-                String res = DummyContext.currentValue();
-                try (DummyContext inThread = new DummyContext("in-thread value")) {
-                    res += ", " + DummyContext.currentValue();
-                }
-                return res + ", " + DummyContext.currentValue();
-            }
-        });
-        assertThat(DummyContext.currentValue(), is("second value"));
-        assertThat(threadResult.get(), is("second value, in-thread value, second value"));
-
-        ctx2.close();
-        ctx1.close();
-    }
-
-    @Test
-    public void testConcurrentSnapshots() throws ExecutionException, InterruptedException {
-        int threadcount = 25;
-        ExecutorService threadpool = Executors.newFixedThreadPool(threadcount);
+    void testConcurrentSnapshots() throws ExecutionException, InterruptedException {
+        int threadCount = 25;
+        ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
         try {
-            List<Future<ContextSnapshot>> snapshots = new ArrayList<Future<ContextSnapshot>>(threadcount);
-            for (int i = 0; i < threadcount; i++) {
-                snapshots.add(threadpool.submit(new Callable<ContextSnapshot>() {
-                    public ContextSnapshot call() throws Exception {
-                        return ContextManagers.createContextSnapshot();
-                    }
-                }));
+            List<Future<ContextSnapshot>> snapshots = new ArrayList<>(threadCount);
+            for (int i = 0; i < threadCount; i++) {
+                snapshots.add(threadPool.submit(ContextSnapshot::capture));
             }
 
-            for (int i = 0; i < threadcount; i++) {
+            for (int i = 0; i < threadCount; i++) {
                 assertThat(snapshots.get(i).get(), is(notNullValue()));
             }
         } finally {
-            threadpool.shutdown();
+            threadPool.shutdown();
         }
     }
 
     @Test
-    public void testCreateSnapshot_ExceptionHandling() {
+    void testCreateSnapshot_ExceptionHandling() {
         ThrowingContextManager.onGet = new IllegalStateException("No active context!");
         Context<String> ctx = new DummyContext("blah");
-        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        ContextSnapshot snapshot = ContextSnapshot.capture();
         ctx.close();
 
         assertThat(DummyContext.currentValue(), is(nullValue()));
@@ -184,12 +127,12 @@ public class ContextManagersTest {
     }
 
     @Test
-    public void testReactivateSnapshot_ExceptionHandling() {
+    void testReactivateSnapshot_ExceptionHandling() {
         final RuntimeException reactivationException = new IllegalStateException("Cannot create new context!");
         ThrowingContextManager mgr = new ThrowingContextManager();
         Context<String> ctx1 = new DummyContext("foo");
         Context<String> ctx2 = mgr.initializeNewContext("bar");
-        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        ContextSnapshot snapshot = ContextSnapshot.capture();
         ThrowingContextManager.onInitialize = reactivationException;
 
         assertThat(DummyContext.currentValue(), is("foo"));
@@ -207,14 +150,14 @@ public class ContextManagersTest {
     }
 
     @Test
-    public void testConcurrentSnapshots_fixedClassLoader() throws ExecutionException, InterruptedException {
-        ContextManagers.useClassLoader(Thread.currentThread().getContextClassLoader());
+    void testConcurrentSnapshots_fixedClassLoader() throws ExecutionException, InterruptedException {
+        ContextManager.useClassLoader(Thread.currentThread().getContextClassLoader());
         int threadcount = 25;
         ExecutorService threadpool = Executors.newFixedThreadPool(threadcount);
         try {
             Future<ContextSnapshot>[] snapshots = new Future[threadcount];
             for (int i = 0; i < threadcount; i++) {
-                snapshots[i] = threadpool.submit(ContextManagers::createContextSnapshot);
+                snapshots[i] = threadpool.submit(ContextSnapshot::capture);
             }
 
             for (int i = 0; i < threadcount; i++) {
@@ -224,6 +167,22 @@ public class ContextManagersTest {
         } finally {
             threadpool.shutdown();
         }
+    }
+
+    @Test
+    void toString_isForSnapshot_notSnapshotImpl() {
+        assertThat(ContextSnapshot.capture(), hasToString(containsString("ContextSnapshot{")));
+    }
+
+    @Test
+    void testTimingDelegation() {
+        DummyContextTimer.clear();
+        assertThat(DummyContextTimer.getLastTimedMillis(ContextSnapshot.class, "capture"), nullValue());
+        assertThat(DummyContextTimer.getLastTimedMillis(ContextSnapshot.class, "reactivate"), nullValue());
+
+        ContextSnapshot.capture().reactivate().close();
+        assertThat(DummyContextTimer.getLastTimedMillis(ContextSnapshot.class, "capture"), notNullValue());
+        assertThat(DummyContextTimer.getLastTimedMillis(ContextSnapshot.class, "reactivate"), notNullValue());
     }
 
 }
