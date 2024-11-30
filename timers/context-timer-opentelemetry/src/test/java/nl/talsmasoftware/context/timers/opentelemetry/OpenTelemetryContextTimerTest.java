@@ -32,7 +32,7 @@ class OpenTelemetryContextTimerTest {
     OpenTelemetryContextTimer subject = new OpenTelemetryContextTimer();
 
     @Test
-    void update_ContextManagers_createContextSnapshot() {
+    void update_ContextSnapshot_capture() {
         // prepare
 
         // execute

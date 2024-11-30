@@ -16,7 +16,6 @@
 package nl.talsmasoftware.context.core.concurrent;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 import nl.talsmasoftware.context.core.function.BiConsumerWithContext;
 import nl.talsmasoftware.context.core.function.BiFunctionWithContext;
 import nl.talsmasoftware.context.core.function.ConsumerWithContext;
@@ -61,10 +60,10 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
     private final boolean takeNewSnapshot;
 
     /**
-     * Creates a new {@link ContextSnapshot} and remembers that in this completable future,
+     * Captures a new {@link ContextSnapshot} and remembers that in this completable future,
      * running all completion methods within this snapshot.
      *
-     * @see ContextManagers#createContextSnapshot()
+     * @see ContextSnapshot#capture()
      */
     public ContextAwareCompletableFuture() {
         this((ContextSnapshot) null);
@@ -75,8 +74,8 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * snapshot context.
      *
      * @param snapshot the snapshot to run completion methods in.
-     *                 Optional, the completable future will take a new snaphot if {@code null} is provided.
-     * @see ContextManagers#createContextSnapshot()
+     *                 Optional, the completable future will capture a new snapshot if {@code null} is provided.
+     * @see ContextSnapshot#capture()
      */
     public ContextAwareCompletableFuture(ContextSnapshot snapshot) {
         this(new ContextSnapshotHolder(snapshot), false);
@@ -126,8 +125,8 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * This method is lenient to {@code null} values for {@code executor} and {@code snapshot}:<br>
      * If {@code executor == null} the common {@link java.util.concurrent.ForkJoinPool ForkJoinPool} is used as
      * specified by {@link CompletableFuture#supplyAsync(Supplier)}.<br>
-     * If {@code snapshot == null} a {@link ContextManagers#createContextSnapshot() new context snapshot} is
-     * created for the {@link Supplier} (if not already a {@link SupplierWithContext}).
+     * If {@code snapshot == null} a {@link ContextSnapshot#capture() new context snapshot} is
+     * captured for the {@link Supplier} (if not already a {@link SupplierWithContext}).
      *
      * @param supplier a function returning the value to be used to complete the returned CompletableFuture
      * @param executor the executor to use for asynchronous execution
@@ -150,8 +149,8 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * This method is lenient to {@code null} values for {@code executor} and {@code snapshot}:<br>
      * If {@code executor == null} the common {@link java.util.concurrent.ForkJoinPool ForkJoinPool} is used as
      * specified by {@link CompletableFuture#supplyAsync(Supplier)}.<br>
-     * If {@code snapshot == null} a {@link ContextManagers#createContextSnapshot() new context snapshot} is
-     * created for the {@link Supplier} (if not already a {@link SupplierWithContext}).
+     * If {@code snapshot == null} a {@link ContextSnapshot#capture() new context snapshot} is
+     * captured for the {@link Supplier} (if not already a {@link SupplierWithContext}).
      *
      * @param supplier        a function returning the value to be used to complete the returned CompletableFuture
      * @param executor        the executor to use for asynchronous execution
@@ -215,8 +214,8 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * This method is lenient to {@code null} values for {@code executor} and {@code snapshot}:<br>
      * If {@code executor == null} the common {@link java.util.concurrent.ForkJoinPool ForkJoinPool} is used as
      * specified by {@link CompletableFuture#supplyAsync(Supplier)}.<br>
-     * If {@code snapshot == null} a {@link ContextManagers#createContextSnapshot() new context snapshot} is
-     * created for the {@link Supplier} (if not already a {@link SupplierWithContext}).
+     * If {@code snapshot == null} a {@link ContextSnapshot#capture() new context snapshot} is
+     * captured for the {@link Supplier} (if not already a {@link SupplierWithContext}).
      *
      * @param runnable the action to run before completing the returned CompletableFuture
      * @param executor the executor to use for asynchronous execution
@@ -237,8 +236,8 @@ public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {
      * This method is lenient to {@code null} values for {@code executor} and {@code snapshot}:<br>
      * If {@code executor == null} the common {@link java.util.concurrent.ForkJoinPool ForkJoinPool} is used as
      * specified by {@link CompletableFuture#supplyAsync(Supplier)}.<br>
-     * If {@code snapshot == null} a {@link ContextManagers#createContextSnapshot() new context snapshot} is
-     * created for the {@link Supplier} (if not already a {@link SupplierWithContext}).
+     * If {@code snapshot == null} a {@link ContextSnapshot#capture() new context snapshot} is
+     * captured for the {@link Supplier} (if not already a {@link SupplierWithContext}).
      *
      * @param runnable        the action to run before completing the returned CompletableFuture
      * @param executor        the executor to use for asynchronous execution

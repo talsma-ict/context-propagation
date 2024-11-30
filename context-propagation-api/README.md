@@ -35,15 +35,15 @@ although technically these use cases are not appropriate.
 Manages contexts by initializing and maintaining an active context value.
 
 Normally it is not necessary to interact directly with individual context managers.
-The `ContextManagers` utility class detects available context managers and lets 
-you take a [_snapshot_](#context-snapshot) of **all** active contexts at once.
+The api detects available context managers and lets 
+you capture a [_snapshot_](#context-snapshot) of **all** active contexts at once.
 
 - [ContextManager javadoc][contextmanager]
-- [ContextManagers javadoc][contextmanagers]
+- [ContextSnapshot javadoc][contextsnapshot]
 
 ### Context Snapshot
 
-A context snapshot is created by the [ContextManagers]' `createContextSnapshot()` method.
+A context snapshot is captured by the [ContextSnapshot]' `capture()` method.
 The snapshot contains active context values from all known [ContextManager] implementations.
 Once created, the captured _values_ in such context snapshot will not change anymore, 
 even when the active context is later modified. 
@@ -52,7 +52,6 @@ They stay active until the reactivation is closed again (or are overwritten by n
 Closing the reactivated object is mandatory (from the thread where the reactivation was called).
 
 - [ContextSnapshot javadoc](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextSnapshot.html)
-- [ContextManagers javadoc](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextManagers.html)
 
 ## Creating your own context manager
 
@@ -68,23 +67,24 @@ It should contain the fully qualified classname of your implementation.
 
 ```java
 public class DummyContextManager implements ContextManager<String> {
-    public Context<String> initializeNewContext(String value) {
-        return new DummyContext(value);
+  public Context<String> initializeNewContext(String value) {
+    return new DummyContext(value);
+  }
+
+  public Context<String> getActiveContextValue() {
+    DummyContext current = DummyContext.current();
+    return current != null ? current.getValue() : null;
+  }
+  
+  private static final class DummyContext extends AbstractThreadLocalContext<String> {
+    private DummyContext(String newValue) {
+      super(newValue);
     }
 
-    public Context<String> getActiveContext() {
-        return DummyContext.current();
+    private static Context<String> current() {
+      return AbstractThreadLocalContext.current(DummyContext.class);
     }
-    
-    private static final class DummyContext extends AbstractThreadLocalContext<String> {
-        private DummyContext(String newValue) {
-            super(newValue);
-        }
-        
-        private static Context<String> current() {
-            return AbstractThreadLocalContext.current(DummyContext.class);
-        }
-    }
+  }
 }
 ```
 
@@ -95,7 +95,6 @@ public class DummyContextManager implements ContextManager<String> {
   [javadoc]: https://www.javadoc.io/doc/nl.talsmasoftware.context/context-propagation 
 
   [threadlocal]: https://docs.oracle.com/javase/8/docs/api/java/lang/ThreadLocal.html
-  [context]: https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/Context.html
-  [contextsnapshot]: https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextSnapshot.html
-  [contextmanager]: https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextManager.html
-  [contextmanagers]: https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextManagers.html
+  [context]: https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/api/Context.html
+  [contextsnapshot]: https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/api/ContextSnapshot.html
+  [contextmanager]: https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/api/ContextManager.html

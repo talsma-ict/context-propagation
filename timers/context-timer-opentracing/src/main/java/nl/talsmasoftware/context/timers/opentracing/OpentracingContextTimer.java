@@ -51,8 +51,8 @@ public class OpentracingContextTimer implements ContextTimer {
             Span span = GlobalTracer.get().buildSpan(operationName).withStartTimestamp(startTimestampMicros).start();
             try {
                 Map<String, Object> log = new LinkedHashMap<>();
-                if ("createContextSnapshot".equals(method)) {
-                    log.put(Fields.EVENT, "New context snapshot created");
+                if ("capture".equals(method)) {
+                    log.put(Fields.EVENT, "New context snapshot captured");
                 } else if ("reactivate".equals(method)) {
                     log.put(Fields.EVENT, "Context snapshot reactivated");
                 }

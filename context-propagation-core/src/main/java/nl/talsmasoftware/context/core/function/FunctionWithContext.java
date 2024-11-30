@@ -16,7 +16,6 @@
 package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -71,7 +70,7 @@ public class FunctionWithContext<IN, OUT> extends WrapperWithContextAndConsumer<
      * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
      * <li>apply the delegate function
      * <li><em>if snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * <li>return the result from the delegate function call (or throw runtime exception if the delegate did).
      * </ol>
@@ -111,7 +110,7 @@ public class FunctionWithContext<IN, OUT> extends WrapperWithContextAndConsumer<
      * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
      * <li>apply the delegate function and get the result
      * <li><em>if context snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * <li>return the result</li>
      * </ol>
@@ -146,7 +145,7 @@ public class FunctionWithContext<IN, OUT> extends WrapperWithContextAndConsumer<
      * <li>apply the {@code before} function
      * <li>apply the delegate function to the result of the {@code before} function and get the end result
      * <li><em>if context snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * <li>return the end result</li>
      * </ol>
@@ -184,7 +183,7 @@ public class FunctionWithContext<IN, OUT> extends WrapperWithContextAndConsumer<
      * <li>apply the delegate function and get the result
      * <li>apply the {@code after} function to the result to get the end result
      * <li><em>if context snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * <li>return the end result</li>
      * </ol>

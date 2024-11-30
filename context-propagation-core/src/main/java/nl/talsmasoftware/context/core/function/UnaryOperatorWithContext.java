@@ -16,7 +16,6 @@
 package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -64,7 +63,7 @@ public class UnaryOperatorWithContext<T> extends FunctionWithContext<T, T> imple
      * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
      * <li>apply the delegate operator
      * <li><em>if snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * <li>return the result from the delegate operator call (or throw runtime exception if the delegate did).
      * </ol>

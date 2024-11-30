@@ -49,7 +49,7 @@ public abstract class WrapperWithContext<T> extends Wrapper<T> {
      * <p>
      * <strong>Note:</strong> <em>Make sure the supplier function does <strong>not</strong> obtain the context snapshot
      * from any threadlocal storage! The wrapper is designed to propagate contexts from one thread to another.
-     * Therefore, the snapshot must be {@link nl.talsmasoftware.context.core.ContextManagers#createContextSnapshot() captured}
+     * Therefore, the snapshot must be {@link ContextSnapshot#capture() captured}
      * in the source thread and {@link ContextSnapshot#reactivate() reactivated} in the target thread.
      * If unsure, please use the
      * {@link #WrapperWithContext(ContextSnapshot, Object) constructor with snapshot} instead.</em>

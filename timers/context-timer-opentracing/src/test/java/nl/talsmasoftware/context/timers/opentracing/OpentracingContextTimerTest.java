@@ -74,7 +74,7 @@ public class OpentracingContextTimerTest {
     }
 
     @Test
-    public void testTraceCreateContextSnapshot() {
+    public void testTraceCaptureContextSnapshot() {
         System.setProperty(PROPERTY_NAME, "true");
         ContextSnapshot.capture();
         assertThat(tracer.finishedSpans(), hasItem(withOperationName("ContextSnapshot.capture")));
