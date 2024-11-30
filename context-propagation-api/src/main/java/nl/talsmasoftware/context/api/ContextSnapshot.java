@@ -25,7 +25,7 @@ import java.io.Closeable;
  * ensuring that all context values are set in that other thread.
  *
  * <p>
- * A snapshot can be obtained from {@linkplain #capture()} method.
+ * A snapshot can be obtained from the {@linkplain #capture()} method.
  *
  * <p>
  * This library contains several utility classes named {@code ContextAware...} or {...WithContext} that will
