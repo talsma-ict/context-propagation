@@ -16,7 +16,6 @@
 package nl.talsmasoftware.context.clearable;
 
 import nl.talsmasoftware.context.api.ContextManager;
-import nl.talsmasoftware.context.core.ContextManagers;
 import nl.talsmasoftware.context.dummy.ThrowingContextManager;
 import org.junit.jupiter.api.Test;
 
@@ -42,7 +41,7 @@ public class ClearableContextManagerTest {
         CLEARABLE.initializeNewContext("Third value");
         assertThat(CLEARABLE.getActiveContextValue(), is("Third value"));
 
-        ContextManagers.clearActiveContexts();
+        ContextManager.clearAll();
         assertThat(CLEARABLE.getActiveContextValue(), is(nullValue()));
     }
 
@@ -50,7 +49,7 @@ public class ClearableContextManagerTest {
     public void testClearActiveContexts_exception() {
         ThrowingContextManager.onGet = new IllegalStateException("Cannot get the current active context!");
 
-        ContextManagers.clearActiveContexts();
+        ContextManager.clearAll();
         // Mustn't throw exceptions.
     }
 }

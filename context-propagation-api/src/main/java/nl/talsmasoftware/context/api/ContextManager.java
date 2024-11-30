@@ -62,7 +62,7 @@ public interface ContextManager<T> {
      * to clear all contexts before returning threads to the pool.
      *
      * <p>
-     * This method normally should only get called by {@code ContextManagers.clearActiveContexts()}.
+     * This method normally should only get called by {@linkplain #clearAll()}.
      *
      * @since 2.0.0
      */

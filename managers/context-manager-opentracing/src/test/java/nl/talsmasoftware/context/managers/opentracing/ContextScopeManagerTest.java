@@ -21,7 +21,7 @@ import io.opentracing.mock.MockTracer;
 import io.opentracing.util.GlobalTracer;
 import io.opentracing.util.GlobalTracerTestUtil;
 import nl.talsmasoftware.context.api.Context;
-import nl.talsmasoftware.context.core.ContextManagers;
+import nl.talsmasoftware.context.api.ContextManager;
 import nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,7 +59,7 @@ public class ContextScopeManagerTest {
     @AfterEach
     public void cleanup() {
         threadpool.shutdown();
-        ContextManagers.clearActiveContexts();
+        ContextManager.clearAll();
         GlobalTracerTestUtil.resetGlobalTracer();
     }
 

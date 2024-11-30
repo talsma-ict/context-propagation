@@ -15,7 +15,7 @@
  */
 package nl.talsmasoftware.context.core.concurrent;
 
-import nl.talsmasoftware.context.core.ContextManagers;
+import nl.talsmasoftware.context.api.ContextManager;
 import nl.talsmasoftware.context.dummy.DummyContextManager;
 import nl.talsmasoftware.context.dummy.ThrowingContextManager;
 import org.junit.jupiter.api.AfterEach;
@@ -58,7 +58,7 @@ public class ContextAwareExecutorServiceTest {
     @BeforeEach
     @AfterEach
     public void clearActiveContexts() {
-        ContextManagers.clearActiveContexts();
+        ContextManager.clearAll();
     }
 
     @Test

@@ -1,4 +1,4 @@
-[![Maven Version][maven-img]][maven] 
+[![Maven Version][maven-img]][maven]
 
 # ServletRequest propagation library
 
@@ -23,9 +23,10 @@ if the `ServletRequestContextFilter` was applied to the inbound request.
 Done!
 
 Now the `ServletRequestContextManager.currentServletRequest()` is propagated into each
-snapshot created by the `ContextManagers.createSnapshot()` method.  
+snapshot created by the `ContextSnapshot.capture()` method.  
 This includes all usages of the `ContextAwareExecutorService`.
 
 
-  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/servletrequest-propagation
-  [maven]: https://search.maven.org/artifact/nl.talsmasoftware.context/servletrequest-propagation
+[maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/servletrequest-propagation
+
+[maven]: https://search.maven.org/artifact/nl.talsmasoftware.context/servletrequest-propagation

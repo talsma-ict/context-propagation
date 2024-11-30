@@ -36,14 +36,14 @@ public class NoContextManagersTest {
 
     @BeforeEach
     public void avoidContextManagersCache() {
-        ContextManagers.useClassLoader(new ClassLoader(Thread.currentThread().getContextClassLoader()) {
+        ContextManager.useClassLoader(new ClassLoader(Thread.currentThread().getContextClassLoader()) {
         });
         assertThat("Move service file", SERVICE_FILE.renameTo(TMP_SERVICE_FILE), is(true));
     }
 
     @AfterEach
     public void resetDefaultClassLoader() {
-        ContextManagers.useClassLoader(null);
+        ContextManager.useClassLoader(null);
         assertThat("Restore service file!", TMP_SERVICE_FILE.renameTo(SERVICE_FILE), is(true));
     }
 
@@ -69,7 +69,7 @@ public class NoContextManagersTest {
 
     @Test
     public void testClearManagedContexts_withoutContextManagers() {
-        ContextManagers.clearActiveContexts(); // there should be no exception
+        ContextManager.clearAll(); // there should be no exception
     }
 
 }
