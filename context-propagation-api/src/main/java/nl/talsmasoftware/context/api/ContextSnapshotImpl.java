@@ -120,16 +120,19 @@ final class ContextSnapshotImpl implements ContextSnapshot {
         public void close() {
             RuntimeException closeException = null;
             // close in reverse order of reactivation
-            for (int i = this.reactivated.length - 1; i >= 0; i--) {
-                Context<?> reactivated = this.reactivated[i];
-                if (reactivated != null) try {
-                    reactivated.close();
-                } catch (RuntimeException rte) {
-                    if (closeException == null) closeException = rte;
-                    else closeException.addSuppressed(rte);
+            for (int i = reactivated.length - 1; i >= 0; i--) {
+                if (reactivated[i] != null) {
+                    try {
+                        reactivated[i].close();
+                    } catch (RuntimeException rte) {
+                        if (closeException == null) closeException = rte;
+                        else closeException.addSuppressed(rte);
+                    }
                 }
             }
-            if (closeException != null) throw closeException;
+            if (closeException != null) {
+                throw closeException;
+            }
         }
 
         @Override

@@ -185,4 +185,10 @@ class ContextSnapshotTest {
         assertThat(DummyContextTimer.getLastTimedMillis(ContextSnapshot.class, "reactivate"), notNullValue());
     }
 
+    @Test
+    void testReactivationToString() {
+        try (ContextSnapshot.Reactivation reactivation = ContextSnapshot.capture().reactivate()) {
+            assertThat(reactivation, hasToString(containsString("ContextSnapshot.Reactivation{")));
+        }
+    }
 }
