@@ -49,7 +49,7 @@ final class ContextSnapshotImpl implements ContextSnapshot {
         }
         if (managers.isEmpty() && SNAPSHOT_LOGGER.isLoggable(Level.FINER)) {
             final Thread currentThread = Thread.currentThread();
-            SNAPSHOT_LOGGER.finer(this + " was created but no ContextManagers were found! Thread="
+            SNAPSHOT_LOGGER.finer(this + " was created but no context managers were found! Thread="
                     + currentThread.getName() + ", ContextClassLoader=" + currentThread.getContextClassLoader());
         }
     }

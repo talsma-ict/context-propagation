@@ -93,7 +93,6 @@ public class OpenTelemetryContextTimer implements ContextTimer {
     }
 
     private static boolean mustTrace(Class<?> type) {
-        return ContextSnapshot.class.isAssignableFrom(type)
-                || "nl.talsmasoftware.context.core.ContextManagers".equals(type.getName());
+        return ContextSnapshot.class.isAssignableFrom(type);
     }
 }
