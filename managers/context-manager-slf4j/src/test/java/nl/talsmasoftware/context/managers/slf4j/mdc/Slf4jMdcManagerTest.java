@@ -79,7 +79,7 @@ public class Slf4jMdcManagerTest {
     public void testMdcItemRestoration() throws Exception {
         MDC.put("mdc-item", "Value 1");
 
-        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        ContextSnapshot snapshot = ContextSnapshot.capture();
         assertThat("New snapshot shouldn't manipulate MDC.", GET_MDC_ITEM.call(), is("Value 1"));
 
         MDC.put("mdc-item", "Value 2");

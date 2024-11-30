@@ -128,7 +128,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
                 return delegate().test(in1, in2);
             } finally {
                 if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                    ContextSnapshot resultSnapshot = ContextSnapshot.capture();
                     LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                     contextSnapshotConsumer.accept(resultSnapshot);
                 }
@@ -173,7 +173,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
                     return delegate().test(in1, in2) && other.test(in1, in2);
                 } finally {
                     if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                        ContextSnapshot resultSnapshot = ContextSnapshot.capture();
                         LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                         contextSnapshotConsumer.accept(resultSnapshot);
                     }
@@ -218,7 +218,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
                     return delegate().test(in1, in2) || other.test(in1, in2);
                 } finally {
                     if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                        ContextSnapshot resultSnapshot = ContextSnapshot.capture();
                         LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                         contextSnapshotConsumer.accept(resultSnapshot);
                     }

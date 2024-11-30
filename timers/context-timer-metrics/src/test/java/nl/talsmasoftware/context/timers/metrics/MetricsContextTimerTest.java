@@ -18,7 +18,6 @@ package nl.talsmasoftware.context.timers.metrics;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.SharedMetricRegistries;
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -70,7 +69,7 @@ public class MetricsContextTimerTest {
     @Test
     public void testCreateSnapshotInFreshApplication() {
         assertThat(SharedMetricRegistries.names(), is(empty()));
-        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        ContextSnapshot snapshot = ContextSnapshot.capture();
         String name = MetricRegistry.name(ContextSnapshot.class, "capture");
         assertThat(snapshot, is(notNullValue()));
 
@@ -85,7 +84,7 @@ public class MetricsContextTimerTest {
         SharedMetricRegistries.setDefault("DefaultRegistry");
 
         assertThat(SharedMetricRegistries.names(), contains("DefaultRegistry"));
-        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        ContextSnapshot snapshot = ContextSnapshot.capture();
         String name = MetricRegistry.name(ContextSnapshot.class, "capture");
         assertThat(snapshot, is(notNullValue()));
 
@@ -101,7 +100,7 @@ public class MetricsContextTimerTest {
         assertThat(SharedMetricRegistries.tryGetDefault(), is(nullValue()));
 
         assertThat(SharedMetricRegistries.names(), contains("NonDefaultRegistry"));
-        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        ContextSnapshot snapshot = ContextSnapshot.capture();
         String name = MetricRegistry.name(ContextSnapshot.class, "capture");
         assertThat(snapshot, is(notNullValue()));
 
@@ -118,7 +117,7 @@ public class MetricsContextTimerTest {
 
         assertThat(SharedMetricRegistries.names(), containsInAnyOrder("NonDefaultRegistry1", "NonDefaultRegistry2"));
         for (int i = 1; i <= 3; i++) {
-            assertThat(ContextManagers.createContextSnapshot(), is(notNullValue()));
+            assertThat(ContextSnapshot.capture(), is(notNullValue()));
         }
         String name = MetricRegistry.name(ContextSnapshot.class, "capture");
 

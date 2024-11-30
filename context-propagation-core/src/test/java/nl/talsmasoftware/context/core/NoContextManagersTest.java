@@ -50,7 +50,7 @@ public class NoContextManagersTest {
     @Test
     public void testReactivate_withoutContextManagers() {
         Context<String> ctx1 = new DummyContext("foo");
-        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        ContextSnapshot snapshot = ContextSnapshot.capture();
         ctx1.close();
 
         ContextSnapshot.Reactivation reactivated = snapshot.reactivate();
@@ -59,7 +59,7 @@ public class NoContextManagersTest {
 
     @Test
     public void testCreateSnapshot_withoutContextManagers() {
-        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        ContextSnapshot snapshot = ContextSnapshot.capture();
         assertThat(snapshot, is(notNullValue()));
 
         ContextSnapshot.Reactivation reactivated = snapshot.reactivate();

@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * Currently, the following timed operations are updated:
  * <ul>
- * <li>{@code ContextManagers.createContextSnapshot}</li>
+ * <li>{@linkplain ContextSnapshot#capture()}</li>
  * <li>{@linkplain ContextSnapshot#reactivate()}</li>
  * <li>{@linkplain ContextManager#getActiveContextValue()} (*)</li>
  * <li>{@linkplain ContextManager#initializeNewContext(Object)} (*)</li>

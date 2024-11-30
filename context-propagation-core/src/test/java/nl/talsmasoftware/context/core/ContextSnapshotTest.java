@@ -33,13 +33,13 @@ public class ContextSnapshotTest {
 
     @Test
     public void testSnapshotToString() {
-        assertThat(ContextManagers.createContextSnapshot(), hasToString(startsWith("ContextSnapshot{size=")));
+        assertThat(ContextSnapshot.capture(), hasToString(startsWith("ContextSnapshot{size=")));
     }
 
     @Test
     public void testSnapshotReactivate() {
         try (Context<String> ctx = MGR.initializeNewContext("Old value")) {
-            ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+            ContextSnapshot snapshot = ContextSnapshot.capture();
             try (Context<String> ctx2 = MGR.initializeNewContext("New value")) {
                 assertThat(MGR.getActiveContextValue(), is("New value"));
 

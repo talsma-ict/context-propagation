@@ -16,7 +16,6 @@
 package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 import nl.talsmasoftware.context.dummy.DummyContext;
 import nl.talsmasoftware.context.dummy.DummyContextManager;
 import org.junit.jupiter.api.AfterEach;
@@ -87,7 +86,7 @@ public class BooleanSupplierWithContextTest {
         DummyContext.setCurrentValue("true");
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
 
-        BooleanSupplier supplier = new BooleanSupplierWithContext(ContextManagers.createContextSnapshot(), () -> {
+        BooleanSupplier supplier = new BooleanSupplierWithContext(ContextSnapshot.capture(), () -> {
             try {
                 return Boolean.parseBoolean(DummyContext.currentValue());
             } finally {

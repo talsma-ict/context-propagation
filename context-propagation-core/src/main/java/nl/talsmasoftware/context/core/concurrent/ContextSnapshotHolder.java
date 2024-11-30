@@ -16,7 +16,6 @@
 package nl.talsmasoftware.context.core.concurrent;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -40,7 +39,7 @@ final class ContextSnapshotHolder implements Consumer<ContextSnapshot>, Supplier
      *                 Optional, if {@code null} the holder will initialize with a new snapshot.
      */
     ContextSnapshotHolder(ContextSnapshot snapshot) {
-        this.snapshot = (snapshot == null ? ContextManagers.createContextSnapshot() : snapshot);
+        this.snapshot = (snapshot == null ? ContextSnapshot.capture() : snapshot);
     }
 
     /**

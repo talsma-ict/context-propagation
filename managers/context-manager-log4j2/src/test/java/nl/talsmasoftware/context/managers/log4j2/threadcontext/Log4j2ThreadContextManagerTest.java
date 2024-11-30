@@ -176,7 +176,7 @@ class Log4j2ThreadContextManagerTest {
         ThreadContext.put(mapKey1, "value1");
         ThreadContext.push("stack1");
 
-        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        ContextSnapshot snapshot = ContextSnapshot.capture();
         assertThat("New snapshot shouldn't manipulate ThreadContext map", ThreadContext.get(mapKey1), equalTo("value1"));
         assertThat(ThreadContext.getContext().size(), is(1));
         assertThat("New snapshot shouldn't manipulate ThreadContext stack", ThreadContext.peek(), equalTo("stack1"));

@@ -17,7 +17,6 @@ package nl.talsmasoftware.context.core.concurrent;
 
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 import nl.talsmasoftware.context.dummy.DummyContext;
 import nl.talsmasoftware.context.dummy.DummyContextManager;
 import org.junit.jupiter.api.AfterEach;
@@ -112,7 +111,7 @@ public class ContextAwareCompletableFutureTest {
     @Test
     public void testSupplyAsync_executor_snapshot() throws ExecutionException, InterruptedException {
         try (Context<String> ctx = manager.initializeNewContext("Vincent Vega")) {
-            ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+            ContextSnapshot snapshot = ContextSnapshot.capture();
             DummyContext.setCurrentValue("Jules Winnfield");
             assertContext("Jules Winnfield");
 
@@ -124,7 +123,7 @@ public class ContextAwareCompletableFutureTest {
     @Test
     public void testSupplyAsync_executor_snapshot_takeNewSnapshot() throws ExecutionException, InterruptedException {
         try (Context<String> ctx = manager.initializeNewContext("Vincent Vega")) {
-            ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+            ContextSnapshot snapshot = ContextSnapshot.capture();
             DummyContext.setCurrentValue("Jules Winnfield");
             assertContext("Jules Winnfield");
 
@@ -160,7 +159,7 @@ public class ContextAwareCompletableFutureTest {
     @Test
     public void testRunAsync_executor_snapshot() throws ExecutionException, InterruptedException {
         try (Context<String> ctx = manager.initializeNewContext("Pumpkin")) {
-            ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+            ContextSnapshot snapshot = ContextSnapshot.capture();
             DummyContext.setCurrentValue("Honey Bunny");
             assertContext("Honey Bunny");
 
@@ -172,7 +171,7 @@ public class ContextAwareCompletableFutureTest {
     @Test
     public void testRunAsync_executor_snapshot_takeNewSnapshot() throws ExecutionException, InterruptedException {
         try (Context<String> ctx = manager.initializeNewContext("Pumpkin")) {
-            ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+            ContextSnapshot snapshot = ContextSnapshot.capture();
             DummyContext.setCurrentValue("Honey Bunny");
             assertContext("Honey Bunny");
 
@@ -1407,7 +1406,7 @@ public class ContextAwareCompletableFutureTest {
     @Test
     public void testAllOfWithSpecificSnapshot() throws ExecutionException, InterruptedException {
         DummyContext.setCurrentValue("Vincent Vega");
-        final ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        final ContextSnapshot snapshot = ContextSnapshot.capture();
         DummyContext.setCurrentValue("Marcellus Wallace");
         CompletableFuture<String> cf1 = new CompletableFuture<>();
         CompletableFuture<String> cf2 = new ContextAwareCompletableFuture<String>().takeNewSnapshot().thenApply(s -> {
@@ -1446,7 +1445,7 @@ public class ContextAwareCompletableFutureTest {
     @Test
     public void testAnyOfWithSpecificSnapshot() throws ExecutionException, InterruptedException {
         DummyContext.setCurrentValue("Vincent Vega");
-        final ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        final ContextSnapshot snapshot = ContextSnapshot.capture();
         DummyContext.setCurrentValue("Marcellus Wallace");
         CompletableFuture<String> cf1 = new CompletableFuture<>();
         CompletableFuture<String> cf2 = new ContextAwareCompletableFuture<String>().takeNewSnapshot().thenApply(s -> {

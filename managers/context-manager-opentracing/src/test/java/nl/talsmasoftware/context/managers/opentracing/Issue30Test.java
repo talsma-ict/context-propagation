@@ -21,7 +21,6 @@ import io.opentracing.util.GlobalTracer;
 import io.opentracing.util.GlobalTracerTestUtil;
 import io.opentracing.util.ThreadLocalScopeManager;
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,7 +36,7 @@ import static org.hamcrest.Matchers.is;
  * <blockquote>
  * span can be {@code null} in {@code ScopeContext} if {@code OpentracingSpanManager} is used with
  * ContextAware* when there is no active span.<br>
- * The problem is that {@code ContextManagers.createContextSnapshot()} only stores
+ * The problem is that {@code ContextSnapshot.capture()} only stores
  * {@code activeContext.getValue()} which is {@code null}<br>
  * {@code ContextManagers.reactivate()} then retreives {@code null} from the snapshot and
  * calls {@code OpentracingSpanManger.initializeNewContext(null)}
@@ -69,7 +68,7 @@ public class Issue30Test {
 
     @Test
     public void testIssue30NullPointerException() {
-        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        ContextSnapshot snapshot = ContextSnapshot.capture();
         ContextSnapshot.Reactivation reactivation = snapshot.reactivate();
         reactivation.close(); // This throws NPE in issue 30
     }

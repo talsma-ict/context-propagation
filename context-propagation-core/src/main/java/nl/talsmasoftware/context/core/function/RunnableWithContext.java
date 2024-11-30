@@ -109,7 +109,7 @@ public class RunnableWithContext extends WrapperWithContextAndConsumer<Runnable>
                 delegate().run();
             } finally {
                 if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                    ContextSnapshot resultSnapshot = ContextSnapshot.capture();
                     LOGGER.finest(() -> "Captured context snapshot after delegation: " + resultSnapshot + ".");
                     contextSnapshotConsumer.accept(resultSnapshot);
                 }

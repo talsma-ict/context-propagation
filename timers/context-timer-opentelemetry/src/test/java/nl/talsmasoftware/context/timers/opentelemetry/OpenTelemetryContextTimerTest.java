@@ -18,7 +18,6 @@ package nl.talsmasoftware.context.timers.opentelemetry;
 import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
 import nl.talsmasoftware.context.api.ContextManager;
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -37,11 +36,11 @@ class OpenTelemetryContextTimerTest {
         // prepare
 
         // execute
-        subject.update(ContextManagers.class, "createContextSnapshot", 5, TimeUnit.MILLISECONDS, null);
+        subject.update(ContextSnapshot.class, "capture", 5, TimeUnit.MILLISECONDS, null);
 
         // verify
         TELEMETRY.assertTraces().hasTracesSatisfyingExactly(trace ->
-                trace.hasSpansSatisfyingExactly(span -> span.hasName("ContextManagers.createContextSnapshot")));
+                trace.hasSpansSatisfyingExactly(span -> span.hasName("ContextSnapshot.capture")));
     }
 
     @Test

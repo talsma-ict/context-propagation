@@ -16,7 +16,6 @@
 package nl.talsmasoftware.context.core.concurrent;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 import nl.talsmasoftware.context.dummy.DummyContextManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +55,7 @@ public class CompletedFutureTest {
     @Test
     public void testCompletedFutureAppliesGivenSnapshot() throws ExecutionException, InterruptedException {
         manager.initializeNewContext("Mr. Blonde");
-        final ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        final ContextSnapshot snapshot = ContextSnapshot.capture();
         manager.initializeNewContext("Mr. Brown");
         final CompletableFuture<String> completed = ContextAwareCompletableFuture.completedFuture("Mr. Blue", snapshot);
         manager.initializeNewContext("Mr. Orange");

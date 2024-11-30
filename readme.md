@@ -63,7 +63,7 @@ to make sure they reactivate _and_ close snapshots in a safe way.
 Just before creating a new thread, capture a snapshot of all ThreadLocal context
 values:
 ```java
-ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+ContextSnapshot snapshot = ContextSnapshot.capture();
 ```
 
 In the code of your background thread, activate the snapshot to have all ThreadLocal

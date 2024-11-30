@@ -95,7 +95,7 @@ public class SpringSecurityContextManagerTest {
     public void testAuthenticationReactivation() throws Exception {
         setAuthentication("Vincent Vega");
 
-        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        ContextSnapshot snapshot = ContextSnapshot.capture();
         assertThat("New snapshot shouldn't manipulate context.", GET_AUTHENTICATION.call(),
                 hasToString(containsString("Vincent Vega")));
 
