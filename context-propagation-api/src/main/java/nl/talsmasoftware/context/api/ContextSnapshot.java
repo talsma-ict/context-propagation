@@ -41,7 +41,7 @@ import java.io.Closeable;
  */
 public interface ContextSnapshot {
     /**
-     * Captures a 'snapshot' from the current
+     * Captures a snapshot of the current
      * {@link ContextManager#getActiveContextValue() active context value}
      * from <em>all known {@link ContextManager}</em> implementations.
      *
