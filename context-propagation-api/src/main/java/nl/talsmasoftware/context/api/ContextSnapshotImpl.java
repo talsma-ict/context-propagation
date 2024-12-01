@@ -35,6 +35,7 @@ final class ContextSnapshotImpl implements ContextSnapshot {
             return new ContextSnapshotImpl();
         } catch (RuntimeException e) {
             SNAPSHOT_LOGGER.log(Level.FINEST, e, () -> "Error capturing ContextSnapshot from " + Thread.currentThread().getName() + ": " + e.getMessage());
+            ServiceCache.clear();
             throw error = e;
         } finally {
             timed(System.nanoTime() - start, ContextSnapshot.class, "capture", error);
