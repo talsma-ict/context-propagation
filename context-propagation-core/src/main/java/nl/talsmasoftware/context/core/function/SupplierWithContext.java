@@ -16,7 +16,6 @@
 package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -60,7 +59,7 @@ public class SupplierWithContext<T> extends WrapperWithContextAndConsumer<Suppli
      * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
      * <li>supply the value by calling the delegate
      * <li><em>if snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * </ol>
      *
@@ -99,7 +98,7 @@ public class SupplierWithContext<T> extends WrapperWithContextAndConsumer<Suppli
      * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
      * <li>get the result from the delegate supplier
      * <li><em>if context snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * <li>return the result</li>
      * </ol>
@@ -112,7 +111,7 @@ public class SupplierWithContext<T> extends WrapperWithContextAndConsumer<Suppli
                 return delegate().get();
             } finally {
                 if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                    ContextSnapshot resultSnapshot = ContextSnapshot.capture();
                     LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                     contextSnapshotConsumer.accept(resultSnapshot);
                 }

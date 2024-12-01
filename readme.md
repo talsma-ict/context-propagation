@@ -63,7 +63,7 @@ to make sure they reactivate _and_ close snapshots in a safe way.
 Just before creating a new thread, capture a snapshot of all ThreadLocal context
 values:
 ```java
-ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+ContextSnapshot snapshot = ContextSnapshot.capture();
 ```
 
 In the code of your background thread, activate the snapshot to have all ThreadLocal
@@ -131,7 +131,7 @@ context snapshots along with time spent in each individual `ContextManager`.
 ### Logging performance
 
 On a development machine, you can get timing for each snapshot by turning on logging
-for `nl.talsmasoftware.context.core.Timers` at `FINEST` or `TRACE` level 
+for `nl.talsmasoftware.context.api.ContextTimer` at `FINEST` or `TRACE` level 
 (depending on your logger of choice).
 Please **do not** turn this on in production as the logging overhead will most likely
 have a noticeable impact on your application.

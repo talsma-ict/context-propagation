@@ -51,8 +51,8 @@ public class OpentracingContextTimer implements ContextTimer {
             Span span = GlobalTracer.get().buildSpan(operationName).withStartTimestamp(startTimestampMicros).start();
             try {
                 Map<String, Object> log = new LinkedHashMap<>();
-                if ("createContextSnapshot".equals(method)) {
-                    log.put(Fields.EVENT, "New context snapshot created");
+                if ("capture".equals(method)) {
+                    log.put(Fields.EVENT, "New context snapshot captured");
                 } else if ("reactivate".equals(method)) {
                     log.put(Fields.EVENT, "Context snapshot reactivated");
                 }
@@ -74,8 +74,7 @@ public class OpentracingContextTimer implements ContextTimer {
         boolean enableTracing = false;
         // Only report spans for entire snapshots, not individual context managers.
         // Could be made configurable if somebody ever asks for it.
-        if (ContextSnapshot.class.isAssignableFrom(type)
-                || "nl.talsmasoftware.context.core.ContextManagers".equals(type.getName())) {
+        if (ContextSnapshot.class.isAssignableFrom(type)) {
             final String prop = System.getProperty(SYS_ENABLED, ENV_ENABLED);
             enableTracing = "1".equals(prop) || "true".equalsIgnoreCase(prop) || "enabled".equalsIgnoreCase(prop);
         }

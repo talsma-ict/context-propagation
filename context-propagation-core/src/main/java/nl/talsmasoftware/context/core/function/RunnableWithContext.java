@@ -16,7 +16,6 @@
 package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -58,7 +57,7 @@ public class RunnableWithContext extends WrapperWithContextAndConsumer<Runnable>
      * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
      * <li>run the delegate task
      * <li><em>if snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * </ol>
      *
@@ -97,7 +96,7 @@ public class RunnableWithContext extends WrapperWithContextAndConsumer<Runnable>
      * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
      * <li>run the delegate task
      * <li><em>if context snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * </ol>
      */
@@ -109,7 +108,7 @@ public class RunnableWithContext extends WrapperWithContextAndConsumer<Runnable>
                 delegate().run();
             } finally {
                 if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                    ContextSnapshot resultSnapshot = ContextSnapshot.capture();
                     LOGGER.finest(() -> "Captured context snapshot after delegation: " + resultSnapshot + ".");
                     contextSnapshotConsumer.accept(resultSnapshot);
                 }

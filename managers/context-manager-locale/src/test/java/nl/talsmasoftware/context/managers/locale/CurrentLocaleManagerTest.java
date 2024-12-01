@@ -16,7 +16,7 @@
 package nl.talsmasoftware.context.managers.locale;
 
 import nl.talsmasoftware.context.api.Context;
-import nl.talsmasoftware.context.core.ContextManagers;
+import nl.talsmasoftware.context.api.ContextManager;
 import nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -128,7 +128,7 @@ public class CurrentLocaleManagerTest {
         Context<Locale> dutchCtx = MANAGER.initializeNewContext(DUTCH);
         Context<Locale> englishCtx = MANAGER.initializeNewContext(ENGLISH);
 
-        ContextManagers.clearActiveContexts();
+        ContextManager.clearAll();
         assertThat(MANAGER.getActiveContextValue(), is(nullValue()));
         assertThat(CurrentLocaleHolder.getOrDefault(), is(DEFAULT_LOCALE));
 

@@ -16,7 +16,6 @@
 package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -62,7 +61,7 @@ public class ConsumerWithContext<T> extends WrapperWithContextAndConsumer<Consum
      * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
      * <li>accept the value by passing it to the delegate consumer
      * <li><em>if snapshot consumer is non-null,</em>
-     * pass it a {@linkplain ContextManagers#createContextSnapshot() new context snapshot}
+     * pass it a {@linkplain ContextSnapshot#capture() new context snapshot}
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * </ol>
      *
@@ -101,7 +100,7 @@ public class ConsumerWithContext<T> extends WrapperWithContextAndConsumer<Consum
      * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
      * <li>accept the value by passing it to the delegate consumer
      * <li><em>if snapshot consumer is non-null,</em>
-     * pass it a {@linkplain ContextManagers#createContextSnapshot() new context snapshot}
+     * pass it a {@linkplain ContextSnapshot#capture() new context snapshot}
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * </ol>
      *
@@ -115,7 +114,7 @@ public class ConsumerWithContext<T> extends WrapperWithContextAndConsumer<Consum
                 delegate().accept(value);
             } finally {
                 if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                    ContextSnapshot resultSnapshot = ContextSnapshot.capture();
                     LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                     contextSnapshotConsumer.accept(resultSnapshot);
                 }
@@ -138,7 +137,7 @@ public class ConsumerWithContext<T> extends WrapperWithContextAndConsumer<Consum
      *     <li>passing it to the {@code after} consumer
      * </ol>
      * <li><em>if snapshot consumer is non-null,</em>
-     * pass it a {@linkplain ContextManagers#createContextSnapshot() new context snapshot}
+     * pass it a {@linkplain ContextSnapshot#capture() new context snapshot}
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * </ol>
      *
@@ -156,7 +155,7 @@ public class ConsumerWithContext<T> extends WrapperWithContextAndConsumer<Consum
                     after.accept(t);
                 } finally {
                     if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                        ContextSnapshot resultSnapshot = ContextSnapshot.capture();
                         LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                         contextSnapshotConsumer.accept(resultSnapshot);
                     }

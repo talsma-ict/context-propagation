@@ -16,7 +16,6 @@
 package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
@@ -67,7 +66,7 @@ public class BooleanSupplierWithContext extends WrapperWithContextAndConsumer<Bo
      * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
      * <li>getting the outcome from the delegate boolean supplier
      * <li><em>if snapshot consumer is non-null,</em>
-     * pass it a {@linkplain ContextManagers#createContextSnapshot() new context snapshot}
+     * pass it a {@linkplain ContextSnapshot#capture() new context snapshot}
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * <li>return the outcome from the delegate boolean supplier call (or throw runtime exception if the delegate did).
      * </ol>
@@ -107,7 +106,7 @@ public class BooleanSupplierWithContext extends WrapperWithContextAndConsumer<Bo
      * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
      * <li>get the outcome from the delegate boolean supplier
      * <li><em>if context snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * <li>return the outcome</li>
      * </ol>
@@ -120,7 +119,7 @@ public class BooleanSupplierWithContext extends WrapperWithContextAndConsumer<Bo
                 return delegate().getAsBoolean();
             } finally {
                 if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                    ContextSnapshot resultSnapshot = ContextSnapshot.capture();
                     LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                     contextSnapshotConsumer.accept(resultSnapshot);
                 }

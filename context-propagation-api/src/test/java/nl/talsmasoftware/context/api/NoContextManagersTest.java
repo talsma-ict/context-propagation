@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.core;
+package nl.talsmasoftware.context.api;
 
-import nl.talsmasoftware.context.api.Context;
-import nl.talsmasoftware.context.api.ContextManager;
-import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.dummy.DummyContext;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -69,7 +67,7 @@ public class NoContextManagersTest {
 
     @Test
     public void testClearManagedContexts_withoutContextManagers() {
-        ContextManager.clearAll(); // there should be no exception
+        Assertions.assertDoesNotThrow(() -> ContextManager.clearAll()); // there should be no exception
     }
 
 }

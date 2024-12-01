@@ -18,7 +18,6 @@ package nl.talsmasoftware.context.core.function;
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.api.ContextSnapshot.Reactivation;
-import nl.talsmasoftware.context.core.ContextManagers;
 import nl.talsmasoftware.context.dummy.DummyContextManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -88,7 +87,7 @@ public class BiConsumerWithContextTest {
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
 
         BiConsumer<String, String> consumer = new BiConsumerWithContext<>(
-                ContextManagers.createContextSnapshot(),
+                ContextSnapshot.capture(),
                 (a, b) -> {
                     assertThat("Context must propagate into thread", currentValue(), is(Optional.of("Old value")));
                     String newValue = format("%s %s", a, b);
@@ -121,7 +120,7 @@ public class BiConsumerWithContextTest {
 
         setCurrentValue("Old value");
         BiConsumer<String, String> consumer1 = new BiConsumerWithContext<>(
-                ContextManagers.createContextSnapshot(),
+                ContextSnapshot.capture(),
                 (a, b) -> setCurrentValue(a + " " + b + ", " + Optional.ofNullable(currentValue()).orElse("NO VALUE")),
                 s -> snapshotHolder[0] = s);
         BiConsumer<String, String> consumer2 = consumer1.andThen(

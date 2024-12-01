@@ -69,18 +69,6 @@
  *     </ul>
  * </ul>
  *
- * <h2>{@linkplain nl.talsmasoftware.context.core.ContextManagers ContextManagers}</h2>
- * <p>
- * Utility class to interact with all detected {@linkplain nl.talsmasoftware.context.api.ContextManager ContextManager}
- * implementations at once, combining all
- * their {@linkplain nl.talsmasoftware.context.api.ContextManager#getActiveContextValue() active context values}
- * into a single {@linkplain nl.talsmasoftware.context.api.ContextSnapshot context snapshot} that can be reactivated
- * in another thread.
- * <p>
- * Although this utility class is public and it is allowed to interact with it,
- * it is advised to use one of the <em>ContextAware..</em> or <em>..WithContext</em> classes instead.<br>
- * They make it much easier to close the reactivated snapshot again in a proper manner.
- *
  * @author Sjoerd Talsma
  */
 package nl.talsmasoftware.context.core;

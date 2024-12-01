@@ -21,7 +21,7 @@ Add it to your classpath.
 Done!
 
 Now the data of the Log4j 2 Thread Context is copied into each snapshot 
-from the `ContextManagers.createSnapshot()` method
+from the `ContextSnapshot.capture()` method
 to be reactivated by the `Contextsnapshot.reactivate()` call.
 The `ContextAwareExecutorService` automatically propagates the full
 Thread Context data into all executed tasks this way.
@@ -31,7 +31,7 @@ data, if any: Thread Context stack values are pushed on top of the existing
 stack; map entries are added to the existing map, only replacing existing
 ones in case of a map key conflict.
 
-Calling `ContextManagers.clearActiveContexts()` will clear the Thread Context
+Calling `ContextManager.clearAll()` will clear the Thread Context
 data of the current thread.
 
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/log4j2-propagation

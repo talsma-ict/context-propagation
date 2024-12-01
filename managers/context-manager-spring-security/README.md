@@ -22,7 +22,7 @@ Add it to your classpath.
 Done!
 
 Now the `SecurityContextHolder.getContext()` is copied into each snapshot 
-from the `ContextManagers.createSnapshot()` method
+from the `ContextSnapshot.capture()` method
 to be reactivated by the `Contextsnapshot.reactivate()` call.  
 The `ContextAwareExecutorService` automatically propagates the active 
 [spring security] `Authentication` into all executed tasks this way.

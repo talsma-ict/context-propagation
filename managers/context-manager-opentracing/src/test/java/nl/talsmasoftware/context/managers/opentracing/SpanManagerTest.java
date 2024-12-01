@@ -23,7 +23,7 @@ import io.opentracing.mock.MockTracer;
 import io.opentracing.util.GlobalTracer;
 import io.opentracing.util.GlobalTracerTestUtil;
 import io.opentracing.util.ThreadLocalScopeManager;
-import nl.talsmasoftware.context.core.ContextManagers;
+import nl.talsmasoftware.context.api.ContextManager;
 import nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -212,7 +212,7 @@ public class SpanManagerTest {
         Scope scope = mockTracer.scopeManager().activate(span);
         assertThat(SpanManager.provider().getActiveContextValue(), is(sameInstance(span)));
 
-        ContextManagers.clearActiveContexts();
+        ContextManager.clearAll();
         // TODO Test after this is merged: https://github.com/opentracing/opentracing-java/pull/313
         // assertThat(SpanManager.provider().getActiveContextValue(), is(nullValue()));
     }

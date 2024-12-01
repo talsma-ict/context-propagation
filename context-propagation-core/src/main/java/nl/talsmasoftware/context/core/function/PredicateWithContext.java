@@ -16,7 +16,6 @@
 package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -70,7 +69,7 @@ public class PredicateWithContext<T> extends WrapperWithContextAndConsumer<Predi
      * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
      * <li>test the delegate predicate and get the outcome
      * <li><em>if snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * <li>return predicate outcome (or throw runtime exception if the delegate did).
      * </ol>
@@ -110,7 +109,7 @@ public class PredicateWithContext<T> extends WrapperWithContextAndConsumer<Predi
      * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
      * <li>test the delegate predicate and get the outcome
      * <li><em>if context snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * <li>return the outcome</li>
      * </ol>
@@ -126,7 +125,7 @@ public class PredicateWithContext<T> extends WrapperWithContextAndConsumer<Predi
                 return delegate().test(value);
             } finally {
                 if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                    ContextSnapshot resultSnapshot = ContextSnapshot.capture();
                     LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                     contextSnapshotConsumer.accept(resultSnapshot);
                 }
@@ -147,7 +146,7 @@ public class PredicateWithContext<T> extends WrapperWithContextAndConsumer<Predi
      * <li>test the delegate predicate and get the outcome
      * <li><em>if the outcome is true, </em> test the {@code other} predicate and return that outcome</li>
      * <li><em>if context snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * <li>return the final outcome</li>
      * </ol>
@@ -171,7 +170,7 @@ public class PredicateWithContext<T> extends WrapperWithContextAndConsumer<Predi
                     return delegate().test(t) && other.test(t);
                 } finally {
                     if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                        ContextSnapshot resultSnapshot = ContextSnapshot.capture();
                         LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                         contextSnapshotConsumer.accept(resultSnapshot);
                     }
@@ -193,7 +192,7 @@ public class PredicateWithContext<T> extends WrapperWithContextAndConsumer<Predi
      * <li>test the delegate predicate and get the outcome
      * <li><em>if the outcome is false, </em> test the {@code other} predicate and return that outcome</li>
      * <li><em>if context snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * <li>return the final outcome</li>
      * </ol>
@@ -216,7 +215,7 @@ public class PredicateWithContext<T> extends WrapperWithContextAndConsumer<Predi
                     return delegate().test(t) || other.test(t);
                 } finally {
                     if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                        ContextSnapshot resultSnapshot = ContextSnapshot.capture();
                         LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                         contextSnapshotConsumer.accept(resultSnapshot);
                     }

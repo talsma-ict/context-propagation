@@ -62,10 +62,62 @@ public interface ContextManager<T> {
      * to clear all contexts before returning threads to the pool.
      *
      * <p>
-     * This method normally should only get called by {@code ContextManagers.clearActiveContexts()}.
+     * This method normally should only get called by {@linkplain #clearAll()}.
      *
      * @since 2.0.0
      */
     void clear();
 
+    /**
+     * Clears all active contexts from the current thread.
+     *
+     * <p>
+     * Contexts that are 'stacked' (i.e. restore the previous state upon close)
+     * should be closed in a way that includes all 'parent' contexts as well.
+     *
+     * <p>
+     * This operation is not intended to be used by general application code
+     * as it likely breaks any 'stacked' active context that surrounding code may depend upon.
+     *
+     * <p>
+     * Appropriate use includes thread management, where threads are reused by some pooling mechanism.<br>
+     * For example, it is considered safe to clear the context when obtaining a 'fresh' thread from a
+     * thread pool (as no context expectations should exist at that point).<br>
+     * An even better strategy would be to clear the context right before returning a used thread
+     * back to the pool as this will allow any unclosed contexts to be garbage collected.<br>
+     * Besides preventing contextual issues, this reduces the risk of memory leaks by unbalanced context calls.
+     *
+     * @since 2.0.0
+     */
+    static void clearAll() {
+        ContextSnapshotImpl.clearActiveContexts();
+    }
+
+    /**
+     * Override the {@linkplain ClassLoader} used to lookup {@linkplain ContextManager context managers}.
+     *
+     * <p>
+     * Normally, capturing a snapshot uses the {@linkplain Thread#getContextClassLoader() Context ClassLoader} from the
+     * {@linkplain Thread#currentThread() current thread} to look up all {@linkplain ContextManager context managers}.
+     * It is possible to configure a fixed, single classloader in your application for these lookups.
+     *
+     * <p>
+     * Using this method to specify a fixed classloader will only impact
+     * <strong>new</strong> {@linkplain ContextSnapshot context snapshots}.<br>
+     * Existing snapshots will <strong>not</strong> be impacted.
+     *
+     * <p>
+     * <strong>Notes:</strong><br>
+     * <ul>
+     * <li>Please be aware that this configuration is global!
+     * <li>This will also affect the lookup of {@linkplain ContextTimer context timers}
+     * </ul>
+     *
+     * @param classLoader The single, fixed ClassLoader to use for finding context managers.
+     *                    Specify {@code null} to restore the default behaviour.
+     * @since 2.0.0
+     */
+    static void useClassLoader(ClassLoader classLoader) {
+        ServiceCache.useClassLoader(classLoader);
+    }
 }

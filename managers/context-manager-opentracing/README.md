@@ -21,7 +21,7 @@ Add it to your classpath.
 Done!
 
 Now the `GlobalTracer.get().activeSpan()` is included in each
-snapshot created by the `ContextManagers.createSnapshot()` method
+snapshot created by the `ContextSnapshot.capture()` method
 and reactivated with it.  
 This includes all usages of the `ContextAwareExecutorService`.
 

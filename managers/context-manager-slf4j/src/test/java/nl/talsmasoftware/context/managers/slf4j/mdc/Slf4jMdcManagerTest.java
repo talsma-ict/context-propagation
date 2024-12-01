@@ -16,8 +16,8 @@
 package nl.talsmasoftware.context.managers.slf4j.mdc;
 
 import nl.talsmasoftware.context.api.Context;
+import nl.talsmasoftware.context.api.ContextManager;
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 import nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,7 +79,7 @@ public class Slf4jMdcManagerTest {
     public void testMdcItemRestoration() throws Exception {
         MDC.put("mdc-item", "Value 1");
 
-        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        ContextSnapshot snapshot = ContextSnapshot.capture();
         assertThat("New snapshot shouldn't manipulate MDC.", GET_MDC_ITEM.call(), is("Value 1"));
 
         MDC.put("mdc-item", "Value 2");
@@ -113,7 +113,7 @@ public class Slf4jMdcManagerTest {
     public void testClearActiveContexts() {
         MDC.put("dummy", "value");
         // Test no-op for MdcManager
-        ContextManagers.clearActiveContexts();
+        ContextManager.clearAll();
         assertThat(MDC.get("dummy"), is("value"));
     }
 }

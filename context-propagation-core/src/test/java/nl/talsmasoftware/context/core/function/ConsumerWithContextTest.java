@@ -17,7 +17,6 @@ package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 import nl.talsmasoftware.context.dummy.DummyContextManager;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
@@ -83,7 +82,7 @@ public class ConsumerWithContextTest {
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
 
         ConsumerWithContext<String> consumer = new ConsumerWithContext<>(
-                ContextManagers.createContextSnapshot(),
+                ContextSnapshot.capture(),
                 val -> {
                     assertThat("Context must propagate into thread", currentValue(), is(Optional.of("Old value")));
                     setCurrentValue(val);
@@ -115,7 +114,7 @@ public class ConsumerWithContextTest {
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
 
         Consumer<String> consumer = new ConsumerWithContext<String>(
-                ContextManagers.createContextSnapshot(),
+                ContextSnapshot.capture(),
                 val -> setCurrentValue(val + ", " + Optional.ofNullable(currentValue()).orElse("NO VALUE")),
                 s -> snapshotHolder[0] = s)
                 .andThen(val -> setCurrentValue(val.toUpperCase() + ", " + Optional.ofNullable(currentValue()).orElse("NO VALUE")));

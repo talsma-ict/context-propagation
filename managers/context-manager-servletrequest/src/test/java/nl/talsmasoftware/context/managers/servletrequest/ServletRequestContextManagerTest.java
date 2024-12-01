@@ -16,7 +16,7 @@
 package nl.talsmasoftware.context.managers.servletrequest;
 
 import nl.talsmasoftware.context.api.Context;
-import nl.talsmasoftware.context.core.ContextManagers;
+import nl.talsmasoftware.context.api.ContextManager;
 import nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -91,7 +91,7 @@ public class ServletRequestContextManagerTest {
         assertThat(ctx.getValue(), is(sameInstance(request)));
         assertThat(ServletRequestContextManager.provider().getActiveContextValue(), is(sameInstance(request)));
 
-        ContextManagers.clearActiveContexts();
+        ContextManager.clearAll();
         assertThat(ctx.getValue(), is(nullValue())); // must have been closed
         assertThat(ServletRequestContextManager.provider().getActiveContextValue(), is(nullValue()));
     }

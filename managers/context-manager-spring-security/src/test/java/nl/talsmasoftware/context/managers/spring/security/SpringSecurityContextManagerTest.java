@@ -15,8 +15,8 @@
  */
 package nl.talsmasoftware.context.managers.spring.security;
 
+import nl.talsmasoftware.context.api.ContextManager;
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 import nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -95,7 +95,7 @@ public class SpringSecurityContextManagerTest {
     public void testAuthenticationReactivation() throws Exception {
         setAuthentication("Vincent Vega");
 
-        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        ContextSnapshot snapshot = ContextSnapshot.capture();
         assertThat("New snapshot shouldn't manipulate context.", GET_AUTHENTICATION.call(),
                 hasToString(containsString("Vincent Vega")));
 
@@ -117,7 +117,7 @@ public class SpringSecurityContextManagerTest {
         setAuthentication("Vincent Vega");
         assertThat(SpringSecurityContextManager.provider().getActiveContextValue().getName(), is("Vincent Vega"));
 
-        ContextManagers.clearActiveContexts();
+        ContextManager.clearAll();
         assertThat(SpringSecurityContextManager.provider().getActiveContextValue(), is(nullValue()));
     }
 

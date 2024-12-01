@@ -16,8 +16,8 @@
 package nl.talsmasoftware.context.managers.log4j2.threadcontext;
 
 import nl.talsmasoftware.context.api.Context;
+import nl.talsmasoftware.context.api.ContextManager;
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 import nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService;
 import org.apache.logging.log4j.ThreadContext;
 import org.junit.jupiter.api.AfterEach;
@@ -176,7 +176,7 @@ class Log4j2ThreadContextManagerTest {
         ThreadContext.put(mapKey1, "value1");
         ThreadContext.push("stack1");
 
-        ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        ContextSnapshot snapshot = ContextSnapshot.capture();
         assertThat("New snapshot shouldn't manipulate ThreadContext map", ThreadContext.get(mapKey1), equalTo("value1"));
         assertThat(ThreadContext.getContext().size(), is(1));
         assertThat("New snapshot shouldn't manipulate ThreadContext stack", ThreadContext.peek(), equalTo("stack1"));
@@ -235,7 +235,7 @@ class Log4j2ThreadContextManagerTest {
         ThreadContext.put("map1", "value1");
         ThreadContext.push("stack1");
 
-        ContextManagers.clearActiveContexts();
+        ContextManager.clearAll();
 
         assertThat(ThreadContext.isEmpty(), is(true));
         assertThat(ThreadContext.getDepth(), is(0));

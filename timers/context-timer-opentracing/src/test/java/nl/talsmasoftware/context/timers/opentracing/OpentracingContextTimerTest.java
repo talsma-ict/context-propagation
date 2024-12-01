@@ -18,7 +18,7 @@ package nl.talsmasoftware.context.timers.opentracing;
 import io.opentracing.mock.MockTracer;
 import io.opentracing.util.GlobalTracer;
 import io.opentracing.util.GlobalTracerTestUtil;
-import nl.talsmasoftware.context.core.ContextManagers;
+import nl.talsmasoftware.context.api.ContextSnapshot;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -68,22 +68,22 @@ public class OpentracingContextTimerTest {
 
     @Test
     public void testDisabledByDefault() {
-        ContextManagers.createContextSnapshot().reactivate().close();
+        ContextSnapshot.capture().reactivate().close();
 
         assertThat(tracer.finishedSpans(), is(empty()));
     }
 
     @Test
-    public void testTraceCreateContextSnapshot() {
+    public void testTraceCaptureContextSnapshot() {
         System.setProperty(PROPERTY_NAME, "true");
-        ContextManagers.createContextSnapshot();
-        assertThat(tracer.finishedSpans(), hasItem(withOperationName("ContextManagers.createContextSnapshot")));
+        ContextSnapshot.capture();
+        assertThat(tracer.finishedSpans(), hasItem(withOperationName("ContextSnapshot.capture")));
     }
 
     @Test
     public void testTraceReactivateContextSnapshot() {
         System.setProperty(PROPERTY_NAME, "true");
-        ContextManagers.createContextSnapshot().reactivate().close();
+        ContextSnapshot.capture().reactivate().close();
         assertThat(tracer.finishedSpans(), hasItem(withOperationName("ContextSnapshot.reactivate")));
     }
 

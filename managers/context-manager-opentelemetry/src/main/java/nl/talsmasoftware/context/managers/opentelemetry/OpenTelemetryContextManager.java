@@ -35,7 +35,8 @@ import nl.talsmasoftware.context.api.ContextManager;
  *
  * <p>
  * There is no need to instantiate the context manager yourself.
- * Including it on the classpath will allow the {@code ContextManagers} class to detect it automatically.
+ * Including it on the classpath will allow the API to automatically include it in
+ * {@linkplain nl.talsmasoftware.context.api.ContextSnapshot context snapshots}.
  */
 public class OpenTelemetryContextManager implements ContextManager<io.opentelemetry.context.Context> {
     private static final OpenTelemetryContextManager INSTANCE = new OpenTelemetryContextManager();

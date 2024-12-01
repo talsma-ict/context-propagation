@@ -16,7 +16,6 @@
 package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
@@ -71,7 +70,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
      * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
      * <li>test the delegate bi-predicate and get the outcome
      * <li><em>if snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * <li>return bi-predicate outcome (or throw runtime exception if the delegate did).
      * </ol>
@@ -111,7 +110,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
      * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
      * <li>test the bi-delegate predicate and get the outcome
      * <li><em>if context snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * <li>return the outcome</li>
      * </ol>
@@ -128,7 +127,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
                 return delegate().test(in1, in2);
             } finally {
                 if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                    ContextSnapshot resultSnapshot = ContextSnapshot.capture();
                     LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                     contextSnapshotConsumer.accept(resultSnapshot);
                 }
@@ -149,7 +148,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
      * <li>test the delegate bi-predicate and get the outcome
      * <li><em>if the outcome is true, </em> test the {@code other} bi-predicate and return that outcome</li>
      * <li><em>if context snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * <li>return the final outcome</li>
      * </ol>
@@ -173,7 +172,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
                     return delegate().test(in1, in2) && other.test(in1, in2);
                 } finally {
                     if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                        ContextSnapshot resultSnapshot = ContextSnapshot.capture();
                         LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                         contextSnapshotConsumer.accept(resultSnapshot);
                     }
@@ -195,7 +194,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
      * <li>test the delegate bi-predicate and get the outcome
      * <li><em>if the outcome is false, </em> test the {@code other} vi-predicate and return that outcome</li>
      * <li><em>if context snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * <li>return the final outcome</li>
      * </ol>
@@ -218,7 +217,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
                     return delegate().test(in1, in2) || other.test(in1, in2);
                 } finally {
                     if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                        ContextSnapshot resultSnapshot = ContextSnapshot.capture();
                         LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                         contextSnapshotConsumer.accept(resultSnapshot);
                     }

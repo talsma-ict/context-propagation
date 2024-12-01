@@ -16,7 +16,6 @@
 package nl.talsmasoftware.context.core.function;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.core.ContextManagers;
 
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -73,7 +72,7 @@ public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndC
      * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
      * <li>apply the delegate function
      * <li><em>if snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * <li>return the result from the delegate function call (or throw runtime exception if the delegate did).
      * </ol>
@@ -113,7 +112,7 @@ public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndC
      * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
      * <li>apply the delegate bi-function and get the result
      * <li><em>if context snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * <li>return the result</li>
      * </ol>
@@ -131,7 +130,7 @@ public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndC
                 return delegate().apply(in1, in2);
             } finally {
                 if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                    ContextSnapshot resultSnapshot = ContextSnapshot.capture();
                     LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                     contextSnapshotConsumer.accept(resultSnapshot);
                 }
@@ -150,7 +149,7 @@ public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndC
      * <li>apply the delegate bi-function and get the result
      * <li>apply the {@code after} function to the result to get the end result
      * <li><em>if context snapshot consumer is non-null,</em>
-     * pass a {@linkplain ContextManagers#createContextSnapshot() new context snapshot} to the consumer
+     * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
      * <li>return the end result</li>
      * </ol>
@@ -169,7 +168,7 @@ public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndC
                     return after.apply(delegate().apply(in1, in2));
                 } finally {
                     if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextManagers.createContextSnapshot();
+                        ContextSnapshot resultSnapshot = ContextSnapshot.capture();
                         LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
                         contextSnapshotConsumer.accept(resultSnapshot);
                     }

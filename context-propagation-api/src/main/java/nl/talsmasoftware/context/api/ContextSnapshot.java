@@ -25,8 +25,7 @@ import java.io.Closeable;
  * ensuring that all context values are set in that other thread.
  *
  * <p>
- * A snapshot can be obtained from the {@code ContextManagers} utility class for interaction with all registered
- * {@link ContextManager} implementations.
+ * A snapshot can be obtained from the {@linkplain #capture()} method.
  *
  * <p>
  * This library contains several utility classes named {@code ContextAware...} or {...WithContext} that will
@@ -41,6 +40,23 @@ import java.io.Closeable;
  * @since 2.0.0
  */
 public interface ContextSnapshot {
+    /**
+     * Captures a snapshot of the current
+     * {@link ContextManager#getActiveContextValue() active context value}
+     * from <em>all known {@link ContextManager}</em> implementations.
+     *
+     * <p>
+     * This snapshot with context values is returned as a single object and can be temporarily
+     * {@link ContextSnapshot#reactivate() reactivated}.
+     * Remember to {@link Context#close() close} the reactivated context once you're done,
+     * preferably in a <code>try-with-resources</code> construct.
+     *
+     * @return A new context snapshot that can be reactivated elsewhere (e.g. a background thread)
+     * within a try-with-resources construct.
+     */
+    static ContextSnapshot capture() {
+        return ContextSnapshotImpl.capture();
+    }
 
     /**
      * Temporarily reactivates all captured context values that are in the snapshot.

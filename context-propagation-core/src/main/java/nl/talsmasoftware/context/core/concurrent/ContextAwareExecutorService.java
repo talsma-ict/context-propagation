@@ -17,7 +17,6 @@ package nl.talsmasoftware.context.core.concurrent;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.api.ContextSnapshot.Reactivation;
-import nl.talsmasoftware.context.core.ContextManagers;
 import nl.talsmasoftware.context.core.delegation.DelegatingExecutorService;
 
 import java.util.concurrent.Callable;
@@ -47,7 +46,7 @@ public class ContextAwareExecutorService extends DelegatingExecutorService imple
 
     @Override
     protected <T> Callable<T> wrap(final Callable<T> callable) {
-        final ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        final ContextSnapshot snapshot = ContextSnapshot.capture();
         return () -> {
             try (Reactivation reactivation = snapshot.reactivate()) {
                 return callable.call();
@@ -57,7 +56,7 @@ public class ContextAwareExecutorService extends DelegatingExecutorService imple
 
     @Override
     protected Runnable wrap(final Runnable runnable) {
-        final ContextSnapshot snapshot = ContextManagers.createContextSnapshot();
+        final ContextSnapshot snapshot = ContextSnapshot.capture();
         return () -> {
             try (Reactivation reactivation = snapshot.reactivate()) {
                 runnable.run();

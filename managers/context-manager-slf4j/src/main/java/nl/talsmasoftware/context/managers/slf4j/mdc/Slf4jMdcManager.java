@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * <p>
  * This manager does not implement the optional {@link #clear()} method.
- * {@code ContextManagers.clearActiveContexts()} will therefore <strong>not</strong> clear the {@linkplain MDC}.
+ * {@linkplain ContextManager#clearAll()} will therefore <strong>not</strong> clear the {@linkplain MDC}.
  * Please use {@linkplain MDC#clear()} explicitly to do that.
  *
  * @author Sjoerd Talsma
@@ -103,7 +103,7 @@ public class Slf4jMdcManager implements ContextManager<Map<String, String>> {
      * This manager does not support clearing the MDC.
      *
      * <p>
-     * Calling {@code ContextManagers.clearActiveContexts()} will therefore <strong>not</strong> clear the
+     * Calling {@linkplain ContextManager#clearAll()} will therefore <strong>not</strong> clear the
      * MDC by default. This can be achieved by calling {@link MDC#clear()} explicitly.
      *
      * @see MDC#clear()

@@ -13,24 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.talsmasoftware.context.core;
+package nl.talsmasoftware.context.dummy;
 
 import nl.talsmasoftware.context.api.ContextTimer;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-final class Timers {
-    private static final Logger TIMING_LOGGER = Logger.getLogger(Timers.class.getName());
+public class DummyContextTimer implements ContextTimer {
+    private static final Map<String, Long> LAST_TIMED = new HashMap<String, Long>();
 
-    static void timed(long durationNanos, Class<?> type, String method, Throwable error) {
-        for (ContextTimer delegate : ServiceCache.cached(ContextTimer.class)) {
-            delegate.update(type, method, durationNanos, TimeUnit.NANOSECONDS, error);
-        }
-        if (TIMING_LOGGER.isLoggable(Level.FINEST)) {
-            TIMING_LOGGER.log(Level.FINEST, "{0}.{1}: {2,number}ns", new Object[]{type.getName(), method, durationNanos});
-        }
+    public static Long getLastTimedMillis(Class<?> type, String method) {
+        return LAST_TIMED.get(type.getName() + "." + method);
     }
 
+    public void update(Class<?> type, String method, long duration, TimeUnit unit, Throwable error) {
+        LAST_TIMED.put(type.getName() + "." + method, unit.toMillis(duration));
+    }
+
+    public static void clear() {
+        LAST_TIMED.clear();
+    }
 }
