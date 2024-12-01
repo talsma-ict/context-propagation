@@ -44,7 +44,6 @@ public interface ContextManager<T> {
      * The value of the currently active context, or {@code null} if no context is active.
      *
      * @return The value of the active context, or {@code null} if no context is active.
-     * @see Context#getValue()
      * @since 2.0.0
      */
     T getActiveContextValue();

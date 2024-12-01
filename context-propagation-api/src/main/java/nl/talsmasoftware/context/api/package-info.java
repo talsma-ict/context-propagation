@@ -18,8 +18,7 @@
  *
  * <h2>{@linkplain nl.talsmasoftware.context.api.Context}</h2>
  * <p>
- * A {@linkplain nl.talsmasoftware.context.api.Context context} contains
- * a {@linkplain nl.talsmasoftware.context.api.Context#getValue() value}.<br>
+ * A {@linkplain nl.talsmasoftware.context.api.Context context} contains a value.<br>
  * There can be one active context per thread. A context remains active until it is closed or another context
  * is activated in the same thread. Normally, a context is backed by a {@linkplain java.lang.ThreadLocal ThreadLocal}
  * variable.

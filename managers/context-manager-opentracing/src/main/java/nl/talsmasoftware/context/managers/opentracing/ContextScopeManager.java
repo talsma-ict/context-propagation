@@ -153,7 +153,7 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
 
         private static Span currentSpan() {
             ThreadLocalSpanContext current = SPAN_CONTEXT.get();
-            return current != null ? current.getValue() : null;
+            return current != null ? current.value : null;
         }
 
         private static void remove() {

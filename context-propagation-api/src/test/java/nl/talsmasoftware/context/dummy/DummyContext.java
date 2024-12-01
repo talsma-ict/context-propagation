@@ -41,10 +41,6 @@ public final class DummyContext implements Context<String> {
         return closed.get();
     }
 
-    public String getValue() {
-        return value;
-    }
-
     public void close() {
         if (closed.compareAndSet(false, true) && INSTANCE.get() == this) {
             DummyContext current = INSTANCE.get();
@@ -60,8 +56,8 @@ public final class DummyContext implements Context<String> {
     }
 
     public static String currentValue() {
-        final Context<String> currentContext = INSTANCE.get();
-        return currentContext != null ? currentContext.getValue() : null;
+        final DummyContext currentContext = INSTANCE.get();
+        return currentContext != null ? currentContext.value : null;
     }
 
     public static void setCurrentValue(String value) {

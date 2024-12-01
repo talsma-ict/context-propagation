@@ -51,24 +51,18 @@ class CurrentLocaleHolderTest {
     void outOfSequenceClosingMustBeSupported() {
         // ctx1 = GERMAN
         Context<Locale> ctx1 = CurrentLocaleHolder.set(Locale.GERMAN);
-        assertThat(ctx1.getValue()).isEqualTo(Locale.GERMAN);
         assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(Locale.GERMAN);
 
         // ctx2 = ENGLISH
         Context<Locale> ctx2 = CurrentLocaleHolder.set(Locale.ENGLISH);
-        assertThat(ctx2.getValue()).isEqualTo(Locale.ENGLISH);
         assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(Locale.ENGLISH);
 
         // out-of-sequence, ctx1 is closed first.
         ctx1.close();
-        assertThat(ctx1.getValue()).isEqualTo(Locale.GERMAN);
-        assertThat(ctx2.getValue()).isEqualTo(Locale.ENGLISH);
         assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(Locale.ENGLISH);
 
         // when ctx2 is closed, because ctx1 was already closed, the remaining context is empty
         ctx2.close();
-        assertThat(ctx1.getValue()).isEqualTo(Locale.GERMAN);
-        assertThat(ctx2.getValue()).isEqualTo(Locale.ENGLISH);
         assertThat(CurrentLocaleHolder.get()).isEmpty();
     }
 
@@ -83,7 +77,6 @@ class CurrentLocaleHolderTest {
         Context<Locale> closedContext = CurrentLocaleHolder.set(Locale.ENGLISH);
         closedContext.close();
 
-        assertThat(closedContext.getValue()).isEqualTo(Locale.ENGLISH);
         assertThat(closedContext).hasToString("CurrentLocaleHolder{closed}");
     }
 

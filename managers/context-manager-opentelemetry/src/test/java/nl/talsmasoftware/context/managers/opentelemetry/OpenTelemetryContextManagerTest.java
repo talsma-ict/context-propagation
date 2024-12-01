@@ -62,7 +62,7 @@ class OpenTelemetryContextManagerTest {
             // verify
             assertThat(Context.current().get(dummyKey)).isEqualTo(dummyValue);
             assertThat(context).isNotNull();
-            assertThat(context.getValue()).isSameAs(newContext);
+            assertThat(subject.getActiveContextValue()).isSameAs(newContext);
         }
 
         assertThat(Context.current().get(dummyKey)).isNull();

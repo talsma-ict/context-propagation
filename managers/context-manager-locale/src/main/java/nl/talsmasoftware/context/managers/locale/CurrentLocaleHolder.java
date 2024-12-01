@@ -115,7 +115,7 @@ public final class CurrentLocaleHolder implements Context<Locale> {
      * @see #getOrDefault()
      */
     public static Optional<Locale> get() {
-        return Optional.ofNullable(LOCALE.get()).map(CurrentLocaleHolder::getValue);
+        return Optional.ofNullable(LOCALE.get()).map(holder -> holder.locale);
     }
 
     /**
@@ -128,16 +128,6 @@ public final class CurrentLocaleHolder implements Context<Locale> {
      */
     public static Locale getOrDefault() {
         return get().orElseGet(Locale::getDefault);
-    }
-
-    /**
-     * The locale in this holder.
-     *
-     * @return The locale in this holder.
-     */
-    @Override
-    public Locale getValue() {
-        return locale;
     }
 
     /**

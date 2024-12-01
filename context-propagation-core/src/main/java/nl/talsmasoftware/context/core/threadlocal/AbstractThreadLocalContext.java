@@ -56,11 +56,10 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
     protected final Context<T> parentContext;
 
     /**
-     * The actual value, so subclasses can still access it after the context has been closed,
-     * because the default {@link #getValue()} implementation will return <code>null</code> in that case.<br>
+     * The actual value, so subclasses can access it.<br>
      * Please be careful accessing the value after the context was closed:
-     * There is no pre-defined meaningful way to handle this situation, as this depends heavily
-     * on the desired features of the particular implementation.
+     * There is no pre-defined meaningful way to handle this situation,
+     * as this depends heavily on the desired features of the particular implementation.
      */
     protected final T value;
 
@@ -108,15 +107,6 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
     }
 
     /**
-     * Returns the value of this context instance, or <code>null</code> if it was already closed.
-     *
-     * @return The value of this context.
-     */
-    public T getValue() {
-        return closed ? null : value;
-    }
-
-    /**
      * Closes this context and in case this context is the active context,
      * restores the active context to the (unclosed) parent context.<br>
      * If no unclosed parent context exists, the 'active context' is cleared.
@@ -131,7 +121,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
 
     /**
      * Returns the classname of this context followed by <code>"{closed}"</code> if it has been closed already;
-     * otherwise the contained {@link #getValue() value} by this context will be added.
+     * otherwise the contained value by this context will be added.
      *
      * @return String representing this context class and either the current value or the fact that it was closed.
      */

@@ -83,12 +83,7 @@ public class OpenTelemetryContextManager implements ContextManager<io.openteleme
      */
     @Override
     public Context<io.opentelemetry.context.Context> initializeNewContext(final io.opentelemetry.context.Context value) {
-        return new ScopeWrappingContext<io.opentelemetry.context.Context>(value.makeCurrent()) {
-            @Override
-            public io.opentelemetry.context.Context getValue() {
-                return value;
-            }
-        };
+        return new ScopeWrappingContext<>(value.makeCurrent());
     }
 
     /**
