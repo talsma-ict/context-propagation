@@ -88,11 +88,9 @@ public class ServletRequestContextManagerTest {
     public void testClearableImplementation() {
         final ServletRequest request = mock(ServletRequest.class);
         Context<ServletRequest> ctx = ServletRequestContextManager.provider().initializeNewContext(request);
-        assertThat(ctx.getValue(), is(sameInstance(request)));
         assertThat(ServletRequestContextManager.provider().getActiveContextValue(), is(sameInstance(request)));
 
         ContextManager.clearAll();
-        assertThat(ctx.getValue(), is(nullValue())); // must have been closed
         assertThat(ServletRequestContextManager.provider().getActiveContextValue(), is(nullValue()));
     }
 

@@ -15,7 +15,6 @@
  */
 package nl.talsmasoftware.context.dummy;
 
-import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext;
 
 /**
@@ -35,8 +34,8 @@ public final class DummyContext extends AbstractThreadLocalContext<String> {
     }
 
     public static String currentValue() {
-        final Context<String> currentContext = INSTANCE.get();
-        return currentContext != null ? currentContext.getValue() : null;
+        final DummyContext currentContext = INSTANCE.get();
+        return currentContext != null ? currentContext.value : null;
     }
 
     public static void setCurrentValue(String value) {

@@ -23,7 +23,7 @@ import nl.talsmasoftware.context.api.Context;
  *
  * @param <T> The type of the contained value, left for the subclass to provide.
  */
-abstract class ScopeWrappingContext<T> implements Context<T> {
+class ScopeWrappingContext<T> implements Context<T> {
     private final Scope scope;
 
     /**

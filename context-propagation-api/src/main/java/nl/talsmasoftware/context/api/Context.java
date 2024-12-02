@@ -46,19 +46,6 @@ import java.io.Closeable;
  */
 public interface Context<T> extends Closeable {
 
-    // TODO think about removing Context.getValue as ContextManager.getActiveContextValue() should suffice.
-
-    /**
-     * The value associated with this context.
-     *
-     * <p>
-     * Behaviour is not specified after the context is {@linkplain #close() closed} and depends
-     * on the {@linkplain ContextManager} implementation.<br>
-     *
-     * @return The value associated with this context.
-     */
-    T getValue();
-
     /**
      * Closes this context.
      *

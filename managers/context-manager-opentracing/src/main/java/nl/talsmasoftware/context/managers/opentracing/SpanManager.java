@@ -134,11 +134,6 @@ public class SpanManager implements ContextManager<Span> {
         }
 
         @Override
-        public Span getValue() {
-            return closed.get() ? null : activeSpan();
-        }
-
-        @Override
         public void close() {
             if (closed.compareAndSet(false, true) && scope != null) {
                 scope.close();
@@ -147,7 +142,7 @@ public class SpanManager implements ContextManager<Span> {
 
         @Override
         public String toString() {
-            return getClass().getSimpleName() + (closed.get() ? "{closed}" : "{" + getValue() + '}');
+            return getClass().getSimpleName() + (closed.get() ? "{closed}" : "{" + activeSpan() + '}');
         }
     }
 

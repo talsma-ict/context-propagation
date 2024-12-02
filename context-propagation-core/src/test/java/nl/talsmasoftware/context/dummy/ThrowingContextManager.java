@@ -77,7 +77,7 @@ public class ThrowingContextManager implements ContextManager<String> {
 
         private static String currentValue() {
             Ctx current = AbstractThreadLocalContext.current(Ctx.class);
-            return current != null ? current.getValue() : null;
+            return current != null ? current.value : null;
         }
 
         private static void remove() {

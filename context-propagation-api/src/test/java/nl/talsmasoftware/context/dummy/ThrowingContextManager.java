@@ -86,11 +86,6 @@ public class ThrowingContextManager implements ContextManager<String> {
         }
 
         @Override
-        public String getValue() {
-            return value;
-        }
-
-        @Override
         public void close() {
             if (onClose != null) try {
                 throw onClose;
@@ -112,7 +107,7 @@ public class ThrowingContextManager implements ContextManager<String> {
 
         private static String currentValue() {
             Ctx current = STORAGE.get();
-            return current != null ? current.getValue() : null;
+            return current != null ? current.value : null;
         }
 
         private static void remove() {

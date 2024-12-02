@@ -39,11 +39,6 @@ final class ServletRequestContext implements Context<ServletRequest> {
     }
 
     @Override
-    public ServletRequest getValue() {
-        return closed.get() ? null : value;
-    }
-
-    @Override
     public void close() {
         if (closed.compareAndSet(false, true)) {
             CONTEXT.set(previous);
