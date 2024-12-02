@@ -97,11 +97,12 @@ out of the box by this context-propagation library:
 
 - [SLF4J MDC (Mapped Diagnostic Context)][slf4j mdc propagation]
 - [Log4j 2 Thread Context][log4j2 thread context propagation]
+- [OpenTelemetry Context][opentelemetry context propagation]
 - [OpenTracing Span contexts][opentracing span propagation]
 - [Spring Security Context]
 - [Locale context][locale context]
 - [ServletRequest contexts][servletrequest propagation]
-- _Yours?_ Feel free to create an issue or pull-request
+- .. _Yours?_ Feel free to create an issue or pull-request
   if you believe there's a general context that was forgotten. 
 
 ## Custom contexts
@@ -165,12 +166,13 @@ configure various timers in the global default metric registry of your applicati
   [javadoc]: https://www.javadoc.io/doc/nl.talsmasoftware.context/context-propagation-root
 
 
+  [locale context]: managers/context-manager-locale
+  [log4j2 thread context propagation]: managers/context-manager-log4j2
+  [opentelemetry context propagation]: managers/context-manager-opentelemetry
+  [opentracing span propagation]: managers/context-manager-opentracing
   [servletrequest propagation]: managers/context-manager-servletrequest
   [slf4j mdc propagation]: managers/context-manager-slf4j
-  [log4j2 thread context propagation]: managers/context-manager-log4j2
-  [locale context]: managers/context-manager-locale
   [spring security context]: managers/context-manager-spring-security
-  [opentracing span propagation]: managers/context-manager-opentracing
   [context propagation metrics]: timers/context-timer-metrics
   [context propagation micrometer]: timers/context-timer-micrometer
   [micrometer]: https://micrometer.io
