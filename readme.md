@@ -163,7 +163,7 @@ configure various timers in the global default metric registry of your applicati
   [coveralls-img]: https://coveralls.io/repos/github/talsma-ict/context-propagation/badge.svg
   [coveralls]: https://coveralls.io/github/talsma-ict/context-propagation
   [javadoc-img]: https://www.javadoc.io/badge/nl.talsmasoftware.context/context-propagation.svg
-  [javadoc]: https://www.javadoc.io/doc/nl.talsmasoftware.context/context-propagation-root
+  [javadoc]: https://www.javadoc.io/doc/nl.talsmasoftware.context/context-propagation
 
 
   [locale context]: managers/context-manager-locale
