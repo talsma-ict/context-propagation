@@ -81,8 +81,8 @@ you can use our _context aware_ ExecutorService instead of your usual threadpool
 
 When submitting new work, this automatically takes a context snapshot
 to reactivate in the background thread.  
-After the background thread finishes the snapshot is closed,
-ensuring no ThreadLocal values leak into the thread pool.
+After the background thread finishes, the snapshot reactivation is closed,
+ensuring that no remaining ThreadLocal values leak into the thread pool.
 
 The `ContextAwareExecutorService` can wrap any ExecutorService for the actual thread execution:
 ```java
