@@ -88,7 +88,7 @@ final class ServiceCache {
             services.add(service);
         }
         services.trimToSize();
-        // TODO debug logging
+        LOGGER.fine(() -> String.format("Loaded %d %s service implementations: %s.", services.size(), serviceType.getSimpleName(), services));
         return Collections.unmodifiableList(services);
     }
 }

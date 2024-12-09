@@ -89,7 +89,7 @@ public interface ContextManager<T> {
      * @since 2.0.0
      */
     static void clearAll() {
-        ContextSnapshotImpl.clearActiveContexts();
+        ContextSnapshotImpl.clearAll();
     }
 
     /**
