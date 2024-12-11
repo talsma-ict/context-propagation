@@ -92,7 +92,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <micrometer.version>1.14.1</micrometer.version>
+        <micrometer.version>1.14.2</micrometer.version>
         <metrics.version>4.2.29</metrics.version>
         <opentelemetry.version>1.45.0</opentelemetry.version>
         <opentracing-api.version>0.33.0</opentracing-api.version>
