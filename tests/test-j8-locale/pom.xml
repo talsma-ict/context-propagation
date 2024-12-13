@@ -16,8 +16,7 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
@@ -29,46 +28,23 @@
     </parent>
 
     <!-- Artifact identification -->
-    <groupId>nl.talsmasoftware.context.timers</groupId>
-    <artifactId>context-timer-opentelemetry</artifactId>
-    <name>Context timer (opentelemetry)</name>
+    <groupId>nl.talsmasoftware.context.tests</groupId>
+    <artifactId>test-j8-locale</artifactId>
+    <name>Test for Locale propagation in Java 8 project</name>
     <packaging>jar</packaging>
 
     <properties>
-        <project.moduleName>${project.groupId}.opentelemetry</project.moduleName>
+        <project.moduleName>${project.groupId}.springsecurity</project.moduleName>
         <root.basedir>${project.parent.basedir}</root.basedir>
+        <project.jdk.version>8</project.jdk.version>
+        <maven.compiler.release>8</maven.compiler.release>
     </properties>
 
     <dependencies>
         <dependency>
-            <groupId>${project.parent.groupId}</groupId>
-            <artifactId>context-propagation-api</artifactId>
+            <groupId>${project.parent.groupId}.managers</groupId>
+            <artifactId>context-manager-locale</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>${project.parent.groupId}</groupId>
-            <artifactId>context-propagation-core</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-sdk-testing</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 </project>
