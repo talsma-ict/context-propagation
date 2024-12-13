@@ -53,6 +53,7 @@
         <module>timers/context-timer-opentracing</module>
 
         <module>tests/test-j8-locale</module>
+        <module>tests/test-j21-locale</module>
     </modules>
 
     <licenses>
