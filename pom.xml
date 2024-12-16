@@ -99,7 +99,7 @@
         <spring-security.version>6.4.1</spring-security.version>
         <servlet-api.version>4.0.1</servlet-api.version>
         <slf4j.version>2.0.16</slf4j.version>
-        <log4j2.version>2.24.2</log4j2.version>
+        <log4j2.version>2.24.3</log4j2.version>
 
         <junit.version>5.11.3</junit.version>
         <logback.version>1.5.12</logback.version>
