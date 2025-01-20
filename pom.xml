@@ -105,7 +105,7 @@
         <logback.version>1.5.14</logback.version>
         <hamcrest.version>3.0</hamcrest.version>
         <mockito.version>1.10.19</mockito.version>
-        <assertj.version>3.27.1</assertj.version>
+        <assertj.version>3.27.3</assertj.version>
 
         <maven-toolchains-plugin.version>3.2.0</maven-toolchains-plugin.version>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
