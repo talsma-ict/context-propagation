@@ -177,5 +177,5 @@ configure various timers in the global default metric registry of your applicati
   [context propagation micrometer]: timers/context-timer-micrometer
   [micrometer]: https://micrometer.io
   
-  [ContextAwareExecutorService]: https://javadoc.io/doc/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/executors/ContextAwareExecutorService.html
+  [ContextAwareExecutorService]: https://javadoc.io/doc/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/core/concurrent/ContextAwareExecutorService.html
   [ContextAwareCompletableFuture]: context-propagation-core/README.md#contextawarecompletablefuture
