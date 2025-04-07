@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-module nl.talsmasoftware.context.tests.jigsaw.locale {
-    requires nl.talsmasoftware.context.api;
-    requires nl.talsmasoftware.context.managers.locale;
+module nl.talsmasoftware.context.api {
+    exports nl.talsmasoftware.context.api;
+
+    uses nl.talsmasoftware.context.api.ContextManager;
+    uses nl.talsmasoftware.context.api.ContextTimer;
 }
