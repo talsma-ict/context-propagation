@@ -1,7 +1,7 @@
-[![CI Build][ci-img]][ci]
-[![Coverage Status][coveralls-img]][coveralls]
 [![Maven Version][maven-img]][maven]
 [![Javadoc][javadoc-img]][javadoc]
+[![CI Build][ci-img]][ci]
+[![Coverage Status][coveralls-img]][coveralls]
 
 > [!IMPORTANT]
 > Main focus of the 'v2' version is simplification of this library.
