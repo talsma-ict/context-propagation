@@ -1,6 +1,6 @@
 [![Maven Version][maven-img]][maven]
 [![Javadoc][javadoc-img]][javadoc]
-[![CI Build][ci-img]][ci]
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=talsma-ict_context-propagation&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=talsma-ict_context-propagation)
 [![Coverage Status][coveralls-img]][coveralls]
 
 > [!IMPORTANT]
@@ -154,8 +154,6 @@ configure various timers in the global default metric registry of your applicati
 [Apache 2.0 license](LICENSE)
 
 
-  [ci-img]: https://github.com/talsma-ict/context-propagation/actions/workflows/ci-build.yml/badge.svg
-  [ci]: https://github.com/talsma-ict/context-propagation/actions/workflows/ci-build.yml
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation
   [maven]: https://search.maven.org/search?q=g:nl.talsmasoftware.context
   [release-img]: https://img.shields.io/github/release/talsma-ict/context-propagation.svg
