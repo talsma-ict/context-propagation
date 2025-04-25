@@ -41,7 +41,9 @@ jobs:
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
       - name: Set version
-        run: ./mvnw --batch-mode versions:set versions:commit -DnewVersion="${VERSION}" -DprocessAllModules=true
+        run: |
+          ./mvnw --batch-mode versions:set versions:commit -DnewVersion="${VERSION}" -DprocessAllModules=true
+          ./mvnw --batch-mode license:format
       - name: Commit and tag new version
         run: |
           git config user.name "Talsma CI"
@@ -54,7 +56,7 @@ jobs:
           MAVEN_CENTRAL_USERNAME: ${{ secrets.SONATYPE_USER }}
           MAVEN_CENTRAL_TOKEN: ${{ secrets.SONATYPE_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        run: ./mvnw --batch-mode clean license:format deploy
+        run: ./mvnw --batch-mode clean deploy
       - name: Create Github release
         uses: softprops/action-gh-release@v2
         with:
