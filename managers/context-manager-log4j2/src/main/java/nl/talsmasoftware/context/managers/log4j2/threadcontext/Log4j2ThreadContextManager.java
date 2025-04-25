@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ public class Log4j2ThreadContextManager implements ContextManager<Log4j2ThreadCo
      * @return The new <em>active</em> context containing the specified value
      * which should be closed by the caller at the end of its lifecycle from the same thread.
      */
-    public Context<Log4j2ThreadContextSnapshot> initializeNewContext(final Log4j2ThreadContextSnapshot value) {
+    public Context initializeNewContext(final Log4j2ThreadContextSnapshot value) {
         if (value == null) {
             throw new NullPointerException("value must not be null");
         }
@@ -132,7 +132,7 @@ public class Log4j2ThreadContextManager implements ContextManager<Log4j2ThreadCo
         return getClass().getSimpleName();
     }
 
-    private static final class ManagedLog4j2ThreadContext implements Context<Log4j2ThreadContextSnapshot> {
+    private static final class ManagedLog4j2ThreadContext implements Context {
         private final Log4j2ThreadContextSnapshot previous, value;
         private final AtomicBoolean closed;
 

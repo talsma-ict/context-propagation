@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -221,7 +221,7 @@ class Log4j2ThreadContextManagerTest {
 
         final Log4j2ThreadContextManager mgr = Log4j2ThreadContextManager.provider();
 
-        Context<Log4j2ThreadContextSnapshot> ctx = mgr.initializeNewContext(data);
+        Context ctx = mgr.initializeNewContext(data);
         try {
             assertThat(ctx, hasToString("ManagedLog4j2ThreadContext{" + data + "}"));
         } finally {

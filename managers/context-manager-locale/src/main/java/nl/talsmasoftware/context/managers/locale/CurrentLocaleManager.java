@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public final class CurrentLocaleManager implements ContextManager<Locale> {
      * @return The context to be closed again by the caller to remove this locale as current locale.
      * @see CurrentLocaleHolder#set(Locale)
      */
-    public Context<Locale> initializeNewContext(Locale value) {
+    public Context initializeNewContext(Locale value) {
         return CurrentLocaleHolder.set(value);
     }
 

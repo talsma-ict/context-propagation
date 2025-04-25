@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,9 @@ public class ContextSnapshotTest {
 
     @Test
     public void testSnapshotReactivate() {
-        try (Context<String> ctx = MGR.initializeNewContext("Old value")) {
+        try (Context ctx = MGR.initializeNewContext("Old value")) {
             ContextSnapshot snapshot = ContextSnapshot.capture();
-            try (Context<String> ctx2 = MGR.initializeNewContext("New value")) {
+            try (Context ctx2 = MGR.initializeNewContext("New value")) {
                 assertThat(MGR.getActiveContextValue(), is("New value"));
 
                 try (ContextSnapshot.Reactivation reactivation = snapshot.reactivate()) {

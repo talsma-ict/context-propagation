@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,9 +84,6 @@ public class ContextScopeManagerTest {
                 }
             });
         }
-//        assertThat(ContextScopeManagerObserver.observed, contains(
-//                activated(withOperationName("parent"))
-//        ));
 
         assertThat(GlobalTracer.get().activeSpan(), equalTo(parentSpan));
         for (Thread t : threads) t.start();
@@ -94,36 +91,12 @@ public class ContextScopeManagerTest {
         parentSpan.finish();
         parent.close();
         assertThat(GlobalTracer.get().activeSpan(), is(nullValue()));
-//        assertThat(ContextScopeManagerObserver.observed, contains(
-//                activated(withOperationName("parent")),
-//                activated(withOperationName(startsWith("inner"))),
-//                activated(withOperationName(startsWith("inner"))),
-//                activated(withOperationName(startsWith("inner"))),
-//                activated(withOperationName(startsWith("inner"))),
-//                activated(withOperationName(startsWith("inner"))),
-//                activated(withOperationName(startsWith("inner"))),
-//                activated(withOperationName(startsWith("inner"))),
-//                activated(withOperationName(startsWith("inner"))),
-//                activated(withOperationName(startsWith("inner"))),
-//                activated(withOperationName(startsWith("inner"))),
-//                deactivated(withOperationName(startsWith("inner"))),
-//                deactivated(withOperationName(startsWith("inner"))),
-//                deactivated(withOperationName(startsWith("inner"))),
-//                deactivated(withOperationName(startsWith("inner"))),
-//                deactivated(withOperationName(startsWith("inner"))),
-//                deactivated(withOperationName(startsWith("inner"))),
-//                deactivated(withOperationName(startsWith("inner"))),
-//                deactivated(withOperationName(startsWith("inner"))),
-//                deactivated(withOperationName(startsWith("inner"))),
-//                deactivated(withOperationName(startsWith("inner"))),
-//                deactivated(withOperationName("parent"))
-//        ));
     }
 
     @Test
     public void testInitializeNewContext() {
         Span span = GlobalTracer.get().buildSpan("span").start();
-        Context<Span> context = scopeManager.initializeNewContext(span);
+        Context context = scopeManager.initializeNewContext(span);
         assertThat(scopeManager.getActiveContextValue(), is(span));
         assertThat(scopeManager.activeSpan(), is(span));
         assertThat(GlobalTracer.get().activeSpan(), is(span));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ public class ClearableDummyContextManager implements ContextManager<String> {
         return current != null ? current.getValue() : null;
     }
 
-    public Context<String> initializeNewContext(String value) {
+    public Context initializeNewContext(String value) {
         return new DummyContext(value);
     }
 
@@ -34,7 +34,7 @@ public class ClearableDummyContextManager implements ContextManager<String> {
         CTX.remove();
     }
 
-    private static class DummyContext implements Context<String> {
+    private static class DummyContext implements Context {
         private final DummyContext previous;
         private String value;
 
