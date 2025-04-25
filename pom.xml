@@ -29,7 +29,7 @@
     <packaging>pom</packaging>
 
     <!-- Project information -->
-    <name>Context propagation (root)</name>
+    <name>Context propagation</name>
     <description>Standardized context propagation in concurrent systems.</description>
     <url>https://github.com/talsma-ict/context-propagation</url>
     <inceptionYear>2016</inceptionYear>
@@ -139,7 +139,8 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <systemPropertyVariables>
-                        <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
+                        <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties
+                        </java.util.logging.config.file>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -242,11 +243,15 @@
                         </offlineLink>
                         <offlineLink>
                             <location>${root.basedir}/.mvn/javadoc/opentelemetry-api</location>
-                            <url>https://www.javadoc.io/page/io.opentelemetry/opentelemetry-api/${opentelemetry.version}</url>
+                            <url>
+                                https://www.javadoc.io/page/io.opentelemetry/opentelemetry-api/${opentelemetry.version}
+                            </url>
                         </offlineLink>
                         <offlineLink>
                             <location>${root.basedir}/.mvn/javadoc/opentelemetry-context</location>
-                            <url>https://www.javadoc.io/page/io.opentelemetry/opentelemetry-context/${opentelemetry.version}</url>
+                            <url>
+                                https://www.javadoc.io/page/io.opentelemetry/opentelemetry-context/${opentelemetry.version}
+                            </url>
                         </offlineLink>
                         <offlineLink>
                             <location>${root.basedir}/.mvn/javadoc/opentracing-api</location>
@@ -254,7 +259,8 @@
                         </offlineLink>
                         <offlineLink>
                             <location>${root.basedir}/.mvn/javadoc/opentracing-util</location>
-                            <url>https://javadoc.io/page/io.opentracing/opentracing-util/${opentracing-api.version}</url>
+                            <url>https://javadoc.io/page/io.opentracing/opentracing-util/${opentracing-api.version}
+                            </url>
                         </offlineLink>
                         <offlineLink>
                             <location>${root.basedir}/.mvn/javadoc/servlet-api</location>
@@ -266,7 +272,9 @@
                         </offlineLink>
                         <offlineLink>
                             <location>${root.basedir}/.mvn/javadoc/spring-security-core</location>
-                            <url>https://javadoc.io/page/org.springframework.security/spring-security-core/${spring-security.version}</url>
+                            <url>
+                                https://javadoc.io/page/org.springframework.security/spring-security-core/${spring-security.version}
+                            </url>
                         </offlineLink>
                     </offlineLinks>
                 </configuration>

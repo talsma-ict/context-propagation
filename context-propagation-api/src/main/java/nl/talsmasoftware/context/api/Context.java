@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,11 +40,10 @@ import java.io.Closeable;
  *     but unwinding provides consistent behaviour in case it does happen.
  * </ul>
  *
- * @param <T> Type of the context value.
  * @author Sjoerd Talsma
  * @since 2.0.0
  */
-public interface Context<T> extends Closeable {
+public interface Context extends Closeable {
 
     /**
      * Closes this context.

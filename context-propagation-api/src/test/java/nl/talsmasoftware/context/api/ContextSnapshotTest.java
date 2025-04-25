@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ class ContextSnapshotTest {
     @Test
     void testCreateSnapshot_ExceptionHandling() {
         ThrowingContextManager.onGet = new IllegalStateException("No active context!");
-        Context<String> ctx = new DummyContext("blah");
+        Context ctx = new DummyContext("blah");
         ContextSnapshot snapshot = ContextSnapshot.capture();
         ctx.close();
 
@@ -130,8 +130,8 @@ class ContextSnapshotTest {
     void testReactivateSnapshot_ExceptionHandling() {
         final RuntimeException reactivationException = new IllegalStateException("Cannot create new context!");
         ThrowingContextManager mgr = new ThrowingContextManager();
-        Context<String> ctx1 = new DummyContext("foo");
-        Context<String> ctx2 = mgr.initializeNewContext("bar");
+        Context ctx1 = new DummyContext("foo");
+        Context ctx2 = mgr.initializeNewContext("bar");
         ContextSnapshot snapshot = ContextSnapshot.capture();
         ThrowingContextManager.onInitialize = reactivationException;
 

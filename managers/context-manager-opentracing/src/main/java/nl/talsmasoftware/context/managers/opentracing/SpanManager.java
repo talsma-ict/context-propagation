@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,7 +103,7 @@ public class SpanManager implements ContextManager<Span> {
      * @return The new context that <strong>must</strong> be closed.
      */
     @Override
-    public Context<Span> initializeNewContext(final Span span) {
+    public Context initializeNewContext(final Span span) {
         return new SpanContext(span);
     }
 
@@ -125,7 +125,7 @@ public class SpanManager implements ContextManager<Span> {
         return GlobalTracer.get().activeSpan();
     }
 
-    private static class SpanContext implements Context<Span> {
+    private static class SpanContext implements Context {
         private final AtomicBoolean closed = new AtomicBoolean(false);
         private final Scope scope;
 

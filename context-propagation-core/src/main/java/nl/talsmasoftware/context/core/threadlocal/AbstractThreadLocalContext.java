@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import java.util.logging.Logger;
  *
  * @author Sjoerd Talsma
  */
-public abstract class AbstractThreadLocalContext<T> implements Context<T> {
+public abstract class AbstractThreadLocalContext<T> implements Context {
     private static final Logger LOGGER = Logger.getLogger(AbstractThreadLocalContext.class.getName());
 
     /**
@@ -53,7 +53,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context<T> {
      * The parent context that was active at the time this context was created (if any)
      * or <code>null</code> in case there was no active context when this context was created.
      */
-    protected final Context<T> parentContext;
+    protected final Context parentContext;
 
     /**
      * The actual value, so subclasses can access it.<br>

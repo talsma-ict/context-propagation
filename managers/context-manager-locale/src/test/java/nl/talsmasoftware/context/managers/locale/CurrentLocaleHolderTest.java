@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,11 +50,11 @@ class CurrentLocaleHolderTest {
     @Test
     void outOfSequenceClosingMustBeSupported() {
         // ctx1 = GERMAN
-        Context<Locale> ctx1 = CurrentLocaleHolder.set(Locale.GERMAN);
+        Context ctx1 = CurrentLocaleHolder.set(Locale.GERMAN);
         assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(Locale.GERMAN);
 
         // ctx2 = ENGLISH
-        Context<Locale> ctx2 = CurrentLocaleHolder.set(Locale.ENGLISH);
+        Context ctx2 = CurrentLocaleHolder.set(Locale.ENGLISH);
         assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(Locale.ENGLISH);
 
         // out-of-sequence, ctx1 is closed first.
@@ -68,13 +68,13 @@ class CurrentLocaleHolderTest {
 
     @Test
     void testToString_current() {
-        Context<Locale> currentContext = CurrentLocaleHolder.set(Locale.ENGLISH);
+        Context currentContext = CurrentLocaleHolder.set(Locale.ENGLISH);
         assertThat(currentContext).hasToString("CurrentLocaleHolder{en}");
     }
 
     @Test
     void testToString_closed() {
-        Context<Locale> closedContext = CurrentLocaleHolder.set(Locale.ENGLISH);
+        Context closedContext = CurrentLocaleHolder.set(Locale.ENGLISH);
         closedContext.close();
 
         assertThat(closedContext).hasToString("CurrentLocaleHolder{closed}");
@@ -82,7 +82,7 @@ class CurrentLocaleHolderTest {
 
     @Test
     void testClose_mustBeRepeatable() {
-        Context<Locale> context = CurrentLocaleHolder.set(Locale.ENGLISH);
+        Context context = CurrentLocaleHolder.set(Locale.ENGLISH);
         assertDoesNotThrow(context::close);
         assertDoesNotThrow(context::close);
         assertDoesNotThrow(context::close);

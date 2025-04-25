@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author Sjoerd Talsma
  */
-public final class DummyContext implements Context<String> {
+public final class DummyContext implements Context {
     private static final ThreadLocal<DummyContext> INSTANCE = new ThreadLocal<>();
 
     private final DummyContext parent;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,13 +63,13 @@ public class CurrentLocaleManagerTest {
 
     @Test
     public void testLocalePropagation() throws ExecutionException, InterruptedException {
-        try (Context<Locale> ctx1 = CurrentLocaleHolder.set(DUTCH)) {
+        try (Context ctx1 = CurrentLocaleHolder.set(DUTCH)) {
             assertThat(MANAGER.getActiveContextValue(), is(DUTCH));
             assertThat(CurrentLocaleHolder.getOrDefault(), is(DUTCH));
 
             final CountDownLatch blocker = new CountDownLatch(1);
             Future<Locale> slowCall;
-            try (Context<Locale> ctx2 = MANAGER.initializeNewContext(GERMAN)) {
+            try (Context ctx2 = MANAGER.initializeNewContext(GERMAN)) {
                 assertThat(MANAGER.getActiveContextValue(), is(GERMAN));
                 assertThat(CurrentLocaleHolder.getOrDefault(), is(GERMAN));
 
@@ -91,11 +91,11 @@ public class CurrentLocaleManagerTest {
     @Test
     public void testGetCurrentLocaleOrDefault() {
         assertThat(CurrentLocaleHolder.getOrDefault(), is(DEFAULT_LOCALE));
-        try (Context<Locale> ctx1 = CurrentLocaleHolder.set(GERMAN)) {
+        try (Context ctx1 = CurrentLocaleHolder.set(GERMAN)) {
             assertThat(CurrentLocaleHolder.getOrDefault(), is(GERMAN));
             assertThat(MANAGER.getActiveContextValue(), is(GERMAN));
 
-            try (Context<Locale> ctx2 = MANAGER.initializeNewContext(null)) {
+            try (Context ctx2 = MANAGER.initializeNewContext(null)) {
                 assertThat(CurrentLocaleHolder.getOrDefault(), is(DEFAULT_LOCALE));
                 assertThat(MANAGER.getActiveContextValue(), nullValue());
             } finally {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,7 +104,7 @@ public class Slf4jMdcManagerTest {
         Map<String, String> mdc = MDC.getCopyOfContextMap();
         assertThat(mgr.getActiveContextValue(), equalTo(mdc));
 
-        try (Context<Map<String, String>> ctx = mgr.initializeNewContext(mdc)) {
+        try (Context ctx = mgr.initializeNewContext(mdc)) {
             assertThat(ctx, hasToString("Slf4jMdcContext" + mdc));
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,8 +112,8 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public Context<Span> initializeNewContext(Span value) {
-        return (Context<Span>) activate(value);
+    public Context initializeNewContext(Span value) {
+        return (Context) activate(value);
     }
 
     /**

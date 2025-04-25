@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ import java.util.logging.Logger;
  *
  * @author Sjoerd Talsma
  */
-public final class CurrentLocaleHolder implements Context<Locale> {
+public final class CurrentLocaleHolder implements Context {
     private static final Logger LOGGER = Logger.getLogger(CurrentLocaleHolder.class.getName());
 
     /**
@@ -101,7 +101,7 @@ public final class CurrentLocaleHolder implements Context<Locale> {
      * @param locale The locale to become the current locale.
      * @return The context to restore the previous locale upon {@code close()}.
      */
-    public static Context<Locale> set(Locale locale) {
+    public static Context set(Locale locale) {
         CurrentLocaleHolder newHolder = new CurrentLocaleHolder(LOCALE.get(), locale);
         LOCALE.set(newHolder);
         return newHolder;

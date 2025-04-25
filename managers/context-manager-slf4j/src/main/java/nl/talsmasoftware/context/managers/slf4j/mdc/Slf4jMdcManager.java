@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ public class Slf4jMdcManager implements ContextManager<Map<String, String>> {
      *                  (which must be closed by the caller at the end of its lifecycle).
      * @return A context that -when closed- will restore the active MDC values to what they were just before this call.
      */
-    public Context<Map<String, String>> initializeNewContext(final Map<String, String> mdcValues) {
+    public Context initializeNewContext(final Map<String, String> mdcValues) {
         return new Slf4jMdcContext(mdcValues);
     }
 
@@ -122,7 +122,7 @@ public class Slf4jMdcManager implements ContextManager<Map<String, String>> {
         return getClass().getSimpleName();
     }
 
-    private static final class Slf4jMdcContext implements Context<Map<String, String>> {
+    private static final class Slf4jMdcContext implements Context {
         private final Map<String, String> previous;
         private final AtomicBoolean closed;
 

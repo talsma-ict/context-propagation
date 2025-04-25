@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,7 @@ public class SpringSecurityContextManager implements ContextManager<Authenticati
      * @param authentication The value to initialize a new context for.
      * @return A context with the new Authentication, restoring the previous authentication when closed.
      */
-    public Context<Authentication> initializeNewContext(Authentication authentication) {
+    public Context initializeNewContext(Authentication authentication) {
         return new AuthenticationContext(authentication);
     }
 
@@ -97,7 +97,7 @@ public class SpringSecurityContextManager implements ContextManager<Authenticati
         SecurityContextHolder.clearContext();
     }
 
-    private static final class AuthenticationContext implements Context<Authentication> {
+    private static final class AuthenticationContext implements Context {
         private final SecurityContext previous;
         private final AtomicBoolean closed;
 
