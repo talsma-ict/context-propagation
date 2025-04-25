@@ -61,7 +61,7 @@ public final class CurrentLocaleHolder implements Context {
      * This constant is inheritable, meaning it will propagate into <em>new</em> Threads.<br>
      * Furthermore, the {@code set} method is made null-safe, removing the ThreadLocal when setting {@code null}.
      */
-    private static final ThreadLocal<CurrentLocaleHolder> LOCALE = new InheritableThreadLocal<CurrentLocaleHolder>() {
+    private static final ThreadLocal<CurrentLocaleHolder> CURRENT_LOCALE = new InheritableThreadLocal<CurrentLocaleHolder>() {
         /**
          * Copies the current locale into a new holder for use in the new thread.
          *
@@ -102,8 +102,8 @@ public final class CurrentLocaleHolder implements Context {
      * @return The context to restore the previous locale upon {@code close()}.
      */
     public static Context set(Locale locale) {
-        CurrentLocaleHolder newHolder = new CurrentLocaleHolder(LOCALE.get(), locale);
-        LOCALE.set(newHolder);
+        CurrentLocaleHolder newHolder = new CurrentLocaleHolder(CURRENT_LOCALE.get(), locale);
+        CURRENT_LOCALE.set(newHolder);
         return newHolder;
     }
 
@@ -115,7 +115,7 @@ public final class CurrentLocaleHolder implements Context {
      * @see #getOrDefault()
      */
     public static Optional<Locale> get() {
-        return Optional.ofNullable(LOCALE.get()).map(holder -> holder.locale);
+        return Optional.ofNullable(CURRENT_LOCALE.get()).map(holder -> holder.locale);
     }
 
     /**
@@ -147,11 +147,11 @@ public final class CurrentLocaleHolder implements Context {
      * Close the context. Restores the nearest unclosed parent locale as current.
      */
     public void close() {
-        final boolean isCurrent = this == LOCALE.get();
+        final boolean isCurrent = this == CURRENT_LOCALE.get();
         if (!closed.compareAndSet(false, true)) {
             LOGGER.finest("Current Locale holder closed repeatedly.");
         } else if (isCurrent) {
-            LOCALE.set(this.unwind());
+            CURRENT_LOCALE.set(this.unwind());
         } else {
             LOGGER.fine("Current Locale holder closed out-of-sequence! It was not the current locale.");
         }
@@ -173,9 +173,9 @@ public final class CurrentLocaleHolder implements Context {
      * This can be useful when returning threads to a thread pool.
      */
     static void clear() {
-        for (CurrentLocaleHolder current = LOCALE.get(); current != null; current = current.unwind()) {
+        for (CurrentLocaleHolder current = CURRENT_LOCALE.get(); current != null; current = current.unwind()) {
             current.close();
         }
-        LOCALE.remove();
+        CURRENT_LOCALE.remove();
     }
 }
