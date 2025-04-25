@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@SuppressWarnings({
+        "rawtypes",  // We deal with all context manager types here.
+        "java:S3416" // As a 'hidden' class within the api, we apply log operations to the relevant interfaces.
+})
 final class ContextSnapshotImpl implements ContextSnapshot {
     private static final Logger SNAPSHOT_LOGGER = Logger.getLogger(ContextSnapshot.class.getName());
     private static final Logger MANAGER_LOGGER = Logger.getLogger(ContextManager.class.getName());
@@ -98,7 +102,6 @@ final class ContextSnapshotImpl implements ContextSnapshot {
      * when it is closed itself.<br>
      * This context contains no meaningful value in itself and purely exists to close the reactivated contexts.
      */
-    @SuppressWarnings("rawtypes")
     private static final class ReactivationImpl implements Reactivation {
         private final Context[] reactivated;
 
@@ -177,7 +180,7 @@ final class ContextSnapshotImpl implements ContextSnapshot {
      * @param snapshotValue  The snapshot value to be reactivated.
      * @return The context to be included in the reactivation object.
      */
-    @SuppressWarnings("unchecked") // We got the value from the managers itself.
+    @SuppressWarnings("unchecked") // We obtain the snapshotValue from the manager itself.
     private static Context reactivate(ContextManager contextManager, Object snapshotValue) {
         if (snapshotValue == null) return null;
         long start = System.nanoTime();
