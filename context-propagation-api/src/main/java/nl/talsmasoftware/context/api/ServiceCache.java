@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,12 @@ final class ServiceCache {
     /**
      * Sometimes a single, fixed classloader may be necessary (e.g. #97)
      */
+    @SuppressWarnings("java:S3077") // The classloader is out of our control, the volatile reference is what we need.
     private static volatile ClassLoader classLoaderOverride = null;
+
+    private ServiceCache() {
+        throw new UnsupportedOperationException("This class cannot be instantiated.");
+    }
 
     static synchronized void useClassLoader(ClassLoader classLoader) {
         if (classLoaderOverride == classLoader) {
@@ -58,7 +63,7 @@ final class ServiceCache {
 
     @SuppressWarnings("unchecked")
     static <T> List<T> cached(Class<T> serviceClass) {
-        return (List<T>) CACHE.computeIfAbsent(serviceClass, ServiceCache::load);
+        return CACHE.computeIfAbsent(serviceClass, ServiceCache::load);
     }
 
     static void clear() {
@@ -79,7 +84,7 @@ final class ServiceCache {
      * @param <T>         The service type to load.
      * @return Unmodifiable list of service implementations.
      */
-    private synchronized static <T> List<T> load(Class<T> serviceType) {
+    private static synchronized <T> List<T> load(Class<T> serviceType) {
         final ArrayList<T> services = new ArrayList<>();
         final ServiceLoader<T> loader = classLoaderOverride == null
                 ? ServiceLoader.load(serviceType)
