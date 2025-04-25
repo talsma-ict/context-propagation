@@ -493,7 +493,7 @@
             <properties>
                 <sonar.host.url>https://sonarcloud.io</sonar.host.url>
                 <sonar.organization>talsma-ict</sonar.organization>
-                <sonar.projectKey>talsma-ict_enumerables</sonar.projectKey>
+                <sonar.projectKey>talsma-ict_context-propagation</sonar.projectKey>
             </properties>
             <build>
                 <plugins>
