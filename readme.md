@@ -58,12 +58,27 @@ to make sure they reactivate _and_ close snapshots in a safe way.
 
 ## How to use this library
 
-### Capturing a snapshot of ThreadLocal context values
+### Threadpools and ExecutorService
+
+If your background threads are managed by an ExecutorService,
+you can use our _context aware_ ExecutorService to wrap your usual threadpool.
+
+This automatically takes a context snapshot to reactivate in the submitted background thread.  
+After the background thread finishes, the snapshot reactivation is automatically closed,
+ensuring that no remaining ThreadLocal values leak into the thread pool.
+
+The `ContextAwareExecutorService` can wrap any ExecutorService for the actual thread execution:
+```java
+private static final ExecutorService THREADPOOL = 
+        new ContextAwareExecutorService(Executors.newCachedThreadpool());
+```
+
+### Manually capture and reactivate a context snapshot
 
 Just before creating a new thread, capture a snapshot of all ThreadLocal context
 values:
 ```java
-ContextSnapshot snapshot = ContextSnapshot.capture();
+final ContextSnapshot snapshot = ContextSnapshot.capture();
 ```
 
 In the code of your background thread, activate the snapshot to have all ThreadLocal
@@ -72,22 +87,6 @@ context values set as they were captured:
 try (ContextSnapshot.Reactivation reactivation = snapshot.reactivate()) {
     // All ThreadLocal values from the snapshot are available within this block
 }
-```
-
-### Threadpools and ExecutorService
-
-If your background threads are managed by an ExecutorService,
-you can use our _context aware_ ExecutorService instead of your usual threadpool.
-
-When submitting new work, this automatically takes a context snapshot
-to reactivate in the background thread.  
-After the background thread finishes, the snapshot reactivation is closed,
-ensuring that no remaining ThreadLocal values leak into the thread pool.
-
-The `ContextAwareExecutorService` can wrap any ExecutorService for the actual thread execution:
-```java
-private static final ExecutorService THREADPOOL = 
-        new ContextAwareExecutorService(Executors.newCachedThreadpool());
 ```
 
 ## Supported contexts
@@ -102,8 +101,9 @@ out of the box by this context-propagation library:
 - [Spring Security Context]
 - [Locale context][locale context]
 - [ServletRequest contexts][servletrequest propagation]
-- .. _Yours?_ Feel free to create an issue or pull-request
-  if you believe there's a general context that was forgotten. 
+- .. _Yours?_ 
+  Feel free to create an issue or pull-request if you know of
+  a ThreadLocal context that should also be included in a context snapshot. 
 
 ## Custom contexts
 

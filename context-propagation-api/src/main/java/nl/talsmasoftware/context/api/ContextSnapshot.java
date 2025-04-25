@@ -28,7 +28,7 @@ import java.io.Closeable;
  * A snapshot can be obtained from the {@linkplain #capture()} method.
  *
  * <p>
- * This library contains several utility classes named {@code ContextAware...} or {...WithContext} that will
+ * This library contains several utility classes named {@code ContextAware...} or {@code ...WithContext} that will
  * automatically take a new snapshot and reactivate it for a particular callable or runnable piece of code,
  * making sure the reactivation is properly closed again.
  *
