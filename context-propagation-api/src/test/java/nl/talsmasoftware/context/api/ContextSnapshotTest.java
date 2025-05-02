@@ -23,7 +23,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +39,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 /**
@@ -198,7 +198,7 @@ class ContextSnapshotTest {
 
     @Test
     void capture_exceptionHandling() {
-        try (MockedStatic<ServiceCache> serviceCacheMock = Mockito.mockStatic(ServiceCache.class)) {
+        try (MockedStatic<ServiceCache> serviceCacheMock = mockStatic(ServiceCache.class)) {
             when(ServiceCache.cached(ContextManager.class)).thenThrow(new IllegalStateException("Service cache error!"));
             assertThatThrownBy(ContextSnapshot::capture)
                     .isExactlyInstanceOf(IllegalStateException.class)
