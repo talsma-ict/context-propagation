@@ -21,7 +21,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static java.util.Objects.requireNonNull;
 
@@ -40,8 +39,6 @@ import static java.util.Objects.requireNonNull;
  * @author Sjoerd Talsma
  */
 public class BiConsumerWithContext<T, U> extends WrapperWithContextAndConsumer<BiConsumer<T, U>> implements BiConsumer<T, U> {
-    private static final Logger LOGGER = Logger.getLogger(BiConsumerWithContext.class.getName());
-
     /**
      * Creates a new bi-consumer that performs the following steps, in-order:
      * <ol>
@@ -77,7 +74,7 @@ public class BiConsumerWithContext<T, U> extends WrapperWithContextAndConsumer<B
     }
 
     /**
-     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and -consumer.
+     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and consumer.
      *
      * <p>
      * This constructor is not for general use. Care must be taken to capture the context snapshot <em>before</em> the
@@ -113,14 +110,10 @@ public class BiConsumerWithContext<T, U> extends WrapperWithContextAndConsumer<B
     public void accept(T in1, U in2) {
         try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
             try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                LOGGER.log(Level.FINEST, "Delegating accept method with {0} to {1}.", new Object[]{context, delegate()});
+                logger.log(Level.FINEST, "Delegating accept method with {0} to {1}.", new Object[]{context, delegate()});
                 delegate().accept(in1, in2);
             } finally {
-                if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextSnapshot.capture();
-                    LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                    contextSnapshotConsumer.accept(resultSnapshot);
-                }
+                captureResultSnapshotIfRequired();
             }
         }
     }
@@ -153,15 +146,11 @@ public class BiConsumerWithContext<T, U> extends WrapperWithContextAndConsumer<B
         return (l, r) -> {
             try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
                 try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                    LOGGER.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});
+                    logger.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});
                     delegate().accept(l, r);
                     after.accept(l, r);
                 } finally {
-                    if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextSnapshot.capture();
-                        LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                        contextSnapshotConsumer.accept(resultSnapshot);
-                    }
+                    captureResultSnapshotIfRequired();
                 }
             }
         };

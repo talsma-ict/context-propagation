@@ -78,7 +78,7 @@ public class UnaryOperatorWithContext<T> extends FunctionWithContext<T, T> imple
     }
 
     /**
-     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and -consumer.
+     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and consumer.
      *
      * <p>
      * This constructor is not for general use. Care must be taken to capture the context snapshot <em>before</em> the

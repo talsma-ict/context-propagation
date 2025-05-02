@@ -19,7 +19,6 @@ import nl.talsmasoftware.context.api.ContextSnapshot;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.logging.Logger;
 
 /**
  * {@linkplain Runnable} that {@linkplain ContextSnapshot#reactivate() reactivates a context snapshot} during the task.
@@ -33,8 +32,6 @@ import java.util.logging.Logger;
  * @author Sjoerd Talsma
  */
 public class RunnableWithContext extends WrapperWithContextAndConsumer<Runnable> implements Runnable {
-    private static final Logger LOGGER = Logger.getLogger(RunnableWithContext.class.getName());
-
     /**
      * Creates a new runnable that performs the following steps, in-order:
      * <ol>
@@ -71,7 +68,7 @@ public class RunnableWithContext extends WrapperWithContextAndConsumer<Runnable>
     }
 
     /**
-     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and -consumer.
+     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and consumer.
      *
      * <p>
      * This constructor is not for general use. Care must be taken to capture the context snapshot <em>before</em> the
@@ -104,14 +101,10 @@ public class RunnableWithContext extends WrapperWithContextAndConsumer<Runnable>
     public void run() {
         try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
             try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                LOGGER.finest(() -> "Delegating run method with " + context + " to " + delegate() + ".");
+                logger.finest(() -> "Delegating run method with " + context + " to " + delegate() + ".");
                 delegate().run();
             } finally {
-                if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextSnapshot.capture();
-                    LOGGER.finest(() -> "Captured context snapshot after delegation: " + resultSnapshot + ".");
-                    contextSnapshotConsumer.accept(resultSnapshot);
-                }
+                captureResultSnapshotIfRequired();
             }
         }
     }

@@ -21,7 +21,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * {@linkplain BooleanSupplier Boolean supplier} that {@linkplain ContextSnapshot#reactivate() reactivates a context snapshot}
@@ -36,8 +35,6 @@ import java.util.logging.Logger;
  * @author Sjoerd Talsma
  */
 public class BooleanSupplierWithContext extends WrapperWithContextAndConsumer<BooleanSupplier> implements BooleanSupplier {
-    private static final Logger LOGGER = Logger.getLogger(BooleanSupplierWithContext.class.getName());
-
     /**
      * Creates a new boolean supplier with context.
      *
@@ -81,7 +78,7 @@ public class BooleanSupplierWithContext extends WrapperWithContextAndConsumer<Bo
     }
 
     /**
-     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and -consumer.
+     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and consumer.
      *
      * <p>
      * This constructor is not for general use. Care must be taken to capture the context snapshot <em>before</em> the
@@ -115,14 +112,10 @@ public class BooleanSupplierWithContext extends WrapperWithContextAndConsumer<Bo
     public boolean getAsBoolean() {
         try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
             try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                LOGGER.log(Level.FINEST, "Delegating getAsBoolean method with {0} to {1}.", new Object[]{context, delegate()});
+                logger.log(Level.FINEST, "Delegating getAsBoolean method with {0} to {1}.", new Object[]{context, delegate()});
                 return delegate().getAsBoolean();
             } finally {
-                if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextSnapshot.capture();
-                    LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                    contextSnapshotConsumer.accept(resultSnapshot);
-                }
+                captureResultSnapshotIfRequired();
             }
         }
     }

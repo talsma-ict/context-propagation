@@ -22,7 +22,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static java.util.Objects.requireNonNull;
 
@@ -36,14 +35,12 @@ import static java.util.Objects.requireNonNull;
  * <p>
  * The reactivated context snapshot will be safely closed after the delegate function has been applied.
  *
- * @param <IN1> the type of the first argument to the function.
- * @param <IN2> the type of the second argument to the function.
- * @param <OUT> the type of the result of the function.
+ * @param <IN1> the first argument type of the function.
+ * @param <IN2> the second argument type of the function.
+ * @param <OUT> the result type of the function.
  * @author Sjoerd Talsma
  */
 public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndConsumer<BiFunction<IN1, IN2, OUT>> implements BiFunction<IN1, IN2, OUT> {
-    private static final Logger LOGGER = Logger.getLogger(BiFunctionWithContext.class.getName());
-
     /**
      * Creates a new bi-function with context.
      *
@@ -87,7 +84,7 @@ public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndC
     }
 
     /**
-     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and -consumer.
+     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and consumer.
      *
      * <p>
      * This constructor is not for general use. Care must be taken to capture the context snapshot <em>before</em> the
@@ -126,14 +123,10 @@ public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndC
     public OUT apply(IN1 in1, IN2 in2) {
         try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
             try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                LOGGER.log(Level.FINEST, "Delegating apply method with {0} to {1}.", new Object[]{context, delegate()});
+                logger.log(Level.FINEST, "Delegating apply method with {0} to {1}.", new Object[]{context, delegate()});
                 return delegate().apply(in1, in2);
             } finally {
-                if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextSnapshot.capture();
-                    LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                    contextSnapshotConsumer.accept(resultSnapshot);
-                }
+                captureResultSnapshotIfRequired();
             }
         }
     }
@@ -147,11 +140,11 @@ public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndC
      * <ol>
      * <li>{@linkplain ContextSnapshot#reactivate() reactivate} the given snapshot
      * <li>apply the delegate bi-function and get the result
-     * <li>apply the {@code after} function to the result to get the end result
+     * <li>apply the {@code after} function to the result to get the result
      * <li><em>if context snapshot consumer is non-null,</em>
      * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
-     * <li>return the end result</li>
+     * <li>return the result</li>
      * </ol>
      *
      * @param after the function to apply to the result of this bi-function.
@@ -164,14 +157,10 @@ public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndC
         return (IN1 in1, IN2 in2) -> {
             try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
                 try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                    LOGGER.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});
+                    logger.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});
                     return after.apply(delegate().apply(in1, in2));
                 } finally {
-                    if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextSnapshot.capture();
-                        LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                        contextSnapshotConsumer.accept(resultSnapshot);
-                    }
+                    captureResultSnapshotIfRequired();
                 }
             }
         };

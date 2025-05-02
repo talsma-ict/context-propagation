@@ -78,7 +78,7 @@ public class BinaryOperatorWithContext<T> extends BiFunctionWithContext<T, T, T>
     }
 
     /**
-     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and -consumer.
+     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and consumer.
      *
      * <p>
      * This constructor is not for general use. Care must be taken to capture the context snapshot <em>before</em> the
@@ -93,5 +93,4 @@ public class BinaryOperatorWithContext<T> extends BiFunctionWithContext<T, T, T>
     protected BinaryOperatorWithContext(Supplier<ContextSnapshot> snapshotSupplier, BinaryOperator<T> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
         super(snapshotSupplier, delegate, snapshotConsumer);
     }
-
 }
