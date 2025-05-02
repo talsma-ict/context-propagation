@@ -37,8 +37,7 @@ import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -132,7 +131,7 @@ public class DelegatingExecutorServiceTest {
     public void testSubmitRunnable() {
         Runnable runnable = mock(Runnable.class);
         Future<Object> result = mock(Future.class);
-        when(delegate.submit(any(Runnable.class), anyObject())).thenReturn(result);
+        when(delegate.submit(any(Runnable.class), any())).thenReturn(result);
 
         assertThat(subject.submit(runnable, "yellow"), is(sameInstance((Future) result)));
 
