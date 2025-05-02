@@ -39,29 +39,29 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * @author Sjoerd Talsma
  */
-public class BooleanSupplierWithContextTest {
+class BooleanSupplierWithContextTest {
 
     private ExecutorService unawareThreadpool;
 
     @BeforeEach
     @AfterEach
-    public void clearDummyContext() {
+    void clearDummyContext() {
         DummyContextManager.clearAllContexts();
     }
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         unawareThreadpool = Executors.newCachedThreadPool();
     }
 
     @AfterEach
-    public void tearDown() throws InterruptedException {
+    void tearDown() throws InterruptedException {
         unawareThreadpool.shutdown();
         unawareThreadpool.awaitTermination(5, TimeUnit.SECONDS);
     }
 
     @Test
-    public void testConstructWithoutSnapshot() {
+    void testConstructWithoutSnapshot() {
         try {
             new BooleanSupplierWithContext(null, () -> true);
             fail("Exception expected");
@@ -71,7 +71,7 @@ public class BooleanSupplierWithContextTest {
     }
 
     @Test
-    public void testConstructWithoutSnapshotSupplier() {
+    void testConstructWithoutSnapshotSupplier() {
         try {
             new BooleanSupplierWithContext((Supplier<ContextSnapshot>) null, () -> true, snapshot -> {
             });
@@ -82,7 +82,7 @@ public class BooleanSupplierWithContextTest {
     }
 
     @Test
-    public void testGetAsBooleanWithSnapshotConsumer() throws ExecutionException, InterruptedException {
+    void testGetAsBooleanWithSnapshotConsumer() throws ExecutionException, InterruptedException {
         DummyContext.setCurrentValue("true");
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
 

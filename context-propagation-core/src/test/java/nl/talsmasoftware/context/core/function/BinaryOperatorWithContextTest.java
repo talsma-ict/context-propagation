@@ -30,11 +30,11 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -45,37 +45,37 @@ import static org.mockito.Mockito.when;
 /**
  * @author Sjoerd Talsma
  */
-public class BinaryOperatorWithContextTest {
+class BinaryOperatorWithContextTest {
 
     private ContextSnapshot snapshot;
     private Context context;
 
     @BeforeEach
     @AfterEach
-    public void clearDummyContext() {
+    void clearDummyContext() {
         DummyContextManager.clearAllContexts();
     }
 
     @BeforeEach
     @SuppressWarnings("unchecked")
-    public void setUp() {
+    void setUp() {
         snapshot = mock(ContextSnapshot.class);
         context = mock(Context.class);
     }
 
     @AfterEach
-    public void verifyMocks() {
+    void verifyMocks() {
         verifyNoMoreInteractions(snapshot, context);
     }
 
     @Test
-    public void testApply() {
+    void testApply() {
         new BinaryOperatorWithContext<>(snapshot, (a, b) -> b).apply("input1", "input2");
         verify(snapshot).reactivate();
     }
 
     @Test
-    public void testApplyWithoutSnapshot() {
+    void testApplyWithoutSnapshot() {
         try {
             new BinaryOperatorWithContext<>(null, (a, b) -> b);
             fail("Exception expected");
@@ -85,9 +85,9 @@ public class BinaryOperatorWithContextTest {
     }
 
     @Test
-    public void testApplyWithoutSnapshotSupplier() {
+    void testApplyWithoutSnapshotSupplier() {
         try {
-            new BinaryOperatorWithContext<>((Supplier<ContextSnapshot>) null, (a, b) -> b, context -> {
+            new BinaryOperatorWithContext<>((Supplier<ContextSnapshot>) null, (a, b) -> b, c -> {
             });
             fail("Exception expected");
         } catch (RuntimeException expected) {
@@ -96,7 +96,7 @@ public class BinaryOperatorWithContextTest {
     }
 
     @Test
-    public void testApplyWithSnapshotConsumer() throws InterruptedException {
+    void testApplyWithSnapshotConsumer() throws InterruptedException {
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
         DummyContext.setCurrentValue("Old value");
 
@@ -105,7 +105,7 @@ public class BinaryOperatorWithContextTest {
                     DummyContext.setCurrentValue("New value");
                     return input2;
                 },
-                snapshot -> snapshotHolder[0] = snapshot).apply("input1", "input2"));
+                s -> snapshotHolder[0] = s).apply("input1", "input2"));
         t.start();
         t.join();
         assertThat(DummyContext.currentValue(), is("Old value"));
@@ -118,35 +118,29 @@ public class BinaryOperatorWithContextTest {
     }
 
     @Test
-    public void testCloseReactivatedContextInCaseOfException() {
+    void testCloseReactivatedContextInCaseOfException() {
         ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
         when(snapshot.reactivate()).thenReturn(reactivation);
         final RuntimeException expectedException = new RuntimeException("Whoops!");
 
-        try {
-            new BinaryOperatorWithContext<String>(() -> snapshot, throwing(expectedException), null) {
-            }.apply("input1", "input2");
-            fail("Exception expected");
-        } catch (RuntimeException rte) {
-            assertThat(rte, is(sameInstance(expectedException)));
-        }
+        BinaryOperatorWithContext<String> subject = new BinaryOperatorWithContext<>(() -> snapshot, throwing(expectedException), null) {
+        };
+        assertThatThrownBy(() -> subject.apply("input1", "input2")).isSameAs(expectedException);
 
         verify(snapshot).reactivate();
         verify(reactivation).close();
     }
 
     @Test
-    public void testAndThenNull() {
-        try {
-            new BinaryOperatorWithContext<>(snapshot, (a, b) -> b).andThen(null);
-            fail("Exception expected");
-        } catch (NullPointerException expected) {
-            assertThat(expected, hasToString(containsString("after function <null>")));
-        }
+    void testAndThenNull() {
+        BinaryOperatorWithContext<Object> subject = new BinaryOperatorWithContext<>(snapshot, (a, b) -> b);
+        assertThatThrownBy(() -> subject.andThen(null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageContaining("after function <null>");
     }
 
     @Test
-    public void testAndThen_singleContextSwitch() {
+    void testAndThen_singleContextSwitch() {
         ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
         when(snapshot.reactivate()).thenReturn(reactivation);
         UnaryOperator<Integer> after = i -> i + 100;
@@ -154,7 +148,7 @@ public class BinaryOperatorWithContextTest {
         AtomicInteger consumed = new AtomicInteger(0);
 
         BiFunction<Integer, Integer, Integer> composed =
-                new BinaryOperatorWithContext<>(snapshot, function, snapshot -> consumed.incrementAndGet())
+                new BinaryOperatorWithContext<>(snapshot, function, s -> consumed.incrementAndGet())
                         .andThen(after);
 
         assertThat(composed.apply(2, 3), is(20 + 15 + 100));
@@ -164,13 +158,11 @@ public class BinaryOperatorWithContextTest {
     }
 
     @Test
-    public void testAndThenWithNull() {
-        try {
-            new FunctionWithContext<>(snapshot, Function.identity()).andThen(null);
-            fail("Exception expected");
-        } catch (NullPointerException expected) {
-            assertThat(expected, hasToString(containsString("after function <null>")));
-        }
+    void testAndThenWithNull() {
+        FunctionWithContext<Object, Object> subject = new FunctionWithContext<>(snapshot, Function.identity());
+        assertThatThrownBy(() -> subject.andThen(null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageContaining("after function <null>");
     }
 
     private static <T> BinaryOperator<T> throwing(RuntimeException rte) {

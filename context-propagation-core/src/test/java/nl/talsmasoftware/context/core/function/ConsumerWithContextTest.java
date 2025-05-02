@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -35,6 +36,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -42,34 +44,34 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 /**
  * @author Sjoerd Talsma
  */
-public class ConsumerWithContextTest {
+class ConsumerWithContextTest {
     private ExecutorService unawareThreadpool;
     private ContextSnapshot snapshot;
     private Context context;
 
     @BeforeEach
     @AfterEach
-    public void clearDummyContext() {
+    void clearDummyContext() {
         DummyContextManager.clearAllContexts();
     }
 
     @BeforeEach
     @SuppressWarnings("unchecked")
-    public void setUp() {
+    void setUp() {
         unawareThreadpool = Executors.newCachedThreadPool();
         snapshot = mock(ContextSnapshot.class);
         context = mock(Context.class);
     }
 
     @AfterEach
-    public void tearDown() throws InterruptedException {
+    void tearDown() throws InterruptedException {
         verifyNoMoreInteractions(snapshot, context);
         unawareThreadpool.shutdown();
         unawareThreadpool.awaitTermination(5, TimeUnit.SECONDS);
     }
 
     @Test
-    public void testAcceptNull() {
+    void testAcceptNull() {
         Object[] accepted = new Object[1];
         new ConsumerWithContext<>(snapshot, val -> accepted[0] = val).accept(null);
         assertThat(accepted[0], is(nullValue()));
@@ -77,23 +79,29 @@ public class ConsumerWithContextTest {
     }
 
     @Test
-    public void testAcceptWithSnapshotConsumer() throws InterruptedException {
+    void testAcceptWithSnapshotConsumer() throws InterruptedException {
         setCurrentValue("Old value");
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
 
+        CountDownLatch latch = new CountDownLatch(1);
         ConsumerWithContext<String> consumer = new ConsumerWithContext<>(
                 ContextSnapshot.capture(),
                 val -> {
-                    assertThat("Context must propagate into thread", currentValue(), is(Optional.of("Old value")));
-                    setCurrentValue(val);
-                    assertThat("Context changed in background thread", currentValue(), Matchers.is(Optional.of(val)));
-                    trySleep(250);
+                    try {
+                        assertThat("Context must propagate into thread", currentValue(), is(Optional.of("Old value")));
+                        setCurrentValue(val);
+                        assertThat("Context changed in background thread", currentValue(), Matchers.is(Optional.of(val)));
+                        latch.await();
+                    } catch (InterruptedException e) {
+                        fail(e);
+                    }
                 },
                 s -> snapshotHolder[0] = s);
 
         Thread t = new Thread(() -> consumer.accept("New value"));
         t.start();
         assertThat("Setting context in other thread musn't impact caller", currentValue(), is("Old value"));
+        latch.countDown();
         t.join(); // Block and trigger assertions
 
         assertThat("Setting context in other thread musn't impact caller", currentValue(), is("Old value"));
@@ -109,7 +117,7 @@ public class ConsumerWithContextTest {
     }
 
     @Test
-    public void testAndThen() throws InterruptedException {
+    void testAndThen() throws InterruptedException {
         setCurrentValue("Old value");
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
 
@@ -128,14 +136,4 @@ public class ConsumerWithContextTest {
             assertThat(currentValue(), is("NEW VALUE, New value, Old value"));
         }
     }
-
-    private static void trySleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException interrupted) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Thread interrupted while sleeping");
-        }
-    }
-
 }
