@@ -24,9 +24,10 @@ import nl.talsmasoftware.context.api.ContextSnapshot;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 /**
  * <a href="https://github.com/talsma-ict/context-propagation/issues/30">Issue 30</a> is for a
@@ -51,28 +52,29 @@ import static org.hamcrest.Matchers.is;
  *
  * @author Sjoerd Talsma
  */
-public class Issue30Test {
+class Issue30Test {
     static final ScopeManager SCOPE_MANAGER = new ThreadLocalScopeManager();
 
     MockTracer mockTracer;
 
     @BeforeEach
-    public void registerMockGlobalTracer() {
+    void registerMockGlobalTracer() {
         GlobalTracerTestUtil.resetGlobalTracer();
-        assertThat("Pre-existing GlobalTracer", GlobalTracer.isRegistered(), is(false));
-        GlobalTracer.register(mockTracer = new MockTracer(SCOPE_MANAGER));
+        assertThat(GlobalTracer.isRegistered()).as("Pre-existing GlobalTracer").isFalse();
+        GlobalTracer.registerIfAbsent(() -> mockTracer = new MockTracer(SCOPE_MANAGER));
     }
 
     @AfterEach
-    public void cleanup() {
+    void cleanup() {
         GlobalTracerTestUtil.resetGlobalTracer();
     }
 
     @Test
-    public void testIssue30NullPointerException() {
+    void testIssue30NullPointerException() {
         ContextSnapshot snapshot = ContextSnapshot.capture();
         ContextSnapshot.Reactivation reactivation = snapshot.reactivate();
-        reactivation.close(); // This throws NPE in issue 30
+        Executable callClose = reactivation::close; // This will throw NPE in issue 30
+        assertDoesNotThrow(callClose);
     }
 
 }
