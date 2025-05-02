@@ -29,7 +29,7 @@ import java.util.function.UnaryOperator;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-public class CompletedFutureTest {
+class CompletedFutureTest {
 
     private static final DummyContextManager manager = new DummyContextManager();
 
@@ -37,12 +37,12 @@ public class CompletedFutureTest {
 
     @BeforeEach
     @AfterEach
-    public void clearDummyContext() {
+    void clearDummyContext() {
         DummyContextManager.clearAllContexts();
     }
 
     @Test
-    public void testCompletedFutureTakesNewSnapshot() throws ExecutionException, InterruptedException {
+    void testCompletedFutureTakesNewSnapshot() throws ExecutionException, InterruptedException {
         manager.initializeNewContext("Mr. Blonde");
         final CompletableFuture<String> completed = ContextAwareCompletableFuture.completedFuture("Mr. Blue");
         manager.initializeNewContext("Mr. Brown");
@@ -53,7 +53,7 @@ public class CompletedFutureTest {
     }
 
     @Test
-    public void testCompletedFutureAppliesGivenSnapshot() throws ExecutionException, InterruptedException {
+    void testCompletedFutureAppliesGivenSnapshot() throws ExecutionException, InterruptedException {
         manager.initializeNewContext("Mr. Blonde");
         final ContextSnapshot snapshot = ContextSnapshot.capture();
         manager.initializeNewContext("Mr. Brown");
@@ -66,7 +66,7 @@ public class CompletedFutureTest {
     }
 
     @Test
-    public void testCompletedStageTakesNewSnapshot() throws ExecutionException, InterruptedException {
+    void testCompletedStageTakesNewSnapshot() throws ExecutionException, InterruptedException {
         manager.initializeNewContext("Mr. Blonde");
         final CompletionStage<String> completed = ContextAwareCompletableFuture.completedStage("Mr. Blue");
         manager.initializeNewContext("Mr. Brown");

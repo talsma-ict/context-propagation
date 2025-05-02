@@ -28,11 +28,11 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -43,37 +43,37 @@ import static org.mockito.Mockito.when;
 /**
  * @author Sjoerd Talsma
  */
-public class BiFunctionWithContextTest {
+class BiFunctionWithContextTest {
 
     private ContextSnapshot snapshot;
     private Context context;
 
     @BeforeEach
     @AfterEach
-    public void clearDummyContext() {
+    void clearDummyContext() {
         DummyContextManager.clearAllContexts();
     }
 
     @BeforeEach
     @SuppressWarnings("unchecked")
-    public void setUp() {
+    void setUp() {
         snapshot = mock(ContextSnapshot.class);
         context = mock(Context.class);
     }
 
     @AfterEach
-    public void verifyMocks() {
+    void verifyMocks() {
         verifyNoMoreInteractions(snapshot, context);
     }
 
     @Test
-    public void testApply() {
+    void testApply() {
         new BiFunctionWithContext<>(snapshot, (a, b) -> b).apply("input1", "input2");
         verify(snapshot).reactivate();
     }
 
     @Test
-    public void testApplyWithoutSnapshot() {
+    void testApplyWithoutSnapshot() {
         try {
             new BiFunctionWithContext<>(null, (a, b) -> b);
             fail("Exception expected");
@@ -83,9 +83,9 @@ public class BiFunctionWithContextTest {
     }
 
     @Test
-    public void testApplyWithoutSnapshotSupplier() {
+    void testApplyWithoutSnapshotSupplier() {
         try {
-            new BiFunctionWithContext<>((Supplier<ContextSnapshot>) null, (a, b) -> b, context -> {
+            new BiFunctionWithContext<>((Supplier<ContextSnapshot>) null, (a, b) -> b, ctx -> {
             });
             fail("Exception expected");
         } catch (RuntimeException expected) {
@@ -94,7 +94,7 @@ public class BiFunctionWithContextTest {
     }
 
     @Test
-    public void testApplyWithSnapshotConsumer() throws InterruptedException {
+    void testApplyWithSnapshotConsumer() throws InterruptedException {
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
         DummyContext.setCurrentValue("Old value");
 
@@ -103,7 +103,7 @@ public class BiFunctionWithContextTest {
                     DummyContext.setCurrentValue("New value");
                     return input2;
                 },
-                snapshot -> snapshotHolder[0] = snapshot).apply("input1", "input2"));
+                s -> snapshotHolder[0] = s).apply("input1", "input2"));
         t.start();
         t.join();
 
@@ -117,34 +117,28 @@ public class BiFunctionWithContextTest {
     }
 
     @Test
-    public void testCloseReactivatedContextInCaseOfException() {
+    void testCloseReactivatedContextInCaseOfException() {
         ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
         when(snapshot.reactivate()).thenReturn(reactivation);
         final RuntimeException expectedException = new RuntimeException("Whoops!");
 
-        try {
-            new BiFunctionWithContext<>(snapshot, throwing(expectedException)).apply("input1", "input2");
-            fail("Exception expected");
-        } catch (RuntimeException rte) {
-            assertThat(rte, is(sameInstance(expectedException)));
-        }
+        BiFunctionWithContext<Object, Object, Object> subject = new BiFunctionWithContext<>(snapshot, throwing(expectedException));
+        assertThatThrownBy(() -> subject.apply("input1", "input2")).isSameAs(expectedException);
 
         verify(snapshot).reactivate();
         verify(reactivation).close();
     }
 
     @Test
-    public void testAndThenNull() {
-        try {
-            new BiFunctionWithContext<>(snapshot, (a, b) -> b).andThen(null);
-            fail("Exception expected");
-        } catch (NullPointerException expected) {
-            assertThat(expected, hasToString(containsString("after function <null>")));
-        }
+    void testAndThenNull() {
+        BiFunctionWithContext<Object, Object, Object> subject = new BiFunctionWithContext<>(snapshot, (a, b) -> b);
+        assertThatThrownBy(() -> subject.andThen(null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageContaining("after function <null>");
     }
 
     @Test
-    public void testAndThen_singleContextSwitch() {
+    void testAndThen_singleContextSwitch() {
         ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
         when(snapshot.reactivate()).thenReturn(reactivation);
         Function<Integer, Integer> after = i -> i + 100;
@@ -152,7 +146,7 @@ public class BiFunctionWithContextTest {
         AtomicInteger consumed = new AtomicInteger(0);
 
         BiFunction<Integer, Integer, Integer> composed =
-                new BiFunctionWithContext<>(snapshot, function, snapshot -> consumed.incrementAndGet())
+                new BiFunctionWithContext<>(snapshot, function, s -> consumed.incrementAndGet())
                         .andThen(after);
 
         assertThat(composed.apply(2, 3), is(20 + 15 + 100));
@@ -162,13 +156,11 @@ public class BiFunctionWithContextTest {
     }
 
     @Test
-    public void testAndThenWithNull() {
-        try {
-            new FunctionWithContext<>(snapshot, Function.identity()).andThen(null);
-            fail("Exception expected");
-        } catch (NullPointerException expected) {
-            assertThat(expected, hasToString(containsString("after function <null>")));
-        }
+    void testAndThenWithNull() {
+        FunctionWithContext<Object, Object> subject = new FunctionWithContext<>(snapshot, Function.identity());
+        assertThatThrownBy(() -> subject.andThen(null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageContaining("after function <null>");
     }
 
     private static <IN1, IN2, OUT> BiFunction<IN1, IN2, OUT> throwing(RuntimeException rte) {

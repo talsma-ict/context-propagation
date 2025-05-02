@@ -42,8 +42,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context {
     /**
      * The constant of ThreadLocal context instances per subclass name so different types don't get mixed.
      */
-    private static final ConcurrentMap<String, ThreadLocal<?>> INSTANCES =
-            new ConcurrentHashMap<String, ThreadLocal<?>>();
+    private static final ConcurrentMap<String, ThreadLocal<?>> INSTANCES = new ConcurrentHashMap<>();
 
     @SuppressWarnings("unchecked")
     private final ThreadLocal<AbstractThreadLocalContext<T>> sharedThreadLocalContext = threadLocalInstanceOf((Class) getClass());
@@ -157,7 +156,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context {
                 typeName = type.getName();
             }
             // Atomically get-or-create the appropriate ThreadLocal instance.
-            if (!INSTANCES.containsKey(typeName)) INSTANCES.putIfAbsent(typeName, new ThreadLocal());
+            if (!INSTANCES.containsKey(typeName)) INSTANCES.putIfAbsent(typeName, new ThreadLocal<>());
         }
         return (ThreadLocal<CTX>) INSTANCES.get(typeName);
     }

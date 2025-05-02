@@ -22,6 +22,7 @@ import nl.talsmasoftware.context.dummy.ThrowingContextManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasToString;
@@ -37,6 +39,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Sjoerd Talsma
@@ -189,6 +193,16 @@ class ContextSnapshotTest {
     void testReactivationToString() {
         try (ContextSnapshot.Reactivation reactivation = ContextSnapshot.capture().reactivate()) {
             assertThat(reactivation, hasToString(containsString("ContextSnapshot.Reactivation{")));
+        }
+    }
+
+    @Test
+    void capture_exceptionHandling() {
+        try (MockedStatic<ServiceCache> serviceCacheMock = mockStatic(ServiceCache.class)) {
+            when(ServiceCache.cached(ContextManager.class)).thenThrow(new IllegalStateException("Service cache error!"));
+            assertThatThrownBy(ContextSnapshot::capture)
+                    .isExactlyInstanceOf(IllegalStateException.class)
+                    .hasMessage("Service cache error!");
         }
     }
 }

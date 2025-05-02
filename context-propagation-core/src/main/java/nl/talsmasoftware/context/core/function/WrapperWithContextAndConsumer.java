@@ -20,6 +20,8 @@ import nl.talsmasoftware.context.core.delegation.WrapperWithContext;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * A {@linkplain WrapperWithContext} that takes an additional {@link Consumer} accepting a resulting snapshot,
@@ -32,6 +34,10 @@ import java.util.function.Supplier;
  * @param <T> The type of the wrapped delegate object.
  */
 abstract class WrapperWithContextAndConsumer<T> extends WrapperWithContext<T> {
+    /**
+     * Logger for the concrete subclass.
+     */
+    protected final Logger logger = Logger.getLogger(getClass().getName());
 
     /**
      * The context snapshot consumer to provide a new snapshot to after the function is complete.
@@ -65,4 +71,11 @@ abstract class WrapperWithContextAndConsumer<T> extends WrapperWithContext<T> {
         this.contextSnapshotConsumer = contextSnapshotConsumer;
     }
 
+    protected void captureResultSnapshotIfRequired() {
+        if (contextSnapshotConsumer != null) {
+            ContextSnapshot resultSnapshot = ContextSnapshot.capture();
+            logger.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
+            contextSnapshotConsumer.accept(resultSnapshot);
+        }
+    }
 }

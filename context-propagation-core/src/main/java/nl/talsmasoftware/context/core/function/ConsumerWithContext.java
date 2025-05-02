@@ -20,7 +20,6 @@ import nl.talsmasoftware.context.api.ContextSnapshot;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static java.util.Objects.requireNonNull;
 
@@ -38,8 +37,6 @@ import static java.util.Objects.requireNonNull;
  * @author Sjoerd Talsma
  */
 public class ConsumerWithContext<T> extends WrapperWithContextAndConsumer<Consumer<T>> implements Consumer<T> {
-    private static final Logger LOGGER = Logger.getLogger(ConsumerWithContext.class.getName());
-
     /**
      * Creates a new consumer that performs the following steps, in-order:
      * <ol>
@@ -75,7 +72,7 @@ public class ConsumerWithContext<T> extends WrapperWithContextAndConsumer<Consum
     }
 
     /**
-     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and -consumer.
+     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and consumer.
      *
      * <p>
      * This constructor is not for general use. Care must be taken to capture the context snapshot <em>before</em> the
@@ -110,14 +107,10 @@ public class ConsumerWithContext<T> extends WrapperWithContextAndConsumer<Consum
     public void accept(T value) {
         try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
             try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                LOGGER.log(Level.FINEST, "Delegating accept method with {0} to {1}.", new Object[]{context, delegate()});
+                logger.log(Level.FINEST, "Delegating accept method with {0} to {1}.", new Object[]{context, delegate()});
                 delegate().accept(value);
             } finally {
-                if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextSnapshot.capture();
-                    LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                    contextSnapshotConsumer.accept(resultSnapshot);
-                }
+                captureResultSnapshotIfRequired();
             }
         }
     }
@@ -150,15 +143,11 @@ public class ConsumerWithContext<T> extends WrapperWithContextAndConsumer<Consum
         return (T t) -> {
             try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
                 try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                    LOGGER.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});
+                    logger.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});
                     delegate().accept(t);
                     after.accept(t);
                 } finally {
-                    if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextSnapshot.capture();
-                        LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                        contextSnapshotConsumer.accept(resultSnapshot);
-                    }
+                    captureResultSnapshotIfRequired();
                 }
             }
         };

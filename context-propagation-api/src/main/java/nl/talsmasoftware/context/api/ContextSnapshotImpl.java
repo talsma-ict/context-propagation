@@ -38,9 +38,10 @@ final class ContextSnapshotImpl implements ContextSnapshot {
         try {
             return new ContextSnapshotImpl();
         } catch (RuntimeException e) {
+            error = e;
             SNAPSHOT_LOGGER.log(Level.FINEST, e, () -> "Error capturing ContextSnapshot from " + Thread.currentThread().getName() + ": " + e.getMessage());
             ServiceCache.clear();
-            throw error = e;
+            throw e;
         } finally {
             timed(System.nanoTime() - start, ContextSnapshot.class, "capture", error);
         }
@@ -64,19 +65,18 @@ final class ContextSnapshotImpl implements ContextSnapshot {
         RuntimeException error = null;
         final Context[] reactivatedContexts = new Context[managers.size()];
         try {
-
             for (int i = 0; i < values.length; i++) {
                 reactivatedContexts[i] = reactivate(managers.get(i), values[i]);
             }
-            return new ReactivationImpl(reactivatedContexts);
-
         } catch (RuntimeException reactivationException) {
+            error = reactivationException;
             tryClose(reactivatedContexts, reactivationException);
             ServiceCache.clear();
-            throw error = reactivationException;
+            throw reactivationException;
         } finally {
             timed(System.nanoTime() - start, ContextSnapshot.class, "reactivate", error);
         }
+        return new ReactivationImpl(reactivatedContexts);
     }
 
     @Override
@@ -192,7 +192,8 @@ final class ContextSnapshotImpl implements ContextSnapshot {
             return reactivated;
 
         } catch (RuntimeException e) {
-            throw error = e;
+            error = e;
+            throw e;
         } finally {
             timed(System.nanoTime() - start, contextManager.getClass(), "initializeNewContext", error);
         }

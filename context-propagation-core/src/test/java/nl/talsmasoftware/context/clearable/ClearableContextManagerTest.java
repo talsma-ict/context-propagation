@@ -15,41 +15,79 @@
  */
 package nl.talsmasoftware.context.clearable;
 
+import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextManager;
 import nl.talsmasoftware.context.dummy.ThrowingContextManager;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 /**
  * Tests for clearing context managers.
  *
  * @author Sjoerd Talsma
  */
-public class ClearableContextManagerTest {
-    private static ContextManager<String> CLEARABLE = new ClearableDummyContextManager();
+class ClearableContextManagerTest {
+    private static final ContextManager<String> CLEARABLE = new ClearableDummyContextManager();
 
-    @Test
-    public void testClearActiveContexts_byManager() {
-        assertThat(CLEARABLE, is(instanceOf(ContextManager.class)));
-
-        CLEARABLE.initializeNewContext("First value");
-        CLEARABLE.initializeNewContext("Second value");
-        CLEARABLE.initializeNewContext("Third value");
-        assertThat(CLEARABLE.getActiveContextValue(), is("Third value"));
-
-        ContextManager.clearAll();
-        assertThat(CLEARABLE.getActiveContextValue(), is(nullValue()));
+    @BeforeEach
+    @AfterEach
+    void clear() {
+        CLEARABLE.clear();
     }
 
     @Test
-    public void testClearActiveContexts_exception() {
-        ThrowingContextManager.onGet = new IllegalStateException("Cannot get the current active context!");
+    void testClearActiveContexts_byManager() {
+        try (Context first = CLEARABLE.initializeNewContext("First value")) {
+            try (Context second = CLEARABLE.initializeNewContext("Second value")) {
+                try (Context third = CLEARABLE.initializeNewContext("Third value")) {
+                    assertThat(CLEARABLE.getActiveContextValue()).isEqualTo("Third value");
+                    CLEARABLE.clear();
+                    assertThat(CLEARABLE.getActiveContextValue()).isNull();
+                }
+                // third.close() should have restored second.
+                assertThat(CLEARABLE.getActiveContextValue()).isEqualTo("Second value");
+                CLEARABLE.clear();
+                assertThat(CLEARABLE.getActiveContextValue()).isNull();
+            }
+            // second.close() should have restored first.
+            assertThat(CLEARABLE.getActiveContextValue()).isEqualTo("First value");
+            CLEARABLE.clear();
+            assertThat(CLEARABLE.getActiveContextValue()).isNull();
+        }
+        assertThat(CLEARABLE.getActiveContextValue()).isNull();
+    }
 
-        ContextManager.clearAll();
-        // Mustn't throw exceptions.
+    @Test
+    void testClearAllActiveContexts() {
+        try (Context first = CLEARABLE.initializeNewContext("First value")) {
+            try (Context second = CLEARABLE.initializeNewContext("Second value")) {
+                try (Context third = CLEARABLE.initializeNewContext("Third value")) {
+                    assertThat(CLEARABLE.getActiveContextValue()).isEqualTo("Third value");
+                    ContextManager.clearAll();
+                    assertThat(CLEARABLE.getActiveContextValue()).isNull();
+                }
+                // third.close() should have restored second.
+                assertThat(CLEARABLE.getActiveContextValue()).isEqualTo("Second value");
+                ContextManager.clearAll();
+                assertThat(CLEARABLE.getActiveContextValue()).isNull();
+            }
+            // second.close() should have restored first.
+            assertThat(CLEARABLE.getActiveContextValue()).isEqualTo("First value");
+            ContextManager.clearAll();
+            assertThat(CLEARABLE.getActiveContextValue()).isNull();
+        }
+        assertThat(CLEARABLE.getActiveContextValue()).isNull();
+    }
+
+    @Test
+    void testClearActiveContexts_exception() {
+        ThrowingContextManager.onGet = new IllegalStateException("Cannot get the current active context!");
+        Executable callClearAll = ContextManager::clearAll;
+        assertDoesNotThrow(callClearAll);
     }
 }

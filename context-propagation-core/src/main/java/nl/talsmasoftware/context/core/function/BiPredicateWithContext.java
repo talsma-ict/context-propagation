@@ -21,7 +21,6 @@ import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import static java.util.Objects.requireNonNull;
 
@@ -40,8 +39,6 @@ import static java.util.Objects.requireNonNull;
  * @author Sjoerd Talsma
  */
 public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsumer<BiPredicate<IN1, IN2>> implements BiPredicate<IN1, IN2> {
-    private static final Logger LOGGER = Logger.getLogger(BiPredicateWithContext.class.getName());
-
     /**
      * Creates a new bi-predicate with context.
      *
@@ -85,7 +82,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
     }
 
     /**
-     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and -consumer.
+     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and consumer.
      *
      * <p>
      * This constructor is not for general use. Care must be taken to capture the context snapshot <em>before</em> the
@@ -123,14 +120,10 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
     public boolean test(IN1 in1, IN2 in2) {
         try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
             try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                LOGGER.log(Level.FINEST, "Delegating test method with {0} to {1}.", new Object[]{context, delegate()});
+                logger.log(Level.FINEST, "Delegating test method with {0} to {1}.", new Object[]{context, delegate()});
                 return delegate().test(in1, in2);
             } finally {
-                if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextSnapshot.capture();
-                    LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                    contextSnapshotConsumer.accept(resultSnapshot);
-                }
+                captureResultSnapshotIfRequired();
             }
         }
     }
@@ -150,7 +143,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
      * <li><em>if context snapshot consumer is non-null,</em>
      * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
-     * <li>return the final outcome</li>
+     * <li>return the outcome</li>
      * </ol>
      *
      * <p>
@@ -168,14 +161,10 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
         return (IN1 in1, IN2 in2) -> {
             try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
                 try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                    LOGGER.log(Level.FINEST, "Delegating 'and' method with {0} to {1}.", new Object[]{context, delegate()});
+                    logger.log(Level.FINEST, "Delegating 'and' method with {0} to {1}.", new Object[]{context, delegate()});
                     return delegate().test(in1, in2) && other.test(in1, in2);
                 } finally {
-                    if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextSnapshot.capture();
-                        LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                        contextSnapshotConsumer.accept(resultSnapshot);
-                    }
+                    captureResultSnapshotIfRequired();
                 }
             }
         };
@@ -196,7 +185,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
      * <li><em>if context snapshot consumer is non-null,</em>
      * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
-     * <li>return the final outcome</li>
+     * <li>return the outcome</li>
      * </ol>
      * <p>
      * Any exceptions thrown during evaluation of either bi-predicate are relayed to the caller;
@@ -213,14 +202,10 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
         return (IN1 in1, IN2 in2) -> {
             try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
                 try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                    LOGGER.log(Level.FINEST, "Delegating 'or' method with {0} to {1}.", new Object[]{context, delegate()});
+                    logger.log(Level.FINEST, "Delegating 'or' method with {0} to {1}.", new Object[]{context, delegate()});
                     return delegate().test(in1, in2) || other.test(in1, in2);
                 } finally {
-                    if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextSnapshot.capture();
-                        LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                        contextSnapshotConsumer.accept(resultSnapshot);
-                    }
+                    captureResultSnapshotIfRequired();
                 }
             }
         };

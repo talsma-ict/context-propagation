@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -36,6 +37,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -43,34 +45,34 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 /**
  * @author Sjoerd Talsma
  */
-public class BiConsumerWithContextTest {
+class BiConsumerWithContextTest {
     private ExecutorService unawareThreadpool;
     private ContextSnapshot snapshot;
     private Context context;
 
     @BeforeEach
     @AfterEach
-    public void clearDummyContext() {
+    void clearDummyContext() {
         DummyContextManager.clearAllContexts();
     }
 
     @BeforeEach
     @SuppressWarnings("unchecked")
-    public void setUp() {
+    void setUp() {
         unawareThreadpool = Executors.newCachedThreadPool();
         snapshot = mock(ContextSnapshot.class);
         context = mock(Context.class);
     }
 
     @AfterEach
-    public void tearDown() throws InterruptedException {
+    void tearDown() throws InterruptedException {
         verifyNoMoreInteractions(snapshot, context);
         unawareThreadpool.shutdown();
         unawareThreadpool.awaitTermination(5, TimeUnit.SECONDS);
     }
 
     @Test
-    public void testAcceptNulls() {
+    void testAcceptNulls() {
         Object[] accepted = new Object[2];
         new BiConsumerWithContext<>(snapshot, (a, b) -> {
             accepted[0] = a;
@@ -82,26 +84,32 @@ public class BiConsumerWithContextTest {
     }
 
     @Test
-    public void testAcceptWithSnapshotConsumer() throws InterruptedException {
+    void testAcceptWithSnapshotConsumer() throws InterruptedException {
         setCurrentValue("Old value");
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
 
+        CountDownLatch latch = new CountDownLatch(1);
         BiConsumer<String, String> consumer = new BiConsumerWithContext<>(
                 ContextSnapshot.capture(),
                 (a, b) -> {
-                    assertThat("Context must propagate into thread", currentValue(), is(Optional.of("Old value")));
-                    String newValue = format("%s %s", a, b);
-                    setCurrentValue(newValue);
-                    assertThat("Context changed in background thread", currentValue(), is(Optional.of(newValue)));
-                    trySleep(250);
+                    try {
+                        assertThat("Context must propagate into thread", currentValue(), is(Optional.of("Old value")));
+                        String newValue = format("%s %s", a, b);
+                        setCurrentValue(newValue);
+                        assertThat("Context changed in background thread", currentValue(), is(Optional.of(newValue)));
+                        latch.await();
+                    } catch (InterruptedException e) {
+                        fail(e);
+                    }
                 },
                 s -> snapshotHolder[0] = s);
 
         Thread t = new Thread(() -> consumer.accept("New", "value"));
         t.start();
         assertThat("Setting context in other thread musn't impact caller", currentValue(), is("Old value"));
-        t.join(); // Block and trigger assertions
 
+        latch.countDown();
+        t.join(); // Block and trigger assertions
         assertThat("Setting context in other thread musn't impact caller", currentValue(), is("Old value"));
         assertThat("Snapshot consumer must be called", snapshotHolder[0], is(notNullValue()));
 
@@ -115,7 +123,7 @@ public class BiConsumerWithContextTest {
     }
 
     @Test
-    public void testAndThen() throws InterruptedException {
+    void testAndThen() throws InterruptedException {
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
 
         setCurrentValue("Old value");
@@ -135,14 +143,4 @@ public class BiConsumerWithContextTest {
             assertThat(currentValue(), is("NEW value, New value, Old value"));
         }
     }
-
-    private static void trySleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException interrupted) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Thread interrupted while sleeping");
-        }
-    }
-
 }

@@ -20,7 +20,6 @@ import nl.talsmasoftware.context.api.ContextSnapshot;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * {@linkplain Supplier} that {@linkplain ContextSnapshot#reactivate() reactivates a context snapshot}
@@ -32,12 +31,10 @@ import java.util.logging.Logger;
  * <p>
  * The reactivated context snapshot will be safely closed after the delegate supplier has been called.
  *
- * @param <T> the type of the result of the function.
+ * @param <T> the result type of the function.
  * @author Sjoerd Talsma
  */
 public class SupplierWithContext<T> extends WrapperWithContextAndConsumer<Supplier<T>> implements Supplier<T> {
-    private static final Logger LOGGER = Logger.getLogger(SupplierWithContext.class.getName());
-
     /**
      * Creates a new supplier that performs the following steps, in-order:
      * <ol>
@@ -73,7 +70,7 @@ public class SupplierWithContext<T> extends WrapperWithContextAndConsumer<Suppli
     }
 
     /**
-     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and -consumer.
+     * Protected constructor for use with a snapshot 'holder' object that acts as both snapshot supplier and consumer.
      *
      * <p>
      * This constructor is not for general use. Care must be taken to capture the context snapshot <em>before</em> the
@@ -107,14 +104,10 @@ public class SupplierWithContext<T> extends WrapperWithContextAndConsumer<Suppli
     public T get() {
         try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
             try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
-                LOGGER.log(Level.FINEST, "Delegating get method with {0} to {1}.", new Object[]{context, delegate()});
+                logger.log(Level.FINEST, "Delegating get method with {0} to {1}.", new Object[]{context, delegate()});
                 return delegate().get();
             } finally {
-                if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextSnapshot.capture();
-                    LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                    contextSnapshotConsumer.accept(resultSnapshot);
-                }
+                captureResultSnapshotIfRequired();
             }
         }
     }

@@ -89,6 +89,7 @@
         <project.javadoc.version>21</project.javadoc.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.testRelease>21</maven.compiler.testRelease>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -104,7 +105,7 @@
         <junit.version>5.12.2</junit.version>
         <logback.version>1.5.18</logback.version>
         <hamcrest.version>3.0</hamcrest.version>
-        <mockito.version>1.10.19</mockito.version>
+        <mockito.version>5.17.0</mockito.version>
         <assertj.version>3.27.3</assertj.version>
 
         <umldoclet.version>2.2.1</umldoclet.version>
@@ -133,11 +134,28 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default-testCompile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
+                        <configuration>
+                            <jdkToolchain>
+                                <version>${maven.compiler.testRelease}</version>
+                            </jdkToolchain>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <jdkToolchain>
+                        <version>${maven.compiler.testRelease}</version>
+                    </jdkToolchain>
                     <systemPropertyVariables>
                         <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties
                         </java.util.logging.config.file>
@@ -155,6 +173,11 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <jdkToolchain>
+                        <version>${maven.compiler.testRelease}</version>
+                    </jdkToolchain>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -377,7 +400,7 @@
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
+            <artifactId>mockito-junit-jupiter</artifactId>
             <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>

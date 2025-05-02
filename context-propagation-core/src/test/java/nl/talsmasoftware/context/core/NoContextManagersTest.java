@@ -22,54 +22,59 @@ import nl.talsmasoftware.context.dummy.DummyContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import java.io.File;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-public class NoContextManagersTest {
+class NoContextManagersTest {
     private static final String SERVICE_LOCATION = "target/test-classes/META-INF/services/";
     private static final File SERVICE_FILE = new File(SERVICE_LOCATION + ContextManager.class.getName());
     private static final File TMP_SERVICE_FILE = new File(SERVICE_LOCATION + "tmp-ContextManager");
 
     @BeforeEach
-    public void avoidContextManagersCache() {
+    void avoidContextManagersCache() {
         ContextManager.useClassLoader(new ClassLoader(Thread.currentThread().getContextClassLoader()) {
         });
-        assertThat("Move service file", SERVICE_FILE.renameTo(TMP_SERVICE_FILE), is(true));
+        assertThat(SERVICE_FILE.renameTo(TMP_SERVICE_FILE)).as("Service file moved").isTrue();
     }
 
     @AfterEach
-    public void resetDefaultClassLoader() {
+    void resetDefaultClassLoader() {
         ContextManager.useClassLoader(null);
-        assertThat("Restore service file!", TMP_SERVICE_FILE.renameTo(SERVICE_FILE), is(true));
+        assertThat(TMP_SERVICE_FILE.renameTo(SERVICE_FILE)).as("Service file restored").isTrue();
     }
 
     @Test
-    public void testReactivate_withoutContextManagers() {
+    void testReactivate_withoutContextManagers() {
         Context ctx1 = new DummyContext("foo");
         ContextSnapshot snapshot = ContextSnapshot.capture();
+        assertThat(DummyContext.currentValue()).isEqualTo("foo");
         ctx1.close();
+        assertThat(DummyContext.currentValue()).isNull();
 
         ContextSnapshot.Reactivation reactivated = snapshot.reactivate();
+        assertThat(DummyContext.currentValue()).isNull();
         reactivated.close();
+        assertThat(DummyContext.currentValue()).isNull();
     }
 
     @Test
-    public void testCreateSnapshot_withoutContextManagers() {
+    void testCreateSnapshot_withoutContextManagers() {
         ContextSnapshot snapshot = ContextSnapshot.capture();
-        assertThat(snapshot, is(notNullValue()));
+        assertThat(snapshot).isNotNull();
 
         ContextSnapshot.Reactivation reactivated = snapshot.reactivate();
-        assertThat(reactivated, is(notNullValue()));
+        assertThat(reactivated).isNotNull();
         reactivated.close();
     }
 
     @Test
-    public void testClearManagedContexts_withoutContextManagers() {
-        ContextManager.clearAll(); // there should be no exception
+    void testClearManagedContexts_withoutContextManagers() {
+        Executable executable = ContextManager::clearAll;
+        assertDoesNotThrow(executable);
     }
 
 }

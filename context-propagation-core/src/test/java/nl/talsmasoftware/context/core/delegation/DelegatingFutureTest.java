@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -33,9 +32,9 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.anyObject;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -114,7 +113,7 @@ public class DelegatingFutureTest {
     @Test
     public void testGetTimeout() throws ExecutionException, InterruptedException, TimeoutException {
         Object result = new Object();
-        when(delegate.get(anyLong(), (TimeUnit) anyObject())).thenReturn(result);
+        when(delegate.get(anyLong(), any())).thenReturn(result);
         assertThat(subject.get(2387L, MILLISECONDS), is(sameInstance(result)));
         verify(delegate).get(eq(2387L), eq(MILLISECONDS));
     }
@@ -122,7 +121,7 @@ public class DelegatingFutureTest {
     @Test
     public void testGetTimeoutException() throws ExecutionException, InterruptedException, TimeoutException {
         ExecutionException exception = new ExecutionException(new RuntimeException());
-        when(delegate.get(anyLong(), (TimeUnit) anyObject())).thenThrow(exception);
+        when(delegate.get(anyLong(), any())).thenThrow(exception);
         try {
             subject.get(1234L, SECONDS);
             fail("Exception expected.");
