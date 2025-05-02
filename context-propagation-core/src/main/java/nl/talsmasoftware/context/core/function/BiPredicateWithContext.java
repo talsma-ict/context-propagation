@@ -126,11 +126,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
                 LOGGER.log(Level.FINEST, "Delegating test method with {0} to {1}.", new Object[]{context, delegate()});
                 return delegate().test(in1, in2);
             } finally {
-                if (contextSnapshotConsumer != null) {
-                    ContextSnapshot resultSnapshot = ContextSnapshot.capture();
-                    LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                    contextSnapshotConsumer.accept(resultSnapshot);
-                }
+                captureNewSnapshotIfRequired();
             }
         }
     }
@@ -150,7 +146,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
      * <li><em>if context snapshot consumer is non-null,</em>
      * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
-     * <li>return the final outcome</li>
+     * <li>return the outcome</li>
      * </ol>
      *
      * <p>
@@ -171,11 +167,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
                     LOGGER.log(Level.FINEST, "Delegating 'and' method with {0} to {1}.", new Object[]{context, delegate()});
                     return delegate().test(in1, in2) && other.test(in1, in2);
                 } finally {
-                    if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextSnapshot.capture();
-                        LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                        contextSnapshotConsumer.accept(resultSnapshot);
-                    }
+                    captureNewSnapshotIfRequired();
                 }
             }
         };
@@ -196,7 +188,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
      * <li><em>if context snapshot consumer is non-null,</em>
      * pass a {@linkplain ContextSnapshot#capture() new context snapshot} to the consumer
      * <li>close the {@linkplain ContextSnapshot.Reactivation reactivation}
-     * <li>return the final outcome</li>
+     * <li>return the outcome</li>
      * </ol>
      * <p>
      * Any exceptions thrown during evaluation of either bi-predicate are relayed to the caller;
@@ -216,13 +208,17 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
                     LOGGER.log(Level.FINEST, "Delegating 'or' method with {0} to {1}.", new Object[]{context, delegate()});
                     return delegate().test(in1, in2) || other.test(in1, in2);
                 } finally {
-                    if (contextSnapshotConsumer != null) {
-                        ContextSnapshot resultSnapshot = ContextSnapshot.capture();
-                        LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
-                        contextSnapshotConsumer.accept(resultSnapshot);
-                    }
+                    captureNewSnapshotIfRequired();
                 }
             }
         };
+    }
+
+    private void captureNewSnapshotIfRequired() {
+        if (contextSnapshotConsumer != null) {
+            ContextSnapshot resultSnapshot = ContextSnapshot.capture();
+            LOGGER.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
+            contextSnapshotConsumer.accept(resultSnapshot);
+        }
     }
 }

@@ -107,10 +107,10 @@ public abstract class DelegatingExecutorService extends Wrapper<ExecutorService>
      *
      * @param tasks The tasks to be wrapped.
      * @param <T>   The common result type for the collection of tasks.
-     * @return A collection with each individual task wrapped.
+     * @return A list with each task wrapped.
      * @see #wrap(Callable)
      */
-    protected <T> Collection<? extends Callable<T>> wrapTasks(Collection<? extends Callable<T>> tasks) {
+    protected <T> List<Callable<T>> wrapTasks(Collection<? extends Callable<T>> tasks) {
         return tasks == null ? null : tasks.stream().map(this::wrap).collect(toList());
     }
 
@@ -120,7 +120,7 @@ public abstract class DelegatingExecutorService extends Wrapper<ExecutorService>
      *
      * @param futures The futures to be wrapped.
      * @param <T>     The common result type for the collection of futures.
-     * @return A list with each individual future wrapped.
+     * @return A list with each future wrapped.
      * @see #wrap(Future)
      */
     protected <T> List<Future<T>> wrapFutures(Collection<? extends Future<T>> futures) {
@@ -263,7 +263,7 @@ public abstract class DelegatingExecutorService extends Wrapper<ExecutorService>
 
     /**
      * Executes the given tasks on the delegate, returning the result of one that has completed successfully
-     * (i. e., without throwing an exception), if any do.
+     * (i.e., without throwing an exception), if any do.
      *
      * <p>
      * This method allows subclasses to {@linkplain #wrap(Callable) wrap} the tasks.
@@ -278,7 +278,7 @@ public abstract class DelegatingExecutorService extends Wrapper<ExecutorService>
 
     /**
      * Executes the given tasks on the delegate, returning the result of one that has completed successfully
-     * (i. e., without throwing an exception), if any do before the timeout elapses.
+     * (i.e., without throwing an exception), if any do before the timeout elapses.
      *
      * <p>
      * This method allows subclasses to {@linkplain #wrap(Callable) wrap} the tasks.
