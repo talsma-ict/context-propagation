@@ -156,9 +156,13 @@
                     <jdkToolchain>
                         <version>${maven.compiler.testRelease}</version>
                     </jdkToolchain>
+                    <argLine>
+                        @{argLine}
+                        -javaagent:"${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar"
+                        -Xshare:off
+                    </argLine>
                     <systemPropertyVariables>
-                        <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties
-                        </java.util.logging.config.file>
+                        <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -177,6 +181,11 @@
                     <jdkToolchain>
                         <version>${maven.compiler.testRelease}</version>
                     </jdkToolchain>
+                    <argLine>
+                        @{argLine}
+                        -javaagent:"${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar"
+                        -Xshare:off
+                    </argLine>
                 </configuration>
             </plugin>
             <plugin>
