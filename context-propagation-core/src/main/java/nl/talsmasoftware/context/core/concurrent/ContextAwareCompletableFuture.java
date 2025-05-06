@@ -45,6 +45,7 @@ import static java.util.Objects.requireNonNull;
  * The implementation allows the creator to {@linkplain #takeNewSnapshot() take a new snapshot} to propagate
  * after each completion stage. Please be aware that this may cause relatively high overhead.
  *
+ * @param <T> The result type of the future.
  * @author Sjoerd Talsma
  */
 public class ContextAwareCompletableFuture<T> extends CompletableFuture<T> {

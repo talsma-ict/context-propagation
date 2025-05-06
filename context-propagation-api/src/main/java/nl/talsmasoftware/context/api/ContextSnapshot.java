@@ -51,8 +51,8 @@ public interface ContextSnapshot {
      * Remember to {@link Context#close() close} the reactivated context once you're done,
      * preferably in a <code>try-with-resources</code> construct.
      *
-     * @return A new context snapshot that can be reactivated elsewhere (e.g. a background thread)
-     * within a try-with-resources construct.
+     * @return A new context snapshot that can be reactivated in another thread,
+     * preferably in a try-with-resources construct.
      */
     static ContextSnapshot capture() {
         return ContextSnapshotImpl.capture();

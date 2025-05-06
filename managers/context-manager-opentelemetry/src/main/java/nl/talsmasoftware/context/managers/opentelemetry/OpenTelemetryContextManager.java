@@ -22,7 +22,6 @@ import nl.talsmasoftware.context.api.ContextManager;
  * Context Manager that delegates {@linkplain java.lang.ThreadLocal ThreadLocal} management to the
  * default {@linkplain io.opentelemetry.context.Context OpenTelemetry Context} storage.
  *
- * <p>
  * <dl>
  *     <dt><strong>{@linkplain #getActiveContextValue()}</strong></dt>
  *     <dd>Delegated to {@linkplain io.opentelemetry.context.Context#current()}</dd>
@@ -39,6 +38,7 @@ import nl.talsmasoftware.context.api.ContextManager;
  * {@linkplain nl.talsmasoftware.context.api.ContextSnapshot context snapshots}.
  */
 public class OpenTelemetryContextManager implements ContextManager<io.opentelemetry.context.Context> {
+    @SuppressWarnings("java:S1874") // This is the only place where the deprecated constructor should be used.
     private static final OpenTelemetryContextManager INSTANCE = new OpenTelemetryContextManager();
 
     /**
@@ -61,6 +61,7 @@ public class OpenTelemetryContextManager implements ContextManager<io.openteleme
      */
     @Deprecated
     public OpenTelemetryContextManager() {
+        // no-op default constructor declared explicitly for deprecation.
     }
 
     /**
@@ -95,6 +96,7 @@ public class OpenTelemetryContextManager implements ContextManager<io.openteleme
      */
     @Override
     public void clear() {
+        // no-op
     }
 
     /**
