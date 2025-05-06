@@ -71,6 +71,13 @@ abstract class WrapperWithContextAndConsumer<T> extends WrapperWithContext<T> {
         this.contextSnapshotConsumer = contextSnapshotConsumer;
     }
 
+    /**
+     * Captures a new {@linkplain ContextSnapshot} and pass it to the {@linkplain #contextSnapshotConsumer}.
+     *
+     * <p>
+     * If there is no {@linkplain #contextSnapshotConsumer},
+     * no unnecessary snapshot will be {@linkplain ContextSnapshot#capture() captured}.
+     */
     protected void captureResultSnapshotIfRequired() {
         if (contextSnapshotConsumer != null) {
             ContextSnapshot resultSnapshot = ContextSnapshot.capture();

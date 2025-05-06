@@ -165,6 +165,18 @@ public abstract class AbstractThreadLocalContext<T> implements Context {
         return (ThreadLocal<C>) INSTANCES.get(typeName);
     }
 
+    /**
+     * The current thread-local context of the requested type.
+     *
+     * <p>
+     * If there is no current thread-local context active for the specified type,
+     * {@code null} is returned.
+     *
+     * @param contextType Subtype of AbstractThreadLocalContext to return the current active instance of.
+     * @param <T>         The type contained in the context.
+     * @param <C>         The concrete subtype of AbstractThreadLocalContext to return the active context instance for.
+     * @return The current thread-local context of the requested type or {@code null} if no context is active.
+     */
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected static <T, C extends AbstractThreadLocalContext<T>> C current(Class<? extends C> contextType) {
         final AbstractThreadLocalContext current = threadLocalInstanceOf(contextType).get();
