@@ -15,9 +15,12 @@
  */
 package nl.talsmasoftware.context.core.delegation;
 
+import java.util.Objects;
+
 /**
  * Base class wrapping a {@linkplain #delegate()} object.
  *
+ * @param <T> The type of delegate object that is wrapped.
  * @author Sjoerd Talsma
  */
 public abstract class Wrapper<T> {
@@ -57,7 +60,7 @@ public abstract class Wrapper<T> {
      * @return {@code true} if this wrapper has the given object as its delegate.
      */
     public boolean isWrapperOf(T other) {
-        return delegate().equals(other);
+        return Objects.equals(delegate(), other);
     }
 
     /**
@@ -71,7 +74,7 @@ public abstract class Wrapper<T> {
      */
     @Override
     public int hashCode() {
-        return delegate().hashCode();
+        return Objects.hashCode(delegate());
     }
 
     /**
@@ -89,8 +92,8 @@ public abstract class Wrapper<T> {
      */
     @Override
     public boolean equals(Object other) {
-        return this == other
-                || (other != null && getClass().equals(other.getClass()) && delegate().equals(((Wrapper) other).delegate()));
+        return this == other || (other != null && getClass().equals(other.getClass())
+                && Objects.equals(delegate(), ((Wrapper<?>) other).delegate()));
     }
 
     /**

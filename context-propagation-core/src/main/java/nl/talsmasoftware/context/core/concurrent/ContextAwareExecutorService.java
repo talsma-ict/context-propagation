@@ -39,7 +39,17 @@ import java.util.concurrent.ExecutorService;
  *
  * @author Sjoerd Talsma
  */
-public class ContextAwareExecutorService extends DelegatingExecutorService implements ExecutorService{
+public class ContextAwareExecutorService extends DelegatingExecutorService implements ExecutorService {
+    /**
+     * Constructor for a new <em>context-aware</em> {@linkplain ExecutorService}.
+     *
+     * <p>
+     * The new executor service will pass all tasks to the {@code delegate} executor service,
+     * capturing a {@linkplain ContextSnapshot} from the caller thread.<br>
+     * Submitted tasks will be provided with a wrapper that reactivates this snapshot in the executed thread context.
+     *
+     * @param delegate The delegate executor service to submit tasks to.
+     */
     public ContextAwareExecutorService(ExecutorService delegate) {
         super(delegate);
     }

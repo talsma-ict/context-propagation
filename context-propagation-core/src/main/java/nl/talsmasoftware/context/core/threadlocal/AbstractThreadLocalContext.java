@@ -27,13 +27,14 @@ import java.util.logging.Logger;
  * Abstract base class maintaining a shared, static {@link ThreadLocal} instance for each concrete subclass.
  *
  * <p>
- * This threadlocal can be accessed by subclasses through the protected method:
+ * This thread-local can be accessed by subclasses through the protected method:
  * {@link #threadLocalInstanceOf(Class)}.
  *
  * <p>
  * The {@linkplain #close()} implementation supports out-of-sequence closing by skipping already-closed contexts
  * when restoring the 'previous' context.
  *
+ * @param <T> The type of values contained in the concrete context implementation.
  * @author Sjoerd Talsma
  */
 public abstract class AbstractThreadLocalContext<T> implements Context {
@@ -44,7 +45,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context {
      */
     private static final ConcurrentMap<String, ThreadLocal<?>> INSTANCES = new ConcurrentHashMap<>();
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private final ThreadLocal<AbstractThreadLocalContext<T>> sharedThreadLocalContext = threadLocalInstanceOf((Class) getClass());
     private volatile boolean closed = false;
 
@@ -106,11 +107,14 @@ public abstract class AbstractThreadLocalContext<T> implements Context {
     }
 
     /**
-     * Closes this context and in case this context is the active context,
-     * restores the active context to the (unclosed) parent context.<br>
-     * If no unclosed parent context exists, the 'active context' is cleared.
+     * Closes this context.
+     *
      * <p>
-     * This method has no side-effects if the context was already closed (it is safe to call multiple times).
+     * In case this context is the active context, the active context is restored to the (unclosed) parent context.<br>
+     * If no unclosed parent context exists, the 'active context' is cleared.
+     *
+     * <p>
+     * This method has no effect if the context was already closed (it is safe to call multiple times).
      */
     public void close() {
         closed = true;
@@ -132,15 +136,15 @@ public abstract class AbstractThreadLocalContext<T> implements Context {
     /**
      * Returns the shared, static {@link ThreadLocal} instance for the specified context type.
      *
-     * @param contextType The first concrete subclass of the abstract threadlocal context
+     * @param contextType The first concrete subclass of the abstract thread-local context
      *                    (So values from separate subclasses do not get mixed up).
      * @param <T>         The type being managed by the context.
-     * @param <CTX>       The first non-abstract context subclass of AbstractThreadLocalContext.
+     * @param <C>         The first non-abstract context subclass of AbstractThreadLocalContext.
      * @return The non-<code>null</code> shared <code>ThreadLocal</code> instance to register these contexts on.
      */
     @SuppressWarnings("unchecked")
-    protected static <T, CTX extends AbstractThreadLocalContext<T>> ThreadLocal<CTX> threadLocalInstanceOf(
-            final Class<? extends CTX> contextType) {
+    protected static <T, C extends AbstractThreadLocalContext<T>> ThreadLocal<C> threadLocalInstanceOf(
+            final Class<? extends C> contextType) {
         if (contextType == null) throw new NullPointerException("The context type was <null>.");
         Class<?> type = contextType;
         String typeName = type.getName();
@@ -158,13 +162,25 @@ public abstract class AbstractThreadLocalContext<T> implements Context {
             // Atomically get-or-create the appropriate ThreadLocal instance.
             if (!INSTANCES.containsKey(typeName)) INSTANCES.putIfAbsent(typeName, new ThreadLocal<>());
         }
-        return (ThreadLocal<CTX>) INSTANCES.get(typeName);
+        return (ThreadLocal<C>) INSTANCES.get(typeName);
     }
 
+    /**
+     * The current thread-local context of the requested type.
+     *
+     * <p>
+     * If there is no current thread-local context active for the specified type,
+     * {@code null} is returned.
+     *
+     * @param contextType Subtype of AbstractThreadLocalContext to return the current active instance of.
+     * @param <T>         The type contained in the context.
+     * @param <C>         The concrete subtype of AbstractThreadLocalContext to return the active context instance for.
+     * @return The current thread-local context of the requested type or {@code null} if no context is active.
+     */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    protected static <T, CTX extends AbstractThreadLocalContext<T>> CTX current(Class<? extends CTX> contextType) {
+    protected static <T, C extends AbstractThreadLocalContext<T>> C current(Class<? extends C> contextType) {
         final AbstractThreadLocalContext current = threadLocalInstanceOf(contextType).get();
-        return (CTX) (current == null || !current.isClosed() ? current : current.unwindIfNecessary());
+        return (C) (current == null || !current.isClosed() ? current : current.unwindIfNecessary());
     }
 
 }

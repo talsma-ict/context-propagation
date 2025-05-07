@@ -25,6 +25,7 @@ import static java.util.Objects.requireNonNull;
  * A {@linkplain Wrapper wrapper} containing a {@linkplain #snapshot() context snapshot}
  * besides a {@linkplain #delegate() delegate}.
  *
+ * @param <T> The type of delegate object that is wrapped.
  * @author Sjoerd Talsma
  */
 public abstract class WrapperWithContext<T> extends Wrapper<T> {
@@ -49,7 +50,7 @@ public abstract class WrapperWithContext<T> extends Wrapper<T> {
      * Wraps the delegate and provides a context snapshot.
      * <p>
      * <strong>Note:</strong> <em>Make sure the supplier function does <strong>not</strong> obtain the context snapshot
-     * from any threadlocal storage! The wrapper is designed to propagate contexts from one thread to another.
+     * from any thread-local storage! The wrapper is designed to propagate contexts from one thread to another.
      * Therefore, the snapshot must be {@link ContextSnapshot#capture() captured}
      * in the source thread and {@link ContextSnapshot#reactivate() reactivated} in the target thread.
      * If unsure, please use the
@@ -96,7 +97,7 @@ public abstract class WrapperWithContext<T> extends Wrapper<T> {
      *     <li>The hash code of the snapshot.
      * </ul>
      *
-     * @return Hashcode based on the hascodes of both the delegate and context snapshot.
+     * @return Hashcode based on the hashcodes of both the delegate and context snapshot.
      * @see #delegate()
      * @see #snapshot()
      */
@@ -129,8 +130,7 @@ public abstract class WrapperWithContext<T> extends Wrapper<T> {
     /**
      * Returns a string representation of the object.
      *
-     * @return The class name, delegate representation and
-     * optionally the context snapshot (only if it was already eagerly evaluated).
+     * @return Class name, delegate and, if already evaluated, the context snapshot.
      */
     @Override
     public String toString() {
