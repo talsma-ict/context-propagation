@@ -27,6 +27,18 @@ import java.util.concurrent.TimeUnit;
 public class MicrometerContextTimer implements ContextTimer {
 
     /**
+     * Default constructor.
+     *
+     * <p>
+     * Normally, it is not necessary to instantiate this timer yourself.
+     * Providing the {@code context-timer-micrometer} jar file on the classpath
+     * should automatically trigger metrics registration using the java ServiceLoader mechanism.
+     */
+    public MicrometerContextTimer() {
+        super(); // Explicit default constructor provided for javadoc.
+    }
+
+    /**
      * Updates the {@linkplain io.micrometer.core.instrument.Timer micrometer Timer} specified by the
      * {@code type} and {@code method} with the given {@code duration}.
      *

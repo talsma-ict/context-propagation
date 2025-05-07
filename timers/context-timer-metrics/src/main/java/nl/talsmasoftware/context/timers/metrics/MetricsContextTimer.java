@@ -73,6 +73,35 @@ public class MetricsContextTimer implements ContextTimer {
     private static final ConcurrentMap<String, Timer> CACHED_TIMERS = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, Meter> CACHED_ERRORS = new ConcurrentHashMap<>();
 
+    /**
+     * Default constructor.
+     *
+     * <p>
+     * Normally, it is not necessary to instantiate this timer yourself.
+     * Providing the {@code context-timer-metrics} jar file on the classpath
+     * should automatically trigger metrics registration using the java ServiceLoader mechanism.
+     */
+    public MetricsContextTimer() {
+        super(); // Explicit default constructor provided for javadoc.
+    }
+
+    /**
+     * Register the timing for a context propagation method.
+     *
+     * <p>
+     * A {@linkplain Timer} is obtained or registered for the specified method.
+     * The specified duration is updated in the timer.
+     *
+     * <p>
+     * A {@linkplain Meter} is obtained or registered for the specified method and suffix {@code "errors"}.
+     * The error meter is marked with 1 if an error occurred, otherwise with 0.
+     *
+     * @param type     Class that was called.
+     * @param method   Method that was called.
+     * @param duration Duration of the call.
+     * @param unit     Unit of the duration.
+     * @param error    Error that was thrown in the call (optional, normally {@code null}).
+     */
     @Override
     public void update(Class<?> type, String method, long duration, TimeUnit unit, Throwable error) {
         final String name = MetricRegistry.name(type, method);

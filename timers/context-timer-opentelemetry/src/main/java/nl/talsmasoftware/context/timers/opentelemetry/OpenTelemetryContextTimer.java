@@ -51,6 +51,18 @@ public class OpenTelemetryContextTimer implements ContextTimer {
     private static final String INSTRUMENTATION_VERSION = Optional.ofNullable(readVersion()).orElse("2.0.0");
 
     /**
+     * Default constructor.
+     *
+     * <p>
+     * Normally, it is not necessary to instantiate this timer yourself.
+     * Providing the {@code context-timer-opentelemetry} jar file on the classpath
+     * should automatically trigger {@linkplain Span} registration using the java ServiceLoader mechanism.
+     */
+    public OpenTelemetryContextTimer() {
+        super(); // Explicit default constructor provided for javadoc.
+    }
+
+    /**
      * Creates a {@linkplain Span} using the {@linkplain GlobalOpenTelemetry} for context switches.
      *
      * <p>
@@ -58,11 +70,11 @@ public class OpenTelemetryContextTimer implements ContextTimer {
      * are <strong>not</strong> traced, only the operations regarding {@linkplain ContextSnapshot}
      * are traced.
      *
-     * @param type     Class that was called
-     * @param method   Method that was called
-     * @param duration Duration of the call
-     * @param unit     Unit of the duration
-     * @param error    Error that was thrown in the call (optional, normally {@code null})
+     * @param type     Class that was called.
+     * @param method   Method that was called.
+     * @param duration Duration of the call.
+     * @param unit     Unit of the duration.
+     * @param error    Error that was thrown in the call (optional, normally {@code null}).
      */
     @Override
     public void update(Class<?> type, String method, long duration, TimeUnit unit, Throwable error) {
