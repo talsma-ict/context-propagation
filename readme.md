@@ -13,7 +13,7 @@
 > All breaking changes to the library must go in this branch.
 > - Java version bumped to Java8 minimum
 > - `ContextManager.getActiveContext()` replaced by `getActiveContextValue()`.
-> - `ContextManager.clear()` will require an implementation.
+> - `ContextManager.clear()` must be implemented, but may be a no-op.
 > - All `@Deprecated(forRemoval=true)` is to be removed.
 > - Add caveat about use vs. Scoped values and Structured Concurrency.
 
