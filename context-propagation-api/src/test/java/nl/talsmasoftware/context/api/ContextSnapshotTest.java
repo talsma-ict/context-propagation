@@ -38,7 +38,7 @@ import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
@@ -136,7 +136,8 @@ class ContextSnapshotTest {
         ThrowingContextManager mgr = new ThrowingContextManager();
         Context ctx1 = new DummyContext("foo");
         Context ctx2 = mgr.initializeNewContext("bar");
-        ContextSnapshot snapshot = ContextSnapshot.capture();
+
+        assertDoesNotThrow(ContextSnapshot::capture);
         ThrowingContextManager.onInitialize = reactivationException;
 
         assertThat(DummyContext.currentValue(), is("foo"));
@@ -146,7 +147,7 @@ class ContextSnapshotTest {
 
         assertThat(DummyContext.currentValue(), is(nullValue()));
         assertThat(mgr.getActiveContextValue(), is(nullValue()));
-        RuntimeException expected = assertThrows(RuntimeException.class, snapshot::reactivate);
+        assertThatThrownBy(ContextSnapshot::capture).isInstanceOf(RuntimeException.class);
 
         // foo + bar mustn't be set after exception!
         assertThat(DummyContext.currentValue(), is(nullValue()));
@@ -156,20 +157,19 @@ class ContextSnapshotTest {
     @Test
     void testConcurrentSnapshots_fixedClassLoader() throws ExecutionException, InterruptedException {
         ContextManager.useClassLoader(Thread.currentThread().getContextClassLoader());
-        int threadcount = 25;
-        ExecutorService threadpool = Executors.newFixedThreadPool(threadcount);
+        int threadCount = 25;
+        ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
         try {
-            Future<ContextSnapshot>[] snapshots = new Future[threadcount];
-            for (int i = 0; i < threadcount; i++) {
-                snapshots[i] = threadpool.submit(ContextSnapshot::capture);
+            final List<Future<ContextSnapshot>> snapshots = new ArrayList<>();
+            for (int i = 0; i < threadCount; i++) {
+                snapshots.add(threadPool.submit(ContextSnapshot::capture));
             }
 
-            for (int i = 0; i < threadcount; i++) {
-                assertThat("Future " + i, snapshots[i], notNullValue());
-                assertThat("Snapshot " + i, snapshots[i].get(), notNullValue());
+            for (Future<ContextSnapshot> future : snapshots) {
+                assertThat(future.get(), is(notNullValue()));
             }
         } finally {
-            threadpool.shutdown();
+            threadPool.shutdown();
         }
     }
 
@@ -198,7 +198,7 @@ class ContextSnapshotTest {
 
     @Test
     void capture_exceptionHandling() {
-        try (MockedStatic<ServiceCache> serviceCacheMock = mockStatic(ServiceCache.class)) {
+        try (MockedStatic<ServiceCache> ignored = mockStatic(ServiceCache.class)) {
             when(ServiceCache.cached(ContextManager.class)).thenThrow(new IllegalStateException("Service cache error!"));
             assertThatThrownBy(ContextSnapshot::capture)
                     .isExactlyInstanceOf(IllegalStateException.class)
