@@ -32,8 +32,8 @@
     <name>Context propagation (bill-of-materials)</name>
     <description>
         Bill of Materials with exported module versions.
-        This only contains 'opinionated' versions
-        so modules of this library and crucial transitive jars.
+        The current version of the various context propagation modules.
+        The versions specified in the bom are guaranteed to work together.
     </description>
 
     <properties>
