@@ -101,8 +101,7 @@ class ContextSnapshotTest {
     @Test
     void testConcurrentSnapshots() throws ExecutionException, InterruptedException {
         int threadCount = 25;
-        ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
-        try {
+        try (ExecutorService threadPool = Executors.newFixedThreadPool(threadCount)) {
             List<Future<ContextSnapshot>> snapshots = new ArrayList<>(threadCount);
             for (int i = 0; i < threadCount; i++) {
                 snapshots.add(threadPool.submit(ContextSnapshot::capture));
@@ -111,8 +110,6 @@ class ContextSnapshotTest {
             for (int i = 0; i < threadCount; i++) {
                 assertThat(snapshots.get(i).get(), is(notNullValue()));
             }
-        } finally {
-            threadPool.shutdown();
         }
     }
 
@@ -137,7 +134,7 @@ class ContextSnapshotTest {
         Context ctx1 = new DummyContext("foo");
         Context ctx2 = mgr.initializeNewContext("bar");
 
-        assertDoesNotThrow(ContextSnapshot::capture);
+        ContextSnapshot snapshot = assertDoesNotThrow(ContextSnapshot::capture);
         ThrowingContextManager.onInitialize = reactivationException;
 
         assertThat(DummyContext.currentValue(), is("foo"));
@@ -147,7 +144,7 @@ class ContextSnapshotTest {
 
         assertThat(DummyContext.currentValue(), is(nullValue()));
         assertThat(mgr.getActiveContextValue(), is(nullValue()));
-        assertThatThrownBy(ContextSnapshot::capture).isInstanceOf(RuntimeException.class);
+        assertThatThrownBy(snapshot::reactivate).isInstanceOf(RuntimeException.class);
 
         // foo + bar mustn't be set after exception!
         assertThat(DummyContext.currentValue(), is(nullValue()));
@@ -158,8 +155,7 @@ class ContextSnapshotTest {
     void testConcurrentSnapshots_fixedClassLoader() throws ExecutionException, InterruptedException {
         ContextManager.useClassLoader(Thread.currentThread().getContextClassLoader());
         int threadCount = 25;
-        ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
-        try {
+        try (ExecutorService threadPool = Executors.newFixedThreadPool(threadCount)) {
             final List<Future<ContextSnapshot>> snapshots = new ArrayList<>();
             for (int i = 0; i < threadCount; i++) {
                 snapshots.add(threadPool.submit(ContextSnapshot::capture));
@@ -168,8 +164,6 @@ class ContextSnapshotTest {
             for (Future<ContextSnapshot> future : snapshots) {
                 assertThat(future.get(), is(notNullValue()));
             }
-        } finally {
-            threadPool.shutdown();
         }
     }
 
