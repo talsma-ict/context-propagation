@@ -18,7 +18,7 @@ package nl.talsmasoftware.context.core.function;
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.dummy.DummyContextManager;
-import org.hamcrest.Matchers;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,11 +30,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import static nl.talsmasoftware.context.dummy.DummyContext.assertCurrentValue;
 import static nl.talsmasoftware.context.dummy.DummyContext.currentValue;
 import static nl.talsmasoftware.context.dummy.DummyContext.setCurrentValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
@@ -45,7 +45,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  * @author Sjoerd Talsma
  */
 class ConsumerWithContextTest {
-    private ExecutorService unawareThreadpool;
+    private ExecutorService unawareThreadPool;
     private ContextSnapshot snapshot;
     private Context context;
 
@@ -56,9 +56,8 @@ class ConsumerWithContextTest {
     }
 
     @BeforeEach
-    @SuppressWarnings("unchecked")
     void setUp() {
-        unawareThreadpool = Executors.newCachedThreadPool();
+        unawareThreadPool = Executors.newCachedThreadPool();
         snapshot = mock(ContextSnapshot.class);
         context = mock(Context.class);
     }
@@ -66,8 +65,8 @@ class ConsumerWithContextTest {
     @AfterEach
     void tearDown() throws InterruptedException {
         verifyNoMoreInteractions(snapshot, context);
-        unawareThreadpool.shutdown();
-        unawareThreadpool.awaitTermination(5, TimeUnit.SECONDS);
+        unawareThreadPool.shutdown();
+        unawareThreadPool.awaitTermination(5, TimeUnit.SECONDS);
     }
 
     @Test
@@ -88,9 +87,9 @@ class ConsumerWithContextTest {
                 ContextSnapshot.capture(),
                 val -> {
                     try {
-                        assertThat("Context must propagate into thread", currentValue(), is(Optional.of("Old value")));
+                        assertCurrentValue().isEqualTo("Old value");
                         setCurrentValue(val);
-                        assertThat("Context changed in background thread", currentValue(), Matchers.is(Optional.of(val)));
+                        assertCurrentValue().isEqualTo(val);
                         latch.await();
                     } catch (InterruptedException e) {
                         fail(e);
@@ -100,16 +99,16 @@ class ConsumerWithContextTest {
 
         Thread t = new Thread(() -> consumer.accept("New value"));
         t.start();
-        assertThat("Setting context in other thread musn't impact caller", currentValue(), is("Old value"));
+        assertCurrentValue().isEqualTo("Old value"); // setting context in another thread mustn't impact caller
         latch.countDown();
         t.join(); // Block and trigger assertions
 
-        assertThat("Setting context in other thread musn't impact caller", currentValue(), is("Old value"));
-        assertThat("Snapshot consumer must be called", snapshotHolder[0], is(notNullValue()));
+        assertCurrentValue().isEqualTo("Old value");
+        Assertions.assertThat(snapshotHolder[0]).isNotNull();
 
         t = new Thread(() -> {
-            try (ContextSnapshot.Reactivation reactivation = snapshotHolder[0].reactivate()) {
-                assertThat("Thread context must propagate", currentValue(), is("New value"));
+            try (ContextSnapshot.Reactivation ignored = snapshotHolder[0].reactivate()) {
+                assertCurrentValue().isEqualTo("New value");
             }
         });
         t.start();
@@ -132,7 +131,7 @@ class ConsumerWithContextTest {
         t.join();
 
         assertThat(currentValue(), is("Old value"));
-        try (ContextSnapshot.Reactivation reactivated = snapshotHolder[0].reactivate()) {
+        try (ContextSnapshot.Reactivation ignored = snapshotHolder[0].reactivate()) {
             assertThat(currentValue(), is("NEW VALUE, New value, Old value"));
         }
     }

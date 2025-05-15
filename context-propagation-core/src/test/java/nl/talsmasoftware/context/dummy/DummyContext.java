@@ -16,6 +16,7 @@
 package nl.talsmasoftware.context.dummy;
 
 import nl.talsmasoftware.context.core.threadlocal.AbstractThreadLocalContext;
+import org.assertj.core.api.StringAssert;
 
 /**
  * @author Sjoerd Talsma
@@ -37,6 +38,10 @@ public final class DummyContext extends AbstractThreadLocalContext<String> {
     public static String currentValue() {
         final DummyContext currentContext = INSTANCE.get();
         return currentContext != null ? currentContext.value : null;
+    }
+
+    public static StringAssert assertCurrentValue() {
+        return new StringAssert(currentValue()).as("Current DummyContext value");
     }
 
     public static void setCurrentValue(String value) {
