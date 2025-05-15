@@ -28,56 +28,52 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class ContextAwareExecutorServiceTest {
-    private static DummyContextManager dummyContextManager = new DummyContextManager();
-    private static ThrowingContextManager throwingContextManager = new ThrowingContextManager();
+class ContextAwareExecutorServiceTest {
+    static DummyContextManager dummyContextManager = new DummyContextManager();
+    static ThrowingContextManager throwingContextManager = new ThrowingContextManager();
 
-    private static Callable<String> getDummyContext = dummyContextManager::getActiveContextValue;
+    static Callable<String> getDummyContext = dummyContextManager::getActiveContextValue;
 
-    private ContextAwareExecutorService executor;
+    ContextAwareExecutorService executor;
 
     @BeforeEach
-    public void setupExecutor() {
+    void setupExecutor() {
         executor = new ContextAwareExecutorService(Executors.newCachedThreadPool());
     }
 
     @AfterEach
-    public void tearDownExecutor() throws InterruptedException {
+    void tearDownExecutor() throws InterruptedException {
         executor.shutdown();
-        executor.awaitTermination(1, TimeUnit.MINUTES);
+        assertThat(executor.awaitTermination(1, TimeUnit.MINUTES)).isTrue();
         executor = null;
     }
 
     @BeforeEach
     @AfterEach
-    public void clearActiveContexts() {
+    void clearActiveContexts() {
         ContextManager.clearAll();
     }
 
     @Test
-    public void testNoContext() throws ExecutionException, InterruptedException {
+    void testNoContext() throws ExecutionException, InterruptedException {
         Future<String> dummy = executor.submit(getDummyContext);
-        assertThat(dummy.get(), is(nullValue()));
+        assertThat(dummy.get()).isNull();
     }
 
     @Test
-    public void testContext() throws ExecutionException, InterruptedException {
+    void testContext() throws ExecutionException, InterruptedException {
         dummyContextManager.initializeNewContext("The quick brown fox jumps over the lazy dog");
         Future<String> dummy = executor.submit(getDummyContext);
         dummyContextManager.initializeNewContext("god yzal eht revo spmuj xof nworb kciuq ehT");
-        assertThat(dummyContextManager.getActiveContextValue(), is("god yzal eht revo spmuj xof nworb kciuq ehT"));
-        assertThat(dummy.get(), is("The quick brown fox jumps over the lazy dog"));
+        assertThat(dummyContextManager.getActiveContextValue()).isEqualTo("god yzal eht revo spmuj xof nworb kciuq ehT");
+        assertThat(dummy.get()).isEqualTo("The quick brown fox jumps over the lazy dog");
     }
 
     @Test
-    public void testCloseException() throws InterruptedException {
+    void testCloseException() throws InterruptedException {
         throwingContextManager.initializeNewContext("The quick brown fox jumps over the lazy dog");
         ThrowingContextManager.onClose = new IllegalStateException("Sometimes we stare so long at a door that is closing " +
                 "that we see too late the one that is open. --Alexander Graham Bell");
@@ -87,12 +83,12 @@ public class ContextAwareExecutorServiceTest {
             dummy.get();
             fail("Exception expected");
         } catch (ExecutionException expected) {
-            assertThat(expected.getCause().getMessage(), containsString("a door that is closing"));
+            assertThat(expected).cause().hasMessageContaining("a door that is closing");
         }
     }
 
     @Test
-    public void testCallException() throws InterruptedException {
+    void testCallException() throws InterruptedException {
         Future<String> dummy = executor.submit(() -> {
             throw new IllegalStateException("DOH!");
         });
@@ -101,26 +97,24 @@ public class ContextAwareExecutorServiceTest {
             dummy.get();
             fail("Exception expected");
         } catch (ExecutionException expected) {
-            assertThat(expected.getCause().getMessage(), is(equalTo("DOH!")));
+            assertThat(expected).cause().hasMessage("DOH!");
         }
     }
 
     @Test
-    public void testBothCallAndCloseException() throws InterruptedException {
+    void testBothCallAndCloseException() throws InterruptedException {
         throwingContextManager.initializeNewContext("The quick brown fox jumps over the lazy dog");
         ThrowingContextManager.onClose = new IllegalStateException("Sometimes we stare so long at a door that is closing " +
                 "that we see too late the one that is open. --Alexander Graham Bell");
-        Future<String> dummy = executor.submit(new Callable<String>() {
-            public String call() {
-                throw new IllegalStateException("DOH!");
-            }
+        Future<String> dummy = executor.submit(() -> {
+            throw new IllegalStateException("DOH!");
         });
 
         try {
             dummy.get();
             fail("Exception expected");
         } catch (ExecutionException expected) {
-            assertThat(expected.getCause().getMessage(), is(equalTo("DOH!")));
+            assertThat(expected).cause().hasMessage("DOH!");
         }
     }
 }

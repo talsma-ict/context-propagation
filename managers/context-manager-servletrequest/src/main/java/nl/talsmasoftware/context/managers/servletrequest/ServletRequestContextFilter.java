@@ -47,6 +47,7 @@ public class ServletRequestContextFilter implements Filter {
      *
      * @param filterConfig a {@code FilterConfig} object containing the filter's configuration and initialization parameters
      */
+    @Override
     public void init(FilterConfig filterConfig) {
         // no-op
     }
@@ -74,7 +75,7 @@ public class ServletRequestContextFilter implements Filter {
             if (request.isAsyncStarted()) try {
                 request.getAsyncContext().addListener(new ServletRequestContextAsyncListener());
             } catch (IllegalStateException e) {
-                LOGGER.log(Level.FINE, "Could not register ServletRequest asynchronous listener: " + e.getMessage(), e);
+                LOGGER.log(Level.FINE, e, () -> "Could not register ServletRequest asynchronous listener: " + e.getMessage());
             }
 
             chain.doFilter(request, response);
@@ -90,6 +91,7 @@ public class ServletRequestContextFilter implements Filter {
      * <p>
      * This filter does not need to clean up before shutdown.
      */
+    @Override
     public void destroy() {
         // no-op
     }

@@ -39,29 +39,29 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.Mockito.mock;
 
-public class ServletRequestContextManagerTest {
+class ServletRequestContextManagerTest {
 
-    private ExecutorService threadpool;
+    ExecutorService threadpool;
 
     @BeforeEach
-    public void init() {
+    void init() {
         ServletRequestContextManager.provider().clear();
         threadpool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
     }
 
     @AfterEach
-    public void cleanup() {
+    void cleanup() {
         threadpool.shutdown();
         ServletRequestContextManager.provider().clear();
     }
 
     @Test
-    public void testContextManagerToStringValue() {
+    void testContextManagerToStringValue() {
         assertThat(ServletRequestContextManager.provider(), hasToString(ServletRequestContextManager.class.getSimpleName()));
     }
 
     @Test
-    public void testGetActiveContext() {
+    void testGetActiveContext() {
         assertThat(ServletRequestContextManager.provider().getActiveContextValue(), is(nullValue()));
 
         final ServletRequest request = mock(ServletRequest.class);
@@ -73,7 +73,7 @@ public class ServletRequestContextManagerTest {
     }
 
     @Test
-    public void testCurrentServletRequest() {
+    void testCurrentServletRequest() {
         assertThat(ServletRequestContextManager.currentServletRequest(), is(nullValue()));
 
         final ServletRequest request = mock(ServletRequest.class);
@@ -85,9 +85,9 @@ public class ServletRequestContextManagerTest {
     }
 
     @Test
-    public void testClearableImplementation() {
+    void testClearableImplementation() {
         final ServletRequest request = mock(ServletRequest.class);
-        Context ctx = ServletRequestContextManager.provider().initializeNewContext(request);
+        ServletRequestContextManager.provider().initializeNewContext(request);
         assertThat(ServletRequestContextManager.provider().getActiveContextValue(), is(sameInstance(request)));
 
         ContextManager.clearAll();
@@ -95,7 +95,7 @@ public class ServletRequestContextManagerTest {
     }
 
     @Test
-    public void testPropagationInOtherThreads() throws ExecutionException, InterruptedException {
+    void testPropagationInOtherThreads() throws ExecutionException, InterruptedException {
         ServletRequestContextManager manager = ServletRequestContextManager.provider();
         ServletRequest request1 = mock(ServletRequest.class);
         ServletRequest request2 = mock(ServletRequest.class);
@@ -125,7 +125,7 @@ public class ServletRequestContextManagerTest {
     }
 
     @Test
-    public void testServletRequestContextToString() {
+    void testServletRequestContextToString() {
         ServletRequestContextManager manager = ServletRequestContextManager.provider();
         assertThat(manager.getActiveContextValue(), nullValue());
 

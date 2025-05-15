@@ -34,11 +34,11 @@ import static java.util.Objects.requireNonNull;
  * <p>
  * The reactivated context snapshot will be safely closed after the delegate function has been applied.
  *
- * @param <IN>  the argument type of the function.
- * @param <OUT> the result type of the function.
+ * @param <T> the argument type of the function.
+ * @param <R> the result type of the function.
  * @author Sjoerd Talsma
  */
-public class FunctionWithContext<IN, OUT> extends WrapperWithContextAndConsumer<Function<IN, OUT>> implements Function<IN, OUT> {
+public class FunctionWithContext<T, R> extends WrapperWithContextAndConsumer<Function<T, R>> implements Function<T, R> {
     /**
      * Creates a new function with context.
      *
@@ -54,7 +54,7 @@ public class FunctionWithContext<IN, OUT> extends WrapperWithContextAndConsumer<
      * @param snapshot Context snapshot to apply the delegate function in.
      * @param delegate The delegate function to apply.
      */
-    public FunctionWithContext(ContextSnapshot snapshot, Function<IN, OUT> delegate) {
+    public FunctionWithContext(ContextSnapshot snapshot, Function<T, R> delegate) {
         this(snapshot, delegate, null);
     }
 
@@ -77,7 +77,7 @@ public class FunctionWithContext<IN, OUT> extends WrapperWithContextAndConsumer<
      * @param snapshotConsumer Consumer accepting the resulting context snapshot after the delegate function was applied
      *                         (optional, may be {@code null}).
      */
-    public FunctionWithContext(ContextSnapshot snapshot, Function<IN, OUT> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
+    public FunctionWithContext(ContextSnapshot snapshot, Function<T, R> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
         super(snapshot, delegate, snapshotConsumer);
     }
 
@@ -94,7 +94,7 @@ public class FunctionWithContext<IN, OUT> extends WrapperWithContextAndConsumer<
      * @param snapshotConsumer Consumer accepting the resulting context snapshot after the delegate task ran
      *                         (optional, may be {@code null}).
      */
-    protected FunctionWithContext(Supplier<ContextSnapshot> snapshotSupplier, Function<IN, OUT> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
+    protected FunctionWithContext(Supplier<ContextSnapshot> snapshotSupplier, Function<T, R> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
         super(snapshotSupplier, delegate, snapshotConsumer);
     }
 
@@ -116,7 +116,7 @@ public class FunctionWithContext<IN, OUT> extends WrapperWithContextAndConsumer<
      * @return the result of the delegate function.
      * @throws RuntimeException if the delegate function throws a runtime exception.
      */
-    public OUT apply(IN in) {
+    public R apply(T in) {
         try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
             try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                 logger.log(Level.FINEST, "Delegating apply method with {0} to {1}.", new Object[]{context, delegate()});
@@ -148,7 +148,7 @@ public class FunctionWithContext<IN, OUT> extends WrapperWithContextAndConsumer<
      * all within a reactivated context snapshot.
      */
     @Override
-    public <V> Function<V, OUT> compose(Function<? super V, ? extends IN> before) {
+    public <V> Function<V, R> compose(Function<? super V, ? extends T> before) {
         requireNonNull(before, "Cannot compose with before function <null>.");
         return (V v) -> {
             try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
@@ -183,9 +183,9 @@ public class FunctionWithContext<IN, OUT> extends WrapperWithContextAndConsumer<
      * all within a reactivated context snapshot.
      */
     @Override
-    public <V> Function<IN, V> andThen(Function<? super OUT, ? extends V> after) {
+    public <V> Function<T, V> andThen(Function<? super R, ? extends V> after) {
         requireNonNull(after, "Cannot transform with after function <null>.");
-        return (IN in) -> {
+        return (T in) -> {
             try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
                 try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                     logger.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});

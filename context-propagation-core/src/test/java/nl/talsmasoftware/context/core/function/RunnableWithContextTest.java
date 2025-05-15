@@ -25,11 +25,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.Supplier;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -39,38 +39,38 @@ import static org.mockito.Mockito.when;
 /**
  * @author Sjoerd Talsma
  */
-public class RunnableWithContextTest {
+class RunnableWithContextTest {
 
-    private ContextSnapshot snapshot;
-    private Context context;
+    ContextSnapshot snapshot;
+    Context context;
 
     @BeforeEach
     @AfterEach
-    public void clearDummyContext() {
+    void clearDummyContext() {
         DummyContextManager.clearAllContexts();
     }
 
     @BeforeEach
     @SuppressWarnings("unchecked")
-    public void setUp() {
+    void setUp() {
         snapshot = mock(ContextSnapshot.class);
         context = mock(Context.class);
     }
 
     @AfterEach
-    public void verifyMocks() {
+    void verifyMocks() {
         verifyNoMoreInteractions(snapshot, context);
     }
 
     @Test
-    public void testRun() {
+    void testRun() {
         new RunnableWithContext(snapshot, () -> {
         }).run();
         verify(snapshot).reactivate();
     }
 
     @Test
-    public void testRunWithoutSnapshot() {
+    void testRunWithoutSnapshot() {
         try {
             new RunnableWithContext(null, () -> {
             });
@@ -81,7 +81,7 @@ public class RunnableWithContextTest {
     }
 
     @Test
-    public void testRunWithoutSnapshotSupplier() {
+    void testRunWithoutSnapshotSupplier() {
         try {
             new RunnableWithContext((Supplier<ContextSnapshot>) null, () -> {
             }, null);
@@ -92,13 +92,13 @@ public class RunnableWithContextTest {
     }
 
     @Test
-    public void testRunWithSnapshotConsumer() throws InterruptedException {
+    void testRunWithSnapshotConsumer() throws InterruptedException {
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
         DummyContext.setCurrentValue("Old value");
 
         Thread t = new Thread(new RunnableWithContext(snapshot,
                 () -> DummyContext.setCurrentValue("New value"),
-                snapshot -> snapshotHolder[0] = snapshot));
+                s -> snapshotHolder[0] = s));
         t.start();
         t.join();
 
@@ -111,23 +111,19 @@ public class RunnableWithContextTest {
     }
 
     @Test
-    public void testCloseReactivatedContextInCaseOfException() {
+    void testCloseReactivatedContextInCaseOfException() {
         ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
         when(snapshot.reactivate()).thenReturn(reactivation);
         final RuntimeException expectedException = new RuntimeException("Whoops!");
 
-        try {
-            new RunnableWithContext(snapshot, throwing(expectedException)).run();
-            fail("Exception expected");
-        } catch (RuntimeException rte) {
-            assertThat(rte, is(sameInstance(expectedException)));
-        }
+        RunnableWithContext subject = new RunnableWithContext(snapshot, throwing(expectedException));
+        assertThatThrownBy(subject::run).isSameAs(expectedException);
 
         verify(snapshot).reactivate();
         verify(reactivation).close();
     }
 
-    private static Runnable throwing(RuntimeException rte) {
+    static Runnable throwing(RuntimeException rte) {
         return () -> {
             throw rte;
         };

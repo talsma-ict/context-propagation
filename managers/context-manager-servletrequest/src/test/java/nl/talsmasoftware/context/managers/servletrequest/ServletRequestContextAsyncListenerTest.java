@@ -28,12 +28,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-public class ServletRequestContextAsyncListenerTest {
+class ServletRequestContextAsyncListenerTest {
 
     ServletRequestContextAsyncListener subject;
 
@@ -43,7 +42,7 @@ public class ServletRequestContextAsyncListenerTest {
     ServletResponse mockResponse;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         ServletRequestContext.clear();
         mockContext = mock(AsyncContext.class);
         mockRequest = mock(ServletRequest.class);
@@ -54,23 +53,23 @@ public class ServletRequestContextAsyncListenerTest {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         ServletRequestContext.clear();
         verifyNoMoreInteractions(mockContext, mockRequest, mockResponse);
     }
 
     @Test
-    public void testOnStart() {
+    void testOnStart() {
         assertThat(ServletRequestContextManager.currentServletRequest(), is(nullValue()));
 
         subject.onStartAsync(event);
         assertThat(ServletRequestContextManager.currentServletRequest(), is(sameInstance(mockRequest)));
 
-        verify(mockContext).addListener(eq(subject));
+        verify(mockContext).addListener(subject);
     }
 
     @Test
-    public void testOnComplete() {
+    void testOnComplete() {
         new ServletRequestContext(mockRequest);
         assertThat(ServletRequestContextManager.currentServletRequest(), is(sameInstance(mockRequest)));
 
@@ -79,7 +78,7 @@ public class ServletRequestContextAsyncListenerTest {
     }
 
     @Test
-    public void testOnTimeout() {
+    void testOnTimeout() {
         new ServletRequestContext(mockRequest);
         assertThat(ServletRequestContextManager.currentServletRequest(), is(sameInstance(mockRequest)));
 
@@ -88,7 +87,7 @@ public class ServletRequestContextAsyncListenerTest {
     }
 
     @Test
-    public void testOnError() {
+    void testOnError() {
         new ServletRequestContext(mockRequest);
         assertThat(ServletRequestContextManager.currentServletRequest(), is(sameInstance(mockRequest)));
 

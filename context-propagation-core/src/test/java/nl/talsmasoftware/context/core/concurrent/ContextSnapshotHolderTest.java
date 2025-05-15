@@ -18,35 +18,32 @@ package nl.talsmasoftware.context.core.concurrent;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
-public class ContextSnapshotHolderTest {
+class ContextSnapshotHolderTest {
 
     @Test
-    public void testCreateWithNull() {
-        assertThat(new ContextSnapshotHolder(null).get(), is(notNullValue()));
+    void testCreateWithNull() {
+        assertThat(new ContextSnapshotHolder(null).get()).isNotNull();
     }
 
     @Test
-    public void testAcceptNull() {
-        assertThrows(NullPointerException.class, () ->
-                new ContextSnapshotHolder(mock(ContextSnapshot.class)).accept(null));
+    void testAcceptNull() {
+        ContextSnapshotHolder subject = new ContextSnapshotHolder(mock(ContextSnapshot.class));
+        assertThatThrownBy(() -> subject.accept(null)).isInstanceOf(NullPointerException.class);
     }
 
     @Test
-    public void testGet() {
+    void testGet() {
         ContextSnapshot snapshot1 = mock(ContextSnapshot.class);
         ContextSnapshot snapshot2 = mock(ContextSnapshot.class);
 
         ContextSnapshotHolder holder = new ContextSnapshotHolder(snapshot1);
-        assertThat(holder.get(), is(sameInstance(snapshot1)));
+        assertThat(holder.get()).isSameAs(snapshot1);
 
         holder.accept(snapshot2);
-        assertThat(holder.get(), is(sameInstance(snapshot2)));
+        assertThat(holder.get()).isSameAs(snapshot2);
     }
 }

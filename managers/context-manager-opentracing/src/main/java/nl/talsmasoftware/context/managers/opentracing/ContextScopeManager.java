@@ -57,6 +57,7 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
     /**
      * Singleton instance of this class.
      */
+    @SuppressWarnings("java:S1874") // This is the singleton instance the constructor was deprecated for.
     private static final ContextScopeManager INSTANCE = new ContextScopeManager();
 
     /**
@@ -79,7 +80,9 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
      * obtained from {@link #provider()} should be used to avoid unnecessary instantiations.
      */
     @Deprecated
+    @SuppressWarnings("java:S1133") // Code can only be removed if this library ever switches to Java 9+ compatibility.
     public ContextScopeManager() {
+        super(); // no-op, default constructor for explicit deprecation.
     }
 
     /**

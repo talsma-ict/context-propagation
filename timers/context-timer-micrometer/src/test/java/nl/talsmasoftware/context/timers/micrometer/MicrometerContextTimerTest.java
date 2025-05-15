@@ -30,24 +30,24 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 
-public class MicrometerContextTimerTest {
+class MicrometerContextTimerTest {
     SimpleMeterRegistry registry;
 
     @BeforeEach
-    public void setupRegistry() {
+    void setupRegistry() {
         registry = new SimpleMeterRegistry();
         Metrics.addRegistry(registry);
     }
 
     @AfterEach
-    public void shutdownRegistry() {
+    void shutdownRegistry() {
         Metrics.removeRegistry(registry);
         registry.clear();
         registry.close();
     }
 
     @Test
-    public void testCreateSnapshotInFreshApplication() {
+    void testCreateSnapshotInFreshApplication() {
         Timer timer = Metrics.timer(ContextSnapshot.class.getName() + ".capture");
         assertThat(timer.count(), is(0L));
 
@@ -58,7 +58,7 @@ public class MicrometerContextTimerTest {
     }
 
     @Test
-    public void testTiming() {
+    void testTiming() {
         Timer timer = Metrics.timer(MicrometerContextTimerTest.class.getName() + ".testTiming");
         new MicrometerContextTimer().update(MicrometerContextTimerTest.class, "testTiming", 43, TimeUnit.MILLISECONDS, null);
         assertThat(timer.count(), is(1L));

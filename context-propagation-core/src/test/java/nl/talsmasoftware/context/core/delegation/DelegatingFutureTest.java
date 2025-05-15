@@ -35,7 +35,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -46,10 +45,10 @@ import static org.mockito.Mockito.when;
  *
  * @author Sjoerd Talsma
  */
-public class DelegatingFutureTest {
+class DelegatingFutureTest {
 
-    private static class TestDelegatingFuture extends DelegatingFuture<Object> {
-        private TestDelegatingFuture(Future<Object> delegate) {
+    static class TestDelegatingFuture extends DelegatingFuture<Object> {
+        TestDelegatingFuture(Future<Object> delegate) {
             super(delegate);
         }
     }
@@ -58,39 +57,39 @@ public class DelegatingFutureTest {
     DelegatingFuture<Object> subject;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         delegate = mock(Future.class);
         subject = new TestDelegatingFuture(delegate);
     }
 
     @AfterEach
-    public void noMoreInteractions() {
+    void noMoreInteractions() {
         verifyNoMoreInteractions(delegate);
     }
 
     @Test
-    public void testCancel() {
+    void testCancel() {
         when(delegate.cancel(anyBoolean())).thenReturn(true);
         assertThat(subject.cancel(false), is(true));
-        verify(delegate).cancel(eq(false));
+        verify(delegate).cancel(false);
     }
 
     @Test
-    public void testIsCancelled() {
+    void testIsCancelled() {
         when(delegate.isCancelled()).thenReturn(true);
         assertThat(subject.isCancelled(), is(true));
         verify(delegate).isCancelled();
     }
 
     @Test
-    public void testIsDone() {
+    void testIsDone() {
         when(delegate.isDone()).thenReturn(true);
         assertThat(subject.isDone(), is(true));
         verify(delegate).isDone();
     }
 
     @Test
-    public void testGet() throws ExecutionException, InterruptedException {
+    void testGet() throws ExecutionException, InterruptedException {
         Object result = new Object();
         when(delegate.get()).thenReturn(result);
         assertThat(subject.get(), is(sameInstance(result)));
@@ -98,7 +97,7 @@ public class DelegatingFutureTest {
     }
 
     @Test
-    public void testGetException() throws ExecutionException, InterruptedException {
+    void testGetException() throws ExecutionException, InterruptedException {
         ExecutionException exception = new ExecutionException(new RuntimeException());
         when(delegate.get()).thenThrow(exception);
         try {
@@ -111,15 +110,15 @@ public class DelegatingFutureTest {
     }
 
     @Test
-    public void testGetTimeout() throws ExecutionException, InterruptedException, TimeoutException {
+    void testGetTimeout() throws ExecutionException, InterruptedException, TimeoutException {
         Object result = new Object();
         when(delegate.get(anyLong(), any())).thenReturn(result);
         assertThat(subject.get(2387L, MILLISECONDS), is(sameInstance(result)));
-        verify(delegate).get(eq(2387L), eq(MILLISECONDS));
+        verify(delegate).get(2387L, MILLISECONDS);
     }
 
     @Test
-    public void testGetTimeoutException() throws ExecutionException, InterruptedException, TimeoutException {
+    void testGetTimeoutException() throws ExecutionException, InterruptedException, TimeoutException {
         ExecutionException exception = new ExecutionException(new RuntimeException());
         when(delegate.get(anyLong(), any())).thenThrow(exception);
         try {
@@ -128,24 +127,24 @@ public class DelegatingFutureTest {
         } catch (ExecutionException expected) {
             assertThat(expected, is(sameInstance(exception)));
         }
-        verify(delegate).get(eq(1234L), eq(SECONDS));
+        verify(delegate).get(1234L, SECONDS);
     }
 
     @Test
-    public void testHashCode() {
+    void testHashCode() {
         int hash = delegate.hashCode();
         assertThat(subject.hashCode(), is(hash));
     }
 
     @Test
-    public void testEquals() {
+    void testEquals() {
         assertThat(subject, is(equalTo(subject)));
         assertThat(subject, is(equalTo((Object) new TestDelegatingFuture(delegate))));
         assertThat(subject, is(not(equalTo((Object) new TestDelegatingFuture(mock(Future.class))))));
     }
 
     @Test
-    public void testToString() {
+    void testToString() {
         assertThat(subject, hasToString("TestDelegatingFuture{" + delegate + "}"));
     }
 }

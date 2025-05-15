@@ -47,6 +47,7 @@ public class Slf4jMdcManager implements ContextManager<Map<String, String>> {
     /**
      * Singleton instance of this class.
      */
+    @SuppressWarnings("java:S1874") // This is the singleton instance the constructor was deprecated for.
     private static final Slf4jMdcManager INSTANCE = new Slf4jMdcManager();
 
     /**
@@ -68,7 +69,9 @@ public class Slf4jMdcManager implements ContextManager<Map<String, String>> {
      * obtained from {@link #provider()} should be used to avoid unnecessary instantiations.
      */
     @Deprecated
+    @SuppressWarnings("java:S1133") // Code can only be removed if this library ever switches to Java 9+ compatibility.
     public Slf4jMdcManager() {
+        super(); // no-op, default constructor for explicit deprecation.
     }
 
     /**

@@ -35,12 +35,12 @@ import static java.util.Objects.requireNonNull;
  * <p>
  * The reactivated context snapshot will be safely closed after the delegate function has been applied.
  *
- * @param <IN1> the first argument type of the function.
- * @param <IN2> the second argument type of the function.
- * @param <OUT> the result type of the function.
+ * @param <T> the first argument type of the function.
+ * @param <U> the second argument type of the function.
+ * @param <R> the result type of the function.
  * @author Sjoerd Talsma
  */
-public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndConsumer<BiFunction<IN1, IN2, OUT>> implements BiFunction<IN1, IN2, OUT> {
+public class BiFunctionWithContext<T, U, R> extends WrapperWithContextAndConsumer<BiFunction<T, U, R>> implements BiFunction<T, U, R> {
     /**
      * Creates a new bi-function with context.
      *
@@ -56,7 +56,7 @@ public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndC
      * @param snapshot Context snapshot to apply the delegate function in.
      * @param delegate The delegate bi-function to apply.
      */
-    public BiFunctionWithContext(ContextSnapshot snapshot, BiFunction<IN1, IN2, OUT> delegate) {
+    public BiFunctionWithContext(ContextSnapshot snapshot, BiFunction<T, U, R> delegate) {
         this(snapshot, delegate, null);
     }
 
@@ -79,7 +79,7 @@ public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndC
      * @param snapshotConsumer Consumer accepting the resulting context snapshot after the delegate function was applied
      *                         (optional, may be {@code null}).
      */
-    public BiFunctionWithContext(ContextSnapshot snapshot, BiFunction<IN1, IN2, OUT> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
+    public BiFunctionWithContext(ContextSnapshot snapshot, BiFunction<T, U, R> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
         super(snapshot, delegate, snapshotConsumer);
     }
 
@@ -96,7 +96,7 @@ public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndC
      * @param snapshotConsumer Consumer accepting the resulting context snapshot after the delegate task ran
      *                         (optional, may be {@code null}).
      */
-    protected BiFunctionWithContext(Supplier<ContextSnapshot> snapshotSupplier, BiFunction<IN1, IN2, OUT> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
+    protected BiFunctionWithContext(Supplier<ContextSnapshot> snapshotSupplier, BiFunction<T, U, R> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
         super(snapshotSupplier, delegate, snapshotConsumer);
     }
 
@@ -120,7 +120,7 @@ public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndC
      * @throws RuntimeException if the delegate bi-function throws a runtime exception.
      */
     @Override
-    public OUT apply(IN1 in1, IN2 in2) {
+    public R apply(T in1, U in2) {
         try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
             try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                 logger.log(Level.FINEST, "Delegating apply method with {0} to {1}.", new Object[]{context, delegate()});
@@ -152,9 +152,9 @@ public class BiFunctionWithContext<IN1, IN2, OUT> extends WrapperWithContextAndC
      * all within a reactivated context snapshot.
      */
     @Override
-    public <V> BiFunction<IN1, IN2, V> andThen(Function<? super OUT, ? extends V> after) {
+    public <V> BiFunction<T, U, V> andThen(Function<? super R, ? extends V> after) {
         requireNonNull(after, "Cannot post-process bi-function with after function <null>.");
-        return (IN1 in1, IN2 in2) -> {
+        return (T in1, U in2) -> {
             try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
                 try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                     logger.log(Level.FINEST, "Delegating andThen method with {0} to {1}.", new Object[]{context, delegate()});

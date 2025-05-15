@@ -42,22 +42,22 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-public class ContextScopeManagerTest {
+class ContextScopeManagerTest {
     MockTracer mockTracer;
     ContextScopeManager scopeManager;
     ExecutorService threadpool;
 
     @BeforeEach
-    public void registerMockGlobalTracer() {
+    void registerMockGlobalTracer() {
         GlobalTracerTestUtil.resetGlobalTracer();
         assertThat("Pre-existing GlobalTracer", GlobalTracer.isRegistered(), is(false));
         scopeManager = ContextScopeManager.provider();
-        GlobalTracer.register(mockTracer = new MockTracer(scopeManager));
+        GlobalTracer.registerIfAbsent(mockTracer = new MockTracer(scopeManager));
         threadpool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
     }
 
     @AfterEach
-    public void cleanup() {
+    void cleanup() {
         threadpool.shutdown();
         ContextManager.clearAll();
         GlobalTracerTestUtil.resetGlobalTracer();
@@ -65,7 +65,7 @@ public class ContextScopeManagerTest {
 
     @Test
     @Disabled("TODO replace observer by MockTracer .finishedSpans inspection!")
-    public void testConcurrency() throws InterruptedException {
+    void testConcurrency() throws InterruptedException {
         List<Thread> threads = new ArrayList<Thread>();
         final Span parentSpan = GlobalTracer.get().buildSpan("parent").start();
         final Scope parent = GlobalTracer.get().activateSpan(parentSpan);
@@ -94,7 +94,7 @@ public class ContextScopeManagerTest {
     }
 
     @Test
-    public void testInitializeNewContext() {
+    void testInitializeNewContext() {
         Span span = GlobalTracer.get().buildSpan("span").start();
         Context context = scopeManager.initializeNewContext(span);
         assertThat(scopeManager.getActiveContextValue(), is(span));
@@ -105,12 +105,12 @@ public class ContextScopeManagerTest {
     }
 
     @Test
-    public void testSimpleToStringWhenLogged() {
+    void testSimpleToStringWhenLogged() {
         assertThat(scopeManager, hasToString(scopeManager.getClass().getSimpleName()));
     }
 
     @Test
-    public void testPredictableOutOfOrderClosing() {
+    void testPredictableOutOfOrderClosing() {
         Span firstSpan = GlobalTracer.get().buildSpan("first").start();
         Scope first = GlobalTracer.get().activateSpan(firstSpan);
         Span secondSpan = GlobalTracer.get().buildSpan("second").start();
@@ -121,7 +121,7 @@ public class ContextScopeManagerTest {
         assertThat(GlobalTracer.get().activeSpan(), is(nullValue())); // first was already closed
     }
 
-    private static void waitFor(CountDownLatch latch) {
+    static void waitFor(CountDownLatch latch) {
         try {
             latch.countDown();
             latch.await(5, TimeUnit.SECONDS);
