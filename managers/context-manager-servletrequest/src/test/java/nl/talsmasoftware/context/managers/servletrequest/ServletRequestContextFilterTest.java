@@ -20,7 +20,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.servlet.AsyncContext;
-import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -38,7 +37,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-public class ServletRequestContextFilterTest {
+class ServletRequestContextFilterTest {
 
     ServletRequestContextFilter subject;
 
@@ -47,7 +46,7 @@ public class ServletRequestContextFilterTest {
     FilterConfig mockConfig;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         mockRequest = mock(ServletRequest.class);
         mockResponse = mock(ServletResponse.class);
         mockConfig = mock(FilterConfig.class);
@@ -57,40 +56,36 @@ public class ServletRequestContextFilterTest {
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         subject.destroy();
         verifyNoMoreInteractions(mockRequest, mockResponse, mockConfig);
     }
 
     @Test
-    public void testToString() {
+    void testToString() {
         assertThat(subject, hasToString(ServletRequestContextFilter.class.getSimpleName()));
     }
 
     @Test
-    public void testSimpleFiltering() throws IOException, ServletException {
+    void testSimpleFiltering() throws IOException, ServletException {
         when(mockRequest.isAsyncStarted()).thenReturn(false);
 
-        subject.doFilter(mockRequest, mockResponse, new FilterChain() {
-            public void doFilter(ServletRequest request, ServletResponse response) {
-                assertThat(ServletRequestContextManager.currentServletRequest(), is(sameInstance(request)));
-            }
-        });
+        subject.doFilter(mockRequest, mockResponse,
+                (request, response) ->
+                        assertThat(ServletRequestContextManager.currentServletRequest(), is(sameInstance(request))));
 
         verify(mockRequest).isAsyncStarted();
     }
 
     @Test
-    public void testAsyncFiltering() throws IOException, ServletException {
+    void testAsyncFiltering() throws IOException, ServletException {
         AsyncContext mockAsyncContext = mock(AsyncContext.class);
         when(mockRequest.isAsyncStarted()).thenReturn(true);
         when(mockRequest.getAsyncContext()).thenReturn(mockAsyncContext);
 
-        subject.doFilter(mockRequest, mockResponse, new FilterChain() {
-            public void doFilter(ServletRequest request, ServletResponse response) {
-                assertThat(ServletRequestContextManager.currentServletRequest(), is(sameInstance(request)));
-            }
-        });
+        subject.doFilter(mockRequest, mockResponse,
+                (request, response) ->
+                        assertThat(ServletRequestContextManager.currentServletRequest(), is(sameInstance(request))));
 
         verify(mockRequest).isAsyncStarted();
         verify(mockRequest).getAsyncContext();
@@ -99,17 +94,15 @@ public class ServletRequestContextFilterTest {
     }
 
     @Test
-    public void testAsyncFiltering_exceptionInAddListener() throws IOException, ServletException {
+    void testAsyncFiltering_exceptionInAddListener() throws IOException, ServletException {
         AsyncContext mockAsyncContext = mock(AsyncContext.class);
         when(mockRequest.isAsyncStarted()).thenReturn(true);
         when(mockRequest.getAsyncContext()).thenReturn(mockAsyncContext);
         doThrow(IllegalStateException.class).when(mockAsyncContext).addListener(any(ServletRequestContextAsyncListener.class));
 
-        subject.doFilter(mockRequest, mockResponse, new FilterChain() {
-            public void doFilter(ServletRequest request, ServletResponse response) {
-                assertThat(ServletRequestContextManager.currentServletRequest(), is(sameInstance(request)));
-            }
-        });
+        subject.doFilter(mockRequest, mockResponse,
+                (request, response) ->
+                        assertThat(ServletRequestContextManager.currentServletRequest(), is(sameInstance(request))));
 
         verify(mockRequest).isAsyncStarted();
         verify(mockRequest).getAsyncContext();

@@ -47,6 +47,7 @@ import static io.opentelemetry.api.common.AttributeKey.stringKey;
  */
 public class OpenTelemetryContextTimer implements ContextTimer {
     private static final Logger LOGGER = Logger.getLogger(OpenTelemetryContextTimer.class.getName());
+    private static final String MAVEN_PROPERTIES_PATH = "/META-INF/maven/nl.talsmasoftware.context.timers/context-timer-opentelemetry/pom.properties";
     private static final String INSTRUMENTATION_SCOPE = "nl.talsmasoftware.context";
     private static final String INSTRUMENTATION_VERSION = Optional.ofNullable(readVersion()).orElse("2.0.0");
 
@@ -93,13 +94,12 @@ public class OpenTelemetryContextTimer implements ContextTimer {
     }
 
     private static String readVersion() {
-        final String path = "/META-INF/maven/nl.talsmasoftware.context.timers/context-timer-opentelemetry/pom.properties";
-        try (InputStream stream = OpenTelemetryContextTimer.class.getResourceAsStream(path)) {
+        try (InputStream stream = OpenTelemetryContextTimer.class.getResourceAsStream(MAVEN_PROPERTIES_PATH)) {
             Properties properties = new Properties();
             properties.load(stream);
             return properties.getProperty("version");
         } catch (IOException | RuntimeException e) {
-            LOGGER.log(Level.WARNING, e, () -> "Error obtaining version from build metadata (" + path + "): " + e.getMessage());
+            LOGGER.log(Level.WARNING, e, () -> "Error obtaining version from build metadata (" + MAVEN_PROPERTIES_PATH + "): " + e.getMessage());
             return null;
         }
     }

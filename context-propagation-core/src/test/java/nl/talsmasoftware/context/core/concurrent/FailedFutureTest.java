@@ -29,21 +29,21 @@ import java.util.function.BiFunction;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-public class FailedFutureTest {
+class FailedFutureTest {
 
-    private static final DummyContextManager manager = new DummyContextManager();
+    static final DummyContextManager manager = new DummyContextManager();
 
-    private static final BiFunction<String, Throwable, String> addActiveContextValue =
+    static final BiFunction<String, Throwable, String> addActiveContextValue =
             (value, ex) -> (ex == null ? value : ex.getMessage()) + ", " + manager.getActiveContextValue();
 
     @BeforeEach
     @AfterEach
-    public void clearDummyContext() {
+    void clearDummyContext() {
         DummyContextManager.clearAllContexts();
     }
 
     @Test
-    public void testFailedFutureTakesNewSnapshot() throws ExecutionException, InterruptedException {
+    void testFailedFutureTakesNewSnapshot() throws ExecutionException, InterruptedException {
         manager.initializeNewContext("Mr. Blonde");
         final CompletableFuture<String> completed = ContextAwareCompletableFuture.failedFuture(new NullPointerException("Mr. Blue"));
         manager.initializeNewContext("Mr. Brown");
@@ -54,7 +54,7 @@ public class FailedFutureTest {
     }
 
     @Test
-    public void testFailedFutureAppliesGivenSnapshot() throws ExecutionException, InterruptedException {
+    void testFailedFutureAppliesGivenSnapshot() throws ExecutionException, InterruptedException {
         manager.initializeNewContext("Mr. Blonde");
         final ContextSnapshot snapshot = ContextSnapshot.capture();
         manager.initializeNewContext("Mr. Brown");
@@ -67,7 +67,7 @@ public class FailedFutureTest {
     }
 
     @Test
-    public void testFailedStageTakesNewSnapshot() throws ExecutionException, InterruptedException {
+    void testFailedStageTakesNewSnapshot() throws ExecutionException, InterruptedException {
         manager.initializeNewContext("Mr. Blonde");
         final CompletionStage<String> completed = ContextAwareCompletableFuture.failedStage(new NullPointerException("Mr. Blue"));
         manager.initializeNewContext("Mr. Brown");

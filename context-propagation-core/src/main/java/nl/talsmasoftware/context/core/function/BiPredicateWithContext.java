@@ -34,11 +34,11 @@ import static java.util.Objects.requireNonNull;
  * <p>
  * The reactivated context snapshot will be safely closed after the delegate function has been applied.
  *
- * @param <IN1> the type of the first argument to the function.
- * @param <IN2> the type of the second argument to the function.
+ * @param <T> the type of the first argument to the function.
+ * @param <U> the type of the second argument to the function.
  * @author Sjoerd Talsma
  */
-public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsumer<BiPredicate<IN1, IN2>> implements BiPredicate<IN1, IN2> {
+public class BiPredicateWithContext<T, U> extends WrapperWithContextAndConsumer<BiPredicate<T, U>> implements BiPredicate<T, U> {
     /**
      * Creates a new bi-predicate with context.
      *
@@ -54,7 +54,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
      * @param snapshot Context snapshot to apply the delegate function in.
      * @param delegate The delegate function to apply.
      */
-    public BiPredicateWithContext(ContextSnapshot snapshot, BiPredicate<IN1, IN2> delegate) {
+    public BiPredicateWithContext(ContextSnapshot snapshot, BiPredicate<T, U> delegate) {
         this(snapshot, delegate, null);
     }
 
@@ -77,7 +77,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
      * @param snapshotConsumer Consumer accepting the resulting context snapshot after the delegate function was applied
      *                         (optional, may be {@code null}).
      */
-    public BiPredicateWithContext(ContextSnapshot snapshot, BiPredicate<IN1, IN2> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
+    public BiPredicateWithContext(ContextSnapshot snapshot, BiPredicate<T, U> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
         super(snapshot, delegate, snapshotConsumer);
     }
 
@@ -94,7 +94,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
      * @param snapshotConsumer Consumer accepting the resulting context snapshot after the delegate task ran
      *                         (optional, may be {@code null}).
      */
-    protected BiPredicateWithContext(Supplier<ContextSnapshot> snapshotSupplier, BiPredicate<IN1, IN2> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
+    protected BiPredicateWithContext(Supplier<ContextSnapshot> snapshotSupplier, BiPredicate<T, U> delegate, Consumer<ContextSnapshot> snapshotConsumer) {
         super(snapshotSupplier, delegate, snapshotConsumer);
     }
 
@@ -117,7 +117,7 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
      * @return {@code true} if the input arguments match the delegate bi-predicate, otherwise {@code false}.
      */
     @Override
-    public boolean test(IN1 in1, IN2 in2) {
+    public boolean test(T in1, U in2) {
         try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
             try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                 logger.log(Level.FINEST, "Delegating test method with {0} to {1}.", new Object[]{context, delegate()});
@@ -156,9 +156,9 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
      * of this bi-predicate and the other bi-predicate, both within the reactivated context snapshot.
      */
     @Override
-    public BiPredicate<IN1, IN2> and(BiPredicate<? super IN1, ? super IN2> other) {
+    public BiPredicate<T, U> and(BiPredicate<? super T, ? super U> other) {
         requireNonNull(other, "Cannot combine bi-predicate with 'and' <null>.");
-        return (IN1 in1, IN2 in2) -> {
+        return (T in1, U in2) -> {
             try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
                 try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                     logger.log(Level.FINEST, "Delegating 'and' method with {0} to {1}.", new Object[]{context, delegate()});
@@ -197,9 +197,9 @@ public class BiPredicateWithContext<IN1, IN2> extends WrapperWithContextAndConsu
      * of this bi-predicate and the other bi-predicate, both within the reactivated context snapshot.
      */
     @Override
-    public BiPredicate<IN1, IN2> or(BiPredicate<? super IN1, ? super IN2> other) {
+    public BiPredicate<T, U> or(BiPredicate<? super T, ? super U> other) {
         requireNonNull(other, "Cannot combine bi-predicate with 'or' <null>.");
-        return (IN1 in1, IN2 in2) -> {
+        return (T in1, U in2) -> {
             try (ContextSnapshot.Reactivation context = snapshot().reactivate()) {
                 try { // inner 'try' is needed: https://github.com/talsma-ict/context-propagation/pull/56#discussion_r201590623
                     logger.log(Level.FINEST, "Delegating 'or' method with {0} to {1}.", new Object[]{context, delegate()});

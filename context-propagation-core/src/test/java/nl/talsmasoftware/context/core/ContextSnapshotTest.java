@@ -28,19 +28,19 @@ import static org.hamcrest.Matchers.startsWith;
 /**
  * @author Sjoerd Talsma
  */
-public class ContextSnapshotTest {
+class ContextSnapshotTest {
     private static final DummyContextManager MGR = new DummyContextManager();
 
     @Test
-    public void testSnapshotToString() {
+    void testSnapshotToString() {
         assertThat(ContextSnapshot.capture(), hasToString(startsWith("ContextSnapshot{size=")));
     }
 
     @Test
-    public void testSnapshotReactivate() {
-        try (Context ctx = MGR.initializeNewContext("Old value")) {
+    void testSnapshotReactivate() {
+        try (Context ignored = MGR.initializeNewContext("Old value")) {
             ContextSnapshot snapshot = ContextSnapshot.capture();
-            try (Context ctx2 = MGR.initializeNewContext("New value")) {
+            try (Context ignored2 = MGR.initializeNewContext("New value")) {
                 assertThat(MGR.getActiveContextValue(), is("New value"));
 
                 try (ContextSnapshot.Reactivation reactivation = snapshot.reactivate()) {

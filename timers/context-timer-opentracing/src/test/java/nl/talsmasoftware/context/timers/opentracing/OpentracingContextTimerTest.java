@@ -36,52 +36,52 @@ import static org.hamcrest.Matchers.is;
  *
  * @author Sjoerd Talsma
  */
-public class OpentracingContextTimerTest {
+class OpentracingContextTimerTest {
 
-    private static final String PROPERTY_NAME = "opentracing.trace.contextmanager";
-    private static final String oldSystemProperty = System.getProperty(PROPERTY_NAME);
+    static final String PROPERTY_NAME = "opentracing.trace.contextmanager";
+    static final String OLD_SYSTEM_PROPERTY = System.getProperty(PROPERTY_NAME);
 
     static MockTracer tracer = new MockTracer();
 
     @BeforeAll
-    public static void initGlobalTracer() {
+    static void initGlobalTracer() {
         GlobalTracerTestUtil.resetGlobalTracer();
-        GlobalTracer.register(tracer);
+        GlobalTracer.registerIfAbsent(tracer);
     }
 
     @AfterAll
-    public static void resetGlobalTracer() {
+    static void resetGlobalTracer() {
         GlobalTracerTestUtil.resetGlobalTracer();
     }
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         System.clearProperty(PROPERTY_NAME);
         tracer.reset();
     }
 
     @AfterEach
-    public void restoreSystemproperty() {
-        if (oldSystemProperty == null) System.clearProperty(PROPERTY_NAME);
-        else System.setProperty(PROPERTY_NAME, oldSystemProperty);
+    void restoreSystemproperty() {
+        if (OLD_SYSTEM_PROPERTY == null) System.clearProperty(PROPERTY_NAME);
+        else System.setProperty(PROPERTY_NAME, OLD_SYSTEM_PROPERTY);
     }
 
     @Test
-    public void testDisabledByDefault() {
+    void testDisabledByDefault() {
         ContextSnapshot.capture().reactivate().close();
 
         assertThat(tracer.finishedSpans(), is(empty()));
     }
 
     @Test
-    public void testTraceCaptureContextSnapshot() {
+    void testTraceCaptureContextSnapshot() {
         System.setProperty(PROPERTY_NAME, "true");
         ContextSnapshot.capture();
         assertThat(tracer.finishedSpans(), hasItem(withOperationName("ContextSnapshot.capture")));
     }
 
     @Test
-    public void testTraceReactivateContextSnapshot() {
+    void testTraceReactivateContextSnapshot() {
         System.setProperty(PROPERTY_NAME, "true");
         ContextSnapshot.capture().reactivate().close();
         assertThat(tracer.finishedSpans(), hasItem(withOperationName("ContextSnapshot.reactivate")));

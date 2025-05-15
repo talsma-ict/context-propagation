@@ -33,6 +33,7 @@ public final class CurrentLocaleManager implements ContextManager<Locale> {
     /**
      * Singleton instance of this class.
      */
+    @SuppressWarnings("java:S1874") // This is the singleton instance the constructor was deprecated for.
     private static final CurrentLocaleManager INSTANCE = new CurrentLocaleManager();
 
     /**
@@ -60,7 +61,9 @@ public final class CurrentLocaleManager implements ContextManager<Locale> {
      * obtained from {@link #provider()} should be used to avoid unnecessary instantiations.
      */
     @Deprecated
+    @SuppressWarnings("java:S1133") // Code can only be removed if this library ever switches to Java 9+ compatibility.
     public CurrentLocaleManager() {
+        super(); // no-op, default constructor for explicit deprecation.
     }
 
     /**

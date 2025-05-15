@@ -151,7 +151,7 @@ public class MetricsContextTimer implements ContextTimer {
             Set<String> registryNames = SharedMetricRegistries.names();
             if (registryNames.isEmpty()) {
                 registryName = "ContextPropagationMetrics";
-                LOGGER.log(Level.FINE, "There are no shared metric registries yet, we'll define our own as \"{0}\".", registryName);
+                LOGGER.log(Level.FINE, "There are no shared metric registries yet, we define our own as \"{0}\".", registryName);
             } else if (registryNames.size() == 1) {
                 registryName = registryNames.iterator().next();
                 LOGGER.log(Level.FINE, "Using single shared registry \"{0}\".", registryName);

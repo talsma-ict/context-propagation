@@ -30,10 +30,7 @@ import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -55,7 +52,6 @@ class BiFunctionWithContextTest {
     }
 
     @BeforeEach
-    @SuppressWarnings("unchecked")
     void setUp() {
         snapshot = mock(ContextSnapshot.class);
         context = mock(Context.class);
@@ -68,29 +64,22 @@ class BiFunctionWithContextTest {
 
     @Test
     void testApply() {
-        new BiFunctionWithContext<>(snapshot, (a, b) -> b).apply("input1", "input2");
+        BiFunctionWithContext<Object, Object, Object> subject = new BiFunctionWithContext<>(snapshot, (a, b) -> b);
+        subject.apply("input1", "input2");
         verify(snapshot).reactivate();
     }
 
     @Test
     void testApplyWithoutSnapshot() {
-        try {
-            new BiFunctionWithContext<>(null, (a, b) -> b);
-            fail("Exception expected");
-        } catch (RuntimeException expected) {
-            assertThat(expected, hasToString(containsString("No context snapshot provided")));
-        }
+        assertThatThrownBy(() -> new BiFunctionWithContext<>(null, (a, b) -> b))
+                .hasMessageContaining("No context snapshot provided");
     }
 
     @Test
     void testApplyWithoutSnapshotSupplier() {
-        try {
-            new BiFunctionWithContext<>((Supplier<ContextSnapshot>) null, (a, b) -> b, ctx -> {
-            });
-            fail("Exception expected");
-        } catch (RuntimeException expected) {
-            assertThat(expected, hasToString(containsString("No context snapshot supplier provided")));
-        }
+        assertThatThrownBy(() -> new BiFunctionWithContext<>((Supplier<ContextSnapshot>) null, (a, b) -> b, ctx -> {
+        }))
+                .hasMessageContaining("No context snapshot supplier provided");
     }
 
     @Test
@@ -108,7 +97,7 @@ class BiFunctionWithContextTest {
         t.join();
 
         assertThat(DummyContext.currentValue(), is("Old value"));
-        try (ContextSnapshot.Reactivation reactivation = snapshotHolder[0].reactivate()) {
+        try (ContextSnapshot.Reactivation ignored = snapshotHolder[0].reactivate()) {
             assertThat(DummyContext.currentValue(), is("New value"));
         }
         assertThat(DummyContext.currentValue(), is("Old value"));
@@ -163,7 +152,7 @@ class BiFunctionWithContextTest {
                 .hasMessageContaining("after function <null>");
     }
 
-    private static <IN1, IN2, OUT> BiFunction<IN1, IN2, OUT> throwing(RuntimeException rte) {
+    private static <T, U, R> BiFunction<T, U, R> throwing(RuntimeException rte) {
         return (input1, input2) -> {
             throw rte;
         };

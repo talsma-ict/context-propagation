@@ -42,12 +42,12 @@ import static org.hamcrest.Matchers.nullValue;
  *
  * @author Sjoerd Talsma
  */
-public class MetricsContextTimerTest {
+class MetricsContextTimerTest {
 
     @BeforeEach
     @AfterEach
     @SuppressWarnings("unchecked")
-    public void resetCachesAndRegistry() {
+    void resetCachesAndRegistry() {
         try {
             // Reflect and clear the caches
             for (String name : Arrays.asList("CACHED_TIMERS", "CACHED_ERRORS")) {
@@ -67,7 +67,7 @@ public class MetricsContextTimerTest {
     }
 
     @Test
-    public void testCreateSnapshotInFreshApplication() {
+    void testCreateSnapshotInFreshApplication() {
         assertThat(SharedMetricRegistries.names(), is(empty()));
         ContextSnapshot snapshot = ContextSnapshot.capture();
         String name = MetricRegistry.name(ContextSnapshot.class, "capture");
@@ -80,7 +80,7 @@ public class MetricsContextTimerTest {
     }
 
     @Test
-    public void testCreateSnapshotInApplicationWithDefaultRegistry() {
+    void testCreateSnapshotInApplicationWithDefaultRegistry() {
         SharedMetricRegistries.setDefault("DefaultRegistry");
 
         assertThat(SharedMetricRegistries.names(), contains("DefaultRegistry"));
@@ -95,7 +95,7 @@ public class MetricsContextTimerTest {
     }
 
     @Test
-    public void testCreateSnapshotInApplicationWithSingleNonDefaultRegistry() {
+    void testCreateSnapshotInApplicationWithSingleNonDefaultRegistry() {
         MetricRegistry registry = SharedMetricRegistries.getOrCreate("NonDefaultRegistry");
         assertThat(SharedMetricRegistries.tryGetDefault(), is(nullValue()));
 
@@ -110,7 +110,7 @@ public class MetricsContextTimerTest {
     }
 
     @Test
-    public void testCreate3SnapshotsInApplicationWithMultipleNonDefaultRegistries() {
+    void testCreate3SnapshotsInApplicationWithMultipleNonDefaultRegistries() {
         MetricRegistry registry1 = SharedMetricRegistries.getOrCreate("NonDefaultRegistry1");
         MetricRegistry registry2 = SharedMetricRegistries.getOrCreate("NonDefaultRegistry2");
         assertThat(SharedMetricRegistries.tryGetDefault(), is(nullValue()));
@@ -129,7 +129,7 @@ public class MetricsContextTimerTest {
     }
 
     @Test
-    public void testMetricsContextTimerToString() {
+    void testMetricsContextTimerToString() {
         MetricsContextTimer metricsContextTimer = new MetricsContextTimer();
         assertThat(metricsContextTimer, hasToString("MetricsContextTimer{timers=[]}"));
 

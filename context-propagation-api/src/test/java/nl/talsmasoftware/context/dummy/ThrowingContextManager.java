@@ -71,7 +71,7 @@ public class ThrowingContextManager implements ContextManager<String> {
         return getClass().getSimpleName();
     }
 
-    private final static class Ctx implements Context {
+    private static final class Ctx implements Context {
         private static final ThreadLocal<Ctx> STORAGE = new ThreadLocal<>();
 
         private final Ctx parent;

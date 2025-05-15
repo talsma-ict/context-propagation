@@ -64,6 +64,7 @@ public class Log4j2ThreadContextManager implements ContextManager<Log4j2ThreadCo
     /**
      * Singleton instance of this class.
      */
+    @SuppressWarnings("java:S1874") // This is the singleton instance the constructor was deprecated for.
     private static final Log4j2ThreadContextManager INSTANCE = new Log4j2ThreadContextManager();
 
     /**
@@ -85,7 +86,9 @@ public class Log4j2ThreadContextManager implements ContextManager<Log4j2ThreadCo
      * obtained from {@link #provider()} should be used to avoid unnecessary instantiations.
      */
     @Deprecated
+    @SuppressWarnings("java:S1133") // Code can only be removed if this library ever switches to Java 9+ compatibility.
     public Log4j2ThreadContextManager() {
+        super(); // no-op, default constructor for explicit deprecation.
     }
 
     /**
@@ -133,7 +136,8 @@ public class Log4j2ThreadContextManager implements ContextManager<Log4j2ThreadCo
     }
 
     private static final class ManagedLog4j2ThreadContext implements Context {
-        private final Log4j2ThreadContextSnapshot previous, value;
+        private final Log4j2ThreadContextSnapshot previous;
+        private final Log4j2ThreadContextSnapshot value;
         private final AtomicBoolean closed;
 
         private ManagedLog4j2ThreadContext(Log4j2ThreadContextSnapshot previous, Log4j2ThreadContextSnapshot value) {

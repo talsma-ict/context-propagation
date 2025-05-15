@@ -29,6 +29,7 @@ public final class DummyContext extends AbstractThreadLocalContext<String> {
     }
 
     // Public for testing!
+    @Override
     public boolean isClosed() {
         return super.isClosed();
     }

@@ -39,42 +39,42 @@ import static org.hamcrest.Matchers.nullValue;
 /**
  * @author Sjoerd Talsma
  */
-public class CurrentLocaleManagerTest {
-    private static final Locale DUTCH = new Locale("nl", "NL");
-    private static final Locale ENGLISH = Locale.UK;
-    private static final Locale GERMAN = Locale.GERMANY;
+class CurrentLocaleManagerTest {
+    static final Locale DUTCH = new Locale("nl", "NL");
+    static final Locale ENGLISH = Locale.UK;
+    static final Locale GERMAN = Locale.GERMANY;
 
-    private static final Locale DEFAULT_LOCALE = Locale.getDefault();
-    private static final CurrentLocaleManager MANAGER = CurrentLocaleManager.provider();
+    static final Locale DEFAULT_LOCALE = Locale.getDefault();
+    static final CurrentLocaleManager MANAGER = CurrentLocaleManager.provider();
 
-    private ExecutorService threadpool;
+    ExecutorService threadPool;
 
     @BeforeEach
-    public void init() {
+    void init() {
         Locale.setDefault(DEFAULT_LOCALE);
-        threadpool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
+        threadPool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
     }
 
     @AfterEach
-    public void cleanup() {
-        threadpool.shutdown();
+    void cleanup() {
+        threadPool.shutdown();
         Locale.setDefault(DEFAULT_LOCALE);
     }
 
     @Test
-    public void testLocalePropagation() throws ExecutionException, InterruptedException {
-        try (Context ctx1 = CurrentLocaleHolder.set(DUTCH)) {
+    void testLocalePropagation() throws ExecutionException, InterruptedException {
+        try (Context ignored = CurrentLocaleHolder.set(DUTCH)) {
             assertThat(MANAGER.getActiveContextValue(), is(DUTCH));
             assertThat(CurrentLocaleHolder.getOrDefault(), is(DUTCH));
 
             final CountDownLatch blocker = new CountDownLatch(1);
             Future<Locale> slowCall;
-            try (Context ctx2 = MANAGER.initializeNewContext(GERMAN)) {
+            try (Context ignored2 = MANAGER.initializeNewContext(GERMAN)) {
                 assertThat(MANAGER.getActiveContextValue(), is(GERMAN));
                 assertThat(CurrentLocaleHolder.getOrDefault(), is(GERMAN));
 
-                slowCall = threadpool.submit(() -> {
-                    blocker.await(5, TimeUnit.SECONDS);
+                slowCall = threadPool.submit(() -> {
+                    assertThat(blocker.await(5, TimeUnit.SECONDS), is(true));
                     return MANAGER.getActiveContextValue();
                 });
             }
@@ -89,13 +89,13 @@ public class CurrentLocaleManagerTest {
     }
 
     @Test
-    public void testGetCurrentLocaleOrDefault() {
+    void testGetCurrentLocaleOrDefault() {
         assertThat(CurrentLocaleHolder.getOrDefault(), is(DEFAULT_LOCALE));
-        try (Context ctx1 = CurrentLocaleHolder.set(GERMAN)) {
+        try (Context ignored = CurrentLocaleHolder.set(GERMAN)) {
             assertThat(CurrentLocaleHolder.getOrDefault(), is(GERMAN));
             assertThat(MANAGER.getActiveContextValue(), is(GERMAN));
 
-            try (Context ctx2 = MANAGER.initializeNewContext(null)) {
+            try (Context ignored2 = MANAGER.initializeNewContext(null)) {
                 assertThat(CurrentLocaleHolder.getOrDefault(), is(DEFAULT_LOCALE));
                 assertThat(MANAGER.getActiveContextValue(), nullValue());
             } finally {
@@ -108,7 +108,7 @@ public class CurrentLocaleManagerTest {
     }
 
     @Test
-    public void testClear() {
+    void testClear() {
         MANAGER.initializeNewContext(DUTCH);
         assertThat(MANAGER.getActiveContextValue(), is(DUTCH));
         MANAGER.initializeNewContext(ENGLISH);
@@ -120,7 +120,7 @@ public class CurrentLocaleManagerTest {
     }
 
     @Test
-    public void testClearAll() {
+    void testClearAll() {
         MANAGER.initializeNewContext(DUTCH);
         assertThat(MANAGER.getActiveContextValue(), is(DUTCH));
         MANAGER.initializeNewContext(ENGLISH);
@@ -132,7 +132,7 @@ public class CurrentLocaleManagerTest {
     }
 
     @Test
-    public void testToString() {
+    void testToString() {
         assertThat(MANAGER, hasToString(containsString("CurrentLocaleManager")));
     }
 }

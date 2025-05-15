@@ -39,7 +39,6 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.same;
 import static org.mockito.Mockito.verify;
@@ -51,10 +50,10 @@ import static org.mockito.Mockito.when;
  *
  * @author Sjoerd Talsma
  */
-public class DelegatingExecutorServiceTest {
+class DelegatingExecutorServiceTest {
 
-    private static class TestDelegatingExecutorService extends DelegatingExecutorService {
-        private TestDelegatingExecutorService(ExecutorService delegate) {
+    static class TestDelegatingExecutorService extends DelegatingExecutorService {
+        TestDelegatingExecutorService(ExecutorService delegate) {
             super(delegate);
         }
     }
@@ -63,24 +62,24 @@ public class DelegatingExecutorServiceTest {
     DelegatingExecutorService subject;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         delegate = mock(ExecutorService.class);
         subject = new TestDelegatingExecutorService(delegate);
     }
 
     @AfterEach
-    public void noMoreInteractions() {
+    void noMoreInteractions() {
         verifyNoMoreInteractions(delegate);
     }
 
     @Test
-    public void testShutdown() {
+    void testShutdown() {
         subject.shutdown();
         verify(delegate).shutdown();
     }
 
     @Test
-    public void testShutdownNow() {
+    void testShutdownNow() {
         List<Runnable> resultObject = emptyList();
         when(delegate.shutdownNow()).thenReturn(resultObject);
 
@@ -90,7 +89,7 @@ public class DelegatingExecutorServiceTest {
     }
 
     @Test
-    public void testIsShutdown() {
+    void testIsShutdown() {
         when(delegate.isShutdown()).thenReturn(true);
 
         assertThat(subject.isShutdown(), is(true));
@@ -99,7 +98,7 @@ public class DelegatingExecutorServiceTest {
     }
 
     @Test
-    public void testIsTerminated() {
+    void testIsTerminated() {
         when(delegate.isTerminated()).thenReturn(true);
 
         assertThat(subject.isTerminated(), is(true));
@@ -108,102 +107,102 @@ public class DelegatingExecutorServiceTest {
     }
 
     @Test
-    public void testAwaitTermination() throws InterruptedException {
+    void testAwaitTermination() throws InterruptedException {
         when(delegate.awaitTermination(anyLong(), any(TimeUnit.class))).thenReturn(true);
 
         assertThat(subject.awaitTermination(1234L, MILLISECONDS), is(true));
 
-        verify(delegate).awaitTermination(eq(1234L), eq(MILLISECONDS));
+        verify(delegate).awaitTermination(1234L, MILLISECONDS);
     }
 
     @Test
-    public void testSubmitCallable() {
-        Callable callable = mock(Callable.class);
+    void testSubmitCallable() {
+        Callable<?> callable = mock(Callable.class);
         Future<Object> result = mock(Future.class);
         when(delegate.submit(any(Callable.class))).thenReturn(result);
 
-        assertThat(subject.submit(callable), is(sameInstance((Future) result)));
+        assertThat(subject.submit(callable), is(sameInstance(result)));
 
-        verify(delegate).submit(eq(callable));
+        verify(delegate).submit(callable);
     }
 
     @Test
-    public void testSubmitRunnable() {
+    void testSubmitRunnable() {
         Runnable runnable = mock(Runnable.class);
         Future<Object> result = mock(Future.class);
         when(delegate.submit(any(Runnable.class), any())).thenReturn(result);
 
-        assertThat(subject.submit(runnable, "yellow"), is(sameInstance((Future) result)));
+        assertThat(subject.submit(runnable, "yellow"), is(sameInstance(result)));
 
-        verify(delegate).submit(eq(runnable), eq("yellow"));
+        verify(delegate).submit(runnable, "yellow");
     }
 
     @Test
-    public void testInvokeAll() throws InterruptedException {
+    void testInvokeAll() throws InterruptedException {
         List<Callable<Object>> calls = emptyList();
         List<Future<Object>> result = emptyList();
         when(delegate.invokeAll(any(Collection.class))).thenReturn(result);
 
         assertThat(subject.invokeAll(calls), is(equalTo(result)));
 
-        verify(delegate).invokeAll(eq(calls));
+        verify(delegate).invokeAll(calls);
     }
 
     @Test
-    public void testInvokeAllTimeout() throws InterruptedException {
+    void testInvokeAllTimeout() throws InterruptedException {
         List<Callable<Object>> calls = emptyList();
         List<Future<Object>> result = emptyList();
         when(delegate.invokeAll(any(Collection.class), anyLong(), any(TimeUnit.class))).thenReturn(result);
 
         assertThat(subject.invokeAll(calls, 2364L, MILLISECONDS), is(equalTo(result)));
 
-        verify(delegate).invokeAll(eq(calls), eq(2364L), eq(MILLISECONDS));
+        verify(delegate).invokeAll(calls, 2364L, MILLISECONDS);
     }
 
     @Test
-    public void testInvokeAny() throws InterruptedException, ExecutionException {
+    void testInvokeAny() throws InterruptedException, ExecutionException {
         List<Callable<Object>> calls = singletonList((Callable<Object>) mock(Callable.class));
         Object result = new Object();
         when(delegate.invokeAny(any(Collection.class))).thenReturn(result);
 
         assertThat(subject.invokeAny(calls), is(sameInstance(result)));
 
-        verify(delegate).invokeAny(eq(calls));
+        verify(delegate).invokeAny(calls);
     }
 
     @Test
-    public void testInvokeAnyTimeout() throws InterruptedException, ExecutionException, TimeoutException {
+    void testInvokeAnyTimeout() throws InterruptedException, ExecutionException, TimeoutException {
         List<Callable<Object>> calls = singletonList((Callable<Object>) mock(Callable.class));
         Object result = new Object();
         when(delegate.invokeAny(any(Collection.class), anyLong(), any(TimeUnit.class))).thenReturn(result);
 
         assertThat(subject.invokeAny(calls, 2873L, MILLISECONDS), is(sameInstance(result)));
 
-        verify(delegate).invokeAny(eq(calls), eq(2873L), eq(MILLISECONDS));
+        verify(delegate).invokeAny(calls, 2873L, MILLISECONDS);
     }
 
     @Test
-    public void testExecute() {
+    void testExecute() {
         Runnable runnable = mock(Runnable.class);
         subject.execute(runnable);
         verify(delegate).execute(same(runnable));
     }
 
     @Test
-    public void testHashCode() {
+    void testHashCode() {
         int hash = delegate.hashCode();
         assertThat(subject.hashCode(), is(hash));
     }
 
     @Test
-    public void testEquals() {
+    void testEquals() {
         assertThat(subject, is(equalTo(subject)));
         assertThat(subject, is(equalTo((Object) new TestDelegatingExecutorService(delegate))));
         assertThat(subject, is(not(equalTo((Object) new TestDelegatingExecutorService(mock(ExecutorService.class))))));
     }
 
     @Test
-    public void testToString() {
+    void testToString() {
         assertThat(subject, hasToString("TestDelegatingExecutorService{" + delegate + "}"));
     }
 
