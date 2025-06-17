@@ -109,7 +109,6 @@ class OpenTelemetryContextTimerTest {
         }
 
         // verify
-        System.out.println(TELEMETRY.getMetrics());
         assertThat(TELEMETRY.getMetrics())
                 .singleElement()
                 .satisfies(metric ->
