@@ -23,11 +23,14 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.concurrent.TimeUnit;
 
+import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 class OpenTelemetryContextTimerTest {
     @RegisterExtension
     static final OpenTelemetryExtension TELEMETRY = OpenTelemetryExtension.create();
+
+    static final int HUNDRED_THOUSAND = 100000;
 
     OpenTelemetryContextTimer subject = new OpenTelemetryContextTimer();
 
@@ -36,11 +39,24 @@ class OpenTelemetryContextTimerTest {
         // prepare
 
         // execute
-        subject.update(ContextSnapshot.class, "capture", 5, TimeUnit.MILLISECONDS, null);
+        for (int i = 0; i < HUNDRED_THOUSAND; i++) {
+            subject.update(ContextSnapshot.class, "capture", 5, TimeUnit.MILLISECONDS, null);
+        }
 
         // verify
-        TELEMETRY.assertTraces().hasTracesSatisfyingExactly(trace ->
-                trace.hasSpansSatisfyingExactly(span -> span.hasName("ContextSnapshot.capture")));
+        assertThat(TELEMETRY.getMetrics())
+                .singleElement()
+                .satisfies(metric ->
+                        assertThat(metric)
+                                .hasName("ContextSnapshot.capture")
+                                .hasDescription("Duration of ContextSnapshot.capture")
+                                .hasUnit("milliseconds")
+                                .hasHistogramSatisfying(histogram -> histogram
+                                        .hasPointsSatisfying(point -> point
+                                                .hasCount(HUNDRED_THOUSAND)
+                                                .hasMin(5.0d)
+                                                .hasMax(5.0d)
+                                        )));
     }
 
     @Test
@@ -48,11 +64,24 @@ class OpenTelemetryContextTimerTest {
         // prepare
 
         // execute
-        subject.update(ContextSnapshot.class, "reactivate", 5, TimeUnit.MILLISECONDS, null);
+        for (int i = 0; i < HUNDRED_THOUSAND; i++) {
+            subject.update(ContextSnapshot.class, "reactivate", 5, TimeUnit.MILLISECONDS, null);
+        }
 
         // verify
-        TELEMETRY.assertTraces().hasTracesSatisfyingExactly(trace ->
-                trace.hasSpansSatisfyingExactly(span -> span.hasName("ContextSnapshot.reactivate")));
+        assertThat(TELEMETRY.getMetrics())
+                .singleElement()
+                .satisfies(metric ->
+                        assertThat(metric)
+                                .hasName("ContextSnapshot.reactivate")
+                                .hasDescription("Duration of ContextSnapshot.reactivate")
+                                .hasUnit("milliseconds")
+                                .hasHistogramSatisfying(histogram -> histogram
+                                        .hasPointsSatisfying(point -> point
+                                                .hasCount(HUNDRED_THOUSAND)
+                                                .hasMin(5.0d)
+                                                .hasMax(5.0d)
+                                        )));
     }
 
     @Test
@@ -61,10 +90,12 @@ class OpenTelemetryContextTimerTest {
         ContextManager<String> contextManagerMock = mock(ContextManager.class);
 
         // execute
-        subject.update(contextManagerMock.getClass(), "initializeNewContext", 5, TimeUnit.MILLISECONDS, null);
+        for (int i = 0; i < HUNDRED_THOUSAND; i++) {
+            subject.update(contextManagerMock.getClass(), "initializeNewContext", 5, TimeUnit.MILLISECONDS, null);
+        }
 
         // verify
-        TELEMETRY.assertTraces().isEmpty();
+        assertThat(TELEMETRY.getMetrics()).isEmpty();
     }
 
     @Test
@@ -73,13 +104,24 @@ class OpenTelemetryContextTimerTest {
         RuntimeException error = new RuntimeException("Whoops!");
 
         // execute
-        subject.update(ContextSnapshot.class, "reactivate", 5, TimeUnit.MILLISECONDS, error);
+        for (int i = 0; i < HUNDRED_THOUSAND; i++) {
+            subject.update(ContextSnapshot.class, "reactivate", 5, TimeUnit.MILLISECONDS, error);
+        }
 
         // verify
-        TELEMETRY.assertTraces().hasTracesSatisfyingExactly(trace ->
-                trace.hasSpansSatisfyingExactly(span ->
-                        span.hasName("ContextSnapshot.reactivate")
-                                .hasEventsSatisfyingExactly(event -> event.hasName("exception"))));
+        assertThat(TELEMETRY.getMetrics())
+                .singleElement()
+                .satisfies(metric ->
+                        assertThat(metric)
+                                .hasName("ContextSnapshot.reactivate")
+                                .hasDescription("Duration of ContextSnapshot.reactivate")
+                                .hasUnit("milliseconds")
+                                .hasHistogramSatisfying(histogram -> histogram
+                                        .hasPointsSatisfying(point -> point
+                                                .hasCount(HUNDRED_THOUSAND)
+                                                .hasMin(5.0d)
+                                                .hasMax(5.0d)
+                                        )));
     }
 
 }
