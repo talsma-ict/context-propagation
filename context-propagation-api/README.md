@@ -1,18 +1,44 @@
 [![Released Version][maven-img]][maven] 
 [![JavaDoc pages][javadoc-img]][javadoc] 
 
-# Context propagation
+# Context propagation API
 
-The main `context-propagation` module implements the _core concepts_ 
+The `context-propagation-api` module implements the _core concepts_ 
 of propagating contexts.  
-The main use case is taking a [_snapshot_][contextsnapshot] 
+The main use case is _capturing_ a [snapshot][contextsnapshot] 
 of [`ThreadLocal`][threadlocal] values from the calling thread 
 and _reactivating_ it in another thread.
 
 ## Key concepts
 
-The terms [Context](#context), [Context Manager](#context-manager) 
-and [Context Snapshot](#context-snapshot) are crucial to understanding this library.
+The terms [Context Snapshot](#context-snapshot), [Context](#context)
+and [Context Manager](#context-manager) are crucial to understanding this library.
+
+### Context Snapshot
+
+A new context snapshot is captured by the [ContextSnapshot] `capture()` method.  
+Each snapshot contains active context values from all known [ContextManager] implementations.  
+The values in this snapshot can be [_reactivated_](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextSnapshot.html#reactivate--) all at once in another thread. 
+They stay active until the reactivation is closed again (or are overwritten by new values).  
+Closing the reactivated object is mandatory (from the thread where the reactivation was called).
+
+Once created, the captured _values_ in a context _snapshot_ do not change anymore, 
+even when the active context is later modified.
+Although reactivating a single snapshot multiple times in different threads is possible,
+the 'normal' use case is capturing a new snapshot from a parent thread and reactivating it in a background thread.
+
+- [ContextSnapshot javadoc](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextSnapshot.html)
+
+### Context Manager
+
+Manages contexts by initializing and maintaining an active context value.
+
+Normally it is not necessary to interact directly with individual context managers.
+The api detects available context managers and lets 
+you capture a [_snapshot_](#context-snapshot) of **all** active contexts at once.
+
+- [ContextManager javadoc][contextmanager]
+- [ContextSnapshot javadoc][contextsnapshot]
 
 ### Context
 
@@ -29,29 +55,6 @@ It contains safeguards for concurrency and out-of-sequence closing of contexts,
 although technically these use cases are not appropriate.
 
 - [Context javadoc][context]
-
-### Context Manager
-
-Manages contexts by initializing and maintaining an active context value.
-
-Normally it is not necessary to interact directly with individual context managers.
-The api detects available context managers and lets 
-you capture a [_snapshot_](#context-snapshot) of **all** active contexts at once.
-
-- [ContextManager javadoc][contextmanager]
-- [ContextSnapshot javadoc][contextsnapshot]
-
-### Context Snapshot
-
-A context snapshot is captured by the [ContextSnapshot]' `capture()` method.
-The snapshot contains active context values from all known [ContextManager] implementations.
-Once created, the captured _values_ in such context snapshot will not change anymore, 
-even when the active context is later modified. 
-The values in this snapshot can be [_reactivated_](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextSnapshot.html#reactivate--) all at once in another thread. 
-They stay active until the reactivation is closed again (or are overwritten by new values).  
-Closing the reactivated object is mandatory (from the thread where the reactivation was called).
-
-- [ContextSnapshot javadoc](https://javadoc.io/page/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/ContextSnapshot.html)
 
 ## Creating your own context manager
 
@@ -71,9 +74,8 @@ public class DummyContextManager implements ContextManager<String> {
     return new DummyContext(value);
   }
 
-  public Context<String> getActiveContextValue() {
-    DummyContext current = DummyContext.current();
-    return current != null ? current.getValue() : null;
+  public String getActiveContextValue() {
+    return DummyContext.current().map(DummyContext::getValue).orElse(null);
   }
   
   private static final class DummyContext extends AbstractThreadLocalContext<String> {
@@ -81,8 +83,8 @@ public class DummyContextManager implements ContextManager<String> {
       super(newValue);
     }
 
-    private static Context<String> current() {
-      return AbstractThreadLocalContext.current(DummyContext.class);
+    private static Optional<Context<String>> current() {
+      return Optional.ofNullable(AbstractThreadLocalContext.current(DummyContext.class));
     }
   }
 }
