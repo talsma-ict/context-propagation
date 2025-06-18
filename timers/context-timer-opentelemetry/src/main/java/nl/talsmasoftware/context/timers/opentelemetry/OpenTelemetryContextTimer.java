@@ -65,21 +65,24 @@ public class OpenTelemetryContextTimer implements ContextTimer {
      */
     @Override
     public void update(Class<?> type, String method, long duration, TimeUnit unit, Throwable error) {
-        if (mustRecord(type)) {
-            getMillisecondTimer(type.getSimpleName() + "." + method).record(unit.toMillis(duration));
-        }
+        getMillisecondTimer(type, method).record(unit.toMillis(duration));
     }
 
-    private static boolean mustRecord(Class<?> type) {
-        return ContextSnapshot.class.isAssignableFrom(type);
-    }
-
-    private static LongHistogram getMillisecondTimer(String timerName) {
+    private static LongHistogram getMillisecondTimer(Class<?> type, String method) {
+        final String timerName = getTimerName(type, method);
         return GlobalOpenTelemetry.getMeter(INSTRUMENTATION_SCOPE)
                 .histogramBuilder(timerName).ofLongs()
                 .setDescription("Duration of " + timerName)
                 .setUnit("milliseconds")
                 .build();
+    }
+
+    private static String getTimerName(Class<?> type, String method) {
+        String typeName = type.getName();
+        if (typeName.startsWith(INSTRUMENTATION_SCOPE)) {
+            typeName = type.getSimpleName();
+        }
+        return typeName + "." + method;
     }
 
 }

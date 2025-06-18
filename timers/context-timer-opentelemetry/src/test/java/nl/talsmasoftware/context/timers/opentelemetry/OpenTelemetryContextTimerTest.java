@@ -16,7 +16,6 @@
 package nl.talsmasoftware.context.timers.opentelemetry;
 
 import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
-import nl.talsmasoftware.context.api.ContextManager;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -24,7 +23,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.concurrent.TimeUnit;
 
 import static io.opentelemetry.sdk.testing.assertj.OpenTelemetryAssertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 class OpenTelemetryContextTimerTest {
     @RegisterExtension
@@ -85,20 +83,6 @@ class OpenTelemetryContextTimerTest {
     }
 
     @Test
-    void update_ContextManager_initializeNewContext_not_traced() {
-        // prepare
-        ContextManager<String> contextManagerMock = mock(ContextManager.class);
-
-        // execute
-        for (int i = 0; i < HUNDRED_THOUSAND; i++) {
-            subject.update(contextManagerMock.getClass(), "initializeNewContext", 5, TimeUnit.MILLISECONDS, null);
-        }
-
-        // verify
-        assertThat(TELEMETRY.getMetrics()).isEmpty();
-    }
-
-    @Test
     void update_ContextSnapshot_reactivate_error() {
         // prepare
         RuntimeException error = new RuntimeException("Whoops!");
@@ -124,4 +108,28 @@ class OpenTelemetryContextTimerTest {
                                         )));
     }
 
+    @Test
+    void update_external_method() {
+        // prepare
+
+        // execute
+        for (int i = 0; i < HUNDRED_THOUSAND; i++) {
+            subject.update(Object.class, "toString", 5, TimeUnit.MILLISECONDS, null);
+        }
+
+        // verify
+        assertThat(TELEMETRY.getMetrics())
+                .singleElement()
+                .satisfies(metric ->
+                        assertThat(metric)
+                                .hasName("java.lang.Object.toString")
+                                .hasDescription("Duration of java.lang.Object.toString")
+                                .hasUnit("milliseconds")
+                                .hasHistogramSatisfying(histogram -> histogram
+                                        .hasPointsSatisfying(point -> point
+                                                .hasCount(HUNDRED_THOUSAND)
+                                                .hasMin(5.0d)
+                                                .hasMax(5.0d)
+                                        )));
+    }
 }
