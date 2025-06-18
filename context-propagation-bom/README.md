@@ -26,8 +26,8 @@ section in your maven `pom.xml`
 ```
 
 This does **not** add any dependencies to your project,
-but makes sure that dependencies to any `context propagation` module
-will all be of the declared version, including transitive dependencies.
+but it makes sure that `context propagation` dependencies you add to your project
+(either direct or as transitive dependency), will all be the versions declared in the bill of materials.
 
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation-bom.svg
   [maven]: https://search.maven.org/artifact/nl.talsmasoftware.context/context-propagation-bom
