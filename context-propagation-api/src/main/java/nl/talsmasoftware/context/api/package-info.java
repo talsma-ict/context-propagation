@@ -26,7 +26,7 @@
  * <h2>{@linkplain nl.talsmasoftware.context.api.ContextManager}</h2>
  * <p>
  * Manages the active context.
- * Can {@linkplain nl.talsmasoftware.context.api.ContextManager#initializeNewContext(java.lang.Object) initialize a new context}
+ * Can {@linkplain nl.talsmasoftware.context.api.ContextManager#activate(java.lang.Object) activate a new context}
  * and provides access to
  * the {@linkplain nl.talsmasoftware.context.api.ContextManager#getActiveContextValue() active context value}.
  *

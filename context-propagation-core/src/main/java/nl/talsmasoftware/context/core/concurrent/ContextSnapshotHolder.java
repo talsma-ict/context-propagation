@@ -37,7 +37,7 @@ final class ContextSnapshotHolder implements Consumer<ContextSnapshot>, Supplier
      * or takes a new snapshot as initial value.
      *
      * @param snapshot The snapshot to hold initially.
-     *                 Optional, if {@code null} the holder will initialize with a new snapshot.
+     *                 Optional, if {@code null} the holder will capture a new snapshot.
      */
     ContextSnapshotHolder(ContextSnapshot snapshot) {
         this.snapshot = (snapshot == null ? ContextSnapshot.capture() : snapshot);

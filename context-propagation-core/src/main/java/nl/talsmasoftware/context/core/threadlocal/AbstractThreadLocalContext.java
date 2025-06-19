@@ -75,7 +75,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context {
         this.parentContext = sharedThreadLocalContext.get();
         this.value = newValue;
         this.sharedThreadLocalContext.set(this);
-        LOGGER.log(Level.FINEST, "Initialized new {0}.", this);
+        LOGGER.log(Level.FINEST, "Activated new {0}.", this);
     }
 
     /**

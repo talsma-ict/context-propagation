@@ -173,7 +173,7 @@ final class ContextSnapshotImpl implements ContextSnapshot {
      * Reactivates a snapshot value for a single context manager.
      *
      * <p>
-     * This initializes a new context with the context manager
+     * This activates a new context containing the snapshot value with the context manager
      * (normally on another thread the snapshot value was captured from).
      *
      * @param contextManager The context manager to reactivate the snapshot value for.
@@ -187,7 +187,7 @@ final class ContextSnapshotImpl implements ContextSnapshot {
         RuntimeException error = null;
         try {
 
-            Context reactivated = contextManager.initializeNewContext(snapshotValue);
+            Context reactivated = contextManager.activate(snapshotValue);
             SNAPSHOT_LOGGER.finest(() -> "Context reactivated from snapshot by " + contextManager + ": " + reactivated + ".");
             return reactivated;
 
@@ -195,7 +195,7 @@ final class ContextSnapshotImpl implements ContextSnapshot {
             error = e;
             throw e;
         } finally {
-            timed(System.nanoTime() - start, contextManager.getClass(), "initializeNewContext", error);
+            timed(System.nanoTime() - start, contextManager.getClass(), "activate", error);
         }
     }
 

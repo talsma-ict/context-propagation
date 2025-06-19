@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  * <li>{@linkplain ContextSnapshot#capture()}</li>
  * <li>{@linkplain ContextSnapshot#reactivate()}</li>
  * <li>{@linkplain ContextManager#getActiveContextValue()} (*)</li>
- * <li>{@linkplain ContextManager#initializeNewContext(Object)} (*)</li>
+ * <li>{@linkplain ContextManager#activate(Object)} (*)</li>
  * </ul>
  * <p>
  * (*) <em>Timing is updated for each concrete {@code ContextManager} implementation class</em>

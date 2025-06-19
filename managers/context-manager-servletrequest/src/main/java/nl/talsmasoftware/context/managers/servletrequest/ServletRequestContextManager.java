@@ -32,7 +32,7 @@ import javax.servlet.ServletRequest;
  * accomplished with the {@linkplain #currentServletRequest()} method.
  *
  * <p>
- * It should normally not be necessary to {@linkplain #initializeNewContext(ServletRequest) initialize new contexts}
+ * It should normally not be necessary to {@linkplain #activate(ServletRequest) activate new contexts}
  * from application code. Adding the {@linkplain ServletRequestContextFilter} to the filter chain should be enough to
  * have the {@linkplain #currentServletRequest() current servlet request} available in your application.
  *
@@ -86,18 +86,18 @@ public final class ServletRequestContextManager implements ContextManager<Servle
     }
 
     /**
-     * Initializes a new {@linkplain ServletRequest} {@linkplain Context} for the given servlet request.
+     * Activate a new {@linkplain ServletRequest} {@linkplain Context} for the given servlet request.
      *
      * <p>
-     * In a normal application it should not be necessary to call this explicitly.
+     * In a normal application, it should not be necessary to call this explicitly.
      * Instead, the {@linkplain ServletRequestContextFilter} normally takes care of it.
      *
      * @param servletRequest The servlet request to become the 'current' request for this thread,
      *                       until the context is closed.
      * @return The context for the given servlet request.
-     * The context <strong>must be</strong> closed in the same that initialized it.
+     * The context <strong>must be</strong> closed in the same that activated it.
      */
-    public Context initializeNewContext(ServletRequest servletRequest) {
+    public Context activate(ServletRequest servletRequest) {
         return new ServletRequestContext(servletRequest);
     }
 

@@ -31,11 +31,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * (see <a href="https://logging.apache.org/log4j/2.x/manual/thread-context.html#Configuration">Log4j 2 manual</a>).
  *
  * <p>
- * Initializing a new context through {@link #initializeNewContext(Log4j2ThreadContextSnapshot)} will
+ * Activating a new context through {@link #activate(Log4j2ThreadContextSnapshot)} will
  * add the context data on top of the existing one, if any: {@code ThreadContext} stack values
  * are pushed on top of the existing stack; map entries are added to the existing map, only
  * replacing existing ones in case of a map key conflict.<br>
- * Closing a context returned from {@link #initializeNewContext(Log4j2ThreadContextSnapshot)} will reset
+ * Closing a context returned from {@link #activate(Log4j2ThreadContextSnapshot)} will reset
  * the {@code ThreadContext} to the values it had before the context was created.<br>
  * This means that closing nested contexts out-of-order will probably result in an undesirable state.<br>
  * It is therefore strongly advised to use Java's {@code try-with-resources} statement to ensure proper
@@ -104,7 +104,7 @@ public class Log4j2ThreadContextManager implements ContextManager<Log4j2ThreadCo
     }
 
     /**
-     * Initializes a new context for the Log4j 2 {@link ThreadContext} of the current thread.
+     * Activate a new context for the Log4j 2 {@link ThreadContext} of the current thread.
      * The data of the context is applied on top of existing data (if any) only replacing
      * conflicting {@code ThreadContext} map entries but keeping all other existing data.
      *
@@ -112,7 +112,7 @@ public class Log4j2ThreadContextManager implements ContextManager<Log4j2ThreadCo
      * @return The new <em>active</em> context containing the specified value
      * which should be closed by the caller at the end of its lifecycle from the same thread.
      */
-    public Context initializeNewContext(final Log4j2ThreadContextSnapshot value) {
+    public Context activate(final Log4j2ThreadContextSnapshot value) {
         if (value == null) {
             throw new NullPointerException("value must not be null");
         }

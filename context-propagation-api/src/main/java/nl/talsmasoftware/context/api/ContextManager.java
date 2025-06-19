@@ -29,16 +29,16 @@ package nl.talsmasoftware.context.api;
 public interface ContextManager<T> {
 
     /**
-     * Initialize a new context containing the specified <code>value</code>.
+     * Activate a new context containing the specified <code>value</code>.
      *
      * <p>
      * Whether the value is allowed to be <code>null</code> is up to the implementation.
      *
-     * @param value The value to initialize a new context for.
+     * @param value The value to activate a new context for.
      * @return The new <em>active</em> context containing the specified value
      * which should be closed by the caller at the end of its lifecycle from the same thread.
      */
-    Context initializeNewContext(T value);
+    Context activate(T value);
 
     /**
      * The value of the currently active context, or {@code null} if no context is active.
@@ -53,7 +53,7 @@ public interface ContextManager<T> {
      *
      * <p>
      * This is an optional operation.<br>
-     * When all initialized contexts are initialized in combination with try-with-resources blocks,
+     * When all active contexts are initialized in combination with try-with-resources blocks,
      * it is not necessary to call clear.
      *
      * <p>

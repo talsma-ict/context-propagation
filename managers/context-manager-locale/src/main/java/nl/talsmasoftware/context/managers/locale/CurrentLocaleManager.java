@@ -74,7 +74,7 @@ public final class CurrentLocaleManager implements ContextManager<Locale> {
      * @return The context to be closed again by the caller to remove this locale as current locale.
      * @see CurrentLocaleHolder#set(Locale)
      */
-    public Context initializeNewContext(Locale value) {
+    public Context activate(Locale value) {
         return CurrentLocaleHolder.set(value);
     }
 

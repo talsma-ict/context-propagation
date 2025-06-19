@@ -96,9 +96,9 @@ class Log4j2ThreadContextManagerTest {
     }
 
     @Test
-    void testInitializeNewContext_null() {
+    void testActivate_null() {
         Log4j2ThreadContextManager manager = Log4j2ThreadContextManager.provider();
-        NullPointerException expected = assertThrows(NullPointerException.class, () -> manager.initializeNewContext(null));
+        NullPointerException expected = assertThrows(NullPointerException.class, () -> manager.activate(null));
         assertThat(expected.getMessage(), notNullValue());
     }
 
@@ -221,7 +221,7 @@ class Log4j2ThreadContextManagerTest {
 
         final Log4j2ThreadContextManager mgr = Log4j2ThreadContextManager.provider();
 
-        Context ctx = mgr.initializeNewContext(data);
+        Context ctx = mgr.activate(data);
         try {
             assertThat(ctx, hasToString("ManagedLog4j2ThreadContext{" + data + "}"));
         } finally {

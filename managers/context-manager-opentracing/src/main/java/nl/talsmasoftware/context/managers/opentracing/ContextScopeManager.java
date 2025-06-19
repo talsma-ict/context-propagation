@@ -92,7 +92,7 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
      * @return The scope that <strong>must be</strong> closed in the same thread
      */
     @Override
-    public Scope activate(Span span) {
+    public ContextScope activate(Span span) {
         return new ThreadLocalSpanContext(span);
     }
 
@@ -104,19 +104,6 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
     @Override
     public Span activeSpan() {
         return ThreadLocalSpanContext.currentSpan();
-    }
-
-    /**
-     * Initializes a new context for the given {@linkplain Span}.
-     *
-     * @param value The span to activate.
-     * @return The new active 'Scope'.
-     * @see #activate(Span)
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public Context initializeNewContext(Span value) {
-        return (Context) activate(value);
     }
 
     /**
@@ -146,7 +133,10 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
         return getClass().getSimpleName();
     }
 
-    private static final class ThreadLocalSpanContext extends AbstractThreadLocalContext<Span> implements Scope {
+    public interface ContextScope extends Context, Scope {
+    }
+
+    private static final class ThreadLocalSpanContext extends AbstractThreadLocalContext<Span> implements ContextScope {
         private static final ThreadLocal<ThreadLocalSpanContext> SPAN_CONTEXT =
                 AbstractThreadLocalContext.threadLocalInstanceOf(ThreadLocalSpanContext.class);
 

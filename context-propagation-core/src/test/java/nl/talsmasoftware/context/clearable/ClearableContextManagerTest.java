@@ -42,9 +42,9 @@ class ClearableContextManagerTest {
 
     @Test
     void testClearActiveContexts_byManager() {
-        try (Context first = CLEARABLE.initializeNewContext("First value")) {
-            try (Context second = CLEARABLE.initializeNewContext("Second value")) {
-                try (Context third = CLEARABLE.initializeNewContext("Third value")) {
+        try (Context first = CLEARABLE.activate("First value")) {
+            try (Context second = CLEARABLE.activate("Second value")) {
+                try (Context third = CLEARABLE.activate("Third value")) {
                     assertThat(CLEARABLE.getActiveContextValue()).isEqualTo("Third value");
                     CLEARABLE.clear();
                     assertThat(CLEARABLE.getActiveContextValue()).isNull();
@@ -64,9 +64,9 @@ class ClearableContextManagerTest {
 
     @Test
     void testClearAllActiveContexts() {
-        try (Context first = CLEARABLE.initializeNewContext("First value")) {
-            try (Context second = CLEARABLE.initializeNewContext("Second value")) {
-                try (Context third = CLEARABLE.initializeNewContext("Third value")) {
+        try (Context first = CLEARABLE.activate("First value")) {
+            try (Context second = CLEARABLE.activate("Second value")) {
+                try (Context third = CLEARABLE.activate("Third value")) {
                     assertThat(CLEARABLE.getActiveContextValue()).isEqualTo("Third value");
                     ContextManager.clearAll();
                     assertThat(CLEARABLE.getActiveContextValue()).isNull();

@@ -21,13 +21,13 @@ import java.io.Closeable;
  * A context can be anything that needs to be maintained on the 'current thread' level.
  *
  * <p>
- * A new context is created by {@link ContextManager#initializeNewContext(Object) initializing}
+ * A new context is created by {@link ContextManager#activate(Object) activating}
  * it using a {@link ContextManager}.
  *
  * <h2>Important!</h2>
- * It is the responsibility of the one initializing a new context to also {@linkplain #close()} it again
+ * It is the responsibility of the one activating a new context to also {@linkplain #close()} it again
  * <em>from the same thread</em>.<br>
- * Using every initialized context in a 'try-with-resources' block of code is a recommended and safe way
+ * Using every activated context in a 'try-with-resources' block of code is a recommended and safe way
  * to make sure this responsibility is honored.
  *
  * <p>

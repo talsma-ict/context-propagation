@@ -53,7 +53,7 @@ public class ServletRequestContextFilter implements Filter {
     }
 
     /**
-     * Filter the request by initializing a new {@linkplain Context} for the request, making sure to close it after
+     * Filter the request by activating a new {@linkplain Context} for the request, making sure to close it after
      * the request finishes.
      *
      * <p>
@@ -70,7 +70,7 @@ public class ServletRequestContextFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         // Automatically becomes the new active context.
-        try (Context context = MANAGER.initializeNewContext(request)) {
+        try (Context context = MANAGER.activate(request)) {
 
             if (request.isAsyncStarted()) try {
                 request.getAsyncContext().addListener(new ServletRequestContextAsyncListener());

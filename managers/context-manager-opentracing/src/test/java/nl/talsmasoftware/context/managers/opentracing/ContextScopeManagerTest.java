@@ -94,9 +94,9 @@ class ContextScopeManagerTest {
     }
 
     @Test
-    void testInitializeNewContext() {
+    void testActivate() {
         Span span = GlobalTracer.get().buildSpan("span").start();
-        Context context = scopeManager.initializeNewContext(span);
+        Context context = scopeManager.activate(span);
         assertThat(scopeManager.getActiveContextValue(), is(span));
         assertThat(scopeManager.activeSpan(), is(span));
         assertThat(GlobalTracer.get().activeSpan(), is(span));

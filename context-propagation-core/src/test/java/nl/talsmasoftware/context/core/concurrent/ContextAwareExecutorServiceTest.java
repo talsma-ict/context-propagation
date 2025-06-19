@@ -65,16 +65,16 @@ class ContextAwareExecutorServiceTest {
 
     @Test
     void testContext() throws ExecutionException, InterruptedException {
-        dummyContextManager.initializeNewContext("The quick brown fox jumps over the lazy dog");
+        dummyContextManager.activate("The quick brown fox jumps over the lazy dog");
         Future<String> dummy = executor.submit(getDummyContext);
-        dummyContextManager.initializeNewContext("god yzal eht revo spmuj xof nworb kciuq ehT");
+        dummyContextManager.activate("god yzal eht revo spmuj xof nworb kciuq ehT");
         assertThat(dummyContextManager.getActiveContextValue()).isEqualTo("god yzal eht revo spmuj xof nworb kciuq ehT");
         assertThat(dummy.get()).isEqualTo("The quick brown fox jumps over the lazy dog");
     }
 
     @Test
     void testCloseException() throws InterruptedException {
-        throwingContextManager.initializeNewContext("The quick brown fox jumps over the lazy dog");
+        throwingContextManager.activate("The quick brown fox jumps over the lazy dog");
         ThrowingContextManager.onClose = new IllegalStateException("Sometimes we stare so long at a door that is closing " +
                 "that we see too late the one that is open. --Alexander Graham Bell");
         Future<String> dummy = executor.submit(getDummyContext);
@@ -103,7 +103,7 @@ class ContextAwareExecutorServiceTest {
 
     @Test
     void testBothCallAndCloseException() throws InterruptedException {
-        throwingContextManager.initializeNewContext("The quick brown fox jumps over the lazy dog");
+        throwingContextManager.activate("The quick brown fox jumps over the lazy dog");
         ThrowingContextManager.onClose = new IllegalStateException("Sometimes we stare so long at a door that is closing " +
                 "that we see too late the one that is open. --Alexander Graham Bell");
         Future<String> dummy = executor.submit(() -> {

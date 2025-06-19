@@ -25,7 +25,7 @@ import nl.talsmasoftware.context.api.ContextManager;
  */
 public class DummyContextManager implements ContextManager<String> {
 
-    public Context initializeNewContext(String value) {
+    public Context activate(String value) {
         return new DummyContext(value);
     }
 

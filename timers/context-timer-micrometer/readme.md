@@ -6,8 +6,8 @@ This module provides [Micrometer] `Timer` instrumentation for:
  - all context snapshots that are created with `ContextSnapshot.capture()` 
  - all context snapshots that are reactivated with `ContextSnapshot.reactivate()`
  - for each specific `ContextManager`:
-   - calls to `ContextManager.getActiveContext` and
-   - calls to `ContextManager.initializeNewContext`
+   - calls to `ContextManager.activate` and
+   - calls to `ContextManager.getActiveContext`
    
 ## How to use this module
 

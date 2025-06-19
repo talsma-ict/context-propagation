@@ -25,11 +25,11 @@ import nl.talsmasoftware.context.api.ContextManager;
  * <dl>
  *     <dt><strong>{@linkplain #getActiveContextValue()}</strong></dt>
  *     <dd>Delegated to {@linkplain io.opentelemetry.context.Context#current()}</dd>
- *     <dt><strong>{@linkplain #initializeNewContext(io.opentelemetry.context.Context)}</strong></dt>
+ *     <dt><strong>{@linkplain #activate(io.opentelemetry.context.Context)}</strong></dt>
  *     <dd>Delegated to {@linkplain io.opentelemetry.context.Context#makeCurrent()}</dd>
  *     <dt><strong>{@linkplain #clear()}</strong></dt>
  *     <dd>no-op: Does <strong>not</strong> clear the current context as we are not managing it ourselves.
- *     This does make it very important that all initialized contexts are properly closed again.</dd>
+ *     This does make it very important that all activated contexts are properly closed again.</dd>
  * </dl>
  *
  * <p>
@@ -83,7 +83,7 @@ public class OpenTelemetryContextManager implements ContextManager<io.openteleme
      * @see io.opentelemetry.context.Context#makeCurrent()
      */
     @Override
-    public Context initializeNewContext(final io.opentelemetry.context.Context value) {
+    public Context activate(final io.opentelemetry.context.Context value) {
         return new ScopeWrappingContext(value.makeCurrent());
     }
 

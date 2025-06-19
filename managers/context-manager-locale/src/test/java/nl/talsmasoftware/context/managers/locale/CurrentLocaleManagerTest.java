@@ -69,7 +69,7 @@ class CurrentLocaleManagerTest {
 
             final CountDownLatch blocker = new CountDownLatch(1);
             Future<Locale> slowCall;
-            try (Context ignored2 = MANAGER.initializeNewContext(GERMAN)) {
+            try (Context ignored2 = MANAGER.activate(GERMAN)) {
                 assertThat(MANAGER.getActiveContextValue(), is(GERMAN));
                 assertThat(CurrentLocaleHolder.getOrDefault(), is(GERMAN));
 
@@ -95,7 +95,7 @@ class CurrentLocaleManagerTest {
             assertThat(CurrentLocaleHolder.getOrDefault(), is(GERMAN));
             assertThat(MANAGER.getActiveContextValue(), is(GERMAN));
 
-            try (Context ignored2 = MANAGER.initializeNewContext(null)) {
+            try (Context ignored2 = MANAGER.activate(null)) {
                 assertThat(CurrentLocaleHolder.getOrDefault(), is(DEFAULT_LOCALE));
                 assertThat(MANAGER.getActiveContextValue(), nullValue());
             } finally {
@@ -109,9 +109,9 @@ class CurrentLocaleManagerTest {
 
     @Test
     void testClear() {
-        MANAGER.initializeNewContext(DUTCH);
+        MANAGER.activate(DUTCH);
         assertThat(MANAGER.getActiveContextValue(), is(DUTCH));
-        MANAGER.initializeNewContext(ENGLISH);
+        MANAGER.activate(ENGLISH);
         assertThat(MANAGER.getActiveContextValue(), is(ENGLISH));
 
         MANAGER.clear();
@@ -121,9 +121,9 @@ class CurrentLocaleManagerTest {
 
     @Test
     void testClearAll() {
-        MANAGER.initializeNewContext(DUTCH);
+        MANAGER.activate(DUTCH);
         assertThat(MANAGER.getActiveContextValue(), is(DUTCH));
-        MANAGER.initializeNewContext(ENGLISH);
+        MANAGER.activate(ENGLISH);
         assertThat(MANAGER.getActiveContextValue(), is(ENGLISH));
 
         ContextManager.clearAll();

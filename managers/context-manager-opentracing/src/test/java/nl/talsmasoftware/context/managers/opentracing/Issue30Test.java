@@ -40,13 +40,13 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
  * The problem is that {@code ContextSnapshot.capture()} only stores
  * {@code activeContext.getValue()} which is {@code null}<br>
  * {@code ContextSnapshot.reactivate()} then retreives {@code null} from the snapshot and
- * calls {@code OpentracingSpanManger.initializeNewContext(null)}
+ * calls {@code OpentracingSpanManger.activate(null)}
  *
  * <p>
  * The test in ScopeContext.close only checks that closed is false before calling span.close.
  *
  * <p>
- * The fix could be to set closed to true in initializeNewContext() if span is null,
+ * The fix could be to set closed to true in activate() if span is null,
  * or add a nullcheck in SpanContext.close.
  * </blockquote>
  *

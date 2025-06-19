@@ -132,10 +132,10 @@ class ContextSnapshotTest {
         final RuntimeException reactivationException = new IllegalStateException("Cannot create new context!");
         ThrowingContextManager mgr = new ThrowingContextManager();
         Context ctx1 = new DummyContext("foo");
-        Context ctx2 = mgr.initializeNewContext("bar");
+        Context ctx2 = mgr.activate("bar");
 
         ContextSnapshot snapshot = assertDoesNotThrow(ContextSnapshot::capture);
-        ThrowingContextManager.onInitialize = reactivationException;
+        ThrowingContextManager.onActivate = reactivationException;
 
         assertThat(DummyContext.currentValue(), is("foo"));
         assertThat(mgr.getActiveContextValue(), is("bar"));

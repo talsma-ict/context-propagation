@@ -12,6 +12,7 @@
 > This is  the development branch for the v2 version of this library.
 > All breaking changes to the library must go in this branch.
 > - Java version bumped to Java8 minimum
+> - `ContextManager.initializeNewContext` replaced by `activate`.
 > - `ContextManager.getActiveContext()` replaced by `getActiveContextValue()`.
 > - `ContextManager.clear()` must be implemented, but may be a no-op.
 > - All `@Deprecated(forRemoval=true)` is to be removed.

@@ -26,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author Sjoerd Talsma
  */
 public class ThrowingContextManager implements ContextManager<String> {
-    public static RuntimeException inConstructor = null, onInitialize = null, onGet = null, onClose = null, onClear = null;
+    public static RuntimeException inConstructor = null, onActivate = null, onGet = null, onClose = null, onClear = null;
 
     public ThrowingContextManager() {
         if (inConstructor != null) try {
@@ -37,11 +37,11 @@ public class ThrowingContextManager implements ContextManager<String> {
     }
 
     @Override
-    public Context initializeNewContext(String value) {
-        if (onInitialize != null) try {
-            throw onInitialize;
+    public Context activate(String value) {
+        if (onActivate != null) try {
+            throw onActivate;
         } finally {
-            onInitialize = null;
+            onActivate = null;
         }
         return new Ctx(value);
     }
