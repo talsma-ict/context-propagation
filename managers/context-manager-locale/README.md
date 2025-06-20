@@ -11,18 +11,16 @@ allowing a configured `Locale` to be propagated.
 1. Add it to your classpath.
    ```xml
    <dependency>
-       <groupId>nl.talsmasoftware.context</groupId>
-       <artifactId>locale-context</artifactId>
+       <groupId>nl.talsmasoftware.context.managers</groupId>
+       <artifactId>context-manager-locale</artifactId>
        <version>[see Maven badge above]</version>
    </dependency>
    ```  
 2. Make sure to use the `ContextAwareExecutorService` as your threadpool.
 3. Set the current Locale for some block of code:
    ```java
-   private static LocaleContextManager localeContextManager = new LocaleContextManager();
-
    private void runWithLocale(Locale locale, Runnable someCode) {
-       try (Context<Locale> ctx = localeContextManager.activate(locale)) {
+       try (Context ctx = CurrentLocaleHolder.set(locale)) {
            someCode.run();
        }
    } 
@@ -30,10 +28,11 @@ allowing a configured `Locale` to be propagated.
 4. Use the LocaleContext anywhere in your application:
    ```java
    private void someMethod() {
-       Locale locale = LocaleContextManager.getCurrentLocaleOrDefault();
+       Optional<Locale> optionalLocale = CurrentLocaleHolder.get();
+       Locale locale = CurrentLocaleHolder.getOrDefault();
    } 
    ```
 
 
-  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/locale-context
-  [maven]: https://search.maven.org/artifact/nl.talsmasoftware.context/locale-context
+  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context.managers/context-manager-locale
+  [maven]: https://search.maven.org/artifact/nl.talsmasoftware.context.managers/context-manager-locale
