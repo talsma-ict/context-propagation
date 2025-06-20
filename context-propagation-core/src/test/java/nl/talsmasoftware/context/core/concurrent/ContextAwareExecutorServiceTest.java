@@ -117,4 +117,19 @@ class ContextAwareExecutorServiceTest {
             assertThat(expected).cause().hasMessage("DOH!");
         }
     }
+
+    @Test
+    void testWrapRunnable() {
+        dummyContextManager.activate("Runnable test value1");
+        Future<?> result = executor.submit(() ->
+                assertThat(dummyContextManager.getActiveContextValue()).isEqualTo("Runnable test value1"));
+        assertThat(result).succeedsWithin(5, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void testWrapCallable() {
+        dummyContextManager.activate("Callable test value 1");
+        Future<String> result = executor.submit(() -> dummyContextManager.getActiveContextValue());
+        assertThat(result).succeedsWithin(5, TimeUnit.SECONDS).isEqualTo("Callable test value 1");
+    }
 }
