@@ -113,13 +113,13 @@ snapshot.wrap(() -> {
 The following `ThreadLocal`-based contexts are currently supported
 out of the box by this context-propagation library:
 
+- [Spring Security Context]
+- [OpenTelemetry Context][opentelemetry context propagation]
 - [SLF4J MDC (Mapped Diagnostic Context)][slf4j mdc propagation]
 - [Log4j 2 Thread Context][log4j2 thread context propagation]
-- [OpenTelemetry Context][opentelemetry context propagation]
-- [OpenTracing Span contexts][opentracing span propagation]
-- [Spring Security Context]
 - [Locale context][locale context]
 - [ServletRequest contexts][servletrequest propagation]
+- [OpenTracing Span contexts][opentracing span propagation]
 - .. _Yours?_
   Feel free to create an issue or pull-request if you know of
   a ThreadLocal context that should also be included in a context snapshot.
