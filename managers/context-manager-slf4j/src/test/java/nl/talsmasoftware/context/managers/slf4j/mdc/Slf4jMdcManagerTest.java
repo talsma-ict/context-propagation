@@ -24,96 +24,98 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 
-import java.io.Closeable;
-import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasToString;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 /**
  * Unit test for the {@link Slf4jMdcManager}.
  *
  * @author Sjoerd Talsma
  */
-public class Slf4jMdcManagerTest {
+class Slf4jMdcManagerTest {
 
     ExecutorService threadpool;
 
     @BeforeEach
-    public void setupThreadpool() {
+    void setupThreadpool() {
         threadpool = ContextAwareExecutorService.wrap(Executors.newCachedThreadPool());
     }
 
     @AfterEach
-    public void shutdownThreadpool() {
+    void shutdownThreadpool() {
         threadpool.shutdown();
     }
 
     @BeforeEach
     @AfterEach
-    public void clearMDC() {
+    void clearMDC() {
         MDC.clear();
     }
 
-    private static final Callable<String> GET_MDC_ITEM = new Callable<String>() {
-        public String call() {
-            return MDC.get("mdc-item");
-        }
-    };
-
     @Test
-    public void testMdcItemPropagation() throws ExecutionException, InterruptedException {
+    void testMdcItemPropagation() throws ExecutionException, InterruptedException {
         MDC.put("mdc-item", "Item value");
-        Future<String> itemValue = threadpool.submit(GET_MDC_ITEM);
+        Future<String> itemValue = threadpool.submit(() -> MDC.get("mdc-item"));
         assertThat(itemValue.get(), is("Item value"));
     }
 
     @Test
-    public void testMdcItemRestoration() throws Exception {
+    void testMdcItemRestoration() throws Exception {
         MDC.put("mdc-item", "Value 1");
 
         ContextSnapshot snapshot = ContextSnapshot.capture();
-        assertThat("New snapshot shouldn't manipulate MDC.", GET_MDC_ITEM.call(), is("Value 1"));
+        assertThat("New snapshot shouldn't manipulate MDC.", MDC.get("mdc-item"), is("Value 1"));
 
         MDC.put("mdc-item", "Value 2");
-        assertThat("Sanity check: MDC changed?", GET_MDC_ITEM.call(), is("Value 2"));
+        assertThat("Sanity check: MDC changed?", MDC.get("mdc-item"), is("Value 2"));
 
-        Closeable reactivation = snapshot.reactivate();
-        assertThat("MDC changed by reactivation", GET_MDC_ITEM.call(), is("Value 1"));
+        try (ContextSnapshot.Reactivation reactivation = snapshot.reactivate()) {
+            assertThat("MDC changed by reactivation", MDC.get("mdc-item"), is("Value 1"));
+        }
 
-        reactivation.close();
-        assertThat("MDC restored?", GET_MDC_ITEM.call(), is("Value 2"));
+        assertThat("MDC restored?", MDC.get("mdc-item"), is("Value 2"));
     }
 
     @Test
-    public void testSlf4jMdcManagerToString() {
+    void testSlf4jMdcManagerToString() {
         assertThat(Slf4jMdcManager.provider(), hasToString("Slf4jMdcManager"));
     }
 
     @Test
-    public void testSlf4jMdcContextToString() {
-        Slf4jMdcManager mgr = Slf4jMdcManager.provider();
-        MDC.put("dummy", "value");
-        Map<String, String> mdc = MDC.getCopyOfContextMap();
-        assertThat(mgr.getActiveContextValue(), equalTo(mdc));
-
-        try (Context ctx = mgr.activate(mdc)) {
-            assertThat(ctx, hasToString("Slf4jMdcContext" + mdc));
+    void testSlf4jMdcContextToString() {
+        Slf4jMdcManager manager = Slf4jMdcManager.provider();
+        try (Context context = manager.activate(MDC.getCopyOfContextMap())) {
+            assertThat(manager, hasToString("Slf4jMdcManager"));
+            assertThat(context, hasToString("Slf4jMdcContext"));
         }
     }
 
     @Test
-    public void testClearActiveContexts() {
+    void testClearActiveContexts() {
         MDC.put("dummy", "value");
         // Test no-op for MdcManager
         ContextManager.clearAll();
         assertThat(MDC.get("dummy"), is("value"));
+    }
+
+    @Test
+    void unrelatedKeysAreNotTouched() throws Exception {
+        MDC.put("test-key-1", "value");
+        ContextSnapshot snapshot = ContextSnapshot.capture();
+
+        MDC.remove("test-key-1");
+        MDC.put("test-key-2", "unrelated value not in the snapshot");
+        assertThat(snapshot.wrap(() -> MDC.get("test-key-1")).call(), is("value"));
+        assertThat(snapshot.wrap(() -> MDC.get("test-key-2")).call(), is("unrelated value not in the snapshot"));
+
+        assertThat(MDC.get("test-key-1"), nullValue());
+        assertThat(MDC.get("test-key-2"), is("unrelated value not in the snapshot"));
     }
 }
