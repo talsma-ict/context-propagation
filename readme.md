@@ -8,17 +8,19 @@
 
 # Context propagation library
 
-Library to create a snapshot of one or more `ThreadLocal` values and reactivate them in another thread.
+Library to capture a snapshot of one or more `ThreadLocal` values and reactivate them in another thread.
 
-The library automatically detects supported `ThreadLocal` values to propagate.
-It uses a Service Provider Interface (SPI) for this using the Java [ServiceLoader].
+The library automatically detects supported `ThreadLocal` values to be captured.
+It uses a `ContextManager` Service Provider Interface (SPI) for this using the Java [ServiceLoader].
 
 The core module provides several [utility classes](#utility-classes) to safely capture a context snapshot
 in the calling thread and reativating it in another thread and ensuring proper
 cleanup after its execution finishes. This reduces the chance of 'leaking' thread-local
 values.
 
-## Terminology
+## API concepts
+
+A brief explanation of the core concepts from the api:
 
 ### ContextSnapshot
 
@@ -36,8 +38,8 @@ Manages a [context](#context) by providing a standard way of interacting with `T
 
 Thread-local values can be accessed via a ContextManager by:
 
-- Calling `activate(value)` which _sets_ the given value until `close()` is called on the resulting `Context`
 - Calling `getActiveContextValue()` which _gets_ the current thread-local value.
+- Calling `activate(value)` which _sets_ the given value until `close()` is called on the resulting `Context`.
 - Calling `clear()` which _removes_ the thread-local value.
 
 ### Context
@@ -45,10 +47,7 @@ Thread-local values can be accessed via a ContextManager by:
 Abstraction for an _activated_ thread-local value.
 
 When the context manager activates a value, a new `Context` is returned.
-_Closing_ this context will remove the activated value again.
-
-It is recommended to _restore_ the thread-local to the value before activation,
-but there is no guarantee that all context manager implementations actually do that.
+_Closing_ this context will undo this activated value again.
 
 > [!IMPORTANT]
 > It is the responsibility of the one activating a new Context to also close it _from the same thread_.
@@ -76,15 +75,14 @@ Examples include:
 If your background threads are managed by an ExecutorService,
 you can use our _context aware_ ExecutorService to wrap your usual threadpool.
 
-This automatically takes a context snapshot to reactivate in the submitted background thread.  
-After the background thread finishes, the snapshot reactivation is automatically closed,
-ensuring that no remaining ThreadLocal values leak into the thread pool.
+The `ContextAwareExcutorService` automatically captures context snapshots before submitting work. 
+This snapshot is then reactivated (and closed) in the submitted background thread.  
 
-The `ContextAwareExecutorService` can wrap any ExecutorService for the actual thread execution:
+It can wrap any ExecutorService for the actual thread execution:
 
 ```java
 private static final ExecutorService THREADPOOL =
-        new ContextAwareExecutorService(Executors.newCachedThreadpool());
+        ContextAwareExecutorService.wrap(Executors.newCachedThreadpool());
 ```
 
 ### Manually capture and reactivate a context snapshot

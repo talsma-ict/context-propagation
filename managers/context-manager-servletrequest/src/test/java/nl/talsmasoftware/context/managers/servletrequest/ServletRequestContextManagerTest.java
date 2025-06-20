@@ -46,7 +46,7 @@ class ServletRequestContextManagerTest {
     @BeforeEach
     void init() {
         ServletRequestContextManager.provider().clear();
-        threadpool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
+        threadpool = ContextAwareExecutorService.wrap(Executors.newCachedThreadPool());
     }
 
     @AfterEach

@@ -16,7 +16,6 @@
 package nl.talsmasoftware.context.core.concurrent;
 
 import nl.talsmasoftware.context.api.ContextSnapshot;
-import nl.talsmasoftware.context.api.ContextSnapshot.Reactivation;
 import nl.talsmasoftware.context.core.delegation.DelegatingExecutorService;
 
 import java.util.concurrent.Callable;
@@ -39,38 +38,32 @@ import java.util.concurrent.ExecutorService;
  *
  * @author Sjoerd Talsma
  */
-public class ContextAwareExecutorService extends DelegatingExecutorService implements ExecutorService {
+public final class ContextAwareExecutorService extends DelegatingExecutorService implements ExecutorService {
     /**
-     * Constructor for a new <em>context-aware</em> {@linkplain ExecutorService}.
+     * Wrap an {@linkplain ExecutorService}, making it <em>context-aware</em>.
      *
      * <p>
-     * The new executor service will pass all tasks to the {@code delegate} executor service,
+     * The new executor service passes all tasks to the {@code delegate} executor service,
      * capturing a {@linkplain ContextSnapshot} from the caller thread.<br>
-     * Submitted tasks will be provided with a wrapper that reactivates this snapshot in the executed thread context.
+     * Submitted tasks will reactivate (and close) this snapshot in the executed thread context.
      *
      * @param delegate The delegate executor service to submit tasks to.
      */
-    public ContextAwareExecutorService(ExecutorService delegate) {
+    public static ContextAwareExecutorService wrap(ExecutorService delegate) {
+        return new ContextAwareExecutorService(delegate);
+    }
+
+    private ContextAwareExecutorService(ExecutorService delegate) {
         super(delegate);
     }
 
     @Override
     protected <T> Callable<T> wrap(final Callable<T> callable) {
-        final ContextSnapshot snapshot = ContextSnapshot.capture();
-        return () -> {
-            try (Reactivation reactivation = snapshot.reactivate()) {
-                return callable.call();
-            }
-        };
+        return ContextSnapshot.capture().wrap(callable);
     }
 
     @Override
     protected Runnable wrap(final Runnable runnable) {
-        final ContextSnapshot snapshot = ContextSnapshot.capture();
-        return () -> {
-            try (Reactivation reactivation = snapshot.reactivate()) {
-                runnable.run();
-            }
-        };
+        return ContextSnapshot.capture().wrap(runnable);
     }
 }

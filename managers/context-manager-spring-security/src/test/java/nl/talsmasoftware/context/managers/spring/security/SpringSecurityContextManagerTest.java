@@ -49,7 +49,7 @@ public class SpringSecurityContextManagerTest {
 
     @BeforeEach
     public void setupThreadpool() {
-        threadpool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
+        threadpool = ContextAwareExecutorService.wrap(Executors.newCachedThreadPool());
     }
 
     @AfterEach

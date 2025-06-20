@@ -48,7 +48,7 @@ public class Slf4jMdcManagerTest {
 
     @BeforeEach
     public void setupThreadpool() {
-        threadpool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
+        threadpool = ContextAwareExecutorService.wrap(Executors.newCachedThreadPool());
     }
 
     @AfterEach

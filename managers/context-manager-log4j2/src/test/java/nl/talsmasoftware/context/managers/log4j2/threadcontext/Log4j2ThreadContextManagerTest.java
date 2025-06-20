@@ -60,7 +60,7 @@ class Log4j2ThreadContextManagerTest {
     void setupThreadpool() {
         // Only use 1 thread because tests expect single thread to be reused
         rawThreadpool = Executors.newFixedThreadPool(1);
-        threadpool = new ContextAwareExecutorService(rawThreadpool);
+        threadpool = ContextAwareExecutorService.wrap(rawThreadpool);
     }
 
     @AfterEach

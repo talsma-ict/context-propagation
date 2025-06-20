@@ -52,7 +52,7 @@ class CurrentLocaleManagerTest {
     @BeforeEach
     void init() {
         Locale.setDefault(DEFAULT_LOCALE);
-        threadPool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
+        threadPool = ContextAwareExecutorService.wrap(Executors.newCachedThreadPool());
     }
 
     @AfterEach

@@ -16,6 +16,7 @@
 package nl.talsmasoftware.context.api;
 
 import java.io.Closeable;
+import java.util.concurrent.Callable;
 
 /**
  * Snapshot capturing all active values from detected {@link ContextManager} implementations.
@@ -26,7 +27,7 @@ import java.io.Closeable;
  *
  * <p>
  * A context snapshot can be obtained from the {@linkplain #capture()} method.
-
+ *
  * <p>
  * <strong>Important:</strong> Make sure to <strong>always</strong> call {@link Reactivation#close()}
  * in the same thread after calling {@linkplain #reactivate()}.
@@ -95,6 +96,49 @@ public interface ContextSnapshot {
          * before the snapshot was activated.
          */
         void close();
+    }
+
+    /**
+     * Wrap a callable in this context snapshot, reactivating it during the call.
+     *
+     * <p>
+     * This provides the code being called with the thread-local values captured in this snapshot,
+     * even if it is executed in a different thread.
+     *
+     * <p>
+     * The reactivation is closed after the call finished ensuring that all thread-local values are properly cleaned up.
+     *
+     * @param callable The callable to be called with all context values from this snapshot.
+     * @param <T>      The result type returned by the callable.
+     * @return The wrapped callable.
+     */
+    default <T> Callable<T> wrap(final Callable<T> callable) {
+        return () -> {
+            try (Reactivation reactivation = this.reactivate()) {
+                return callable.call();
+            }
+        };
+    }
+
+    /**
+     * Wrap a runnable in this context snapshot, reactivating it during the run.
+     *
+     * <p>
+     * This provides the code being ran with the thread-local values captured in this snapshot,
+     * even if it is executed in a different thread.
+     *
+     * <p>
+     * The reactivation is closed after the run finished ensuring that all thread-local values are properly cleaned up.
+     *
+     * @param runnable The runnable to be ran with all context values from this snapshot.
+     * @return The wrapped runnable.
+     */
+    default Runnable wrap(final Runnable runnable) {
+        return () -> {
+            try (Reactivation reactivation = this.reactivate()) {
+                runnable.run();
+            }
+        };
     }
 
 }

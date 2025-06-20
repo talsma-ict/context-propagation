@@ -41,7 +41,7 @@ class ContextAwareExecutorServiceTest {
 
     @BeforeEach
     void setupExecutor() {
-        executor = new ContextAwareExecutorService(Executors.newCachedThreadPool());
+        executor = ContextAwareExecutorService.wrap(Executors.newCachedThreadPool());
     }
 
     @AfterEach
