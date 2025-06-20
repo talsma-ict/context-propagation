@@ -179,7 +179,7 @@ and the structure of the repository.
   - Separate API module containing only the minimum API.
   - Separate core module for all [utility classes](#utility-classes).
   - All provided manager implementations moved to `managers` subdirectory.
-  - All context timer implementations moved to 'timers' subdirectory.
+  - All context timer implementations moved to `timers` subdirectory.
 - API simplification. 
   - Static `ContextSnapshot.capture()` captures a new snapshot and `ContextSnapshot.reactivate()` reactivates it.
   - `ContextManager.initializeNewContext(value)` was renamed to `activate(value)`.
