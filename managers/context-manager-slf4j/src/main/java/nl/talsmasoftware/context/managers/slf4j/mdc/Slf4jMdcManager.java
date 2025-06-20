@@ -19,8 +19,8 @@ import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextManager;
 import org.slf4j.MDC;
 
+import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Manager to propagate the Slf4J {@linkplain MDC MDC context map} from one thread to another.
@@ -89,7 +89,7 @@ public class Slf4jMdcManager implements ContextManager<Map<String, String>> {
      * @return A context that -when closed- will restore the active MDC values to what they were just before this call.
      */
     public Context activate(final Map<String, String> mdcValues) {
-        return new Slf4jMdcContext(mdcValues);
+        return new Slf4jMdcContext(mdcValues == null ? Collections.emptyMap() : mdcValues);
     }
 
     /**
@@ -125,39 +125,4 @@ public class Slf4jMdcManager implements ContextManager<Map<String, String>> {
         return getClass().getSimpleName();
     }
 
-    private static final class Slf4jMdcContext implements Context {
-        private final Map<String, String> previous;
-        private final AtomicBoolean closed;
-
-        private Slf4jMdcContext(Map<String, String> value) {
-            // Capture current MDC as 'previous' and make the given values the 'new current' MDC.
-            this.previous = MDC.getCopyOfContextMap();
-            setMdc(value);
-            this.closed = new AtomicBoolean(false);
-        }
-
-        public Map<String, String> getValue() {
-            return MDC.getCopyOfContextMap();
-        }
-
-        public void close() {
-            if (closed.compareAndSet(false, true)) {
-                setMdc(previous);
-            }
-        }
-
-        @Override
-        public String toString() {
-            Map<String, String> mdc = getValue();
-            return closed.get() ? "Slf4jMdcContext{closed}" : "Slf4jMdcContext" + (mdc == null ? "{}" : mdc);
-        }
-
-        private static void setMdc(Map<String, String> mdc) {
-            if (mdc == null) {
-                MDC.clear();
-            } else {
-                MDC.setContextMap(mdc);
-            }
-        }
-    }
 }
