@@ -45,8 +45,8 @@ public interface Context extends Closeable {
      * <p>
      * It is the responsibility of the one activating a new context to also close it <em>from the same thread</em>.
      *
-     * @implNote Implementors are advised to <em>restore</em> the previous thread-local value upon close, but are not obliged to do so.
      * @implSpec It <strong>must</strong> be possible to call the {@linkplain #close()} method multiple times. Later calls must have no effect and should not throw exceptions.
+     * @implNote Implementors are advised to <em>restore</em> the previous thread-local value upon close, but are not obliged to do so.
      */
     void close();
 

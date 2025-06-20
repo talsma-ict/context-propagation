@@ -257,6 +257,18 @@
                     <additionalOptions>
                         <additionalOption>-createPumlFiles</additionalOption>
                     </additionalOptions>
+                    <tags>
+                        <tag>
+                            <name>implNote</name>
+                            <placement>a</placement>
+                            <head>Implementation Note:</head>
+                        </tag>
+                        <tag>
+                            <name>implSpec</name>
+                            <placement>a</placement>
+                            <head>Implementation Requirements:</head>
+                        </tag>
+                    </tags>
                     <offlineLinks>
                         <offlineLink>
                             <location>${root.basedir}/.mvn/javadoc</location>
