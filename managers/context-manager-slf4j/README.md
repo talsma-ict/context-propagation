@@ -12,8 +12,8 @@ be automatically included into the `ContextSnapshot`.
 Add it to your classpath. 
 ```xml
 <dependency>
-    <groupId>nl.talsmasoftware.context</groupId>
-    <artifactId>slf4j-propagation</artifactId>
+    <groupId>nl.talsmasoftware.context.managers</groupId>
+    <artifactId>context-manager-slf4j</artifactId>
     <version>[see Maven badge above]</version>
 </dependency>
 ```
@@ -27,8 +27,8 @@ The `ContextAwareExecutorService` automatically propagates the full [MDC] conten
 into all executed tasks this way.
 
 
-  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/slf4j-propagation
-  [maven]: https://search.maven.org/artifact/nl.talsmasoftware.context/slf4j-propagation
+  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context.managers/context-manager-slf4j
+  [maven]: https://search.maven.org/artifact/nl.talsmasoftware.context.managers/context-manager-slf4j
 
   [slf4j]: https://www.slf4j.org/
   [mdc]: https://www.slf4j.org/api/org/slf4j/MDC.html
