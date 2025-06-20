@@ -22,7 +22,7 @@ allowing a configured `Locale` to be propagated.
    private static LocaleContextManager localeContextManager = new LocaleContextManager();
 
    private void runWithLocale(Locale locale, Runnable someCode) {
-       try (Context<Locale> ctx = localeContextManager.initializeNewContext(locale)) {
+       try (Context<Locale> ctx = localeContextManager.activate(locale)) {
            someCode.run();
        }
    } 

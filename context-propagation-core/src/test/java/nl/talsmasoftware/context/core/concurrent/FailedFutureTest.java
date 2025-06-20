@@ -44,9 +44,9 @@ class FailedFutureTest {
 
     @Test
     void testFailedFutureTakesNewSnapshot() throws ExecutionException, InterruptedException {
-        manager.initializeNewContext("Mr. Blonde");
+        manager.activate("Mr. Blonde");
         final CompletableFuture<String> completed = ContextAwareCompletableFuture.failedFuture(new NullPointerException("Mr. Blue"));
-        manager.initializeNewContext("Mr. Brown");
+        manager.activate("Mr. Brown");
         CompletableFuture<String> future = completed.handleAsync(addActiveContextValue);
 
         assertThat(future.get(), is("Mr. Blue, Mr. Blonde"));
@@ -55,11 +55,11 @@ class FailedFutureTest {
 
     @Test
     void testFailedFutureAppliesGivenSnapshot() throws ExecutionException, InterruptedException {
-        manager.initializeNewContext("Mr. Blonde");
+        manager.activate("Mr. Blonde");
         final ContextSnapshot snapshot = ContextSnapshot.capture();
-        manager.initializeNewContext("Mr. Brown");
+        manager.activate("Mr. Brown");
         final CompletableFuture<String> completed = ContextAwareCompletableFuture.failedFuture(new NullPointerException("Mr. Blue"), snapshot);
-        manager.initializeNewContext("Mr. Orange");
+        manager.activate("Mr. Orange");
         CompletableFuture<String> future = completed.handleAsync(addActiveContextValue);
 
         assertThat(future.get(), is("Mr. Blue, Mr. Blonde"));
@@ -68,9 +68,9 @@ class FailedFutureTest {
 
     @Test
     void testFailedStageTakesNewSnapshot() throws ExecutionException, InterruptedException {
-        manager.initializeNewContext("Mr. Blonde");
+        manager.activate("Mr. Blonde");
         final CompletionStage<String> completed = ContextAwareCompletableFuture.failedStage(new NullPointerException("Mr. Blue"));
-        manager.initializeNewContext("Mr. Brown");
+        manager.activate("Mr. Brown");
         CompletionStage<String> stage = completed.handleAsync(addActiveContextValue);
 
         assertThat(stage.toCompletableFuture().get(), is("Mr. Blue, Mr. Blonde"));

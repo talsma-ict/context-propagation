@@ -132,10 +132,10 @@ class ContextSnapshotTest {
         final RuntimeException reactivationException = new IllegalStateException("Cannot create new context!");
         ThrowingContextManager mgr = new ThrowingContextManager();
         Context ctx1 = new DummyContext("foo");
-        Context ctx2 = mgr.initializeNewContext("bar");
+        Context ctx2 = mgr.activate("bar");
 
         ContextSnapshot snapshot = assertDoesNotThrow(ContextSnapshot::capture);
-        ThrowingContextManager.onInitialize = reactivationException;
+        ThrowingContextManager.onActivate = reactivationException;
 
         assertThat(DummyContext.currentValue(), is("foo"));
         assertThat(mgr.getActiveContextValue(), is("bar"));
@@ -198,5 +198,27 @@ class ContextSnapshotTest {
                     .isExactlyInstanceOf(IllegalStateException.class)
                     .hasMessage("Service cache error!");
         }
+    }
+
+    @Test
+    void wrapRunnable() {
+        dummyManager.activate("Value 1");
+        ContextSnapshot snapshot = ContextSnapshot.capture();
+        dummyManager.activate("Value 2");
+
+        assertThat(dummyManager.getActiveContextValue(), is("Value 2"));
+        snapshot.wrap(() -> assertThat(dummyManager.getActiveContextValue(), is("Value 1"))).run();
+        assertThat(dummyManager.getActiveContextValue(), is("Value 2"));
+    }
+
+    @Test
+    void wrapCallable() throws Exception {
+        dummyManager.activate("Value 1");
+        ContextSnapshot snapshot = ContextSnapshot.capture();
+        dummyManager.activate("Value 2");
+
+        assertThat(dummyManager.getActiveContextValue(), is("Value 2"));
+        assertThat(snapshot.wrap(dummyManager::getActiveContextValue).call(), is("Value 1"));
+        assertThat(dummyManager.getActiveContextValue(), is("Value 2"));
     }
 }

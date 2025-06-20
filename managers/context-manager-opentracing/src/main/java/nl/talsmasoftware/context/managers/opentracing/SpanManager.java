@@ -89,7 +89,7 @@ public class SpanManager implements ContextManager<Span> {
      * <p>
      * {@linkplain Context#close() Closing} the returned {@link Context} will also close the
      * corresponding {@link Scope} as it was also activated by us.<br>
-     * As a result of the opentracing 'rules' for scopes, <strong>every</strong> initialized {@link Context}
+     * As a result of the opentracing 'rules' for scopes, <strong>every</strong> activated {@link Context}
      * <strong>must be closed</strong>.<br>
      * The span will <strong>not</strong> be automatically {@link Span#finish() finished}
      * when the context is closed; this {@linkplain ContextManager} just propagates the Span
@@ -103,7 +103,7 @@ public class SpanManager implements ContextManager<Span> {
      * @return The new context that <strong>must</strong> be closed.
      */
     @Override
-    public Context initializeNewContext(final Span span) {
+    public Context activate(final Span span) {
         return new SpanContext(span);
     }
 

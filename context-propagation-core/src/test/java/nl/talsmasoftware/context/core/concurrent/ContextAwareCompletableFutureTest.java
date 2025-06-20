@@ -78,7 +78,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testDefaultConstructor() throws ExecutionException, InterruptedException {
-        Context ctx = manager.initializeNewContext("foo");
+        Context ctx = manager.activate("foo");
         CompletableFuture<String> future1 = new ContextAwareCompletableFuture<>(); // should have a new snapshot with foo
         ctx.close();
 
@@ -95,7 +95,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testSupplyAsync() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Vincent Vega")) {
+        try (Context ignored = manager.activate("Vincent Vega")) {
             Future<String> future = supplyAsync(DummyContext::currentValue);
             assertThat(future.get(), is("Vincent Vega"));
         }
@@ -103,7 +103,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testSupplyAsync_executor() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Marcellus Wallace")) {
+        try (Context ignored = manager.activate("Marcellus Wallace")) {
             Future<String> future = supplyAsync(DummyContext::currentValue, contextUnawareThreadpool);
             assertThat(future.get(), is("Marcellus Wallace"));
         }
@@ -111,7 +111,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testSupplyAsync_executor_snapshot() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Vincent Vega")) {
+        try (Context ignored = manager.activate("Vincent Vega")) {
             ContextSnapshot snapshot = ContextSnapshot.capture();
             DummyContext.setCurrentValue("Jules Winnfield");
             assertContext("Jules Winnfield");
@@ -123,7 +123,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testSupplyAsync_executor_snapshot_takeNewSnapshot() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Vincent Vega")) {
+        try (Context ignored = manager.activate("Vincent Vega")) {
             ContextSnapshot snapshot = ContextSnapshot.capture();
             DummyContext.setCurrentValue("Jules Winnfield");
             assertContext("Jules Winnfield");
@@ -143,7 +143,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testRunAsync() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Mia Wallace")) {
+        try (Context ignored = manager.activate("Mia Wallace")) {
             ContextAwareCompletableFuture<Void> future = ContextAwareCompletableFuture.runAsync(() -> assertThat(DummyContext.currentValue(), is("Mia Wallace")));
             future.get(); // trigger asynchronous assertion
         }
@@ -151,7 +151,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testRunAsync_executor() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Jimmie")) {
+        try (Context ignored = manager.activate("Jimmie")) {
             ContextAwareCompletableFuture<Void> future = ContextAwareCompletableFuture.runAsync(() -> assertThat(DummyContext.currentValue(), is("Jimmie")), contextUnawareThreadpool);
             future.get(); // trigger asynchronous assertion
         }
@@ -159,7 +159,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testRunAsync_executor_snapshot() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Pumpkin")) {
+        try (Context ignored = manager.activate("Pumpkin")) {
             ContextSnapshot snapshot = ContextSnapshot.capture();
             DummyContext.setCurrentValue("Honey Bunny");
             assertContext("Honey Bunny");
@@ -171,7 +171,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testRunAsync_executor_snapshot_takeNewSnapshot() throws ExecutionException, InterruptedException {
-        try (Context ingored = manager.initializeNewContext("Pumpkin")) {
+        try (Context ingored = manager.activate("Pumpkin")) {
             ContextSnapshot snapshot = ContextSnapshot.capture();
             DummyContext.setCurrentValue("Honey Bunny");
             assertContext("Honey Bunny");
@@ -187,14 +187,14 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenApply() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Jimmie")) {
+        try (Context ignored = manager.activate("Jimmie")) {
             Future<String> future = ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Bonnie"))
                     .thenApply(voidvalue -> DummyContext.currentValue());
             assertThat(future.get(), is("Jimmie"));
         }
 
-        try (Context ignored = manager.initializeNewContext("Jimmie")) {
+        try (Context ignored = manager.activate("Jimmie")) {
             Future<String> future = ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Bonnie"), null, null, true)
                     .thenApply(voidvalue -> DummyContext.currentValue());
@@ -204,14 +204,14 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenApplyAsync() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Butch")) {
+        try (Context ignored = manager.activate("Butch")) {
             Future<String> future = ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Esmerelda Villalobos"))
                     .thenApplyAsync(voidvalue -> DummyContext.currentValue());
             assertThat(future.get(), is("Butch"));
         }
 
-        try (Context ignored = manager.initializeNewContext("Butch")) {
+        try (Context ignored = manager.activate("Butch")) {
             Future<String> future = ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Esmerelda Villalobos"), null, null, true)
                     .thenApplyAsync(voidvalue -> DummyContext.currentValue());
@@ -221,14 +221,14 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenApplyAsync_executor() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Maynard")) {
+        try (Context ignored = manager.activate("Maynard")) {
             Future<String> future = ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Zed"))
                     .thenApplyAsync(voidvalue -> DummyContext.currentValue(), contextUnawareThreadpool);
             assertThat(future.get(), is("Maynard"));
         }
 
-        try (Context ignored = manager.initializeNewContext("Maynard")) {
+        try (Context ignored = manager.activate("Maynard")) {
             Future<String> future = ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Zed"), null, null, true)
                     .thenApplyAsync(voidvalue -> DummyContext.currentValue(), contextUnawareThreadpool);
@@ -238,7 +238,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenApplyAndTakeNewSnapshot() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Jimmie")) {
+        try (Context ignored = manager.activate("Jimmie")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Bonnie")).takeNewSnapshot().thenApply(voidvalue -> {
                 String val = DummyContext.currentValue();
                 DummyContext.setCurrentValue("-" + val);
@@ -249,7 +249,7 @@ class ContextAwareCompletableFutureTest {
             }).get();
         }
 
-        try (Context ignored = manager.initializeNewContext("Jimmie")) {
+        try (Context ignored = manager.activate("Jimmie")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Bonnie"), null, null, true).thenApply(voidvalue -> {
                 String val = DummyContext.currentValue();
                 DummyContext.setCurrentValue("-" + val);
@@ -263,7 +263,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenApplyAsyncAndTakeNewSnapshot() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Butch")) {
+        try (Context ignored = manager.activate("Butch")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Esmerelda Villalobos")).takeNewSnapshot().thenApplyAsync(voidvalue -> {
                 String val = DummyContext.currentValue();
                 DummyContext.setCurrentValue("-" + val);
@@ -274,7 +274,7 @@ class ContextAwareCompletableFutureTest {
             }).get();
         }
 
-        try (Context ignored = manager.initializeNewContext("Butch")) {
+        try (Context ignored = manager.activate("Butch")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Esmerelda Villalobos"), null, null, true).thenApplyAsync(voidvalue -> {
                 String val = DummyContext.currentValue();
                 DummyContext.setCurrentValue("-" + val);
@@ -288,7 +288,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenApplyAsyncAndTakeNewSnapshot_executor() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Maynard")) {
+        try (Context ignored = manager.activate("Maynard")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Zed")).takeNewSnapshot().thenApplyAsync(voidvalue -> {
                 String val = DummyContext.currentValue();
                 DummyContext.setCurrentValue("-" + val);
@@ -299,7 +299,7 @@ class ContextAwareCompletableFutureTest {
             }).get();
         }
 
-        try (Context ignored = manager.initializeNewContext("Maynard")) {
+        try (Context ignored = manager.activate("Maynard")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Zed"), null, null, true).thenApplyAsync(voidvalue -> {
                 String val = DummyContext.currentValue();
                 DummyContext.setCurrentValue("-" + val);
@@ -313,13 +313,13 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenAccept() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("The Gimp")) {
+        try (Context ignored = manager.activate("The Gimp")) {
             Future<Void> future = ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Butch"))
                     .thenAccept(voidvalue -> assertThat(DummyContext.currentValue(), is("The Gimp")));
             future.get(); // trigger asynchronous assertion
         }
 
-        try (Context ignored = manager.initializeNewContext("The Gimp")) {
+        try (Context ignored = manager.activate("The Gimp")) {
             Future<Void> future = ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Butch"), null, null, true)
                     .thenAccept(voidvalue -> assertThat(DummyContext.currentValue(), is("Butch")));
             future.get(); // trigger asynchronous assertion
@@ -328,14 +328,14 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenAcceptAsync() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Butch")) {
+        try (Context ignored = manager.activate("Butch")) {
             Future<Void> future = ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Fabienne"))
                     .thenAcceptAsync(voidvalue -> assertThat(DummyContext.currentValue(), is("Butch")));
             future.get(); // trigger asynchronous assertion
         }
 
-        try (Context ignored = manager.initializeNewContext("Butch")) {
+        try (Context ignored = manager.activate("Butch")) {
             Future<Void> future = ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Fabienne"), null, null, true)
                     .thenAcceptAsync(voidvalue -> assertThat(DummyContext.currentValue(), is("Fabienne")));
@@ -345,14 +345,14 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenAcceptAsync_executor() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Marvin")) {
+        try (Context ignored = manager.activate("Marvin")) {
             Future<Void> future = ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Winston Wolfe"))
                     .thenAcceptAsync(voidvalue -> assertThat(DummyContext.currentValue(), is("Marvin")), contextUnawareThreadpool);
             future.get(); // trigger asynchronous assertion
         }
 
-        try (Context ignored = manager.initializeNewContext("Marvin")) {
+        try (Context ignored = manager.activate("Marvin")) {
             Future<Void> future = ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Winston Wolfe"), null, null, true)
                     .thenAcceptAsync(voidvalue -> assertThat(DummyContext.currentValue(), is("Winston Wolfe")), contextUnawareThreadpool);
@@ -362,7 +362,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenAcceptAndTakeNewSnapshot() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("The Gimp")) {
+        try (Context ignored = manager.activate("The Gimp")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Butch")).takeNewSnapshot().thenAccept(voidvalue -> {
                         String val = DummyContext.currentValue();
                         assertThat(val, is("The Gimp"));
@@ -371,7 +371,7 @@ class ContextAwareCompletableFutureTest {
                     .get(); // trigger asynchronous assertion
         }
 
-        try (Context ignored = manager.initializeNewContext("The Gimp")) {
+        try (Context ignored = manager.activate("The Gimp")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Butch"), null, null, true).thenAccept(voidvalue -> {
                         String val = DummyContext.currentValue();
                         assertThat(val, is("Butch"));
@@ -383,7 +383,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenAcceptAsynAndTakeNewSnapshot() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Butch")) {
+        try (Context ignored = manager.activate("Butch")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Fabienne")).takeNewSnapshot().thenAcceptAsync(voidvalue -> {
                         String val = DummyContext.currentValue();
                         assertThat(val, is("Butch"));
@@ -392,7 +392,7 @@ class ContextAwareCompletableFutureTest {
                     .get(); // trigger asynchronous assertion
         }
 
-        try (Context ignored = manager.initializeNewContext("Butch")) {
+        try (Context ignored = manager.activate("Butch")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Fabienne"), null, null, true).thenAcceptAsync(voidvalue -> {
                         String val = DummyContext.currentValue();
                         assertThat(val, is("Fabienne"));
@@ -404,7 +404,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenAcceptAsyncAndTakeNewSnapshot_executor() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Marvin")) {
+        try (Context ignored = manager.activate("Marvin")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Winston Wolfe")).takeNewSnapshot().thenAcceptAsync(voidvalue -> {
                         String val = DummyContext.currentValue();
                         assertThat(val, is("Marvin"));
@@ -414,7 +414,7 @@ class ContextAwareCompletableFutureTest {
                     .get(); // trigger asynchronous assertion
         }
 
-        try (Context ignored = manager.initializeNewContext("Marvin")) {
+        try (Context ignored = manager.activate("Marvin")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Winston Wolfe"), null, null, true).thenAcceptAsync(voidvalue -> {
                         String val = DummyContext.currentValue();
                         assertThat(val, is("Winston Wolfe"));
@@ -426,12 +426,12 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenRun() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Lance")) {
+        try (Context ignored = manager.activate("Lance")) {
             Future<Void> future = ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Jody")).thenRun(() -> assertThat(DummyContext.currentValue(), is("Lance")));
             future.get(); // trigger asynchronous assertion
         }
 
-        try (Context ignored = manager.initializeNewContext("Lance")) {
+        try (Context ignored = manager.activate("Lance")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Jody"), null, null, true)
                     .thenRun(() -> assertThat(DummyContext.currentValue(), is("Jody")))
@@ -441,13 +441,13 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenRunAsync() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Ringo")) {
+        try (Context ignored = manager.activate("Ringo")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Yolanda"))
                     .thenRunAsync(() -> assertThat(DummyContext.currentValue(), is("Ringo")))
                     .get(); // trigger asynchronous assertion
         }
 
-        try (Context ignored = manager.initializeNewContext("Ringo")) {
+        try (Context ignored = manager.activate("Ringo")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Yolanda"), null, null, true)
                     .thenRunAsync(() -> assertThat(DummyContext.currentValue(), is("Yolanda")))
@@ -457,14 +457,14 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenRunAsync_executor() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Capt. Koons")) {
+        try (Context ignored = manager.activate("Capt. Koons")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Butch"))
                     .thenRunAsync(() -> assertThat(DummyContext.currentValue(), is("Capt. Koons")), contextUnawareThreadpool)
                     .get(); // trigger asynchronous assertion
         }
 
-        try (Context ignored = manager.initializeNewContext("Capt. Koons")) {
+        try (Context ignored = manager.activate("Capt. Koons")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Butch"), null, null, true)
                     .thenRunAsync(() -> assertThat(DummyContext.currentValue(), is("Butch")), contextUnawareThreadpool)
@@ -474,7 +474,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenRunAndTakeNewSnapshot() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Lance")) {
+        try (Context ignored = manager.activate("Lance")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Jody"))
                     .takeNewSnapshot()
@@ -487,7 +487,7 @@ class ContextAwareCompletableFutureTest {
                     .get(); // trigger asynchronous assertion
         }
 
-        try (Context ignored = manager.initializeNewContext("Lance")) {
+        try (Context ignored = manager.activate("Lance")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Jody"), null, null, true)
                     .thenRun(() -> {
@@ -502,7 +502,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenRunAsyncAndTakeNewSnapshot() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Ringo")) {
+        try (Context ignored = manager.activate("Ringo")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Yolanda"))
                     .takeNewSnapshot()
@@ -515,7 +515,7 @@ class ContextAwareCompletableFutureTest {
                     .get(); // trigger asynchronous assertion
         }
 
-        try (Context ignored = manager.initializeNewContext("Ringo")) {
+        try (Context ignored = manager.activate("Ringo")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Yolanda"), null, null, true)
                     .thenRunAsync(() -> {
@@ -530,7 +530,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenRunAsyncAndTakeNewSnapshot_executor() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Capt. Koons")) {
+        try (Context ignored = manager.activate("Capt. Koons")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Butch"))
                     .takeNewSnapshot()
@@ -543,7 +543,7 @@ class ContextAwareCompletableFutureTest {
                     .get(); // trigger asynchronous assertion
         }
 
-        try (Context ignored = manager.initializeNewContext("Capt. Koons")) {
+        try (Context ignored = manager.activate("Capt. Koons")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Butch"), null, null, true)
                     .thenRunAsync(() -> {
@@ -558,14 +558,14 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testWhenComplete() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Butch")) {
+        try (Context ignored = manager.activate("Butch")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Floyd"))
                     .whenComplete((voidValue, exception) -> assertThat(DummyContext.currentValue(), is("Butch")))
                     .get(); // trigger asynchronous assertion
         }
 
-        try (Context ignored = manager.initializeNewContext("Butch")) {
+        try (Context ignored = manager.activate("Butch")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Floyd"), null, null, true)
                     .whenComplete((voidValue, exception) -> assertThat(DummyContext.currentValue(), is("Floyd")))
@@ -575,14 +575,14 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testWhenCompleteAsync() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Zed")) {
+        try (Context ignored = manager.activate("Zed")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Pipe hittin' niggers"))
                     .whenCompleteAsync((voidValue, exception) -> assertThat(DummyContext.currentValue(), is("Zed")))
                     .get(); // trigger asynchronous assertion
         }
 
-        try (Context ignored = manager.initializeNewContext("Zed")) {
+        try (Context ignored = manager.activate("Zed")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Pipe hittin' niggers"), null, null, true)
                     .whenCompleteAsync((voidValue, exception) -> assertThat(DummyContext.currentValue(), is("Pipe hittin' niggers")))
@@ -592,14 +592,14 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testWhenCompleteAsync_executor() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Butch")) {
+        try (Context ignored = manager.activate("Butch")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Floyd"))
                     .whenCompleteAsync((voidValue, exception) -> assertThat(DummyContext.currentValue(), is("Butch")), contextUnawareThreadpool)
                     .get(); // trigger asynchronous assertion
         }
 
-        try (Context ignored = manager.initializeNewContext("Butch")) {
+        try (Context ignored = manager.activate("Butch")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Floyd"), null, null, true)
                     .whenCompleteAsync((voidValue, exception) -> assertThat(DummyContext.currentValue(), is("Floyd")), contextUnawareThreadpool)
@@ -610,14 +610,14 @@ class ContextAwareCompletableFutureTest {
     @Test
     void testHandle() throws ExecutionException, InterruptedException {
         final RuntimeException exception = new RuntimeException("Bad Motherfucker");
-        try (Context ignored = manager.initializeNewContext("Jody")) {
+        try (Context ignored = manager.activate("Jody")) {
             assertThat(ContextAwareCompletableFuture.runAsync(() -> {
                 DummyContext.setCurrentValue("Trudy");
                 throw exception;
             }).handle((voidValue, throwable) -> manager.getActiveContextValue()).get(), is("Jody"));
         }
 
-        try (Context ignored = manager.initializeNewContext("Jody")) {
+        try (Context ignored = manager.activate("Jody")) {
             assertThat(ContextAwareCompletableFuture.runAsync(() -> {
                 DummyContext.setCurrentValue("Trudy");
                 throw exception;
@@ -628,14 +628,14 @@ class ContextAwareCompletableFutureTest {
     @Test
     void testHandleAsync() throws ExecutionException, InterruptedException {
         final RuntimeException exception = new RuntimeException("Bad Motherfucker");
-        try (Context ignored = manager.initializeNewContext("Jody")) {
+        try (Context ignored = manager.activate("Jody")) {
             assertThat(ContextAwareCompletableFuture.runAsync(() -> {
                 DummyContext.setCurrentValue("Trudy");
                 throw exception;
             }).handleAsync((voidValue, throwable) -> manager.getActiveContextValue()).get(), is("Jody"));
         }
 
-        try (Context ignored = manager.initializeNewContext("Jody")) {
+        try (Context ignored = manager.activate("Jody")) {
             assertThat(ContextAwareCompletableFuture.runAsync(() -> {
                 DummyContext.setCurrentValue("Trudy");
                 throw exception;
@@ -646,14 +646,14 @@ class ContextAwareCompletableFutureTest {
     @Test
     void testHandleAsync_executor() throws ExecutionException, InterruptedException {
         final RuntimeException exception = new RuntimeException("Bad Motherfucker");
-        try (Context ignored = manager.initializeNewContext("Jody")) {
+        try (Context ignored = manager.activate("Jody")) {
             assertThat(ContextAwareCompletableFuture.runAsync(() -> {
                 DummyContext.setCurrentValue("Trudy");
                 throw exception;
             }).handleAsync((voidValue, throwable) -> manager.getActiveContextValue(), contextUnawareThreadpool).get(), is("Jody"));
         }
 
-        try (Context ignored = manager.initializeNewContext("Jody")) {
+        try (Context ignored = manager.activate("Jody")) {
             assertThat(ContextAwareCompletableFuture.runAsync(() -> {
                 DummyContext.setCurrentValue("Trudy");
                 throw exception;
@@ -664,7 +664,7 @@ class ContextAwareCompletableFutureTest {
     @Test
     void testHandleAndTakeSnapshot() throws ExecutionException, InterruptedException {
         final RuntimeException exception = new RuntimeException("Bad Motherfucker");
-        try (Context ignored = manager.initializeNewContext("Jody")) {
+        try (Context ignored = manager.activate("Jody")) {
             assertThat(ContextAwareCompletableFuture.runAsync(() -> {
                 DummyContext.setCurrentValue("Trudy");
                 throw exception;
@@ -675,7 +675,7 @@ class ContextAwareCompletableFutureTest {
             }).whenComplete((result, throwable) -> assertContext("-Jody")).get(), is("Jody"));
         }
 
-        try (Context ignored = manager.initializeNewContext("Jody")) {
+        try (Context ignored = manager.activate("Jody")) {
             assertThat(ContextAwareCompletableFuture.runAsync(() -> {
                 DummyContext.setCurrentValue("Trudy");
                 throw exception;
@@ -690,7 +690,7 @@ class ContextAwareCompletableFutureTest {
     @Test
     void testHandleAsyncAndTakeSnapshot() throws ExecutionException, InterruptedException {
         final RuntimeException exception = new RuntimeException("Bad Motherfucker");
-        try (Context ignored = manager.initializeNewContext("Jody")) {
+        try (Context ignored = manager.activate("Jody")) {
             assertThat(ContextAwareCompletableFuture.runAsync(() -> {
                 DummyContext.setCurrentValue("Trudy");
                 throw exception;
@@ -701,7 +701,7 @@ class ContextAwareCompletableFutureTest {
             }).whenComplete((result, throwable) -> assertContext("-Jody")).get(), is("Jody"));
         }
 
-        try (Context ignored = manager.initializeNewContext("Jody")) {
+        try (Context ignored = manager.activate("Jody")) {
             assertThat(ContextAwareCompletableFuture.runAsync(() -> {
                 DummyContext.setCurrentValue("Trudy");
                 throw exception;
@@ -716,7 +716,7 @@ class ContextAwareCompletableFutureTest {
     @Test
     void testHandleAsyncAndTakeSnapshot_executor() throws ExecutionException, InterruptedException {
         final RuntimeException exception = new RuntimeException("Bad Motherfucker");
-        try (Context ignored = manager.initializeNewContext("Jody")) {
+        try (Context ignored = manager.activate("Jody")) {
             assertThat(ContextAwareCompletableFuture.runAsync(() -> {
                 DummyContext.setCurrentValue("Trudy");
                 throw exception;
@@ -727,7 +727,7 @@ class ContextAwareCompletableFutureTest {
             }, contextUnawareThreadpool).whenComplete((result, throwable) -> assertContext("-Jody")).get(), is("Jody"));
         }
 
-        try (Context ignored = manager.initializeNewContext("Jody")) {
+        try (Context ignored = manager.activate("Jody")) {
             assertThat(ContextAwareCompletableFuture.runAsync(() -> {
                 DummyContext.setCurrentValue("Trudy");
                 throw exception;
@@ -741,7 +741,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testExceptionally() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Gringo")) {
+        try (Context ignored = manager.activate("Gringo")) {
             ContextAwareCompletableFuture.runAsync(() -> {
                 DummyContext.setCurrentValue("Jules Winnfield");
                 throw new RuntimeException("Bad Motherfucker");
@@ -752,7 +752,7 @@ class ContextAwareCompletableFutureTest {
             }).get();
         }
 
-        try (Context ignored = manager.initializeNewContext("Gringo")) {
+        try (Context ignored = manager.activate("Gringo")) {
             ContextAwareCompletableFuture.runAsync(() -> {
                 DummyContext.setCurrentValue("Jules Winnfield");
                 throw new RuntimeException("Bad Motherfucker");
@@ -766,7 +766,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testExceptionallyAndTakeNewSnapshot() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Gringo")) {
+        try (Context ignored = manager.activate("Gringo")) {
             ContextAwareCompletableFuture.runAsync(() -> {
                 DummyContext.setCurrentValue("Jules Winnfield");
                 throw new RuntimeException("Bad Motherfucker");
@@ -778,7 +778,7 @@ class ContextAwareCompletableFutureTest {
             }).thenAccept(aVoid -> assertContext("-Gringo")).get();
         }
 
-        try (Context ignored = manager.initializeNewContext("Gringo")) {
+        try (Context ignored = manager.activate("Gringo")) {
             ContextAwareCompletableFuture.runAsync(() -> {
                 DummyContext.setCurrentValue("Jules Winnfield");
                 throw new RuntimeException("Bad Motherfucker");
@@ -793,7 +793,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenCombine() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Marcellus Wallace")) {
+        try (Context ignored = manager.activate("Marcellus Wallace")) {
             Future<String> future = ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Vincent Vega"))
                     .thenCombine(ContextAwareCompletableFuture
@@ -802,7 +802,7 @@ class ContextAwareCompletableFutureTest {
             assertThat(DummyContext.currentValue(), is("Marcellus Wallace"));
         }
 
-        try (Context ignored = manager.initializeNewContext("Marcellus Wallace")) {
+        try (Context ignored = manager.activate("Marcellus Wallace")) {
             Future<String> future = ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Vincent Vega"), null, null, true)
                     .thenCombine(ContextAwareCompletableFuture
@@ -814,7 +814,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenCombineAsync() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Brett")) {
+        try (Context ignored = manager.activate("Brett")) {
             Future<String> future = ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Marvin"))
                     .thenCombineAsync(ContextAwareCompletableFuture
@@ -823,7 +823,7 @@ class ContextAwareCompletableFutureTest {
             assertThat(DummyContext.currentValue(), is("Brett"));
         }
 
-        try (Context ignored = manager.initializeNewContext("Brett")) {
+        try (Context ignored = manager.activate("Brett")) {
             Future<String> future = ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Marvin"), null, null, true)
                     .thenCombineAsync(ContextAwareCompletableFuture
@@ -835,7 +835,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenCombineAsync_executor() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Brett")) {
+        try (Context ignored = manager.activate("Brett")) {
             Future<String> future = ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Marvin"))
                     .thenCombineAsync(ContextAwareCompletableFuture
@@ -844,7 +844,7 @@ class ContextAwareCompletableFutureTest {
             assertThat(DummyContext.currentValue(), is("Brett"));
         }
 
-        try (Context ignored = manager.initializeNewContext("Brett")) {
+        try (Context ignored = manager.activate("Brett")) {
             Future<String> future = ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Marvin"), null, null, true)
                     .thenCombineAsync(ContextAwareCompletableFuture
@@ -856,7 +856,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenCombineAndTakeNewSnapshot() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Marcellus Wallace")) {
+        try (Context ignored = manager.activate("Marcellus Wallace")) {
             Future<String> future = ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Vincent Vega"))
                     .takeNewSnapshot()
@@ -869,7 +869,7 @@ class ContextAwareCompletableFutureTest {
             assertThat(future.get(), is("Marcellus Wallace"));
         }
 
-        try (Context ignored = manager.initializeNewContext("Marcellus Wallace")) {
+        try (Context ignored = manager.activate("Marcellus Wallace")) {
             Future<String> future = ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Vincent Vega"), null, null, true).thenCombine(ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Jules Winnfield")), (voidA, voidB) -> {
                 String val = DummyContext.currentValue();
                 DummyContext.setCurrentValue("-" + val);
@@ -882,7 +882,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenCombineAsyncAndTakeNewSnapshot() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Brett")) {
+        try (Context ignored = manager.activate("Brett")) {
             Future<String> future = ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Marvin")).takeNewSnapshot().thenCombineAsync(ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Flock of Seagulls")), (voidA, voidB) -> {
                 String val = DummyContext.currentValue();
                 DummyContext.setCurrentValue("-" + val);
@@ -893,7 +893,7 @@ class ContextAwareCompletableFutureTest {
             assertThat(DummyContext.currentValue(), is("Brett"));
         }
 
-        try (Context ignored = manager.initializeNewContext("Brett")) {
+        try (Context ignored = manager.activate("Brett")) {
             Future<String> future = ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Marvin"), null, null, true).thenCombineAsync(ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Flock of Seagulls")), (voidA, voidB) -> {
                 String val = DummyContext.currentValue();
                 DummyContext.setCurrentValue("-" + val);
@@ -907,7 +907,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenCombineAsyncAndTakeNewSnapshot_executor() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Brett")) {
+        try (Context ignored = manager.activate("Brett")) {
             Future<String> future = ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Marvin")).takeNewSnapshot().thenCombineAsync(ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Flock of Seagulls")), (voidA, voidB) -> {
                 String val = DummyContext.currentValue();
                 DummyContext.setCurrentValue("-" + val);
@@ -918,7 +918,7 @@ class ContextAwareCompletableFutureTest {
             assertThat(DummyContext.currentValue(), is("Brett"));
         }
 
-        try (Context ignored = manager.initializeNewContext("Brett")) {
+        try (Context ignored = manager.activate("Brett")) {
             Future<String> future = ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Marvin"), null, null, true).thenCombineAsync(ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Flock of Seagulls")), (voidA, voidB) -> {
                 String val = DummyContext.currentValue();
                 DummyContext.setCurrentValue("-" + val);
@@ -932,7 +932,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenAcceptBoth() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Pulp Fiction")) {
+        try (Context ignored = manager.activate("Pulp Fiction")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Quentin"), null, null, true)
                     .thenAcceptBoth(completedFuture("Tarantino"), (Void voidA, String stringB) -> assertThat(manager.getActiveContextValue() + stringB, is("QuentinTarantino")))
@@ -943,7 +943,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenAcceptBothAsync() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Pulp Fiction")) {
+        try (Context ignored = manager.activate("Pulp Fiction")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Quentin"), null, null, true)
                     .thenAcceptBothAsync(completedFuture("Tarantino"), (Void voidA, String stringB) -> assertThat(manager.getActiveContextValue() + stringB, is("QuentinTarantino")))
@@ -954,7 +954,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenAcceptBothAsync_executor() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Pulp Fiction")) {
+        try (Context ignored = manager.activate("Pulp Fiction")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Quentin"), null, null, true)
                     .thenAcceptBothAsync(completedFuture("Tarantino"), (Void voidA, String stringB) -> assertThat(manager.getActiveContextValue() + stringB, is("QuentinTarantino")), contextUnawareThreadpool)
@@ -965,7 +965,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenAcceptBothAndTakeNewSnapshot() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Pulp Fiction")) {
+        try (Context ignored = manager.activate("Pulp Fiction")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Quentin"))
                     .takeNewSnapshot()
@@ -978,7 +978,7 @@ class ContextAwareCompletableFutureTest {
                     .get();
         }
 
-        try (Context ignored = manager.initializeNewContext("Pulp Fiction")) {
+        try (Context ignored = manager.activate("Pulp Fiction")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Quentin"), null, null, true)
                     .thenAcceptBoth(completedFuture(" by Tarantino"), (Void voidA, String stringB) -> {
@@ -993,7 +993,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenAcceptBothAsyncAndTakeNewSnapshot() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Pulp Fiction")) {
+        try (Context ignored = manager.activate("Pulp Fiction")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Quentin"))
                     .takeNewSnapshot()
@@ -1006,7 +1006,7 @@ class ContextAwareCompletableFutureTest {
                     .get();
         }
 
-        try (Context ignored = manager.initializeNewContext("Pulp Fiction")) {
+        try (Context ignored = manager.activate("Pulp Fiction")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Quentin"), null, null, true)
                     .thenAcceptBoth(completedFuture("Tarantino"), (Void voidA, String stringB) -> {
@@ -1021,7 +1021,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenAcceptBothAsyncAndTakeNewSnapshot_executor() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Pulp Fiction")) {
+        try (Context ignored = manager.activate("Pulp Fiction")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Quentin"))
                     .takeNewSnapshot()
@@ -1035,7 +1035,7 @@ class ContextAwareCompletableFutureTest {
             assertContext("Pulp Fiction");
         }
 
-        try (Context ignored = manager.initializeNewContext("Pulp Fiction")) {
+        try (Context ignored = manager.activate("Pulp Fiction")) {
             ContextAwareCompletableFuture
                     .runAsync(() -> DummyContext.setCurrentValue("Quentin"), null, null, true)
                     .thenAcceptBothAsync(completedFuture("Tarantino"), (Void voidA, String stringB) -> {
@@ -1051,40 +1051,40 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testRunAfterBoth() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("French Fries")) {
+        try (Context ignored = manager.activate("French Fries")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Ketchup")).runAfterBoth(ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Mayonaise")), () -> assertContext("French Fries")).get();
         }
 
-        try (Context ignored = manager.initializeNewContext("French Fries")) {
+        try (Context ignored = manager.activate("French Fries")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Ketchup"), null, null, true).runAfterBoth(ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Mayonaise")), () -> assertContext("Ketchup")).get();
         }
     }
 
     @Test
     void testRunAfterBothAsync() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("French Fries")) {
+        try (Context ignored = manager.activate("French Fries")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Ketchup")).runAfterBothAsync(ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Mayonaise")), () -> assertContext("French Fries")).get();
         }
 
-        try (Context ignored = manager.initializeNewContext("French Fries")) {
+        try (Context ignored = manager.activate("French Fries")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Ketchup"), null, null, true).runAfterBothAsync(ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Mayonaise")), () -> assertContext("Ketchup")).get();
         }
     }
 
     @Test
     void testRunAfterBothAsync_executor() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("French Fries")) {
+        try (Context ignored = manager.activate("French Fries")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Ketchup")).runAfterBothAsync(ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Mayonaise")), () -> assertContext("French Fries"), contextUnawareThreadpool).get();
         }
 
-        try (Context ignored = manager.initializeNewContext("French Fries")) {
+        try (Context ignored = manager.activate("French Fries")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Ketchup"), null, null, true).runAfterBothAsync(ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Mayonaise")), () -> assertContext("Ketchup"), contextUnawareThreadpool).get();
         }
     }
 
     @Test
     void testRunAfterBothAndTakeNewSnapshot() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("French Fries")) {
+        try (Context ignored = manager.activate("French Fries")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Ketchup")).takeNewSnapshot().runAfterBoth(ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Mayonaise")), () -> {
                 String val = manager.getActiveContextValue();
                 assertThat(val, is("French Fries"));
@@ -1092,7 +1092,7 @@ class ContextAwareCompletableFutureTest {
             }).thenAccept(aVoid -> assertContext("-French Fries")).get();
         }
 
-        try (Context ignored = manager.initializeNewContext("French Fries")) {
+        try (Context ignored = manager.activate("French Fries")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Ketchup"), null, null, true).runAfterBoth(ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Mayonaise")), () -> {
                 String val = manager.getActiveContextValue();
                 assertThat(val, is("Ketchup"));
@@ -1103,7 +1103,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testRunAfterBothAsyncAndTakeNewSnapshot() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("French Fries")) {
+        try (Context ignored = manager.activate("French Fries")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Ketchup")).takeNewSnapshot().runAfterBothAsync(ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Mayonaise")), () -> {
                 String val = manager.getActiveContextValue();
                 assertThat(val, is("French Fries"));
@@ -1111,7 +1111,7 @@ class ContextAwareCompletableFutureTest {
             }).thenAccept(aVoid -> assertContext("-French Fries")).get();
         }
 
-        try (Context ignored = manager.initializeNewContext("French Fries")) {
+        try (Context ignored = manager.activate("French Fries")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Ketchup"), null, null, true).runAfterBothAsync(ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Mayonaise")), () -> {
                 String val = manager.getActiveContextValue();
                 assertThat(val, is("Ketchup"));
@@ -1122,7 +1122,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testRunAfterBothAsyncAndTakeNewSnapshot_executor() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("French Fries")) {
+        try (Context ignored = manager.activate("French Fries")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Ketchup")).takeNewSnapshot().runAfterBothAsync(ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Mayonaise")), () -> {
                 String val = manager.getActiveContextValue();
                 assertThat(val, is("French Fries"));
@@ -1130,7 +1130,7 @@ class ContextAwareCompletableFutureTest {
             }, contextUnawareThreadpool).thenAccept(aVoid -> assertContext("-French Fries")).get();
         }
 
-        try (Context ignored = manager.initializeNewContext("French Fries")) {
+        try (Context ignored = manager.activate("French Fries")) {
             ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Ketchup"), null, null, true).runAfterBothAsync(ContextAwareCompletableFuture.runAsync(() -> DummyContext.setCurrentValue("Mayonaise")), () -> {
                 String val = manager.getActiveContextValue();
                 assertThat(val, is("Ketchup"));
@@ -1142,7 +1142,7 @@ class ContextAwareCompletableFutureTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testApplyToEither(boolean takeNewSnapshot) throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Parent")) {
+        try (Context ignored = manager.activate("Parent")) {
             // prepare
             ContextAwareCompletableFuture<String> future1 = supplyAsync(stringSupplier("Function 1", "Parent"));
             ContextAwareCompletableFuture<String> future2 = supplyAsync(stringSupplier("Function 2", "Parent"));
@@ -1158,7 +1158,7 @@ class ContextAwareCompletableFutureTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testApplyToEitherAsync(boolean takeNewSnapshot) throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Parent")) {
+        try (Context ignored = manager.activate("Parent")) {
             // prepare
             ContextAwareCompletableFuture<String> future1 = supplyAsync(stringSupplier("Function 1", "Parent"));
             ContextAwareCompletableFuture<String> future2 = supplyAsync(stringSupplier("Function 2", "Parent"));
@@ -1174,7 +1174,7 @@ class ContextAwareCompletableFutureTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testApplyToEitherAsync_executor(boolean takeNewSnapshot) throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("Parent")) {
+        try (Context ignored = manager.activate("Parent")) {
             // prepare
             ContextAwareCompletableFuture<String> future1 = supplyAsync(stringSupplier("Function 1", "Parent"));
             ContextAwareCompletableFuture<String> future2 = supplyAsync(stringSupplier("Function 2", "Parent"));
@@ -1190,7 +1190,7 @@ class ContextAwareCompletableFutureTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testAcceptEither(boolean takeNewSnapshot) {
-        try (Context ignored = manager.initializeNewContext("Parent")) {
+        try (Context ignored = manager.activate("Parent")) {
             // prepare
             ContextAwareCompletableFuture<String> future1 = supplyAsync(stringSupplier("Function 1", "Parent"));
             ContextAwareCompletableFuture<String> future2 = supplyAsync(stringSupplier("Function 2", "Parent"));
@@ -1209,7 +1209,7 @@ class ContextAwareCompletableFutureTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testAcceptEitherAsync(boolean takeNewSnapshot) {
-        try (Context ignored = manager.initializeNewContext("Parent")) {
+        try (Context ignored = manager.activate("Parent")) {
             // prepare
             ContextAwareCompletableFuture<String> future1 = supplyAsync(stringSupplier("Function 1", "Parent"));
             ContextAwareCompletableFuture<String> future2 = supplyAsync(stringSupplier("Function 2", "Parent"));
@@ -1228,7 +1228,7 @@ class ContextAwareCompletableFutureTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testAcceptEitherAsync_executor(boolean takeNewSnapshot) {
-        try (Context ignored = manager.initializeNewContext("Parent")) {
+        try (Context ignored = manager.activate("Parent")) {
             // prepare
             ContextAwareCompletableFuture<String> future1 = supplyAsync(stringSupplier("Function 1", "Parent"));
             ContextAwareCompletableFuture<String> future2 = supplyAsync(stringSupplier("Function 2", "Parent"));
@@ -1247,7 +1247,7 @@ class ContextAwareCompletableFutureTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testRunAfterEither(boolean takeNewSnapshot) {
-        try (Context ignored = manager.initializeNewContext("Parent")) {
+        try (Context ignored = manager.activate("Parent")) {
             // prepare
             ContextAwareCompletableFuture<String> future1 = supplyAsync(stringSupplier("Function 1", "Parent"));
             ContextAwareCompletableFuture<String> future2 = supplyAsync(stringSupplier("Function 2", "Parent"));
@@ -1263,7 +1263,7 @@ class ContextAwareCompletableFutureTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testRunAfterEitherAsync(boolean takeNewSnapshot) {
-        try (Context ignored = manager.initializeNewContext("Parent")) {
+        try (Context ignored = manager.activate("Parent")) {
             // prepare
             ContextAwareCompletableFuture<String> future1 = supplyAsync(stringSupplier("Function 1", "Parent"));
             ContextAwareCompletableFuture<String> future2 = supplyAsync(stringSupplier("Function 2", "Parent"));
@@ -1279,7 +1279,7 @@ class ContextAwareCompletableFutureTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testRunAfterEitherAsync_executor(boolean takeNewSnapshot) {
-        try (Context ignored = manager.initializeNewContext("Parent")) {
+        try (Context ignored = manager.activate("Parent")) {
             // prepare
             ContextAwareCompletableFuture<String> future1 = supplyAsync(stringSupplier("Function 1", "Parent"));
             ContextAwareCompletableFuture<String> future2 = supplyAsync(stringSupplier("Function 2", "Parent"));
@@ -1294,7 +1294,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenCompose() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("John")) {
+        try (Context ignored = manager.activate("John")) {
             assertThat(supplyAsync(() -> {
                 String current = manager.getActiveContextValue();
                 DummyContext.setCurrentValue("Travolta");
@@ -1302,7 +1302,7 @@ class ContextAwareCompletableFutureTest {
             }).thenCompose(value -> supplyAsync(() -> value + manager.getActiveContextValue())).get(), is("JohnJohn"));
         }
 
-        try (Context ignored = manager.initializeNewContext("John")) {
+        try (Context ignored = manager.activate("John")) {
             assertThat(supplyAsync(() -> {
                 String current = manager.getActiveContextValue();
                 DummyContext.setCurrentValue("Travolta");
@@ -1313,7 +1313,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenComposeAsync() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("John")) {
+        try (Context ignored = manager.activate("John")) {
             assertThat(supplyAsync(() -> {
                 String current = manager.getActiveContextValue();
                 DummyContext.setCurrentValue("Travolta");
@@ -1321,7 +1321,7 @@ class ContextAwareCompletableFutureTest {
             }).thenComposeAsync(value -> supplyAsync(() -> value + manager.getActiveContextValue())).get(), is("JohnJohn"));
         }
 
-        try (Context ignored = manager.initializeNewContext("John")) {
+        try (Context ignored = manager.activate("John")) {
             assertThat(supplyAsync(() -> {
                 String current = manager.getActiveContextValue();
                 DummyContext.setCurrentValue("Travolta");
@@ -1332,7 +1332,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testThenComposeAsync_executor() throws ExecutionException, InterruptedException {
-        try (Context ignored = manager.initializeNewContext("John")) {
+        try (Context ignored = manager.activate("John")) {
             assertThat(supplyAsync(() -> {
                 String current = manager.getActiveContextValue();
                 DummyContext.setCurrentValue("Travolta");
@@ -1340,7 +1340,7 @@ class ContextAwareCompletableFutureTest {
             }).thenComposeAsync(value -> completedFuture(value + manager.getActiveContextValue()), contextUnawareThreadpool).get(), is("JohnJohn"));
         }
 
-        try (Context ignored = manager.initializeNewContext("John")) {
+        try (Context ignored = manager.activate("John")) {
             assertThat(supplyAsync(() -> {
                 String current = manager.getActiveContextValue();
                 DummyContext.setCurrentValue("Travolta");
@@ -1351,7 +1351,7 @@ class ContextAwareCompletableFutureTest {
 
     @Test
     void testTimingIssue55() throws ExecutionException, InterruptedException, TimeoutException {
-        try (Context ignored = manager.initializeNewContext("Vincent Vega")) {
+        try (Context ignored = manager.activate("Vincent Vega")) {
             final CountDownLatch latch1 = new CountDownLatch(1), latch2 = new CountDownLatch(1);
             ContextAwareCompletableFuture<String> future1 = supplyAsync(() -> {
                 String result = Optional.ofNullable(DummyContext.currentValue()).orElse("NO VALUE");

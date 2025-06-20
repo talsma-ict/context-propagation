@@ -1,17 +1,19 @@
-[![Maven Version][maven-img]][maven] 
+[![Maven Version][maven-img]][maven]
 
 # Metrics instrumentation for context-propagation
 
 This module provides [metrics] `Timer` instrumentation for:
- - all context snapshots that are created with `ContextSnapshot.capture()` 
- - all context snapshots that are reactivated with `ContextSnapshot.reactivate()`
- - for each specific `ContextManager`:
-   - calls to `ContextManager.getActiveContext` and
-   - calls to `ContextManager.initializeNewContext`
-   
+
+- all context snapshots that are created with `ContextSnapshot.capture()`
+- all context snapshots that are reactivated with `ContextSnapshot.reactivate()`
+- for each specific `ContextManager`:
+    - calls to `ContextManager.activate` and
+    - calls to `ContextManager.getActiveContextValue`
+
 ## How to use this module
 
 All you need to do is add it to your classpath:
+
   ```xml
   <dependency>
       <groupId>nl.talsmasoftware.context</groupId>

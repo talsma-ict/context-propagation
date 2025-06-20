@@ -26,7 +26,7 @@ public class ClearableDummyContextManager implements ContextManager<String> {
         return current != null ? current.getValue() : null;
     }
 
-    public Context initializeNewContext(String value) {
+    public Context activate(String value) {
         return new DummyContext(value);
     }
 

@@ -31,9 +31,9 @@ the 'normal' use case is capturing a new snapshot from a parent thread and react
 
 ### Context Manager
 
-Manages contexts by initializing and maintaining an active context value.
+Manages contexts by activating and maintaining an active context value.
 
-Normally it is not necessary to interact directly with individual context managers.
+Normally, it is not necessary to interact directly with individual context managers.
 The api detects available context managers and lets 
 you capture a [_snapshot_](#context-snapshot) of **all** active contexts at once.
 
@@ -70,23 +70,23 @@ It should contain the fully qualified classname of your implementation.
 
 ```java
 public class DummyContextManager implements ContextManager<String> {
-  public Context<String> initializeNewContext(String value) {
-    return new DummyContext(value);
-  }
-
-  public String getActiveContextValue() {
-    return DummyContext.current().map(DummyContext::getValue).orElse(null);
-  }
-  
-  private static final class DummyContext extends AbstractThreadLocalContext<String> {
-    private DummyContext(String newValue) {
-      super(newValue);
+    public Context<String> activate(String value) {
+        return new DummyContext(value);
     }
 
-    private static Optional<Context<String>> current() {
-      return Optional.ofNullable(AbstractThreadLocalContext.current(DummyContext.class));
+    public String getActiveContextValue() {
+        return DummyContext.current().map(DummyContext::getValue).orElse(null);
     }
-  }
+
+    private static final class DummyContext extends AbstractThreadLocalContext<String> {
+        private DummyContext(String newValue) {
+            super(newValue);
+        }
+
+        private static Optional<Context<String>> current() {
+            return Optional.ofNullable(AbstractThreadLocalContext.current(DummyContext.class));
+        }
+    }
 }
 ```
 

@@ -38,9 +38,9 @@ class ContextSnapshotTest {
 
     @Test
     void testSnapshotReactivate() {
-        try (Context ignored = MGR.initializeNewContext("Old value")) {
+        try (Context ignored = MGR.activate("Old value")) {
             ContextSnapshot snapshot = ContextSnapshot.capture();
-            try (Context ignored2 = MGR.initializeNewContext("New value")) {
+            try (Context ignored2 = MGR.activate("New value")) {
                 assertThat(MGR.getActiveContextValue(), is("New value"));
 
                 try (ContextSnapshot.Reactivation reactivation = snapshot.reactivate()) {

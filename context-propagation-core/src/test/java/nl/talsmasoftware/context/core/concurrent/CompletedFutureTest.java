@@ -43,9 +43,9 @@ class CompletedFutureTest {
 
     @Test
     void testCompletedFutureTakesNewSnapshot() throws ExecutionException, InterruptedException {
-        manager.initializeNewContext("Mr. Blonde");
+        manager.activate("Mr. Blonde");
         final CompletableFuture<String> completed = ContextAwareCompletableFuture.completedFuture("Mr. Blue");
-        manager.initializeNewContext("Mr. Brown");
+        manager.activate("Mr. Brown");
         CompletableFuture<String> future = completed.thenApplyAsync(addActiveContextValue);
 
         assertThat(future.get(), is("Mr. Blue, Mr. Blonde"));
@@ -54,11 +54,11 @@ class CompletedFutureTest {
 
     @Test
     void testCompletedFutureAppliesGivenSnapshot() throws ExecutionException, InterruptedException {
-        manager.initializeNewContext("Mr. Blonde");
+        manager.activate("Mr. Blonde");
         final ContextSnapshot snapshot = ContextSnapshot.capture();
-        manager.initializeNewContext("Mr. Brown");
+        manager.activate("Mr. Brown");
         final CompletableFuture<String> completed = ContextAwareCompletableFuture.completedFuture("Mr. Blue", snapshot);
-        manager.initializeNewContext("Mr. Orange");
+        manager.activate("Mr. Orange");
         CompletableFuture<String> future = completed.thenApplyAsync(addActiveContextValue);
 
         assertThat(future.get(), is("Mr. Blue, Mr. Blonde"));
@@ -67,9 +67,9 @@ class CompletedFutureTest {
 
     @Test
     void testCompletedStageTakesNewSnapshot() throws ExecutionException, InterruptedException {
-        manager.initializeNewContext("Mr. Blonde");
+        manager.activate("Mr. Blonde");
         final CompletionStage<String> completed = ContextAwareCompletableFuture.completedStage("Mr. Blue");
-        manager.initializeNewContext("Mr. Brown");
+        manager.activate("Mr. Brown");
         CompletionStage<String> stage = completed.thenApplyAsync(addActiveContextValue);
 
         assertThat(stage.toCompletableFuture().get(), is("Mr. Blue, Mr. Blonde"));

@@ -49,7 +49,7 @@ class OpenTelemetryContextManagerTest {
     }
 
     @Test
-    void initializeNewContext_makes_specified_Context_current() {
+    void activate_makes_specified_value_current() {
         // prepare
         ContextKey<Object> dummyKey = ContextKey.named("dummy");
         String dummyValue = UUID.randomUUID().toString();
@@ -57,7 +57,7 @@ class OpenTelemetryContextManagerTest {
         assertThat(Context.current().get(dummyKey)).isNull();
 
         // execute
-        try (nl.talsmasoftware.context.api.Context context = subject.initializeNewContext(newContext)) {
+        try (nl.talsmasoftware.context.api.Context context = subject.activate(newContext)) {
 
             // verify
             assertThat(Context.current().get(dummyKey)).isEqualTo(dummyValue);

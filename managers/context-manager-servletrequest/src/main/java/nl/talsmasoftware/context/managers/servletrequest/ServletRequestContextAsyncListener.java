@@ -31,15 +31,15 @@ final class ServletRequestContextAsyncListener implements AsyncListener {
     private static final ContextManager<ServletRequest> MANAGER = ServletRequestContextManager.provider();
 
     /**
-     * Registers itself for future updates and initializes the supplied servlet request as the current servlet request
+     * Registers itself for future updates and activates the supplied servlet request as the current servlet request
      * on the async thread.
      *
      * @param event the AsyncEvent indicating that a new asynchronous cycle is being initiated.
-     * @see ServletRequestContextManager#initializeNewContext(ServletRequest)
+     * @see ServletRequestContextManager#activate(ServletRequest)
      */
     public void onStartAsync(AsyncEvent event) {
         event.getAsyncContext().addListener(this);
-        MANAGER.initializeNewContext(event.getSuppliedRequest());
+        MANAGER.activate(event.getSuppliedRequest());
     }
 
     /**

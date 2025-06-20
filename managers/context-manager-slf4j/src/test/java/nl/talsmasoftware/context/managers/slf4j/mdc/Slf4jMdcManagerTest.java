@@ -48,7 +48,7 @@ public class Slf4jMdcManagerTest {
 
     @BeforeEach
     public void setupThreadpool() {
-        threadpool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
+        threadpool = ContextAwareExecutorService.wrap(Executors.newCachedThreadPool());
     }
 
     @AfterEach
@@ -104,7 +104,7 @@ public class Slf4jMdcManagerTest {
         Map<String, String> mdc = MDC.getCopyOfContextMap();
         assertThat(mgr.getActiveContextValue(), equalTo(mdc));
 
-        try (Context ctx = mgr.initializeNewContext(mdc)) {
+        try (Context ctx = mgr.activate(mdc)) {
             assertThat(ctx, hasToString("Slf4jMdcContext" + mdc));
         }
     }

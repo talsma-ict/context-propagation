@@ -16,25 +16,27 @@
 package nl.talsmasoftware.context.api;
 
 import java.io.Closeable;
+import java.util.concurrent.Callable;
 
 /**
- * Snapshot of context values from all registered {@link ContextManager} implementations.
+ * Snapshot capturing all active values from detected {@link ContextManager} implementations.
  *
  * <p>
- * Such a snapshot can be passed to another thread and {@link #reactivate() reactivated} there,
- * ensuring that all context values are set in that other thread.
+ * Such a snapshot can be passed to another thread,
+ * allowing all captured values to be reactivated in that other thread by a single method call.
  *
  * <p>
- * A snapshot can be obtained from the {@linkplain #capture()} method.
+ * A context snapshot can be obtained from the {@linkplain #capture()} method.
  *
  * <p>
- * This library contains several utility classes named {@code ContextAware...} or {@code ...WithContext} that will
- * automatically take a new snapshot and reactivate it for a particular callable or runnable piece of code,
+ * <strong>Important:</strong> Make sure to <strong>always</strong> call {@link Reactivation#close()}
+ * in the same thread after calling {@linkplain #reactivate()}.
+ *
+ * <p>
+ * The module {@code context-propagation-core} contains several utility classes
+ * named {@code ContextAware...} or {@code ...WithContext} that will automatically capture a new snapshot
+ * and reactivate it for a particular callable or runnable piece of code,
  * making sure the reactivation is properly closed again.
- *
- * <p>
- * If you need to explicitly interact with a snapshot yourself, please make sure to <strong>always</strong> call
- * {@link Reactivation#close()}.
  *
  * @author Sjoerd Talsma
  * @since 2.0.0
@@ -94,6 +96,49 @@ public interface ContextSnapshot {
          * before the snapshot was activated.
          */
         void close();
+    }
+
+    /**
+     * Wrap a callable in this context snapshot, reactivating it during the call.
+     *
+     * <p>
+     * This provides the code being called with the thread-local values captured in this snapshot,
+     * even if it is executed in a different thread.
+     *
+     * <p>
+     * The reactivation is closed after the call finished ensuring that all thread-local values are properly cleaned up.
+     *
+     * @param callable The callable to be called with all context values from this snapshot.
+     * @param <T>      The result type returned by the callable.
+     * @return The wrapped callable.
+     */
+    default <T> Callable<T> wrap(final Callable<T> callable) {
+        return () -> {
+            try (Reactivation reactivation = this.reactivate()) {
+                return callable.call();
+            }
+        };
+    }
+
+    /**
+     * Wrap a runnable in this context snapshot, reactivating it during the run.
+     *
+     * <p>
+     * This provides the code being ran with the thread-local values captured in this snapshot,
+     * even if it is executed in a different thread.
+     *
+     * <p>
+     * The reactivation is closed after the run finished ensuring that all thread-local values are properly cleaned up.
+     *
+     * @param runnable The runnable to be ran with all context values from this snapshot.
+     * @return The wrapped runnable.
+     */
+    default Runnable wrap(final Runnable runnable) {
+        return () -> {
+            try (Reactivation reactivation = this.reactivate()) {
+                runnable.run();
+            }
+        };
     }
 
 }

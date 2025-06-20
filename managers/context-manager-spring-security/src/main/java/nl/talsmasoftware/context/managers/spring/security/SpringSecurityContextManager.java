@@ -62,16 +62,16 @@ public class SpringSecurityContextManager implements ContextManager<Authenticati
     }
 
     /**
-     * Creates a new Spring {@linkplain SecurityContext} and sets the {@linkplain Authentication value} in it.
+     * Activate a new Spring {@linkplain SecurityContext} and sets the {@linkplain Authentication value} in it.
      *
      * <p>
      * This new value is set in the {@linkplain SecurityContextHolder} and the current {@linkplain Authentication}
      * is remembered, to be restored when the returned {@link Context} is closed.
      *
-     * @param authentication The value to initialize a new context for.
+     * @param authentication The value to activate a new context for.
      * @return A context with the new Authentication, restoring the previous authentication when closed.
      */
-    public Context initializeNewContext(Authentication authentication) {
+    public Context activate(Authentication authentication) {
         return new AuthenticationContext(authentication);
     }
 

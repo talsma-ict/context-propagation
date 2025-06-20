@@ -41,7 +41,7 @@ class ContextAwareExecutorServiceTest {
 
     @BeforeEach
     void setupExecutor() {
-        executor = new ContextAwareExecutorService(Executors.newCachedThreadPool());
+        executor = ContextAwareExecutorService.wrap(Executors.newCachedThreadPool());
     }
 
     @AfterEach
@@ -65,16 +65,16 @@ class ContextAwareExecutorServiceTest {
 
     @Test
     void testContext() throws ExecutionException, InterruptedException {
-        dummyContextManager.initializeNewContext("The quick brown fox jumps over the lazy dog");
+        dummyContextManager.activate("The quick brown fox jumps over the lazy dog");
         Future<String> dummy = executor.submit(getDummyContext);
-        dummyContextManager.initializeNewContext("god yzal eht revo spmuj xof nworb kciuq ehT");
+        dummyContextManager.activate("god yzal eht revo spmuj xof nworb kciuq ehT");
         assertThat(dummyContextManager.getActiveContextValue()).isEqualTo("god yzal eht revo spmuj xof nworb kciuq ehT");
         assertThat(dummy.get()).isEqualTo("The quick brown fox jumps over the lazy dog");
     }
 
     @Test
     void testCloseException() throws InterruptedException {
-        throwingContextManager.initializeNewContext("The quick brown fox jumps over the lazy dog");
+        throwingContextManager.activate("The quick brown fox jumps over the lazy dog");
         ThrowingContextManager.onClose = new IllegalStateException("Sometimes we stare so long at a door that is closing " +
                 "that we see too late the one that is open. --Alexander Graham Bell");
         Future<String> dummy = executor.submit(getDummyContext);
@@ -103,7 +103,7 @@ class ContextAwareExecutorServiceTest {
 
     @Test
     void testBothCallAndCloseException() throws InterruptedException {
-        throwingContextManager.initializeNewContext("The quick brown fox jumps over the lazy dog");
+        throwingContextManager.activate("The quick brown fox jumps over the lazy dog");
         ThrowingContextManager.onClose = new IllegalStateException("Sometimes we stare so long at a door that is closing " +
                 "that we see too late the one that is open. --Alexander Graham Bell");
         Future<String> dummy = executor.submit(() -> {
@@ -116,5 +116,21 @@ class ContextAwareExecutorServiceTest {
         } catch (ExecutionException expected) {
             assertThat(expected).cause().hasMessage("DOH!");
         }
+    }
+
+    @Test
+    void testWrapRunnable() {
+        Runnable runnable = () -> assertThat(dummyContextManager.getActiveContextValue())
+                .isEqualTo("Runnable test value1");
+        dummyContextManager.activate("Runnable test value1");
+        Future<?> result = executor.submit(runnable);
+        assertThat(result).succeedsWithin(5, TimeUnit.SECONDS);
+    }
+
+    @Test
+    void testWrapCallable() {
+        dummyContextManager.activate("Callable test value 1");
+        Future<String> result = executor.submit(() -> dummyContextManager.getActiveContextValue());
+        assertThat(result).succeedsWithin(5, TimeUnit.SECONDS).isEqualTo("Callable test value 1");
     }
 }

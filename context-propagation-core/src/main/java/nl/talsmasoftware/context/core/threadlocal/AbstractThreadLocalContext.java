@@ -26,6 +26,15 @@ import java.util.logging.Logger;
 /**
  * Abstract base class maintaining a shared, static {@link ThreadLocal} instance for each concrete subclass.
  *
+ * <ul>
+ *     <li>Random-depth nested contexts.
+ *     <li>Restoration of 'previous' context state when closing.
+ *     <li>Unwinding to the nearest un-closed context in case contexts get closed out-of-sequence.
+ *     Closing out-of-sequence will not happen if all contexts are used in try-with-resources blocks,
+ *     but unwinding provides consistent behaviour in case it does happen.
+ * </ul>
+
+ *
  * <p>
  * This thread-local can be accessed by subclasses through the protected method:
  * {@link #threadLocalInstanceOf(Class)}.
@@ -75,7 +84,7 @@ public abstract class AbstractThreadLocalContext<T> implements Context {
         this.parentContext = sharedThreadLocalContext.get();
         this.value = newValue;
         this.sharedThreadLocalContext.set(this);
-        LOGGER.log(Level.FINEST, "Initialized new {0}.", this);
+        LOGGER.log(Level.FINEST, "Activated new {0}.", this);
     }
 
     /**

@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * getting the active context is fully delegated to the MDC.
  *
  * <p>
- * Closing a context returned form {@link #initializeNewContext(Map)} restores the MDC
+ * Closing a context returned form {@link #activate(Map)} restores the MDC
  * to the values it had before the context was created.<br>
  * This means that closing nested contexts out-of-order will probably result in an undesirable state.<br>
  * It is therefore strongly advised to use Java's {@code try-with-resources} mechanism to ensure proper
@@ -75,7 +75,7 @@ public class Slf4jMdcManager implements ContextManager<Map<String, String>> {
     }
 
     /**
-     * Initializes a new MDC context populated by the specified values.
+     * Activate a new MDC context populated by the specified values.
      *
      * <p>
      * The given values will become the active MDC values for the current thread.<br>
@@ -84,11 +84,11 @@ public class Slf4jMdcManager implements ContextManager<Map<String, String>> {
      * <p>
      * Please be aware that this may overwrite changes made to the MDC from other code.
      *
-     * @param mdcValues The values to initialize a new context for
+     * @param mdcValues The values to activate a new context for
      *                  (which must be closed by the caller at the end of its lifecycle).
      * @return A context that -when closed- will restore the active MDC values to what they were just before this call.
      */
-    public Context initializeNewContext(final Map<String, String> mdcValues) {
+    public Context activate(final Map<String, String> mdcValues) {
         return new Slf4jMdcContext(mdcValues);
     }
 

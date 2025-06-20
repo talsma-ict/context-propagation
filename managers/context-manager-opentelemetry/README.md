@@ -7,8 +7,8 @@ Context Manager that delegates ThreadLocal management to the
 default OpenTelemetry Context storage.
 
 Obtaining the current context value is delegated to
-`io.opentelemetry.context.Context.current()`.
-Initializing a new context value is delegated to
+`io.opentelemetry.context.Context.current()`.  
+Activating a new context value is delegated to
 `io.opentelemetry.context.Context.makeCurrent()`.
 
 Adding the `context-manager-opentelemetry` jar to the classpath

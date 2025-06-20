@@ -65,7 +65,7 @@ public class SpanManagerTest {
         GlobalTracerTestUtil.resetGlobalTracer();
         assertThat("Pre-existing GlobalTracer", GlobalTracer.isRegistered(), is(false));
         GlobalTracer.register(mockTracer = new MockTracer(SCOPE_MANAGER));
-        threadpool = new ContextAwareExecutorService(Executors.newCachedThreadPool());
+        threadpool = ContextAwareExecutorService.wrap(Executors.newCachedThreadPool());
     }
 
     @AfterEach
