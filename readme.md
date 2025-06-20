@@ -24,7 +24,7 @@ A brief explanation of the core concepts from the api:
 
 ### ContextSnapshot
 
-Captures all active values from detected [ContextManager](#contextmanager) implementations.
+Captures active ThreadLocal values from all detected [ContextManager](#contextmanager) implementations.
 
 These values can be _reactivated_ in another thread.  
 Reactivated snapshots **must be closed** to avoid leaking context.
