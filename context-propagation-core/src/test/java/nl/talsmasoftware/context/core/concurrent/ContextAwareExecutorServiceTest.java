@@ -120,9 +120,10 @@ class ContextAwareExecutorServiceTest {
 
     @Test
     void testWrapRunnable() {
+        Runnable runnable = () -> assertThat(dummyContextManager.getActiveContextValue())
+                .isEqualTo("Runnable test value1");
         dummyContextManager.activate("Runnable test value1");
-        Future<?> result = executor.submit(() ->
-                assertThat(dummyContextManager.getActiveContextValue()).isEqualTo("Runnable test value1"));
+        Future<?> result = executor.submit(runnable);
         assertThat(result).succeedsWithin(5, TimeUnit.SECONDS);
     }
 
