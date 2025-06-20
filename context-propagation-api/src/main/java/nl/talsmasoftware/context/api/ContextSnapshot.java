@@ -18,23 +18,24 @@ package nl.talsmasoftware.context.api;
 import java.io.Closeable;
 
 /**
- * Snapshot of context values from all registered {@link ContextManager} implementations.
+ * Snapshot capturing all active values from detected {@link ContextManager} implementations.
  *
  * <p>
- * Such a snapshot can be passed to another thread and {@link #reactivate() reactivated} there,
- * ensuring that all context values are set in that other thread.
+ * Such a snapshot can be passed to another thread,
+ * allowing all captured values to be reactivated in that other thread by a single method call.
  *
  * <p>
- * A snapshot can be obtained from the {@linkplain #capture()} method.
+ * A context snapshot can be obtained from the {@linkplain #capture()} method.
+
+ * <p>
+ * <strong>Important:</strong> Make sure to <strong>always</strong> call {@link Reactivation#close()}
+ * in the same thread after calling {@linkplain #reactivate()}.
  *
  * <p>
- * This library contains several utility classes named {@code ContextAware...} or {@code ...WithContext} that will
- * automatically take a new snapshot and reactivate it for a particular callable or runnable piece of code,
+ * The module {@code context-propagation-core} contains several utility classes
+ * named {@code ContextAware...} or {@code ...WithContext} that will automatically capture a new snapshot
+ * and reactivate it for a particular callable or runnable piece of code,
  * making sure the reactivation is properly closed again.
- *
- * <p>
- * If you need to explicitly interact with a snapshot yourself, please make sure to <strong>always</strong> call
- * {@link Reactivation#close()}.
  *
  * @author Sjoerd Talsma
  * @since 2.0.0

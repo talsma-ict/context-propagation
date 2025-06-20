@@ -18,27 +18,21 @@ package nl.talsmasoftware.context.api;
 import java.io.Closeable;
 
 /**
- * A context can be anything that needs to be maintained on the 'current thread' level.
+ * Abstraction for an activated {@linkplain ThreadLocal} value.
  *
  * <p>
- * A new context is created by {@link ContextManager#activate(Object) activating}
- * it using a {@link ContextManager}.
+ * When the context manager {@linkplain ContextManager#activate(Object) activates} a value,
+ * a new Context is returned. Closing this context will remove the activated value again.
  *
  * <h2>Important!</h2>
- * It is the responsibility of the one activating a new context to also {@linkplain #close()} it again
+ * It is the responsibility of the one activating a new Context to also {@linkplain #close()} it
  * <em>from the same thread</em>.<br>
  * Using every activated context in a 'try-with-resources' block of code is a recommended and safe way
  * to make sure this responsibility is honored.
  *
  * <p>
- * This library provides an {@code AbstractThreadLocalContext} that provides
- * <ul>
- *     <li>Random-depth nested contexts.
- *     <li>Restoration of 'previous' context state when closing.
- *     <li>Unwinding to the nearest un-closed context in case contexts get closed out-of-sequence.
- *     Closing out-of-sequence will not happen if all contexts are used in try-with-resources blocks,
- *     but unwinding provides consistent behaviour in case it does happen.
- * </ul>
+ * The {@code context-propagation-core} module provides an {@code AbstractThreadLocalContext} base class
+ * that features nesting active values and predictable behaviour for out-of-order closing.
  *
  * @author Sjoerd Talsma
  * @since 2.0.0
@@ -46,17 +40,13 @@ import java.io.Closeable;
 public interface Context extends Closeable {
 
     /**
-     * Closes this context.
+     * Close this context by removing the activated value.
      *
      * <p>
-     * It is the responsibility of the one activating a new context to also close it again <em>from the same thread</em>.
+     * It is the responsibility of the one activating a new context to also close it <em>from the same thread</em>.
      *
-     * <p>
-     * It must be possible to call this method multiple times.
-     * Subsequent {@code close()} calls must have no effect and should not throw exceptions.
-     *
-     * <p>
-     * Implementors are advised to restore previous contextual state upon close but are not obliged to do so.
+     * @implNote Implementors are advised to <em>restore</em> the previous thread-local value upon close, but are not obliged to do so.
+     * @implSpec It <strong>must</strong> be possible to call the {@linkplain #close()} method multiple times. Later calls must have no effect and should not throw exceptions.
      */
     void close();
 

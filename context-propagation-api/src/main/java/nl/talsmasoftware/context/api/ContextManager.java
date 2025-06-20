@@ -16,7 +16,16 @@
 package nl.talsmasoftware.context.api;
 
 /**
- * {@linkplain Context} manager service.
+ * Manages a {@linkplain Context} by providing a standard way of interacting with {@linkplain ThreadLocal} values.
+ *
+ * <p>
+ * {@linkplain ThreadLocal} values can be accessed via a ContextManager by:
+ * <ul>
+ *     <li>Calling {@linkplain #activate(Object)} which <em>sets</em> the given value until {@linkplain Context#close()}
+ *     is called on the resulting {@linkplain Context}.
+ *     <li>Calling {@linkplain #getActiveContextValue()} which <em>sets</em> the current thread-local value.
+ *     <li>Calling {@linkplain #clear()} which <em>removes</em> the thread-local value.
+ * </ul>
  *
  * <p>
  * Implementations must be made available through the {@linkplain java.util.ServiceLoader ServiceLoader}.<br>
