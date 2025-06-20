@@ -94,13 +94,18 @@ values:
 final ContextSnapshot snapshot = ContextSnapshot.capture();
 ```
 
-In the code of your background thread, activate the snapshot to have all ThreadLocal
+In the code of your background thread, reactivate the snapshot to have all ThreadLocal
 context values set as they were captured:
 
 ```java
-try(ContextSnapshot.Reactivation reactivation = snapshot.reactivate()){
-        // All ThreadLocal values from the snapshot are available within this block
-        }
+try (ContextSnapshot.Reactivation reactivation = snapshot.reactivate()) {
+    // All ThreadLocal values from the snapshot are available within this block
+}
+
+// or, using a Runnable lambda:
+snapshot.wrap(() -> {
+    // All ThreadLocal values from the snapshot are available within this block
+}).run();
 ```
 
 ## Supported contexts

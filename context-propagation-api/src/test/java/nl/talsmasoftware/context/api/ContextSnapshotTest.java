@@ -199,4 +199,26 @@ class ContextSnapshotTest {
                     .hasMessage("Service cache error!");
         }
     }
+
+    @Test
+    void wrapRunnable() {
+        dummyManager.activate("Value 1");
+        ContextSnapshot snapshot = ContextSnapshot.capture();
+        dummyManager.activate("Value 2");
+
+        assertThat(dummyManager.getActiveContextValue(), is("Value 2"));
+        snapshot.wrap(() -> assertThat(dummyManager.getActiveContextValue(), is("Value 1"))).run();
+        assertThat(dummyManager.getActiveContextValue(), is("Value 2"));
+    }
+
+    @Test
+    void wrapCallable() throws Exception {
+        dummyManager.activate("Value 1");
+        ContextSnapshot snapshot = ContextSnapshot.capture();
+        dummyManager.activate("Value 2");
+
+        assertThat(dummyManager.getActiveContextValue(), is("Value 2"));
+        assertThat(snapshot.wrap(dummyManager::getActiveContextValue).call(), is("Value 1"));
+        assertThat(dummyManager.getActiveContextValue(), is("Value 2"));
+    }
 }
