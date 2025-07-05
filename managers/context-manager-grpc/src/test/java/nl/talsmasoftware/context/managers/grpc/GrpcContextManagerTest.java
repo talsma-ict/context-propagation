@@ -34,7 +34,7 @@ import static org.assertj.core.api.InstanceOfAssertFactories.OPTIONAL;
 
 class GrpcContextManagerTest {
     static final Context.Key<String> TEST_KEY = Context.key("test-key");
-    static final Locale DUTCH = new Locale("nl", "NL");
+    static final Locale DUTCH = Locale.of("nl", "NL");
     static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
 
     @BeforeEach

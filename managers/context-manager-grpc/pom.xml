@@ -50,27 +50,7 @@
             <groupId>io.grpc</groupId>
             <artifactId>grpc-api</artifactId>
         </dependency>
-<!--
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-context</artifactId>
-        </dependency>
--->
-<!--
-        <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-opentelemetry</artifactId>
-        </dependency>
--->
 
-<!--
-        <dependency>
-            <groupId>${project.parent.groupId}</groupId>
-            <artifactId>context-propagation-core</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
-        </dependency>
--->
         <dependency>
             <groupId>nl.talsmasoftware.context.managers</groupId>
             <artifactId>context-manager-locale</artifactId>
