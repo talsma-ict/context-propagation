@@ -116,6 +116,7 @@ out of the box by this context-propagation library:
 - [Spring Security Context]
 - [OpenTelemetry Context][opentelemetry context propagation]
 - [SLF4J MDC (Mapped Diagnostic Context)][slf4j mdc propagation]
+- [gRPC Context](managers/context-manager-grpc)
 - [Log4j 2 Thread Context][log4j2 thread context propagation]
 - [Locale context][locale context]
 - [ServletRequest contexts][servletrequest propagation]
@@ -192,45 +193,25 @@ and the structure of the repository.
 [Apache 2.0 license](LICENSE)
 
 
-[maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation
+  [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context/context-propagation
+  [maven]: https://search.maven.org/search?q=g:nl.talsmasoftware.context
+  [release-img]: https://img.shields.io/github/release/talsma-ict/context-propagation.svg
+  [release]: https://github.com/talsma-ict/context-propagation/releases
+  [coveralls-img]: https://coveralls.io/repos/github/talsma-ict/context-propagation/badge.svg
+  [coveralls]: https://coveralls.io/github/talsma-ict/context-propagation
+  [javadoc-img]: https://www.javadoc.io/badge/nl.talsmasoftware.context/context-propagation.svg
+  [javadoc]: https://www.javadoc.io/doc/nl.talsmasoftware.context/context-propagation
 
-[maven]: https://search.maven.org/search?q=g:nl.talsmasoftware.context
-
-[release-img]: https://img.shields.io/github/release/talsma-ict/context-propagation.svg
-
-[release]: https://github.com/talsma-ict/context-propagation/releases
-
-[coveralls-img]: https://coveralls.io/repos/github/talsma-ict/context-propagation/badge.svg
-
-[coveralls]: https://coveralls.io/github/talsma-ict/context-propagation
-
-[javadoc-img]: https://www.javadoc.io/badge/nl.talsmasoftware.context/context-propagation.svg
-
-[javadoc]: https://www.javadoc.io/doc/nl.talsmasoftware.context/context-propagation
-
-
-[locale context]: managers/context-manager-locale
-
-[log4j2 thread context propagation]: managers/context-manager-log4j2
-
-[opentelemetry context propagation]: managers/context-manager-opentelemetry
-
-[opentracing span propagation]: managers/context-manager-opentracing
-
-[serviceloader]: https://docs.oracle.com/javase/8/docs/api/index.html?java/util/ServiceLoader.html
-
-[servletrequest propagation]: managers/context-manager-servletrequest
-
-[slf4j mdc propagation]: managers/context-manager-slf4j
-
-[spring security context]: managers/context-manager-spring-security
-
-[context propagation metrics]: timers/context-timer-metrics
-
-[context propagation micrometer]: timers/context-timer-micrometer
-
-[micrometer]: https://micrometer.io
-
-[ContextAwareExecutorService]: https://javadoc.io/doc/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/core/concurrent/ContextAwareExecutorService.html
-
-[ContextAwareCompletableFuture]: context-propagation-core/README.md#contextawarecompletablefuture
+  [locale context]: managers/context-manager-locale
+  [log4j2 thread context propagation]: managers/context-manager-log4j2
+  [opentelemetry context propagation]: managers/context-manager-opentelemetry
+  [opentracing span propagation]: managers/context-manager-opentracing
+  [serviceloader]: https://docs.oracle.com/javase/8/docs/api/index.html?java/util/ServiceLoader.html
+  [servletrequest propagation]: managers/context-manager-servletrequest
+  [slf4j mdc propagation]: managers/context-manager-slf4j
+  [spring security context]: managers/context-manager-spring-security
+  [context propagation metrics]: timers/context-timer-metrics
+  [context propagation micrometer]: timers/context-timer-micrometer
+  [micrometer]: https://micrometer.io
+  [ContextAwareExecutorService]: https://javadoc.io/doc/nl.talsmasoftware.context/context-propagation/latest/nl/talsmasoftware/context/core/concurrent/ContextAwareExecutorService.html
+  [ContextAwareCompletableFuture]: context-propagation-core/README.md#contextawarecompletablefuture

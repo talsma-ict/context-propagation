@@ -39,6 +39,7 @@
         <module>context-propagation-api</module>
         <module>context-propagation-core</module>
 
+        <module>managers/context-manager-grpc</module>
         <module>managers/context-manager-locale</module>
         <module>managers/context-manager-log4j2</module>
         <module>managers/context-manager-opentelemetry</module>
