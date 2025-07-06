@@ -160,15 +160,19 @@ have a noticeable impact on your application.
 
 ### Metrics reporting
 
-The [context propagation metrics] module uses the excellent
-[dropwizard metrics](https://metrics.dropwizard.io/) library to
-instrument Timers for context propagation.
+The context propagation performance will be automatically measured
+when you add any of the following modules to your classpath:
 
-Similarly, the [context propagation Micrometer] module adds [Micrometer]
-instrumentation Timers for the context propagation.
-
-Adding either of these modules to your classpath will automatically
-configure various timers in the global default metric registry of your application.
+- [context-timer-metrics](timers/context-timer-metrics): 
+  Uses the [dropwizard metrics](https://metrics.dropwizard.io/) library
+  to instrument Timers for context propagation.
+- [context-timer-micrometer](timers/context-timer-micrometer):
+  Adds [Micrometer] Timers for context propagation.
+- [context-timer-opentelemetry](timers/context-timer-opentelemetry):
+  Creates OpenTelemetry histogram meters for context propagation.
+- [context-timer-opentracing](timers/context-timer-opentracing):
+  Old module creating opentracing spans for context propagation.
+  Consider replacing by its successor, opentelemetry.
 
 ## New in version 2
 
@@ -187,6 +191,11 @@ and the structure of the repository.
   - `ContextManager.getActiveContext()` was replaced by `getActiveContextValue()`.
   - `ContextManager.clear()` must be implemented, but is allowed to be a 'no-op' empty implementation. The `Clearable` interface was removed.
 - All `@Deprecated(forRemoval=true)` items from v1 were removed.
+- New `ContextManager` implementations for:
+  - [OpenTelemetry](managers/context-manager-opentelemetry) context
+  - The [gRPC](managers/context-manager-grpc) framework context
+- New `ContextTimer` implementation using:
+  - [OpenTelemetry](timers/context-timer-opentelemetry) histogram meter.
 
 ## License
 
