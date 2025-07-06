@@ -30,17 +30,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sjoerd Talsma
  */
 class CurrentLocaleManagerTest {
-    static final Locale DUTCH = new Locale("nl", "NL");
+    static final Locale DUTCH = Locale.of("nl", "NL");
     static final Locale ENGLISH = Locale.UK;
     static final Locale GERMAN = Locale.GERMANY;
 
@@ -64,75 +60,75 @@ class CurrentLocaleManagerTest {
     @Test
     void testLocalePropagation() throws ExecutionException, InterruptedException {
         try (Context ignored = CurrentLocaleHolder.set(DUTCH)) {
-            assertThat(MANAGER.getActiveContextValue(), is(DUTCH));
-            assertThat(CurrentLocaleHolder.getOrDefault(), is(DUTCH));
+            assertThat(MANAGER.getActiveContextValue()).isEqualTo(DUTCH);
+            assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(DUTCH);
 
             final CountDownLatch blocker = new CountDownLatch(1);
             Future<Locale> slowCall;
             try (Context ignored2 = MANAGER.activate(GERMAN)) {
-                assertThat(MANAGER.getActiveContextValue(), is(GERMAN));
-                assertThat(CurrentLocaleHolder.getOrDefault(), is(GERMAN));
+                assertThat(MANAGER.getActiveContextValue()).isEqualTo(GERMAN);
+                assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(GERMAN);
 
                 slowCall = threadPool.submit(() -> {
-                    assertThat(blocker.await(5, TimeUnit.SECONDS), is(true));
+                    assertThat(blocker.await(5, TimeUnit.SECONDS)).isTrue();
                     return MANAGER.getActiveContextValue();
                 });
             }
 
-            assertThat("Restored context in parent", MANAGER.getActiveContextValue(), is(DUTCH));
-            assertThat("Slow thread already done", slowCall.isDone(), is(false));
+            assertThat(MANAGER.getActiveContextValue()).as("Restored context in parent").isEqualTo(DUTCH);
+            assertThat(slowCall.isDone()).as("Slow thread already done").isFalse();
             blocker.countDown();
-            assertThat("Context in slow thread", slowCall.get(), is(GERMAN));
+            assertThat(slowCall.get()).as("Context in slow thread").isEqualTo(GERMAN);
         }
-        assertThat("Current context", MANAGER.getActiveContextValue(), is(nullValue()));
-        assertThat(CurrentLocaleHolder.getOrDefault(), is(DEFAULT_LOCALE));
+        assertThat(MANAGER.getActiveContextValue()).as("Current context").isNull();
+        assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(DEFAULT_LOCALE);
     }
 
     @Test
     void testGetCurrentLocaleOrDefault() {
-        assertThat(CurrentLocaleHolder.getOrDefault(), is(DEFAULT_LOCALE));
+        assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(DEFAULT_LOCALE);
         try (Context ignored = CurrentLocaleHolder.set(GERMAN)) {
-            assertThat(CurrentLocaleHolder.getOrDefault(), is(GERMAN));
-            assertThat(MANAGER.getActiveContextValue(), is(GERMAN));
+            assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(GERMAN);
+            assertThat(MANAGER.getActiveContextValue()).isEqualTo(GERMAN);
 
             try (Context ignored2 = MANAGER.activate(null)) {
-                assertThat(CurrentLocaleHolder.getOrDefault(), is(DEFAULT_LOCALE));
-                assertThat(MANAGER.getActiveContextValue(), nullValue());
+                assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(DEFAULT_LOCALE);
+                assertThat(MANAGER.getActiveContextValue()).isNull();
             } finally {
-                assertThat(CurrentLocaleHolder.getOrDefault(), is(GERMAN));
-                assertThat(MANAGER.getActiveContextValue(), is(GERMAN));
+                assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(GERMAN);
+                assertThat(MANAGER.getActiveContextValue()).isEqualTo(GERMAN);
             }
         } finally {
-            assertThat(CurrentLocaleHolder.getOrDefault(), is(DEFAULT_LOCALE));
+            assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(DEFAULT_LOCALE);
         }
     }
 
     @Test
     void testClear() {
         MANAGER.activate(DUTCH);
-        assertThat(MANAGER.getActiveContextValue(), is(DUTCH));
+        assertThat(MANAGER.getActiveContextValue()).isEqualTo(DUTCH);
         MANAGER.activate(ENGLISH);
-        assertThat(MANAGER.getActiveContextValue(), is(ENGLISH));
+        assertThat(MANAGER.getActiveContextValue()).isEqualTo(ENGLISH);
 
         MANAGER.clear();
-        assertThat(MANAGER.getActiveContextValue(), is(nullValue()));
-        assertThat(CurrentLocaleHolder.getOrDefault(), is(DEFAULT_LOCALE));
+        assertThat(MANAGER.getActiveContextValue()).isNull();
+        assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(DEFAULT_LOCALE);
     }
 
     @Test
     void testClearAll() {
         MANAGER.activate(DUTCH);
-        assertThat(MANAGER.getActiveContextValue(), is(DUTCH));
+        assertThat(MANAGER.getActiveContextValue()).isEqualTo(DUTCH);
         MANAGER.activate(ENGLISH);
-        assertThat(MANAGER.getActiveContextValue(), is(ENGLISH));
+        assertThat(MANAGER.getActiveContextValue()).isEqualTo(ENGLISH);
 
         ContextManager.clearAll();
-        assertThat(MANAGER.getActiveContextValue(), is(nullValue()));
-        assertThat(CurrentLocaleHolder.getOrDefault(), is(DEFAULT_LOCALE));
+        assertThat(MANAGER.getActiveContextValue()).isNull();
+        assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(DEFAULT_LOCALE);
     }
 
     @Test
     void testToString() {
-        assertThat(MANAGER, hasToString(containsString("CurrentLocaleManager")));
+        assertThat(MANAGER.toString()).contains("CurrentLocaleManager");
     }
 }

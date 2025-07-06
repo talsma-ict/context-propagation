@@ -26,8 +26,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class FailedFutureTest {
 
@@ -49,8 +48,8 @@ class FailedFutureTest {
         manager.activate("Mr. Brown");
         CompletableFuture<String> future = completed.handleAsync(addActiveContextValue);
 
-        assertThat(future.get(), is("Mr. Blue, Mr. Blonde"));
-        assertThat(manager.getActiveContextValue(), is("Mr. Brown"));
+        assertThat(future.get()).isEqualTo("Mr. Blue, Mr. Blonde");
+        assertThat(manager.getActiveContextValue()).isEqualTo("Mr. Brown");
     }
 
     @Test
@@ -62,8 +61,8 @@ class FailedFutureTest {
         manager.activate("Mr. Orange");
         CompletableFuture<String> future = completed.handleAsync(addActiveContextValue);
 
-        assertThat(future.get(), is("Mr. Blue, Mr. Blonde"));
-        assertThat(manager.getActiveContextValue(), is("Mr. Orange"));
+        assertThat(future.get()).isEqualTo("Mr. Blue, Mr. Blonde");
+        assertThat(manager.getActiveContextValue()).isEqualTo("Mr. Orange");
     }
 
     @Test
@@ -73,8 +72,8 @@ class FailedFutureTest {
         manager.activate("Mr. Brown");
         CompletionStage<String> stage = completed.handleAsync(addActiveContextValue);
 
-        assertThat(stage.toCompletableFuture().get(), is("Mr. Blue, Mr. Blonde"));
-        assertThat(manager.getActiveContextValue(), is("Mr. Brown"));
+        assertThat(stage.toCompletableFuture().get()).isEqualTo("Mr. Blue, Mr. Blonde");
+        assertThat(manager.getActiveContextValue()).isEqualTo("Mr. Brown");
     }
 
 }

@@ -33,10 +33,7 @@ import java.util.function.BiConsumer;
 import static java.lang.String.format;
 import static nl.talsmasoftware.context.dummy.DummyContext.currentValue;
 import static nl.talsmasoftware.context.dummy.DummyContext.setCurrentValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -78,8 +75,7 @@ class BiConsumerWithContextTest {
             accepted[0] = a;
             accepted[1] = b;
         }).accept(null, null);
-        assertThat(accepted[0], is(nullValue()));
-        assertThat(accepted[1], is(nullValue()));
+        assertThat(accepted).containsExactly(null, null);
         verify(snapshot).reactivate();
     }
 
@@ -93,10 +89,10 @@ class BiConsumerWithContextTest {
                 ContextSnapshot.capture(),
                 (a, b) -> {
                     try {
-                        assertThat("Context must propagate into thread", currentValue(), is(Optional.of("Old value")));
+                        assertThat(currentValue()).withFailMessage("Context must propagate into thread").contains("Old value");
                         String newValue = format("%s %s", a, b);
                         setCurrentValue(newValue);
-                        assertThat("Context changed in background thread", currentValue(), is(Optional.of(newValue)));
+                        assertThat(currentValue()).withFailMessage("Context changed in background thread").contains(newValue);
                         latch.await();
                     } catch (InterruptedException e) {
                         fail(e);
@@ -106,16 +102,16 @@ class BiConsumerWithContextTest {
 
         Thread t = new Thread(() -> consumer.accept("New", "value"));
         t.start();
-        assertThat("Setting context in other thread musn't impact caller", currentValue(), is("Old value"));
+        assertThat(currentValue()).withFailMessage("Setting context in other thread musn't impact caller").isEqualTo("Old value");
 
         latch.countDown();
         t.join(); // Block and trigger assertions
-        assertThat("Setting context in other thread musn't impact caller", currentValue(), is("Old value"));
-        assertThat("Snapshot consumer must be called", snapshotHolder[0], is(notNullValue()));
+        assertThat(currentValue()).withFailMessage("Setting context in other thread musn't impact caller").isEqualTo("Old value");
+        assertThat(snapshotHolder[0]).withFailMessage("Snapshot consumer must be called").isNotNull();
 
         t = new Thread(() -> {
             try (Reactivation reactivation = snapshotHolder[0].reactivate()) {
-                assertThat("Thread context must propagate", currentValue(), is("New value"));
+                assertThat(currentValue()).withFailMessage("Thread context must propagate").isEqualTo("New value");
             }
         });
         t.start();
@@ -138,9 +134,9 @@ class BiConsumerWithContextTest {
         t.start();
         t.join();
 
-        assertThat(currentValue(), is("Old value"));
+        assertThat(currentValue()).isEqualTo("Old value");
         try (Reactivation reactivated = snapshotHolder[0].reactivate()) {
-            assertThat(currentValue(), is("NEW value, New value, Old value"));
+            assertThat(currentValue()).isEqualTo("NEW value, New value, Old value");
         }
     }
 }

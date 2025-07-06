@@ -32,11 +32,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit test for the {@link SpringSecurityContextManager}.
@@ -79,7 +75,7 @@ public class SpringSecurityContextManagerTest {
 
     @Test
     public void testWithoutAnyAuthentication() {
-        assertThat(SpringSecurityContextManager.provider().getActiveContextValue(), is(nullValue()));
+        assertThat(SpringSecurityContextManager.provider().getActiveContextValue()).isNull();
     }
 
     @Test
@@ -88,7 +84,7 @@ public class SpringSecurityContextManagerTest {
         Future<Authentication> itemValue = threadpool.submit(GET_AUTHENTICATION);
 
         SecurityContextHolder.clearContext();
-        assertThat(itemValue.get(), hasToString(containsString("Mr. Bean")));
+        assertThat(itemValue.get().toString()).contains("Mr. Bean");
     }
 
     @Test
@@ -96,29 +92,29 @@ public class SpringSecurityContextManagerTest {
         setAuthentication("Vincent Vega");
 
         ContextSnapshot snapshot = ContextSnapshot.capture();
-        assertThat("New snapshot shouldn't manipulate context.", GET_AUTHENTICATION.call(),
-                hasToString(containsString("Vincent Vega")));
+        assertThat(GET_AUTHENTICATION.call().toString()).withFailMessage("New snapshot shouldn't manipulate context.")
+                .contains("Vincent Vega");
 
         setAuthentication("Jules Winnfield");
-        assertThat("Sanity check: Context changed?", GET_AUTHENTICATION.call(),
-                hasToString(containsString("Jules Winnfield")));
+        assertThat(GET_AUTHENTICATION.call().toString()).withFailMessage("Sanity check: Context changed?")
+                .contains("Jules Winnfield");
 
         Closeable reactivation = snapshot.reactivate();
-        assertThat("Context changed by reactivation", GET_AUTHENTICATION.call(),
-                hasToString(containsString("Vincent Vega")));
+        assertThat(GET_AUTHENTICATION.call().toString()).withFailMessage("Context changed by reactivation")
+                .contains("Vincent Vega");
 
         reactivation.close();
-        assertThat("Context restored?", GET_AUTHENTICATION.call(),
-                hasToString(containsString("Jules Winnfield")));
+        assertThat(GET_AUTHENTICATION.call().toString()).withFailMessage("Context restored?")
+                .contains("Jules Winnfield");
     }
 
     @Test
     public void testClearableImplementation() {
         setAuthentication("Vincent Vega");
-        assertThat(SpringSecurityContextManager.provider().getActiveContextValue().getName(), is("Vincent Vega"));
+        assertThat(SpringSecurityContextManager.provider().getActiveContextValue().getName()).isEqualTo("Vincent Vega");
 
         ContextManager.clearAll();
-        assertThat(SpringSecurityContextManager.provider().getActiveContextValue(), is(nullValue()));
+        assertThat(SpringSecurityContextManager.provider().getActiveContextValue()).isNull();
     }
 
 }

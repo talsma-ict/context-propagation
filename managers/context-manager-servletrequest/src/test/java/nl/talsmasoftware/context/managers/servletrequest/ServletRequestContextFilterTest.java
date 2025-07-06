@@ -26,10 +26,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import java.io.IOException;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -63,7 +60,7 @@ class ServletRequestContextFilterTest {
 
     @Test
     void testToString() {
-        assertThat(subject, hasToString(ServletRequestContextFilter.class.getSimpleName()));
+        assertThat(subject).hasToString(ServletRequestContextFilter.class.getSimpleName());
     }
 
     @Test
@@ -72,7 +69,7 @@ class ServletRequestContextFilterTest {
 
         subject.doFilter(mockRequest, mockResponse,
                 (request, response) ->
-                        assertThat(ServletRequestContextManager.currentServletRequest(), is(sameInstance(request))));
+                        assertThat(ServletRequestContextManager.currentServletRequest()).isSameAs(request));
 
         verify(mockRequest).isAsyncStarted();
     }
@@ -85,7 +82,7 @@ class ServletRequestContextFilterTest {
 
         subject.doFilter(mockRequest, mockResponse,
                 (request, response) ->
-                        assertThat(ServletRequestContextManager.currentServletRequest(), is(sameInstance(request))));
+                        assertThat(ServletRequestContextManager.currentServletRequest()).isSameAs(request));
 
         verify(mockRequest).isAsyncStarted();
         verify(mockRequest).getAsyncContext();
@@ -102,7 +99,7 @@ class ServletRequestContextFilterTest {
 
         subject.doFilter(mockRequest, mockResponse,
                 (request, response) ->
-                        assertThat(ServletRequestContextManager.currentServletRequest(), is(sameInstance(request))));
+                        assertThat(ServletRequestContextManager.currentServletRequest()).isSameAs(request));
 
         verify(mockRequest).isAsyncStarted();
         verify(mockRequest).getAsyncContext();

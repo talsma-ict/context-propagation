@@ -25,12 +25,7 @@ import java.util.concurrent.TimeoutException;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -70,21 +65,21 @@ class DelegatingFutureTest {
     @Test
     void testCancel() {
         when(delegate.cancel(anyBoolean())).thenReturn(true);
-        assertThat(subject.cancel(false), is(true));
+        assertThat(subject.cancel(false)).isTrue();
         verify(delegate).cancel(false);
     }
 
     @Test
     void testIsCancelled() {
         when(delegate.isCancelled()).thenReturn(true);
-        assertThat(subject.isCancelled(), is(true));
+        assertThat(subject.isCancelled()).isTrue();
         verify(delegate).isCancelled();
     }
 
     @Test
     void testIsDone() {
         when(delegate.isDone()).thenReturn(true);
-        assertThat(subject.isDone(), is(true));
+        assertThat(subject.isDone()).isTrue();
         verify(delegate).isDone();
     }
 
@@ -92,7 +87,7 @@ class DelegatingFutureTest {
     void testGet() throws ExecutionException, InterruptedException {
         Object result = new Object();
         when(delegate.get()).thenReturn(result);
-        assertThat(subject.get(), is(sameInstance(result)));
+        assertThat(subject.get()).isSameAs(result);
         verify(delegate).get();
     }
 
@@ -104,7 +99,7 @@ class DelegatingFutureTest {
             subject.get();
             fail("Exception expected.");
         } catch (ExecutionException expected) {
-            assertThat(expected, is(sameInstance(exception)));
+            assertThat(expected).isSameAs(exception);
         }
         verify(delegate).get();
     }
@@ -113,7 +108,7 @@ class DelegatingFutureTest {
     void testGetTimeout() throws ExecutionException, InterruptedException, TimeoutException {
         Object result = new Object();
         when(delegate.get(anyLong(), any())).thenReturn(result);
-        assertThat(subject.get(2387L, MILLISECONDS), is(sameInstance(result)));
+        assertThat(subject.get(2387L, MILLISECONDS)).isSameAs(result);
         verify(delegate).get(2387L, MILLISECONDS);
     }
 
@@ -125,7 +120,7 @@ class DelegatingFutureTest {
             subject.get(1234L, SECONDS);
             fail("Exception expected.");
         } catch (ExecutionException expected) {
-            assertThat(expected, is(sameInstance(exception)));
+            assertThat(expected).isSameAs(exception);
         }
         verify(delegate).get(1234L, SECONDS);
     }
@@ -133,18 +128,19 @@ class DelegatingFutureTest {
     @Test
     void testHashCode() {
         int hash = delegate.hashCode();
-        assertThat(subject.hashCode(), is(hash));
+        assertThat(subject.hashCode()).isEqualTo(hash);
     }
 
     @Test
     void testEquals() {
-        assertThat(subject, is(equalTo(subject)));
-        assertThat(subject, is(equalTo((Object) new TestDelegatingFuture(delegate))));
-        assertThat(subject, is(not(equalTo((Object) new TestDelegatingFuture(mock(Future.class))))));
+        assertThat(subject)
+                .isEqualTo(subject)
+                .isEqualTo(new TestDelegatingFuture(delegate))
+                .isNotEqualTo(new TestDelegatingFuture(mock(Future.class)));
     }
 
     @Test
     void testToString() {
-        assertThat(subject, hasToString("TestDelegatingFuture{" + delegate + "}"));
+        assertThat(subject).hasToString("TestDelegatingFuture{" + delegate + "}");
     }
 }

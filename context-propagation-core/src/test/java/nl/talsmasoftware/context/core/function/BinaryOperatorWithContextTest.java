@@ -30,12 +30,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -76,23 +72,17 @@ class BinaryOperatorWithContextTest {
 
     @Test
     void testApplyWithoutSnapshot() {
-        try {
-            new BinaryOperatorWithContext<>(null, (a, b) -> b);
-            fail("Exception expected");
-        } catch (RuntimeException expected) {
-            assertThat(expected, hasToString(containsString("No context snapshot provided")));
-        }
+        assertThatThrownBy(() -> new BinaryOperatorWithContext<>(null, (a, b) -> b))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("No context snapshot provided");
     }
 
     @Test
     void testApplyWithoutSnapshotSupplier() {
-        try {
-            new BinaryOperatorWithContext<>((Supplier<ContextSnapshot>) null, (a, b) -> b, c -> {
-            });
-            fail("Exception expected");
-        } catch (RuntimeException expected) {
-            assertThat(expected, hasToString(containsString("No context snapshot supplier provided")));
-        }
+        assertThatThrownBy(() -> new BinaryOperatorWithContext<>((Supplier<ContextSnapshot>) null, (a, b) -> b, c -> {
+        }))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("No context snapshot supplier provided");
     }
 
     @Test
@@ -108,11 +98,11 @@ class BinaryOperatorWithContextTest {
                 s -> snapshotHolder[0] = s).apply("input1", "input2"));
         t.start();
         t.join();
-        assertThat(DummyContext.currentValue(), is("Old value"));
+        assertThat(DummyContext.currentValue()).isEqualTo("Old value");
         try (ContextSnapshot.Reactivation reactivation = snapshotHolder[0].reactivate()) {
-            assertThat(DummyContext.currentValue(), is("New value"));
+            assertThat(DummyContext.currentValue()).isEqualTo("New value");
         }
-        assertThat(DummyContext.currentValue(), is("Old value"));
+        assertThat(DummyContext.currentValue()).isEqualTo("Old value");
 
         verify(snapshot).reactivate();
     }
@@ -151,10 +141,10 @@ class BinaryOperatorWithContextTest {
                 new BinaryOperatorWithContext<>(snapshot, function, s -> consumed.incrementAndGet())
                         .andThen(after);
 
-        assertThat(composed.apply(2, 3), is(20 + 15 + 100));
+        assertThat(composed.apply(2, 3)).isEqualTo(20 + 15 + 100);
         verify(snapshot, times(1)).reactivate();
         verify(reactivation, times(1)).close();
-        assertThat(consumed.get(), is(1));
+        assertThat(consumed.get()).isEqualTo(1);
     }
 
     @Test

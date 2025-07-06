@@ -29,10 +29,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit test for the {@link Slf4jMdcManager}.
@@ -63,7 +60,7 @@ class Slf4jMdcManagerTest {
     void testMdcItemPropagation() throws ExecutionException, InterruptedException {
         MDC.put("mdc-item", "Item value");
         Future<String> itemValue = threadpool.submit(() -> MDC.get("mdc-item"));
-        assertThat(itemValue.get(), is("Item value"));
+        assertThat(itemValue.get()).isEqualTo("Item value");
     }
 
     @Test
@@ -71,29 +68,29 @@ class Slf4jMdcManagerTest {
         MDC.put("mdc-item", "Value 1");
 
         ContextSnapshot snapshot = ContextSnapshot.capture();
-        assertThat("New snapshot shouldn't manipulate MDC.", MDC.get("mdc-item"), is("Value 1"));
+        assertThat(MDC.get("mdc-item")).withFailMessage("New snapshot shouldn't manipulate MDC.").isEqualTo("Value 1");
 
         MDC.put("mdc-item", "Value 2");
-        assertThat("Sanity check: MDC changed?", MDC.get("mdc-item"), is("Value 2"));
+        assertThat(MDC.get("mdc-item")).as("Sanity check: MDC changed?").isEqualTo("Value 2");
 
         try (ContextSnapshot.Reactivation reactivation = snapshot.reactivate()) {
-            assertThat("MDC changed by reactivation", MDC.get("mdc-item"), is("Value 1"));
+            assertThat(MDC.get("mdc-item")).withFailMessage("MDC changed by reactivation").isEqualTo("Value 1");
         }
 
-        assertThat("MDC restored?", MDC.get("mdc-item"), is("Value 2"));
+        assertThat(MDC.get("mdc-item")).as("MDC restored?").isEqualTo("Value 2");
     }
 
     @Test
     void testSlf4jMdcManagerToString() {
-        assertThat(Slf4jMdcManager.provider(), hasToString("Slf4jMdcManager"));
+        assertThat(Slf4jMdcManager.provider()).hasToString("Slf4jMdcManager");
     }
 
     @Test
     void testSlf4jMdcContextToString() {
         Slf4jMdcManager manager = Slf4jMdcManager.provider();
         try (Context context = manager.activate(MDC.getCopyOfContextMap())) {
-            assertThat(manager, hasToString("Slf4jMdcManager"));
-            assertThat(context, hasToString("Slf4jMdcContext"));
+            assertThat(manager).hasToString("Slf4jMdcManager");
+            assertThat(context).hasToString("Slf4jMdcContext");
         }
     }
 
@@ -102,7 +99,7 @@ class Slf4jMdcManagerTest {
         MDC.put("dummy", "value");
         // Test no-op for MdcManager
         ContextManager.clearAll();
-        assertThat(MDC.get("dummy"), is("value"));
+        assertThat(MDC.get("dummy")).isEqualTo("value");
     }
 
     @Test
@@ -112,10 +109,10 @@ class Slf4jMdcManagerTest {
 
         MDC.remove("test-key-1");
         MDC.put("test-key-2", "unrelated value not in the snapshot");
-        assertThat(snapshot.wrap(() -> MDC.get("test-key-1")).call(), is("value"));
-        assertThat(snapshot.wrap(() -> MDC.get("test-key-2")).call(), is("unrelated value not in the snapshot"));
+        assertThat(snapshot.wrap(() -> MDC.get("test-key-1")).call()).isEqualTo("value");
+        assertThat(snapshot.wrap(() -> MDC.get("test-key-2")).call()).isEqualTo("unrelated value not in the snapshot");
 
-        assertThat(MDC.get("test-key-1"), nullValue());
-        assertThat(MDC.get("test-key-2"), is("unrelated value not in the snapshot"));
+        assertThat(MDC.get("test-key-1")).isNull();
+        assertThat(MDC.get("test-key-2")).isEqualTo("unrelated value not in the snapshot");
     }
 }

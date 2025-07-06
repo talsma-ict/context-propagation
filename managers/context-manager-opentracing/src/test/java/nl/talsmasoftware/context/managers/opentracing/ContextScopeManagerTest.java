@@ -35,12 +35,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 class ContextScopeManagerTest {
     MockTracer mockTracer;
@@ -50,7 +46,7 @@ class ContextScopeManagerTest {
     @BeforeEach
     void registerMockGlobalTracer() {
         GlobalTracerTestUtil.resetGlobalTracer();
-        assertThat("Pre-existing GlobalTracer", GlobalTracer.isRegistered(), is(false));
+        assertThat(GlobalTracer.isRegistered()).as("Pre-existing GlobalTracer").isFalse();
         scopeManager = ContextScopeManager.provider();
         GlobalTracer.registerIfAbsent(mockTracer = new MockTracer(scopeManager));
         threadpool = ContextAwareExecutorService.wrap(Executors.newCachedThreadPool());
@@ -85,28 +81,28 @@ class ContextScopeManagerTest {
             });
         }
 
-        assertThat(GlobalTracer.get().activeSpan(), equalTo(parentSpan));
+        assertThat(GlobalTracer.get().activeSpan()).isEqualTo(parentSpan);
         for (Thread t : threads) t.start();
         for (Thread t : threads) t.join();
         parentSpan.finish();
         parent.close();
-        assertThat(GlobalTracer.get().activeSpan(), is(nullValue()));
+        assertThat(GlobalTracer.get().activeSpan()).isNull();
     }
 
     @Test
     void testActivate() {
         Span span = GlobalTracer.get().buildSpan("span").start();
         Context context = scopeManager.activate(span);
-        assertThat(scopeManager.getActiveContextValue(), is(span));
-        assertThat(scopeManager.activeSpan(), is(span));
-        assertThat(GlobalTracer.get().activeSpan(), is(span));
+        assertThat(scopeManager.getActiveContextValue()).isEqualTo(span);
+        assertThat(scopeManager.activeSpan()).isEqualTo(span);
+        assertThat(GlobalTracer.get().activeSpan()).isEqualTo(span);
         context.close();
         span.finish();
     }
 
     @Test
     void testSimpleToStringWhenLogged() {
-        assertThat(scopeManager, hasToString(scopeManager.getClass().getSimpleName()));
+        assertThat(scopeManager).hasToString(scopeManager.getClass().getSimpleName());
     }
 
     @Test
@@ -116,9 +112,9 @@ class ContextScopeManagerTest {
         Span secondSpan = GlobalTracer.get().buildSpan("second").start();
         Scope second = GlobalTracer.get().activateSpan(secondSpan);
         first.close();
-        assertThat(GlobalTracer.get().activeSpan(), is(secondSpan));
+        assertThat(GlobalTracer.get().activeSpan()).isEqualTo(secondSpan);
         second.close();
-        assertThat(GlobalTracer.get().activeSpan(), is(nullValue())); // first was already closed
+        assertThat(GlobalTracer.get().activeSpan()).isNull(); // first was already closed
     }
 
     static void waitFor(CountDownLatch latch) {

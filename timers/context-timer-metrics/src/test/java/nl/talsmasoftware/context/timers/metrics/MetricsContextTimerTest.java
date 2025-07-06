@@ -28,14 +28,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test class to check whether metrics are actually maintained when creating and reactivating snapshots.
@@ -68,73 +61,72 @@ class MetricsContextTimerTest {
 
     @Test
     void testCreateSnapshotInFreshApplication() {
-        assertThat(SharedMetricRegistries.names(), is(empty()));
+        assertThat(SharedMetricRegistries.names()).isEmpty();
         ContextSnapshot snapshot = ContextSnapshot.capture();
         String name = MetricRegistry.name(ContextSnapshot.class, "capture");
-        assertThat(snapshot, is(notNullValue()));
+        assertThat(snapshot).isNotNull();
 
-        assertThat(SharedMetricRegistries.names(), contains("ContextPropagationMetrics"));
+        assertThat(SharedMetricRegistries.names()).contains("ContextPropagationMetrics");
         MetricRegistry registry = SharedMetricRegistries.getOrCreate("ContextPropagationMetrics");
-        assertThat(registry.getTimers().containsKey(name), is(true));
-        assertThat(registry.timer(name).getCount(), is(1L));
+        assertThat(registry.getTimers()).containsKey(name);
+        assertThat(registry.timer(name).getCount()).isEqualTo(1L);
     }
 
     @Test
     void testCreateSnapshotInApplicationWithDefaultRegistry() {
         SharedMetricRegistries.setDefault("DefaultRegistry");
 
-        assertThat(SharedMetricRegistries.names(), contains("DefaultRegistry"));
+        assertThat(SharedMetricRegistries.names()).contains("DefaultRegistry");
         ContextSnapshot snapshot = ContextSnapshot.capture();
         String name = MetricRegistry.name(ContextSnapshot.class, "capture");
-        assertThat(snapshot, is(notNullValue()));
+        assertThat(snapshot).isNotNull();
 
-        assertThat(SharedMetricRegistries.names(), contains("DefaultRegistry")); // No new registries!
+        assertThat(SharedMetricRegistries.names()).containsExactly("DefaultRegistry"); // No new registries!
         MetricRegistry registry = SharedMetricRegistries.getDefault();
-        assertThat(registry.getTimers().containsKey(name), is(true));
-        assertThat(registry.timer(name).getCount(), is(1L));
+        assertThat(registry.getTimers()).containsKey(name);
+        assertThat(registry.timer(name).getCount()).isEqualTo(1L);
     }
 
     @Test
     void testCreateSnapshotInApplicationWithSingleNonDefaultRegistry() {
         MetricRegistry registry = SharedMetricRegistries.getOrCreate("NonDefaultRegistry");
-        assertThat(SharedMetricRegistries.tryGetDefault(), is(nullValue()));
+        assertThat(SharedMetricRegistries.tryGetDefault()).isNull();
 
-        assertThat(SharedMetricRegistries.names(), contains("NonDefaultRegistry"));
+        assertThat(SharedMetricRegistries.names()).contains("NonDefaultRegistry");
         ContextSnapshot snapshot = ContextSnapshot.capture();
         String name = MetricRegistry.name(ContextSnapshot.class, "capture");
-        assertThat(snapshot, is(notNullValue()));
+        assertThat(snapshot).isNotNull();
 
-        assertThat(SharedMetricRegistries.names(), contains("NonDefaultRegistry")); // No new registries!
-        assertThat(registry.getTimers().containsKey(name), is(true));
-        assertThat(registry.timer(name).getCount(), is(1L));
+        assertThat(SharedMetricRegistries.names()).containsExactly("NonDefaultRegistry"); // No new registries!
+        assertThat(registry.getTimers()).containsKey(name);
+        assertThat(registry.timer(name).getCount()).isEqualTo(1L);
     }
 
     @Test
     void testCreate3SnapshotsInApplicationWithMultipleNonDefaultRegistries() {
         MetricRegistry registry1 = SharedMetricRegistries.getOrCreate("NonDefaultRegistry1");
         MetricRegistry registry2 = SharedMetricRegistries.getOrCreate("NonDefaultRegistry2");
-        assertThat(SharedMetricRegistries.tryGetDefault(), is(nullValue()));
+        assertThat(SharedMetricRegistries.tryGetDefault()).isNull();
 
-        assertThat(SharedMetricRegistries.names(), containsInAnyOrder("NonDefaultRegistry1", "NonDefaultRegistry2"));
+        assertThat(SharedMetricRegistries.names()).containsExactlyInAnyOrder("NonDefaultRegistry1", "NonDefaultRegistry2");
         for (int i = 1; i <= 3; i++) {
-            assertThat(ContextSnapshot.capture(), is(notNullValue()));
+            assertThat(ContextSnapshot.capture()).isNotNull();
         }
         String name = MetricRegistry.name(ContextSnapshot.class, "capture");
 
-        assertThat(registry1.getTimers().containsKey(name), is(true));
-        assertThat(registry1.timer(name).getCount(), is(3L));
+        assertThat(registry1.getTimers()).containsKey(name);
+        assertThat(registry1.timer(name).getCount()).isEqualTo(3L);
 
-        assertThat(registry2.getTimers().containsKey(name), is(true));
-        assertThat(registry2.timer(name).getCount(), is(3L));
+        assertThat(registry2.getTimers()).containsKey(name);
+        assertThat(registry2.timer(name).getCount()).isEqualTo(3L);
     }
 
     @Test
     void testMetricsContextTimerToString() {
         MetricsContextTimer metricsContextTimer = new MetricsContextTimer();
-        assertThat(metricsContextTimer, hasToString("MetricsContextTimer{timers=[]}"));
+        assertThat(metricsContextTimer).hasToString("MetricsContextTimer{timers=[]}");
 
         metricsContextTimer.update(getClass(), "method", 1, TimeUnit.SECONDS, null);
-        assertThat(metricsContextTimer,
-                hasToString("MetricsContextTimer{timers=[" + getClass().getName() + ".method]}"));
+        assertThat(metricsContextTimer).hasToString("MetricsContextTimer{timers=[" + getClass().getName() + ".method]}");
     }
 }

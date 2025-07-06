@@ -31,12 +31,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 class ServletRequestContextManagerTest {
@@ -57,41 +52,41 @@ class ServletRequestContextManagerTest {
 
     @Test
     void testContextManagerToStringValue() {
-        assertThat(ServletRequestContextManager.provider(), hasToString(ServletRequestContextManager.class.getSimpleName()));
+        assertThat(ServletRequestContextManager.provider()).hasToString(ServletRequestContextManager.class.getSimpleName());
     }
 
     @Test
     void testGetActiveContext() {
-        assertThat(ServletRequestContextManager.provider().getActiveContextValue(), is(nullValue()));
+        assertThat(ServletRequestContextManager.provider().getActiveContextValue()).isNull();
 
         final ServletRequest request = mock(ServletRequest.class);
         Context ctx = ServletRequestContextManager.provider().activate(request);
 
-        assertThat(ServletRequestContextManager.provider().getActiveContextValue(), is(sameInstance(request)));
+        assertThat(ServletRequestContextManager.provider().getActiveContextValue()).isSameAs(request);
         ctx.close();
-        assertThat(ServletRequestContextManager.provider().getActiveContextValue(), is(nullValue()));
+        assertThat(ServletRequestContextManager.provider().getActiveContextValue()).isNull();
     }
 
     @Test
     void testCurrentServletRequest() {
-        assertThat(ServletRequestContextManager.currentServletRequest(), is(nullValue()));
+        assertThat(ServletRequestContextManager.currentServletRequest()).isNull();
 
         final ServletRequest request = mock(ServletRequest.class);
         Context ctx = ServletRequestContextManager.provider().activate(request);
 
-        assertThat(ServletRequestContextManager.currentServletRequest(), is(sameInstance(request)));
+        assertThat(ServletRequestContextManager.currentServletRequest()).isSameAs(request);
         ctx.close();
-        assertThat(ServletRequestContextManager.currentServletRequest(), is(nullValue()));
+        assertThat(ServletRequestContextManager.currentServletRequest()).isNull();
     }
 
     @Test
     void testClearableImplementation() {
         final ServletRequest request = mock(ServletRequest.class);
         ServletRequestContextManager.provider().activate(request);
-        assertThat(ServletRequestContextManager.provider().getActiveContextValue(), is(sameInstance(request)));
+        assertThat(ServletRequestContextManager.provider().getActiveContextValue()).isSameAs(request);
 
         ContextManager.clearAll();
-        assertThat(ServletRequestContextManager.provider().getActiveContextValue(), is(nullValue()));
+        assertThat(ServletRequestContextManager.provider().getActiveContextValue()).isNull();
     }
 
     @Test
@@ -101,8 +96,8 @@ class ServletRequestContextManagerTest {
         ServletRequest request2 = mock(ServletRequest.class);
 
         try (Context ctx1 = manager.activate(request1)) {
-            assertThat("Current context", manager.getActiveContextValue(), is(notNullValue()));
-            assertThat("Current context value", manager.getActiveContextValue(), is(request1));
+            assertThat(manager.getActiveContextValue()).as("Current context").isNotNull();
+            assertThat(manager.getActiveContextValue()).as("Current context value").isEqualTo(request1);
 
             final CountDownLatch blocker = new CountDownLatch(1);
             Future<ServletRequest> slowCall;
@@ -115,25 +110,25 @@ class ServletRequestContextManagerTest {
                 });
 
             }
-            assertThat("Restored context in parent", ServletRequestContextManager.currentServletRequest(), is(request1));
-            assertThat("Slow thread already done", slowCall.isDone(), is(false));
+            assertThat(ServletRequestContextManager.currentServletRequest()).as("Restored context in parent").isEqualTo(request1);
+            assertThat(slowCall.isDone()).isFalse();
             blocker.countDown();
-            assertThat("Context in slow thread", slowCall.get(), is(request2));
+            assertThat(slowCall.get()).isEqualTo(request2);
         }
 
-        assertThat("Current closed context", manager.getActiveContextValue(), is(nullValue()));
+        assertThat(manager.getActiveContextValue()).isNull();
     }
 
     @Test
     void testServletRequestContextToString() {
         ServletRequestContextManager manager = ServletRequestContextManager.provider();
-        assertThat(manager.getActiveContextValue(), nullValue());
+        assertThat(manager.getActiveContextValue()).isNull();
 
         ServletRequest request = mock(ServletRequest.class);
         Context servletRequestContext = manager.activate(request);
-        assertThat(servletRequestContext, hasToString("ServletRequestContext{value=" + request + "}"));
+        assertThat(servletRequestContext).hasToString("ServletRequestContext{value=" + request + "}");
 
         servletRequestContext.close();
-        assertThat(servletRequestContext, hasToString("ServletRequestContext{closed}"));
+        assertThat(servletRequestContext).hasToString("ServletRequestContext{closed}");
     }
 }

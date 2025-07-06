@@ -17,8 +17,7 @@ package nl.talsmasoftware.context.core.delegation;
 
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class WrapperTest {
 
@@ -27,7 +26,7 @@ public class WrapperTest {
         Wrapper<Object> subject = new Wrapper<Object>(new Object()) {
         };
 
-        assertThat(subject.isWrapperOf(null), is(false));
+        assertThat(subject.isWrapperOf(null)).isFalse();
     }
 
     @Test
@@ -35,7 +34,7 @@ public class WrapperTest {
         Wrapper<Object> subject = new Wrapper<Object>(new Object()) {
         };
 
-        assertThat(subject.isWrapperOf(new Object()), is(false));
+        assertThat(subject.isWrapperOf(new Object())).isFalse();
     }
 
     @Test
@@ -44,6 +43,6 @@ public class WrapperTest {
         Wrapper<Object> subject = new Wrapper<Object>(delegate) {
         };
 
-        assertThat(subject.isWrapperOf(delegate), is(true));
+        assertThat(subject.isWrapperOf(delegate)).isTrue();
     }
 }

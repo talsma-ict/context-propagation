@@ -25,11 +25,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static nl.talsmasoftware.context.timers.opentracing.MockSpanMatcher.withOperationName;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test and demonstration of the tracing of context switches themselves.
@@ -69,22 +65,23 @@ class OpentracingContextTimerTest {
     @Test
     void testDisabledByDefault() {
         ContextSnapshot.capture().reactivate().close();
-
-        assertThat(tracer.finishedSpans(), is(empty()));
+        assertThat(tracer.finishedSpans()).isEmpty();
     }
 
     @Test
     void testTraceCaptureContextSnapshot() {
         System.setProperty(PROPERTY_NAME, "true");
         ContextSnapshot.capture();
-        assertThat(tracer.finishedSpans(), hasItem(withOperationName("ContextSnapshot.capture")));
+        assertThat(tracer.finishedSpans())
+                .anyMatch(span -> "ContextSnapshot.capture".equals(span.operationName()));
     }
 
     @Test
     void testTraceReactivateContextSnapshot() {
         System.setProperty(PROPERTY_NAME, "true");
         ContextSnapshot.capture().reactivate().close();
-        assertThat(tracer.finishedSpans(), hasItem(withOperationName("ContextSnapshot.reactivate")));
+        assertThat(tracer.finishedSpans())
+                .anyMatch(span -> "ContextSnapshot.reactivate".equals(span.operationName()));
     }
 
 }

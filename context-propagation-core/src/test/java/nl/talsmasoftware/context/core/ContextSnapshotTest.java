@@ -20,10 +20,7 @@ import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.dummy.DummyContextManager;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Sjoerd Talsma
@@ -33,7 +30,7 @@ class ContextSnapshotTest {
 
     @Test
     void testSnapshotToString() {
-        assertThat(ContextSnapshot.capture(), hasToString(startsWith("ContextSnapshot{size=")));
+        assertThat(ContextSnapshot.capture().toString()).startsWith("ContextSnapshot{size=");
     }
 
     @Test
@@ -41,14 +38,14 @@ class ContextSnapshotTest {
         try (Context ignored = MGR.activate("Old value")) {
             ContextSnapshot snapshot = ContextSnapshot.capture();
             try (Context ignored2 = MGR.activate("New value")) {
-                assertThat(MGR.getActiveContextValue(), is("New value"));
+                assertThat(MGR.getActiveContextValue()).isEqualTo("New value");
 
                 try (ContextSnapshot.Reactivation reactivation = snapshot.reactivate()) {
-                    assertThat(MGR.getActiveContextValue(), is("Old value"));
-                    assertThat(reactivation, hasToString(startsWith("ContextSnapshot.Reactivation{size=")));
+                    assertThat(MGR.getActiveContextValue()).isEqualTo("Old value");
+                    assertThat(reactivation.toString()).startsWith("ContextSnapshot.Reactivation{size=");
                 }
 
-                assertThat(MGR.getActiveContextValue(), is("New value"));
+                assertThat(MGR.getActiveContextValue()).isEqualTo("New value");
             }
         }
     }

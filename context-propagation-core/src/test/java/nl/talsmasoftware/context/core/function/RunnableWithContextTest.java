@@ -25,12 +25,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.function.Supplier;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -71,24 +67,18 @@ class RunnableWithContextTest {
 
     @Test
     void testRunWithoutSnapshot() {
-        try {
-            new RunnableWithContext(null, () -> {
-            });
-            fail("Exception expected");
-        } catch (RuntimeException expected) {
-            assertThat(expected, hasToString(containsString("No context snapshot provided")));
-        }
+        assertThatThrownBy(() -> new RunnableWithContext(null, () -> {
+        }))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("No context snapshot provided");
     }
 
     @Test
     void testRunWithoutSnapshotSupplier() {
-        try {
-            new RunnableWithContext((Supplier<ContextSnapshot>) null, () -> {
-            }, null);
-            fail("Exception expected");
-        } catch (RuntimeException expected) {
-            assertThat(expected, hasToString(containsString("No context snapshot supplier provided")));
-        }
+        assertThatThrownBy(() -> new RunnableWithContext((Supplier<ContextSnapshot>) null, () -> {
+        }, null))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("No context snapshot supplier provided");
     }
 
     @Test
@@ -102,9 +92,9 @@ class RunnableWithContextTest {
         t.start();
         t.join();
 
-        assertThat(DummyContext.currentValue(), is("Old value"));
+        assertThat(DummyContext.currentValue()).isEqualTo("Old value");
         try (ContextSnapshot.Reactivation reactivation = snapshotHolder[0].reactivate()) {
-            assertThat(DummyContext.currentValue(), is("New value"));
+            assertThat(DummyContext.currentValue()).isEqualTo("New value");
         }
 
         verify(snapshot).reactivate();
