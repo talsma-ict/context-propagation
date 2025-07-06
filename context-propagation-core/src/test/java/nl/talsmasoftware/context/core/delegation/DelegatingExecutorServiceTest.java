@@ -191,9 +191,10 @@ class DelegatingExecutorServiceTest {
 
     @Test
     void testEquals() {
-        assertThat(subject).isEqualTo(subject);
-        assertThat(subject).isEqualTo(new TestDelegatingExecutorService(delegate));
-        assertThat(subject).isNotEqualTo(new TestDelegatingExecutorService(mock(ExecutorService.class)));
+        assertThat(subject)
+                .isEqualTo(subject)
+                .isEqualTo(new TestDelegatingExecutorService(delegate))
+                .isNotEqualTo(new TestDelegatingExecutorService(mock(ExecutorService.class)));
     }
 
     @Test

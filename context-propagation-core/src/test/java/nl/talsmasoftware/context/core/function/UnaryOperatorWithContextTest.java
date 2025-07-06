@@ -74,7 +74,7 @@ public class UnaryOperatorWithContextTest {
 
     @Test
     public void testApplyWithoutSnapshotSupplier() {
-        assertThatThrownBy(() -> new UnaryOperatorWithContext<>((Supplier<ContextSnapshot>) null, input -> input, context -> {
+        assertThatThrownBy(() -> new UnaryOperatorWithContext<>((Supplier<ContextSnapshot>) null, input -> input, ctx -> {
         }))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("No context snapshot supplier provided");

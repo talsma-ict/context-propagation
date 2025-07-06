@@ -47,7 +47,7 @@ class MicrometerContextTimerTest {
     @Test
     void testCreateSnapshotInFreshApplication() {
         Timer timer = Metrics.timer(ContextSnapshot.class.getName() + ".capture");
-        assertThat(timer.count()).isEqualTo(0L);
+        assertThat(timer.count()).isZero();
 
         ContextSnapshot snapshot = ContextSnapshot.capture();
         assertThat(snapshot).isNotNull();

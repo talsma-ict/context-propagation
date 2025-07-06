@@ -232,6 +232,6 @@ class Log4j2ThreadContextManagerTest {
         ContextManager.clearAll();
 
         assertThat(ThreadContext.isEmpty()).isTrue();
-        assertThat(ThreadContext.getDepth()).isEqualTo(0);
+        assertThat(ThreadContext.getDepth()).isZero();
     }
 }

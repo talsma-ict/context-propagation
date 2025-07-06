@@ -55,7 +55,7 @@ class Log4J2ThreadContextSnapshotTest {
 
     @Test
     void testCaptureFromCurrentThread_empty() {
-        assertThat(ThreadContext.getDepth()).isEqualTo(0);
+        assertThat(ThreadContext.getDepth()).isZero();
         assertThat(ThreadContext.isEmpty()).isTrue();
 
         Log4j2ThreadContextSnapshot snapshot = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
@@ -64,13 +64,13 @@ class Log4J2ThreadContextSnapshotTest {
 
         // Applying empty snapshot should have no effect
         snapshot.applyToCurrentThread();
-        assertThat(ThreadContext.getDepth()).isEqualTo(0);
+        assertThat(ThreadContext.getDepth()).isZero();
         assertThat(ThreadContext.isEmpty()).isTrue();
     }
 
     @Test
     void testCaptureFromCurrentThread_empty_apply() {
-        assertThat(ThreadContext.getDepth()).isEqualTo(0);
+        assertThat(ThreadContext.getDepth()).isZero();
         assertThat(ThreadContext.isEmpty()).isTrue();
 
         Log4j2ThreadContextSnapshot snapshot = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
@@ -180,12 +180,10 @@ class Log4J2ThreadContextSnapshotTest {
     void testImmutableContextStack() {
         ThreadContext.push("stack1");
         ThreadContext.push("stack2");
-        final Log4j2ThreadContextSnapshot snapshot = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
+        var contextStack = Log4j2ThreadContextSnapshot.captureFromCurrentThread().getContextStack();
 
-        assertThatThrownBy(() -> snapshot.getContextStack().pop())
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThatThrownBy(() -> snapshot.getContextStack().push("stack3"))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThat(snapshot.getContextStack()).containsExactly("stack1", "stack2");
+        assertThatThrownBy(contextStack::pop).isInstanceOf(UnsupportedOperationException.class);
+        assertThatThrownBy(() -> contextStack.push("stack3")).isInstanceOf(UnsupportedOperationException.class);
+        assertThat(contextStack).containsExactly("stack1", "stack2");
     }
 }
