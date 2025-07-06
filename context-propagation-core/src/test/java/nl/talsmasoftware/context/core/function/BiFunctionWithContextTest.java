@@ -28,9 +28,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -96,11 +95,11 @@ class BiFunctionWithContextTest {
         t.start();
         t.join();
 
-        assertThat(DummyContext.currentValue(), is("Old value"));
+        assertThat(DummyContext.currentValue()).isEqualTo("Old value");
         try (ContextSnapshot.Reactivation ignored = snapshotHolder[0].reactivate()) {
-            assertThat(DummyContext.currentValue(), is("New value"));
+            assertThat(DummyContext.currentValue()).isEqualTo("New value");
         }
-        assertThat(DummyContext.currentValue(), is("Old value"));
+        assertThat(DummyContext.currentValue()).isEqualTo("Old value");
 
         verify(snapshot).reactivate();
     }
@@ -138,10 +137,10 @@ class BiFunctionWithContextTest {
                 new BiFunctionWithContext<>(snapshot, function, s -> consumed.incrementAndGet())
                         .andThen(after);
 
-        assertThat(composed.apply(2, 3), is(20 + 15 + 100));
+        assertThat(composed.apply(2, 3)).isEqualTo(20 + 15 + 100);
         verify(snapshot, times(1)).reactivate();
         verify(reactivation, times(1)).close();
-        assertThat(consumed.get(), is(1));
+        assertThat(consumed.get()).isEqualTo(1);
     }
 
     @Test

@@ -24,10 +24,7 @@ import javax.servlet.AsyncEvent;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -60,10 +57,10 @@ class ServletRequestContextAsyncListenerTest {
 
     @Test
     void testOnStart() {
-        assertThat(ServletRequestContextManager.currentServletRequest(), is(nullValue()));
+        assertThat(ServletRequestContextManager.currentServletRequest()).isNull();
 
         subject.onStartAsync(event);
-        assertThat(ServletRequestContextManager.currentServletRequest(), is(sameInstance(mockRequest)));
+        assertThat(ServletRequestContextManager.currentServletRequest()).isSameAs(mockRequest);
 
         verify(mockContext).addListener(subject);
     }
@@ -71,28 +68,28 @@ class ServletRequestContextAsyncListenerTest {
     @Test
     void testOnComplete() {
         new ServletRequestContext(mockRequest);
-        assertThat(ServletRequestContextManager.currentServletRequest(), is(sameInstance(mockRequest)));
+        assertThat(ServletRequestContextManager.currentServletRequest()).isSameAs(mockRequest);
 
         subject.onComplete(event);
-        assertThat(ServletRequestContextManager.currentServletRequest(), is(nullValue()));
+        assertThat(ServletRequestContextManager.currentServletRequest()).isNull();
     }
 
     @Test
     void testOnTimeout() {
         new ServletRequestContext(mockRequest);
-        assertThat(ServletRequestContextManager.currentServletRequest(), is(sameInstance(mockRequest)));
+        assertThat(ServletRequestContextManager.currentServletRequest()).isSameAs(mockRequest);
 
         subject.onTimeout(event);
-        assertThat(ServletRequestContextManager.currentServletRequest(), is(nullValue()));
+        assertThat(ServletRequestContextManager.currentServletRequest()).isNull();
     }
 
     @Test
     void testOnError() {
         new ServletRequestContext(mockRequest);
-        assertThat(ServletRequestContextManager.currentServletRequest(), is(sameInstance(mockRequest)));
+        assertThat(ServletRequestContextManager.currentServletRequest()).isSameAs(mockRequest);
 
         subject.onError(event);
-        assertThat(ServletRequestContextManager.currentServletRequest(), is(nullValue()));
+        assertThat(ServletRequestContextManager.currentServletRequest()).isNull();
     }
 
 }

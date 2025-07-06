@@ -31,13 +31,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
@@ -64,37 +59,37 @@ class ContextSnapshotTest {
     @Test
     void testSnapshot_inSameThread() {
         dummyManager.clear();
-        assertThat(DummyContext.currentValue(), is(nullValue()));
+        assertThat(DummyContext.currentValue()).isNull();
 
         DummyContext ctx1 = new DummyContext("initial value");
-        assertThat(DummyContext.currentValue(), is("initial value"));
+        assertThat(DummyContext.currentValue()).isEqualTo("initial value");
 
         DummyContext ctx2 = new DummyContext("second value");
-        assertThat(DummyContext.currentValue(), is("second value"));
+        assertThat(DummyContext.currentValue()).isEqualTo("second value");
 
         ContextSnapshot snapshot = ContextSnapshot.capture();
-        assertThat(DummyContext.currentValue(), is("second value")); // No context change because of snapshot.
+        assertThat(DummyContext.currentValue()).isEqualTo("second value"); // No context change because of snapshot.
 
         DummyContext ctx3 = new DummyContext("third value");
-        assertThat(DummyContext.currentValue(), is("third value"));
+        assertThat(DummyContext.currentValue()).isEqualTo("third value");
 
         // Reactivate snapshot: ctx1 -> ctx2 -> ctx3 -> ctx2'
         ContextSnapshot.Reactivation reactivation = snapshot.reactivate();
-        assertThat(DummyContext.currentValue(), is("second value"));
+        assertThat(DummyContext.currentValue()).isEqualTo("second value");
 
         reactivation.close();
-        assertThat(DummyContext.currentValue(), is("third value")); // back to ctx3, NOT ctx1 !!
+        assertThat(DummyContext.currentValue()).isEqualTo("third value"); // back to ctx3, NOT ctx1 !!
 
         // out-of-order closing!
         ctx2.close();
-        assertThat(DummyContext.currentValue(), is("third value")); // back to ctx3, NOT ctx1 !!
+        assertThat(DummyContext.currentValue()).isEqualTo("third value"); // back to ctx3, NOT ctx1 !!
 
         ctx3.close();
-        assertThat(DummyContext.currentValue(), is("initial value")); // back to ctx1 because ctx2 is closed
+        assertThat(DummyContext.currentValue()).isEqualTo("initial value"); // back to ctx1 because ctx2 is closed
 
-        assertThat(ctx1.isClosed(), is(false));
-        assertThat(ctx2.isClosed(), is(true));
-        assertThat(ctx3.isClosed(), is(true));
+        assertThat(ctx1.isClosed()).isFalse();
+        assertThat(ctx2.isClosed()).isTrue();
+        assertThat(ctx3.isClosed()).isTrue();
         ctx1.close();
     }
 
@@ -108,7 +103,7 @@ class ContextSnapshotTest {
             }
 
             for (int i = 0; i < threadCount; i++) {
-                assertThat(snapshots.get(i).get(), is(notNullValue()));
+                assertThat(snapshots.get(i).get()).isNotNull();
             }
         }
     }
@@ -120,11 +115,11 @@ class ContextSnapshotTest {
         ContextSnapshot snapshot = ContextSnapshot.capture();
         ctx.close();
 
-        assertThat(DummyContext.currentValue(), is(nullValue()));
+        assertThat(DummyContext.currentValue()).isNull();
         ContextSnapshot.Reactivation reactivation = snapshot.reactivate();
-        assertThat(DummyContext.currentValue(), is("blah"));
+        assertThat(DummyContext.currentValue()).isEqualTo("blah");
         reactivation.close();
-        assertThat(DummyContext.currentValue(), is(nullValue()));
+        assertThat(DummyContext.currentValue()).isNull();
     }
 
     @Test
@@ -137,18 +132,18 @@ class ContextSnapshotTest {
         ContextSnapshot snapshot = assertDoesNotThrow(ContextSnapshot::capture);
         ThrowingContextManager.onActivate = reactivationException;
 
-        assertThat(DummyContext.currentValue(), is("foo"));
-        assertThat(mgr.getActiveContextValue(), is("bar"));
+        assertThat(DummyContext.currentValue()).isEqualTo("foo");
+        assertThat(mgr.getActiveContextValue()).isEqualTo("bar");
         ctx1.close();
         ctx2.close();
 
-        assertThat(DummyContext.currentValue(), is(nullValue()));
-        assertThat(mgr.getActiveContextValue(), is(nullValue()));
+        assertThat(DummyContext.currentValue()).isNull();
+        assertThat(mgr.getActiveContextValue()).isNull();
         assertThatThrownBy(snapshot::reactivate).isInstanceOf(RuntimeException.class);
 
         // foo + bar mustn't be set after exception!
-        assertThat(DummyContext.currentValue(), is(nullValue()));
-        assertThat(mgr.getActiveContextValue(), is(nullValue()));
+        assertThat(DummyContext.currentValue()).isNull();
+        assertThat(mgr.getActiveContextValue()).isNull();
     }
 
     @Test
@@ -162,31 +157,31 @@ class ContextSnapshotTest {
             }
 
             for (Future<ContextSnapshot> future : snapshots) {
-                assertThat(future.get(), is(notNullValue()));
+                assertThat(future.get()).isNotNull();
             }
         }
     }
 
     @Test
     void toString_isForSnapshot_notSnapshotImpl() {
-        assertThat(ContextSnapshot.capture(), hasToString(containsString("ContextSnapshot{")));
+        assertThat(ContextSnapshot.capture().toString()).contains("ContextSnapshot{");
     }
 
     @Test
     void testTimingDelegation() {
         DummyContextTimer.clear();
-        assertThat(DummyContextTimer.getLastTimedMillis(ContextSnapshot.class, "capture"), nullValue());
-        assertThat(DummyContextTimer.getLastTimedMillis(ContextSnapshot.class, "reactivate"), nullValue());
+        assertThat(DummyContextTimer.getLastTimedMillis(ContextSnapshot.class, "capture")).isNull();
+        assertThat(DummyContextTimer.getLastTimedMillis(ContextSnapshot.class, "reactivate")).isNull();
 
         ContextSnapshot.capture().reactivate().close();
-        assertThat(DummyContextTimer.getLastTimedMillis(ContextSnapshot.class, "capture"), notNullValue());
-        assertThat(DummyContextTimer.getLastTimedMillis(ContextSnapshot.class, "reactivate"), notNullValue());
+        assertThat(DummyContextTimer.getLastTimedMillis(ContextSnapshot.class, "capture")).isNotNull();
+        assertThat(DummyContextTimer.getLastTimedMillis(ContextSnapshot.class, "reactivate")).isNotNull();
     }
 
     @Test
     void testReactivationToString() {
         try (ContextSnapshot.Reactivation reactivation = ContextSnapshot.capture().reactivate()) {
-            assertThat(reactivation, hasToString(containsString("ContextSnapshot.Reactivation{")));
+            assertThat(reactivation.toString()).contains("ContextSnapshot.Reactivation{");
         }
     }
 
@@ -206,9 +201,9 @@ class ContextSnapshotTest {
         ContextSnapshot snapshot = ContextSnapshot.capture();
         dummyManager.activate("Value 2");
 
-        assertThat(dummyManager.getActiveContextValue(), is("Value 2"));
-        snapshot.wrap(() -> assertThat(dummyManager.getActiveContextValue(), is("Value 1"))).run();
-        assertThat(dummyManager.getActiveContextValue(), is("Value 2"));
+        assertThat(dummyManager.getActiveContextValue()).isEqualTo("Value 2");
+        snapshot.wrap((Runnable) () -> assertThat(dummyManager.getActiveContextValue()).isEqualTo("Value 1")).run();
+        assertThat(dummyManager.getActiveContextValue()).isEqualTo("Value 2");
     }
 
     @Test
@@ -217,8 +212,8 @@ class ContextSnapshotTest {
         ContextSnapshot snapshot = ContextSnapshot.capture();
         dummyManager.activate("Value 2");
 
-        assertThat(dummyManager.getActiveContextValue(), is("Value 2"));
-        assertThat(snapshot.wrap(dummyManager::getActiveContextValue).call(), is("Value 1"));
-        assertThat(dummyManager.getActiveContextValue(), is("Value 2"));
+        assertThat(dummyManager.getActiveContextValue()).isEqualTo("Value 2");
+        assertThat(snapshot.wrap(dummyManager::getActiveContextValue).call()).isEqualTo("Value 1");
+        assertThat(dummyManager.getActiveContextValue()).isEqualTo("Value 2");
     }
 }

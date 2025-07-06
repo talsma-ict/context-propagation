@@ -18,7 +18,6 @@ package nl.talsmasoftware.context.core.function;
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.dummy.DummyContextManager;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,9 +32,7 @@ import java.util.function.Consumer;
 import static nl.talsmasoftware.context.dummy.DummyContext.assertCurrentValue;
 import static nl.talsmasoftware.context.dummy.DummyContext.currentValue;
 import static nl.talsmasoftware.context.dummy.DummyContext.setCurrentValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -73,7 +70,7 @@ class ConsumerWithContextTest {
     void testAcceptNull() {
         Object[] accepted = new Object[1];
         new ConsumerWithContext<>(snapshot, val -> accepted[0] = val).accept(null);
-        assertThat(accepted[0], is(nullValue()));
+        assertThat(accepted[0]).isNull();
         verify(snapshot).reactivate();
     }
 
@@ -104,7 +101,7 @@ class ConsumerWithContextTest {
         t.join(); // Block and trigger assertions
 
         assertCurrentValue().isEqualTo("Old value");
-        Assertions.assertThat(snapshotHolder[0]).isNotNull();
+        assertThat(snapshotHolder[0]).isNotNull();
 
         t = new Thread(() -> {
             try (ContextSnapshot.Reactivation ignored = snapshotHolder[0].reactivate()) {
@@ -130,9 +127,9 @@ class ConsumerWithContextTest {
         t.start();
         t.join();
 
-        assertThat(currentValue(), is("Old value"));
+        assertThat(currentValue()).isEqualTo("Old value");
         try (ContextSnapshot.Reactivation ignored = snapshotHolder[0].reactivate()) {
-            assertThat(currentValue(), is("NEW VALUE, New value, Old value"));
+            assertThat(currentValue()).isEqualTo("NEW VALUE, New value, Old value");
         }
     }
 }

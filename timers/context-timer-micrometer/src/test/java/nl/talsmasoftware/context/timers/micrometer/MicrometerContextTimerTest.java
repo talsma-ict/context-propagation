@@ -25,10 +25,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.number.IsCloseTo.closeTo;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.Offset.offset;
 
 class MicrometerContextTimerTest {
     SimpleMeterRegistry registry;
@@ -49,20 +47,20 @@ class MicrometerContextTimerTest {
     @Test
     void testCreateSnapshotInFreshApplication() {
         Timer timer = Metrics.timer(ContextSnapshot.class.getName() + ".capture");
-        assertThat(timer.count(), is(0L));
+        assertThat(timer.count()).isEqualTo(0L);
 
         ContextSnapshot snapshot = ContextSnapshot.capture();
-        assertThat(snapshot, is(notNullValue()));
+        assertThat(snapshot).isNotNull();
 
-        assertThat(timer.count(), is(1L));
+        assertThat(timer.count()).isEqualTo(1L);
     }
 
     @Test
     void testTiming() {
         Timer timer = Metrics.timer(MicrometerContextTimerTest.class.getName() + ".testTiming");
         new MicrometerContextTimer().update(MicrometerContextTimerTest.class, "testTiming", 43, TimeUnit.MILLISECONDS, null);
-        assertThat(timer.count(), is(1L));
-        assertThat(timer.mean(TimeUnit.NANOSECONDS), closeTo(43000000.0d, 0.001d));
+        assertThat(timer.count()).isEqualTo(1L);
+        assertThat(timer.mean(TimeUnit.NANOSECONDS)).isCloseTo(43000000.0d, offset(0.001d));
     }
 
 }

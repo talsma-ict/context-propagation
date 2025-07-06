@@ -30,11 +30,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * @author Sjoerd Talsma
@@ -62,23 +59,17 @@ class BooleanSupplierWithContextTest {
 
     @Test
     void testConstructWithoutSnapshot() {
-        try {
-            new BooleanSupplierWithContext(null, () -> true);
-            fail("Exception expected");
-        } catch (RuntimeException expected) {
-            assertThat(expected, hasToString(containsString("No context snapshot provided")));
-        }
+        assertThatThrownBy(() -> new BooleanSupplierWithContext(null, () -> true))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("No context snapshot provided");
     }
 
     @Test
     void testConstructWithoutSnapshotSupplier() {
-        try {
-            new BooleanSupplierWithContext((Supplier<ContextSnapshot>) null, () -> true, snapshot -> {
-            });
-            fail("Exception expected");
-        } catch (RuntimeException expected) {
-            assertThat(expected, hasToString(containsString("No context snapshot supplier provided")));
-        }
+        assertThatThrownBy(() -> new BooleanSupplierWithContext((Supplier<ContextSnapshot>) null, () -> true, snapshot -> {
+        }))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("No context snapshot supplier provided");
     }
 
     @Test
@@ -95,13 +86,13 @@ class BooleanSupplierWithContextTest {
         }, s -> snapshotHolder[0] = s);
 
         Future<Boolean> future = unawareThreadpool.submit(supplier::getAsBoolean);
-        assertThat(future.get(), is(true));
+        assertThat(future.get()).isTrue();
 
-        assertThat(DummyContext.currentValue(), is("true"));
+        assertThat(DummyContext.currentValue()).isEqualTo("true");
         try (ContextSnapshot.Reactivation reactivation = snapshotHolder[0].reactivate()) {
-            assertThat(DummyContext.currentValue(), is("false"));
+            assertThat(DummyContext.currentValue()).isEqualTo("false");
         }
-        assertThat(DummyContext.currentValue(), is("true"));
+        assertThat(DummyContext.currentValue()).isEqualTo("true");
     }
 
 }

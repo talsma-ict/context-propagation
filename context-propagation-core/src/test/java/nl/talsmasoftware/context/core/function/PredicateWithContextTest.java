@@ -29,12 +29,8 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasToString;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -74,12 +70,9 @@ class PredicateWithContextTest {
 
     @Test
     void testTestWithoutSnapshot() {
-        try {
-            new PredicateWithContext<>(null, input -> true);
-            fail("Exception expected");
-        } catch (RuntimeException expected) {
-            assertThat(expected, hasToString(containsString("No context snapshot provided")));
-        }
+        assertThatThrownBy(() -> new PredicateWithContext<>(null, input -> true))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("No context snapshot provided");
     }
 
     @Test
@@ -107,11 +100,11 @@ class PredicateWithContextTest {
         t.start();
         t.join();
 
-        assertThat(DummyContext.currentValue(), is("Old value"));
+        assertThat(DummyContext.currentValue()).isEqualTo("Old value");
         try (ContextSnapshot.Reactivation ignored = snapshotHolder[0].reactivate()) {
-            assertThat(DummyContext.currentValue(), is("New value"));
+            assertThat(DummyContext.currentValue()).isEqualTo("New value");
         }
-        assertThat(DummyContext.currentValue(), is("Old value"));
+        assertThat(DummyContext.currentValue()).isEqualTo("Old value");
 
         verify(snapshot).reactivate();
     }
@@ -147,10 +140,10 @@ class PredicateWithContextTest {
         AtomicInteger consumed = new AtomicInteger(0);
         Predicate<String> combined = new PredicateWithContext<>(snapshot, predicate, s -> consumed.incrementAndGet()).and(and);
 
-        assertThat(combined.test(""), is(true));
+        assertThat(combined.test("")).isTrue();
         verify(snapshot, times(1)).reactivate();
         verify(reactivation, times(1)).close();
-        assertThat(consumed.get(), is(1));
+        assertThat(consumed.get()).isEqualTo(1);
     }
 
     @Test
@@ -164,12 +157,12 @@ class PredicateWithContextTest {
         AtomicInteger consumed = new AtomicInteger(0);
         Predicate<String> combined = new PredicateWithContext<>(snapshot, predicate, s -> consumed.incrementAndGet()).and(and);
 
-        assertThat(combined.test(null), is(false));
+        assertThat(combined.test(null)).isFalse();
         verifyNoMoreInteractions(and);
 
         verify(snapshot, times(1)).reactivate();
         verify(reactivation, times(1)).close();
-        assertThat(consumed.get(), is(1));
+        assertThat(consumed.get()).isEqualTo(1);
     }
 
     @Test
@@ -190,10 +183,10 @@ class PredicateWithContextTest {
         AtomicInteger consumed = new AtomicInteger(0);
         Predicate<String> combined = new PredicateWithContext<>(snapshot, predicate, s -> consumed.incrementAndGet()).or(or);
 
-        assertThat(combined.test(""), is(true));
+        assertThat(combined.test("")).isTrue();
         verify(snapshot, times(1)).reactivate();
         verify(reactivation, times(1)).close();
-        assertThat(consumed.get(), is(1));
+        assertThat(consumed.get()).isEqualTo(1);
     }
 
     @Test
@@ -207,12 +200,12 @@ class PredicateWithContextTest {
         AtomicInteger consumed = new AtomicInteger(0);
         Predicate<String> combined = new PredicateWithContext<>(snapshot, predicate, s -> consumed.incrementAndGet()).or(or);
 
-        assertThat(combined.test(null), is(true));
+        assertThat(combined.test(null)).isTrue();
         verifyNoMoreInteractions(or);
 
         verify(snapshot, times(1)).reactivate();
         verify(reactivation, times(1)).close();
-        assertThat(consumed.get(), is(1));
+        assertThat(consumed.get()).isEqualTo(1);
     }
 
     static <T> Predicate<T> throwing(RuntimeException rte) {

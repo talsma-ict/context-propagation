@@ -30,9 +30,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -69,7 +67,7 @@ public class SupplierWithContextTest {
 
     @Test
     public void testGetNull() {
-        assertThat(new SupplierWithContext<>(snapshot, () -> null).get(), is(nullValue()));
+        assertThat(new SupplierWithContext<>(snapshot, () -> null).get()).isNull();
         verify(snapshot).reactivate();
     }
 
@@ -87,12 +85,12 @@ public class SupplierWithContextTest {
         }, s -> snapshotHolder[0] = s);
 
         Future<String> future = unawareThreadpool.submit(supplier::get);
-        assertThat(future.get(), is(nullValue()));
+        assertThat(future.get()).isNull();
 
         verify(snapshot).reactivate();
-        assertThat(DummyContext.currentValue(), is("Old value"));
+        assertThat(DummyContext.currentValue()).isEqualTo("Old value");
         try (ContextSnapshot.Reactivation reactivation = snapshotHolder[0].reactivate()) {
-            assertThat(DummyContext.currentValue(), is("New value"));
+            assertThat(DummyContext.currentValue()).isEqualTo("New value");
         }
     }
 
