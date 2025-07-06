@@ -170,7 +170,7 @@ when you add any of the following modules to your classpath:
   Adds [Micrometer] Timers for context propagation.
 - [context-timer-opentelemetry](timers/context-timer-opentelemetry):
   Creates OpenTelemetry histogram meters for context propagation.
-- [context-timer-opentracing](timers/context-timer-opentracing):
+- context-timer-opentracing:
   Old module creating opentracing spans for context propagation.
   Consider replacing by its successor, opentelemetry.
 
