@@ -190,12 +190,12 @@ and the structure of the repository.
   - `ContextManager.initializeNewContext(value)` was renamed to `activate(value)`.
   - `ContextManager.getActiveContext()` was replaced by `getActiveContextValue()`.
   - `ContextManager.clear()` must be implemented, but is allowed to be a 'no-op' empty implementation. The `Clearable` interface was removed.
-- All `@Deprecated(forRemoval=true)` items from v1 were removed.
 - New `ContextManager` implementations for:
   - [OpenTelemetry](managers/context-manager-opentelemetry) context
   - The [gRPC](managers/context-manager-grpc) framework context
 - New `ContextTimer` implementation using:
   - [OpenTelemetry](timers/context-timer-opentelemetry) histogram meter.
+- All `@Deprecated(forRemoval=true)` items from v1 were removed.
 
 ## License
 
