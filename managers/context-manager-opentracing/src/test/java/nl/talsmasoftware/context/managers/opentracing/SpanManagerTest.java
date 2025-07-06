@@ -143,7 +143,7 @@ public class SpanManagerTest {
     }
 
     @Test
-    @SuppressWarnings("java:5961") // Long-lived span goes through multiple states which all need assertions
+    @SuppressWarnings("java:S5961") // Long-lived span goes through multiple states which all need assertions
     public void testLonglivedChildSpanFromBackgroundThread() throws Exception {
         Span parentSpan = mockTracer.buildSpan("first-op").start();
         Scope parent = mockTracer.activateSpan(parentSpan);

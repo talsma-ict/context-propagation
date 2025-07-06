@@ -81,11 +81,12 @@ class WrapperWithContextTest {
         assertThat(set.add(new WrapperWithContext<Object>(snapshot, mock(Wrapper.class)) {
         })).isTrue();
         assertThat(set).hasSize(3);
-        assertThat(wrapper).isEqualTo(wrapper);
-        assertThat(wrapper).isEqualTo(new DoNothingWrapper(snapshot, delegate));
         WrapperWithContext<Object> copy = new WrapperWithContext<Object>(snapshot, delegate) {
         };
-        assertThat(wrapper).isNotEqualTo(copy); // different inner class
+        assertThat(wrapper)
+                .isEqualTo(wrapper)
+                .isEqualTo(new DoNothingWrapper(snapshot, delegate))
+                .isNotEqualTo(copy); // different inner class
     }
 
     static class DoNothingWrapper extends WrapperWithContext<Object> {

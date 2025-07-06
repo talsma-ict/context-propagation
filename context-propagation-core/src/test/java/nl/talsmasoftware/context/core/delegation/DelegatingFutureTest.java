@@ -133,9 +133,10 @@ class DelegatingFutureTest {
 
     @Test
     void testEquals() {
-        assertThat(subject).isEqualTo(subject);
-        assertThat(subject).isEqualTo(new TestDelegatingFuture(delegate));
-        assertThat(subject).isNotEqualTo(new TestDelegatingFuture(mock(Future.class)));
+        assertThat(subject)
+                .isEqualTo(subject)
+                .isEqualTo(new TestDelegatingFuture(delegate))
+                .isNotEqualTo(new TestDelegatingFuture(mock(Future.class)));
     }
 
     @Test

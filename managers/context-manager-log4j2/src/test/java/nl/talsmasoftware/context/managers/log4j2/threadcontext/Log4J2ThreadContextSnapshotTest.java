@@ -169,11 +169,10 @@ class Log4J2ThreadContextSnapshotTest {
     void testImmutableContextMap() {
         ThreadContext.put("key1", "value1");
         ThreadContext.put("key2", "value2");
-        final Log4j2ThreadContextSnapshot snapshot = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
+        var contextMap = Log4j2ThreadContextSnapshot.captureFromCurrentThread().getContextMap();
 
-        assertThatThrownBy(() -> snapshot.getContextMap().put("key3", "value3"))
-                .isInstanceOf(UnsupportedOperationException.class);
-        assertThat(snapshot.getContextMap()).hasSize(2);
+        assertThatThrownBy(() -> contextMap.put("key3", "value3")).isInstanceOf(UnsupportedOperationException.class);
+        assertThat(contextMap).hasSize(2);
     }
 
     @Test
