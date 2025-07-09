@@ -19,14 +19,11 @@ import java.io.Closeable;
 import java.util.concurrent.Callable;
 
 /**
- * Snapshot capturing all active values from detected {@link ContextManager} implementations.
+ * Captures active values from all detected {@linkplain ContextManager} implementations.
  *
  * <p>
- * Such a snapshot can be passed to another thread,
- * allowing all captured values to be reactivated in that other thread by a single method call.
- *
- * <p>
- * A context snapshot can be obtained from the {@linkplain #capture()} method.
+ * A context snapshot can be obtained from the {@linkplain #capture()} method.<br>
+ * The captured values in this snapshot can be reactivated in another thread.
  *
  * <p>
  * <strong>Important:</strong> Make sure to <strong>always</strong> call {@link Reactivation#close()}

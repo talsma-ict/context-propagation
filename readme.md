@@ -36,7 +36,7 @@ to make sure they reactivate _and_ close snapshots in a safe way.
 
 Manages a [context](#context) by providing a standard way of interacting with `ThreadLocal` values.
 
-Thread-local values can be accessed via a ContextManager by:
+Managed thread-local values can be accessed via a ContextManager by:
 
 - Calling `getActiveContextValue()` which _gets_ the current thread-local value.
 - Calling `activate(value)` which _sets_ the given value until `close()` is called on the resulting `Context`.

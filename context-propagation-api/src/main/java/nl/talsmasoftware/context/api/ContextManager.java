@@ -19,29 +19,33 @@ package nl.talsmasoftware.context.api;
  * Manages a {@linkplain Context} by providing a standard way of interacting with {@linkplain ThreadLocal} values.
  *
  * <p>
+ * Thread-local values can be accessed via a ContextManager by:
+ *
+ * <p>
  * {@linkplain ThreadLocal} values can be accessed via a ContextManager by:
  * <ul>
+ *     <li>Calling {@linkplain #getActiveContextValue()} which <em>gets</em> the current thread-local value.
  *     <li>Calling {@linkplain #activate(Object)} which <em>sets</em> the given value until {@linkplain Context#close()}
- *     is called on the resulting {@linkplain Context}.
- *     <li>Calling {@linkplain #getActiveContextValue()} which <em>sets</em> the current thread-local value.
+ *     is called on the returned {@linkplain Context}.
  *     <li>Calling {@linkplain #clear()} which <em>removes</em> the thread-local value.
  * </ul>
  *
- * <p>
- * Implementations must be made available through the {@linkplain java.util.ServiceLoader ServiceLoader}.<br>
- * For details how to make your implementation available, please see the documentation of {@link java.util.ServiceLoader}.
- *
  * @param <T> type of the context value
  * @author Sjoerd Talsma
+ * @implSpec Implementations <strong>must</strong> be made available through Java's ServiceLoader.
+ * For details how to make your implementation available, please see the documentation of {@link java.util.ServiceLoader}.
  * @since 2.0.0
  */
 public interface ContextManager<T> {
-
     /**
      * Activate a new context containing the specified <code>value</code>.
      *
      * <p>
      * Whether the value is allowed to be <code>null</code> is up to the implementation.
+     *
+     * <p>
+     * The specified value is the <em>active</em> value for the current thread,
+     * until the returned {@linkplain Context} is closed, or another value gets activated.
      *
      * @param value The value to activate a new context for.
      * @return The new <em>active</em> context containing the specified value
@@ -58,7 +62,7 @@ public interface ContextManager<T> {
     T getActiveContextValue();
 
     /**
-     * Clears the current context and any potential parent contexts that exist.
+     * Clears the current context and any potential parent contexts that exist, for the current thread.
      *
      * <p>
      * This is an optional operation.<br>
@@ -66,8 +70,7 @@ public interface ContextManager<T> {
      * it is not necessary to call clear.
      *
      * <p>
-     * The operation exists to allow thread pool management making sure
-     * to clear all contexts before returning threads to the pool.
+     * The operation exists to allow thread-pool management to clear all contexts before returning threads to the pool.
      *
      * <p>
      * This method normally should only get called by {@linkplain #clearAll()}.

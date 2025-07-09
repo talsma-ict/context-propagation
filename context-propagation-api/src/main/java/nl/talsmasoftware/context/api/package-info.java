@@ -14,37 +14,41 @@
  * limitations under the License.
  */
 /**
- * API concepts used throughout the {@code context-propagation} library.
- *
- * <h2>{@linkplain nl.talsmasoftware.context.api.Context}</h2>
- * <p>
- * A {@linkplain nl.talsmasoftware.context.api.Context context} contains a value.<br>
- * There can be one active context per thread. A context remains active until it is closed or another context
- * is activated in the same thread. Normally, a context is backed by a {@linkplain java.lang.ThreadLocal ThreadLocal}
- * variable.
- *
- * <h2>{@linkplain nl.talsmasoftware.context.api.ContextManager}</h2>
- * <p>
- * Manages the active context.
- * Can {@linkplain nl.talsmasoftware.context.api.ContextManager#activate(java.lang.Object) activate a new context}
- * and provides access to
- * the {@linkplain nl.talsmasoftware.context.api.ContextManager#getActiveContextValue() active context value}.
- *
- * <p>
- * For normal application code it should not be necessary to interact with context managers directly.
- * Instead, using the various context-aware utility classes from the core module will automatically propagate
- * any supported context types to background threads for you.
+ * The API of the {@code context-propagation} library.
  *
  * <h2>{@linkplain nl.talsmasoftware.context.api.ContextSnapshot}</h2>
  * <p>
- * A snapshot contains the active context value from all known context managers.<br>
- * These values can be reactivated all together in another thread
- * by {@linkplain nl.talsmasoftware.context.api.ContextSnapshot#reactivate() reactivating} the snapshot.<br>
- * Reactivated snapshots <strong>must</strong> be closed to avoid leaking context.
+ * Captures active values from all detected {@linkplain nl.talsmasoftware.context.api.ContextManager} implementations.
  *
  * <p>
- * All context aware utility classes in this the core module of this library are tested
+ * The captured values in a snapshot can be reactivated in another thread.<br>
+ * Snapshot reactivations must be closed again to avoid leaking context.
+ *
+ * <p>
+ * All context aware utility classes in this library are tested
  * to make sure they reactivate and close snapshots in a safe way.
+ *
+ * <h2>{@linkplain nl.talsmasoftware.context.api.ContextManager}</h2>
+ * <p>
+ * Manages {@linkplain nl.talsmasoftware.context.api.Context contexts} by providing a standard way of interacting
+ * with {@linkplain java.lang.ThreadLocal} values.
+ *
+ * <p>
+ * Managed context values can be accessed via a ContextManager by:
+ * <ul>
+ *  <li>Calling {@code getActiveContextValue()} which <em>gets</em> the current thread-local value.
+ *  <li>Calling {@code activate(value)} which <em>sets</em> the given value until {@code close()}
+ *  is called on the returned {@code Context}.
+ *  <li>Calling {@code clear()} which <em>removes</em> the thread-local value.
+ * </ul>
+ *
+ * <h2>{@linkplain nl.talsmasoftware.context.api.Context}</h2>
+ * <p>
+ * Abstraction for an activated {@linkplain java.lang.ThreadLocal} value.
+ *
+ * <p>
+ * When the context manager {@code activates} a value, a new Context is returned.
+ * Closing this context will remove the activated value again.
  *
  * @author Sjoerd Talsma
  */
