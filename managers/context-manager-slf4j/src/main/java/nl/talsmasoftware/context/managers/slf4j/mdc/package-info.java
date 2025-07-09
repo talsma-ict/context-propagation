@@ -18,11 +18,19 @@
  *
  * <p>
  * This context manager maintains no ThreadLocal state of its own,
- * instead it propagates the
- * existing {@linkplain org.slf4j.MDC#getCopyOfContextMap() MDC context map}
- * into each {@linkplain nl.talsmasoftware.context.api.ContextSnapshot context snapshot}
- * to be applied again when the snapshot
- * is {@linkplain nl.talsmasoftware.context.api.ContextSnapshot#reactivate() reactivated}
- * in another thread.
+ * instead it propagates the current {@linkplain org.slf4j.MDC MDC} values
+ * into each {@linkplain nl.talsmasoftware.context.api.ContextSnapshot context snapshot} that is captured.
+ *
+ * <p>
+ * Upon {@linkplain nl.talsmasoftware.context.api.ContextSnapshot#reactivate() reactivation},
+ * these captured values (and <em>only</em> these captured values) are reactivated in the MDC.
+ * <ul>
+ *  <li>MDC keys that exist in the target MDC which are <em>not</em> part of the snapshot are left unchanged.
+ *  <li>MDC keys with the case-insensitive substring {@code "thread"}, are <em>not</em> captured
+ *      in the {@linkplain nl.talsmasoftware.context.api.ContextSnapshot},
+ *      since they most-likely contain a thread-specific value.
+ *  <li>When a reactivation is <em>closed</em>, the <em>previous</em> MDC values <em>for the captured keys</em> are restored.
+ *      All other keys that are not part of the context snapshot will be left unchanged.
+ * </ul>
  */
 package nl.talsmasoftware.context.managers.slf4j.mdc;

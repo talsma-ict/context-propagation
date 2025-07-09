@@ -17,6 +17,7 @@ package nl.talsmasoftware.context.managers.slf4j.mdc;
 
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextManager;
+import nl.talsmasoftware.context.api.ContextSnapshot;
 import org.slf4j.MDC;
 
 import java.util.Collections;
@@ -30,18 +31,28 @@ import java.util.Map;
  * getting the active context is fully delegated to the MDC.
  *
  * <p>
+ * Upon {@linkplain ContextSnapshot#reactivate() reactivation},
+ * these captured values (and <em>only</em> these captured values) are reactivated in the MDC.
+ * <ul>
+ *  <li>MDC keys that exist in the target MDC which are <em>not</em> part of the snapshot are left unchanged.
+ *  <li>MDC keys with the case-insensitive substring {@code "thread"}, are <em>not</em> captured
+ *      in the {@linkplain ContextSnapshot},
+ *      since they most-likely contain a thread-specific value.
+ *  <li>When a reactivation is <em>closed</em>, the <em>previous</em> MDC values <em>for the captured keys</em> are restored.
+ *      All other keys that are not part of the context snapshot will be left unchanged.
+ * </ul>
+ *
+ * <p>
  * Closing a context returned form {@link #activate(Map)} restores the MDC
  * to the values it had before the context was created.<br>
  * This means that closing nested contexts out-of-order will probably result in an undesirable state.<br>
  * It is therefore strongly advised to use Java's {@code try-with-resources} mechanism to ensure proper
  * closing of nested MDC contexts.
  *
- * <p>
- * This manager does not implement the optional {@link #clear()} method.
+ * @author Sjoerd Talsma
+ * @implNote This manager does not implement the optional {@link #clear()} method.
  * {@linkplain ContextManager#clearAll()} will therefore <strong>not</strong> clear the {@linkplain MDC}.
  * Please use {@linkplain MDC#clear()} explicitly to do that.
- *
- * @author Sjoerd Talsma
  */
 public class Slf4jMdcManager implements ContextManager<Map<String, String>> {
     /**

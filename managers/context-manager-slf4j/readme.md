@@ -1,6 +1,6 @@
 [![Maven Version][maven-img]][maven] 
 
-# SLF4J MDC propagation library
+# Slf4j MDC propagation library
 
 Adding the `slf4j-propagation` jar to your classpath
 is all that is needed to let the [Mapped Diagnostic Context (MDC)][mdc] 
@@ -20,11 +20,15 @@ Add it to your classpath.
 
 Done!
 
-Now the `MDC.getCopyOfContextMap()` is copied into each snapshot 
-from the `ContextSnapshot.capture()` method
-to be reactivated by the `Contextsnapshot.reactivate()` call.
-The `ContextAwareExecutorService` automatically propagates the full [MDC] content
-into all executed tasks this way.
+## What does it do?
+
+The current `MDC` map values are included in each `ContextSnapshot` when it is captured.  
+Upon reactivation, these captured values (and _only_ these captured values) are reactivated in the MDC.
+- MDC keys that exist in the target MDC which are _not_ part of the snapshot are left unchanged.
+- MDC keys with the case-insensitive substring `"thread"`, are _not_ captured in the ContextSnashot,
+  since they most-likely contain a thread-specific value.
+- When a reactivation is _closed_, the _previous_ MDC values _for the captured keys_ are restored.
+  All other keys that are _not_ part of the context snapshot will be left unchanged.
 
 
   [maven-img]: https://img.shields.io/maven-central/v/nl.talsmasoftware.context.managers/context-manager-slf4j
