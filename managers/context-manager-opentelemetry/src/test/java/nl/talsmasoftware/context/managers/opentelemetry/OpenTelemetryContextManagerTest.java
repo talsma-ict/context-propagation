@@ -19,6 +19,7 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.context.ContextKey;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
+import nl.talsmasoftware.context.api.ContextSnapshot;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -86,5 +87,21 @@ class OpenTelemetryContextManagerTest {
     @Test
     void toString_returns_simple_classname() {
         assertThat(subject).hasToString("OpenTelemetryContextManager");
+    }
+
+    @Test
+    void automaticRegistration() {
+        ContextKey<Object> key = ContextKey.named("dummy");
+        String dummyValue = UUID.randomUUID().toString();
+        ContextSnapshot snapshot;
+        try (Scope scope = Context.current().with(key, dummyValue).makeCurrent()) {
+            snapshot = ContextSnapshot.capture();
+        }
+
+        assertThat(Context.current().get(key)).isNull();
+        try (ContextSnapshot.Reactivation reactivation = snapshot.reactivate()) {
+            assertThat(Context.current().get(key)).isEqualTo(dummyValue);
+        }
+        assertThat(Context.current().get(key)).isNull();
     }
 }
