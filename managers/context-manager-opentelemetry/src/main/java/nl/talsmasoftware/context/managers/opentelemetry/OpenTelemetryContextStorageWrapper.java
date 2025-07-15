@@ -76,8 +76,4 @@ public class OpenTelemetryContextStorageWrapper implements ContextStorage {
         };
     }
 
-    private static ContextSnapshot.Reactivation reactivateSnapshot(Context context) {
-        ContextSnapshot snapshot = context.get(OTEL_SNAPSHOT_KEY);
-        return snapshot == null ? null : snapshot.reactivate();
-    }
 }
