@@ -15,8 +15,11 @@
  */
 package nl.talsmasoftware.context.managers.opentelemetry;
 
+import io.opentelemetry.context.ContextStorage;
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextManager;
+
+import static nl.talsmasoftware.context.managers.opentelemetry.OpenTelemetryContextStorageWrapper.CAPTURE;
 
 /**
  * Context Manager that delegates {@linkplain java.lang.ThreadLocal ThreadLocal} management to the
@@ -38,6 +41,12 @@ import nl.talsmasoftware.context.api.ContextManager;
  * {@linkplain nl.talsmasoftware.context.api.ContextSnapshot context snapshots}.
  */
 public class OpenTelemetryContextManager implements ContextManager<io.opentelemetry.context.Context> {
+    static {
+        // Register the otel storage wrapper directly when the context manager class is loaded.
+        // This should be during application initialization.
+        ContextStorage.addWrapper(OpenTelemetryContextStorageWrapper::new);
+    }
+
     @SuppressWarnings("java:S1874") // This is the only place where the deprecated constructor should be used.
     private static final OpenTelemetryContextManager INSTANCE = new OpenTelemetryContextManager();
 
@@ -72,7 +81,16 @@ public class OpenTelemetryContextManager implements ContextManager<io.openteleme
      */
     @Override
     public io.opentelemetry.context.Context getActiveContextValue() {
-        return io.opentelemetry.context.Context.current();
+        if (CAPTURE.get()) {
+            try {
+                CAPTURE.set(false); // prevent snapshot in otel-context in snapshot
+                return io.opentelemetry.context.Context.current();
+            } finally {
+                CAPTURE.set(true);
+            }
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -84,7 +102,7 @@ public class OpenTelemetryContextManager implements ContextManager<io.openteleme
      */
     @Override
     public Context activate(final io.opentelemetry.context.Context value) {
-        return new ScopeWrappingContext(value.makeCurrent());
+        return value.makeCurrent()::close;
     }
 
     /**
