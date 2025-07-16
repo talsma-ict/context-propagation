@@ -21,7 +21,21 @@ returned from `io.opentelemetry.context.Context.current()`,
 thereby bridging _all_ supported `ContextManager` implementations over the
 `io.opentelemetry.context.Context` mechanism.
 
-## How to use this library
+## Bridge example: Spring-security
+
+Suppose your application uses `spring-security` to store the current `Authentication` data.
+Also, opentelemetry is used for instrumentation purposes.
+
+Then you can:
+- replace `spring-security` dependency by `context-manager-spring-security` (which already includes spring-security for you as transitive dependency).
+- replace `opentelemetry-context` dependency by `context-manager-opentelemetry` (which already includes opentelemetry-context for you as transitive dependency).
+
+This will automatically:
+1. capture and reactivate the current spring-security `Authentication` _and_ opentelemetry `Context` in `ContextSnapshot`s.
+2. capture and reactivate the current spring-security `Authentication` in opentelemetry `Context`s.
+3. propagate any additional contexts managed by a supported contest manager through both these mechanisms.
+
+## Usage
 
 Adding the `context-manager-opentelemetry` jar to the classpath
 is all that is needed to include the OpenTelemetry `Context` in ContextSnapshots

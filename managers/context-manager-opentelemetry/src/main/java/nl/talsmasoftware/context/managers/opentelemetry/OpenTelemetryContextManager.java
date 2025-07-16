@@ -43,6 +43,7 @@ import static nl.talsmasoftware.context.managers.opentelemetry.OpenTelemetryCont
  * </ul>
  *
  * <h2>Bridge function</h2>
+ *
  * Besides capturing the current Context, this module also {@linkplain ContextStorage#addWrapper(Function) adds}
  * an {@linkplain OpenTelemetryContextStorageWrapper} to the configured open telemetry {@linkplain ContextStorage}.<br>
  * This wrapper includes captured {@linkplain ContextSnapshot}s into each Context returned
