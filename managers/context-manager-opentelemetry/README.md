@@ -3,27 +3,40 @@
 
 # OpenTelemetry context propagation library
 
-Context Manager that delegates ThreadLocal management to the
-default OpenTelemetry Context storage.
+Context Manager for the open telemetry `io.opentelemetry.context.Context`.
 
-Obtaining the current context value is delegated to
-`io.opentelemetry.context.Context.current()`.  
-Activating a new context value is delegated to
-`io.opentelemetry.context.Context.makeCurrent()`.
+Includes the `current` open telemetry `Context` in _captured_ `ContextSnapshot`s.
+
+The ContextManager delegates ThreadLocal management to the configured OpenTelemetry `ContextStorage`.  
+Obtaining the current context value is delegated to `io.opentelemetry.context.Context.current()`.  
+Initializing a new context value is delegated to `io.opentelemetry.context.Context.makeCurrent()`.
+
+## Bridge function
+
+Besides capturing the current Context, this module also adds an `OpenTelemetryContextStorageWrapper`
+to the configured open telemetry `ContextStorage`.
+
+This wrapper includes captured `ContextSnapshot`s into each Context
+returned from `io.opentelemetry.context.Context.current()`,
+thereby bridging _all_ supported `ContextManager` implementations over the
+`io.opentelemetry.context.Context` mechanism.
+
+## How to use this library
 
 Adding the `context-manager-opentelemetry` jar to the classpath
-is all that is needed to include the OpenTelemetry `Context` in ContextSnapshots.
-This propagates the context to other threads using the
+is all that is needed to include the OpenTelemetry `Context` in ContextSnapshots
+and enable the bridge function.
+
+This includes support by the utility classes such as
 `ContextAwareExecutorService` or `ContextAwareCompletableFuture`.
 
 Also, any function _..WithContext_ in the `core.function` package
 automatically activates the context snapshot around the function body.
 
-## How to use this library
-
 Add it to your classpath.
 
 ```xml
+
 <dependency>
     <groupId>nl.talsmasoftware.context.managers</groupId>
     <artifactId>context-manager.opentelemetry</artifactId>
