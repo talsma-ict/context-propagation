@@ -15,29 +15,63 @@
  */
 package nl.talsmasoftware.context.managers.opentelemetry;
 
+import io.opentelemetry.context.ContextStorage;
 import nl.talsmasoftware.context.api.Context;
 import nl.talsmasoftware.context.api.ContextManager;
+import nl.talsmasoftware.context.api.ContextSnapshot;
+
+import java.util.function.Function;
+
+import static nl.talsmasoftware.context.managers.opentelemetry.OpenTelemetryContextStorageWrapper.CAPTURE_LOCK;
 
 /**
- * Context Manager that delegates {@linkplain java.lang.ThreadLocal ThreadLocal} management to the
- * default {@linkplain io.opentelemetry.context.Context OpenTelemetry Context} storage.
- *
- * <dl>
- *     <dt><strong>{@linkplain #getActiveContextValue()}</strong></dt>
- *     <dd>Delegated to {@linkplain io.opentelemetry.context.Context#current()}</dd>
- *     <dt><strong>{@linkplain #activate(io.opentelemetry.context.Context)}</strong></dt>
- *     <dd>Delegated to {@linkplain io.opentelemetry.context.Context#makeCurrent()}</dd>
- *     <dt><strong>{@linkplain #clear()}</strong></dt>
- *     <dd>no-op: Does <strong>not</strong> clear the current context as we are not managing it ourselves.
- *     This does make it very important that all activated contexts are properly closed again.</dd>
- * </dl>
+ * Context Manager for the open telemetry {@linkplain io.opentelemetry.context.Context Context}.
  *
  * <p>
- * There is no need to instantiate the context manager yourself.
- * Including it on the classpath will allow the API to automatically include it in
- * {@linkplain nl.talsmasoftware.context.api.ContextSnapshot context snapshots}.
+ * Includes the {@linkplain io.opentelemetry.context.Context#current() current}
+ * open telemetry {@linkplain io.opentelemetry.context.Context Context}
+ * in {@linkplain ContextSnapshot#capture() captured} {@linkplain ContextSnapshot}s.
+ *
+ * <p>
+ * The ContextManager delegates {@linkplain java.lang.ThreadLocal ThreadLocal} management to the
+ * default {@linkplain io.opentelemetry.context.Context OpenTelemetry Context} storage.
+ * <ul>
+ *     <li>Obtaining the current context value is delegated to
+ *     {@linkplain io.opentelemetry.context.Context#current()}.
+ *     <li>Intializing a new context value is delegated to
+ *     {@linkplain io.opentelemetry.context.Context#makeCurrent()}.
+ * </ul>
+ *
+ * <h2>Bridge function</h2>
+ *
+ * Besides capturing the current Context, this module also {@linkplain ContextStorage#addWrapper(Function) adds}
+ * an {@linkplain OpenTelemetryContextStorageWrapper} to the configured open telemetry {@linkplain ContextStorage}.<br>
+ * This wrapper includes captured {@linkplain ContextSnapshot}s into each Context returned
+ * from {@linkplain io.opentelemetry.context.Context#current()},
+ * thereby bridging <em>all</em> supported {@linkplain ContextManager} implementations over the
+ * open telemetry {@linkplain io.opentelemetry.context.Context Context} mechanism.
+ *
+ * <p>
+ * There is no need to instantiate the context manager yourself.<br>
+ * Including it on the classpath will:
+ * <ol>
+ *     <li>allow the API to automatically include it in captured
+ *     {@linkplain nl.talsmasoftware.context.api.ContextSnapshot ContextSnapshot}s.
+ *     <li>automatically add an {@linkplain OpenTelemetryContextStorageWrapper},
+ *     bridging ContextSnapshots to be propagated <em>over</em> open telemetry context management.
+ * </ol>
+ *
+ * @implNote The method {@linkplain #clear()} is a no-op; it will <strong>not</strong> clear the current context
+ * as we are not in control over the storage ourselves.
+ * This does make it very important that all reactivated context snapshots are properly closed again.
  */
 public class OpenTelemetryContextManager implements ContextManager<io.opentelemetry.context.Context> {
+    static {
+        // Register the otel storage wrapper directly when the context manager class is loaded.
+        // This should be during application initialization.
+        ContextStorage.addWrapper(OpenTelemetryContextStorageWrapper::new);
+    }
+
     @SuppressWarnings("java:S1874") // This is the only place where the deprecated constructor should be used.
     private static final OpenTelemetryContextManager INSTANCE = new OpenTelemetryContextManager();
 
@@ -72,7 +106,16 @@ public class OpenTelemetryContextManager implements ContextManager<io.openteleme
      */
     @Override
     public io.opentelemetry.context.Context getActiveContextValue() {
-        return io.opentelemetry.context.Context.current();
+        if (CAPTURE_LOCK.get() == null) {
+            try {
+                CAPTURE_LOCK.set(this); // prevent ContextSnapshot in Context in ContextSnapshot by recursion.
+                return io.opentelemetry.context.Context.current();
+            } finally {
+                CAPTURE_LOCK.remove();
+            }
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -84,7 +127,7 @@ public class OpenTelemetryContextManager implements ContextManager<io.openteleme
      */
     @Override
     public Context activate(final io.opentelemetry.context.Context value) {
-        return new ScopeWrappingContext(value.makeCurrent());
+        return value.makeCurrent()::close;
     }
 
     /**

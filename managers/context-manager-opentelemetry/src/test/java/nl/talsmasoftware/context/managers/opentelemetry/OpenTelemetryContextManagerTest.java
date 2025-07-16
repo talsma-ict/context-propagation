@@ -19,20 +19,33 @@ import io.opentelemetry.context.Context;
 import io.opentelemetry.context.ContextKey;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.sdk.testing.junit5.OpenTelemetryExtension;
+import nl.talsmasoftware.context.api.ContextManager;
 import nl.talsmasoftware.context.api.ContextSnapshot;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.Mockito.mock;
 
 class OpenTelemetryContextManagerTest {
     @RegisterExtension
     static final OpenTelemetryExtension TELEMETRY = OpenTelemetryExtension.create();
 
     static OpenTelemetryContextManager subject = OpenTelemetryContextManager.provider();
+
+    @BeforeEach
+    @AfterEach
+    void clearContexts() {
+        ContextManager.clearAll();
+        SecurityContextHolder.clearContext();
+    }
 
     @Test
     void getActiveContextValue_delegatesToContext_current() {
@@ -63,7 +76,7 @@ class OpenTelemetryContextManagerTest {
             // verify
             assertThat(Context.current().get(dummyKey)).isEqualTo(dummyValue);
             assertThat(context).isNotNull();
-            assertThat(subject.getActiveContextValue()).isSameAs(newContext);
+            assertThat(subject.getActiveContextValue().get(dummyKey)).isEqualTo(dummyValue);
         }
 
         assertThat(Context.current().get(dummyKey)).isNull();
@@ -90,7 +103,7 @@ class OpenTelemetryContextManagerTest {
     }
 
     @Test
-    void automaticRegistration() {
+    void otelPropagationWithContextSnapshot() {
         ContextKey<Object> key = ContextKey.named("dummy");
         String dummyValue = UUID.randomUUID().toString();
         ContextSnapshot snapshot;
@@ -103,5 +116,23 @@ class OpenTelemetryContextManagerTest {
             assertThat(Context.current().get(key)).isEqualTo(dummyValue);
         }
         assertThat(Context.current().get(key)).isNull();
+    }
+
+    @Test
+    void managedContextPropagationWithOtelContext() {
+        Authentication authentication = mock(Authentication.class);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        Context otelContext = Context.current();
+
+        SecurityContextHolder.clearContext();
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
+
+        try (Scope scope = otelContext.makeCurrent()) {
+            assertThat(SecurityContextHolder.getContext().getAuthentication())
+                    .as("Reactivated Spring Security authentication")
+                    .isSameAs(authentication);
+        }
+
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
     }
 }

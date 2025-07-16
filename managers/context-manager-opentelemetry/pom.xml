@@ -55,5 +55,11 @@
             <artifactId>opentelemetry-sdk-testing</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>nl.talsmasoftware.context.managers</groupId>
+            <artifactId>context-manager-spring-security</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

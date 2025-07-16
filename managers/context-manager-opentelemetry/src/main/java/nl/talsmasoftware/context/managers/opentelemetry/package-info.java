@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 /**
- * Manager to propagate {@linkplain io.opentelemetry.context.Context OpenTelemetry context}
- * from one thread to another.
+ * Context Manager for the open telemetry {@linkplain io.opentelemetry.context.Context Context}.
+ *
+ * <p>
+ * Includes the {@linkplain io.opentelemetry.context.Context#current() current}
+ * open telemetry {@linkplain io.opentelemetry.context.Context Context}
+ * in {@linkplain nl.talsmasoftware.context.api.ContextSnapshot#capture() captured}
+ * {@linkplain nl.talsmasoftware.context.api.ContextSnapshot ContextSnapshot}s.
  *
  * <p>
  * The ContextManager delegates {@linkplain java.lang.ThreadLocal ThreadLocal} management to the
@@ -27,15 +32,14 @@
  *     {@linkplain io.opentelemetry.context.Context#makeCurrent()}.
  * </ul>
  *
- * <p>
- * Adding the {@code context-manager-opentelemetry} library to the classpath
- * is all that is needed to include the {@link io.opentelemetry.context.Context OpenTelemetry Context}
- * in {@linkplain nl.talsmasoftware.context.api.ContextSnapshot ContextSnapshots}.
- * This propagates the context to other threads using the
- * {@code ContextAwareExecutorService} or {@code ContextAwareCompletableFuture}.
- *
- * <p>
- * Also, any function <em>..WithContext</em> in the {@code nl.talsmasoftware.context.core.function} package
- * automatically activates the context snapshot around the function body.
+ * <h2>Bridge function</h2>
+ * Besides capturing the current Context, this module
+ * also {@linkplain io.opentelemetry.context.ContextStorage#addWrapper(java.util.function.Function) adds}
+ * an {@linkplain nl.talsmasoftware.context.managers.opentelemetry.OpenTelemetryContextStorageWrapper OpenTelemetryContextStorageWrapper}
+ * to the configured open telemetry {@linkplain io.opentelemetry.context.ContextStorage ContextStorage}.<br>
+ * This wrapper includes captured {@linkplain nl.talsmasoftware.context.api.ContextSnapshot ContextSnapshot}s
+ * into each Context returned from {@linkplain io.opentelemetry.context.Context#current()},
+ * thereby bridging <em>all</em> supported {@linkplain nl.talsmasoftware.context.api.ContextManager} implementations
+ * over the open telemetry {@linkplain io.opentelemetry.context.Context Context} mechanism.
  */
 package nl.talsmasoftware.context.managers.opentelemetry;
