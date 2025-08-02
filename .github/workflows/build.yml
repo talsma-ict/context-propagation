@@ -38,7 +38,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./mvnw --batch-mode clean verify
-      - name: Coveralls
-        uses: coverallsapp/github-action@v2
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+#      - name: Coveralls
+#        uses: coverallsapp/github-action@v2
+#        with:
+#          github-token: ${{ secrets.GITHUB_TOKEN }}
