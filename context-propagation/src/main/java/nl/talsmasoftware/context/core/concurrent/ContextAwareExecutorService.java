@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,28 @@ import java.util.logging.Logger;
 public class ContextAwareExecutorService extends nl.talsmasoftware.context.delegation.CallMappingExecutorService {
     private static final Logger LOGGER = Logger.getLogger(ContextAwareExecutorService.class.getName());
 
+    /**
+     * Wrap an {@linkplain ExecutorService}, making it <em>context-aware</em>.
+     *
+     * <p>
+     * The new executor service passes all tasks to the {@code delegate} executor service,
+     * capturing a {@linkplain ContextSnapshot} from the caller thread.<br>
+     * Submitted tasks will reactivate (and close) this snapshot in the executed thread context.
+     *
+     * @param delegate The delegate executor service to submit tasks to.
+     */
+    public static ContextAwareExecutorService wrap(ExecutorService delegate) {
+        return new ContextAwareExecutorService(delegate);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param delegate The delegate executor service to wrap.
+     * @see #wrap(ExecutorService)
+     * @deprecated Will be made private in v2 of the library, replaced by static wrap method.
+     */
+    @Deprecated
     public ContextAwareExecutorService(ExecutorService delegate) {
         super(delegate);
     }
