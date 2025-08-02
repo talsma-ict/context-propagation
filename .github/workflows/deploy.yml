@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows: [ 'Build and test' ]
     types: [ 'completed' ]
-    branches: [ 'develop-v1', 'master', 'main' ]
+    branches: [ 'develop*', 'master', 'main' ]
 
 jobs:
   build:

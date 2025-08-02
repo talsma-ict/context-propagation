@@ -2,9 +2,9 @@ name: Build and test
 
 on:
   pull_request:
-    branches: [ 'develop-v1', 'master', 'main' ]
+    branches: [ 'develop*', 'master', 'main' ]
   push:
-    branches: [ 'develop-v1', 'master', 'main' ]
+    branches: [ 'develop*', 'master', 'main' ]
 
 jobs:
   build:
