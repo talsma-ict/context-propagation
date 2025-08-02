@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2024 Talsma ICT
+ * Copyright 2016-2025 Talsma ICT
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,18 +35,5 @@ import java.util.concurrent.ExecutorService;
 public class ContextAwareExecutorService extends nl.talsmasoftware.context.core.concurrent.ContextAwareExecutorService {
     public ContextAwareExecutorService(ExecutorService delegate) {
         super(delegate);
-    }
-
-    /**
-     * This method maps any callable (before scheduling it) by taking a snapshot of the context in the scheduling thread
-     * and propagating this context into the executed callable by snapshot reactivation.
-     *
-     * @param callable The callable to be mapped.
-     * @param <V>      the actual return type of the callable object being scheduled.
-     * @return A callable that will reactivate the scheduling thread context snapshot before executing.
-     */
-    @Override
-    protected <V> Callable<V> map(final Callable<V> callable) {
-        return super.map(callable);
     }
 }
