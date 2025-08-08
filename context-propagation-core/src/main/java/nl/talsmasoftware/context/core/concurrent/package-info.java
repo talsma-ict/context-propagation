@@ -20,11 +20,12 @@
  * <p>
  * Executor service that wraps another {@linkplain java.util.concurrent.ExecutorService ExecutorService},
  * making sure background tasks operate 'within'
- * a {@linkplain nl.talsmasoftware.context.api.ContextSnapshot context snapshot} taken from the submitting thread.
+ * a reactivated {@linkplain nl.talsmasoftware.context.api.ContextSnapshot context snapshot}
+ * that is captured from the submitting thread.
  *
  * <h2>{@linkplain nl.talsmasoftware.context.core.concurrent.ContextAwareCompletableFuture ContextAwareCompletableFuture}</h2>
  * <p>
  * {@linkplain java.util.concurrent.CompletableFuture CompletableFuture} that runs every successive call with a reactivated
- * {@linkplain nl.talsmasoftware.context.api.ContextSnapshot context snapshot} taken from the submitting thread.
+ * {@linkplain nl.talsmasoftware.context.api.ContextSnapshot context snapshot} captured from the submitting thread.
  */
 package nl.talsmasoftware.context.core.concurrent;

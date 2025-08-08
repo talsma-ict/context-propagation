@@ -23,18 +23,20 @@ import java.util.concurrent.ExecutorService;
 
 /**
  * Executor service that wraps another {@linkplain ExecutorService}, making sure background tasks operate 'within'
- * a {@linkplain ContextSnapshot context snapshot} taken from the submitting thread.
+ * a reactivated {@linkplain ContextSnapshot context snapshot} that was captured from the submitting thread.
  *
  * <p>
  * Any existing {@linkplain ExecutorService} can be used as a delegate, including those from
  * the {@linkplain java.util.concurrent.Executors Executors} utility class.
  *
  * <p>
- * The executor service will make sure to close each reactivated snapshot again after the code in the task is finished,
- * even if it throws an exception.
+ * The executor service makes sure to close each reactivated snapshot again after the code in the task finishes,
+ * even if an exception was thrown.
  *
  * <p>
  * Both {@link Callable} and {@link Runnable} tasks are wrapped.
+ * {@linkplain ContextSnapshot} contains a static {@linkplain ContextSnapshot#wrap(Runnable) wrap}
+ * method for {@linkplain Runnable} and {@linkplain Callable}.
  *
  * @author Sjoerd Talsma
  */
@@ -48,6 +50,9 @@ public final class ContextAwareExecutorService extends DelegatingExecutorService
      * Submitted tasks will reactivate (and close) this snapshot in the executed thread context.
      *
      * @param delegate The delegate executor service to submit tasks to.
+     * @return The new context-aware executor service.
+     * @see ContextSnapshot#capture()
+     * @see ContextSnapshot#reactivate()
      */
     public static ContextAwareExecutorService wrap(ExecutorService delegate) {
         return new ContextAwareExecutorService(delegate);
