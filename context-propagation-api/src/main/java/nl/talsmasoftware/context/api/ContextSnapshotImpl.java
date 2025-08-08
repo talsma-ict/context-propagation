@@ -180,7 +180,7 @@ final class ContextSnapshotImpl implements ContextSnapshot {
      * @param snapshotValue  The snapshot value to be reactivated.
      * @return The context to be included in the reactivation object.
      */
-    @SuppressWarnings("unchecked") // We obtain the snapshotValue from the manager itself.
+    @SuppressWarnings("unchecked") // We get the snapshotValue from the manager itself.
     private static Context reactivate(ContextManager contextManager, Object snapshotValue) {
         if (snapshotValue == null) return null;
         long start = System.nanoTime();

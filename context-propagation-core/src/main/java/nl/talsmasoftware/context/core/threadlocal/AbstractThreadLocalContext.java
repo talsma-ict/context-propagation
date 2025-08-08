@@ -29,7 +29,7 @@ import java.util.logging.Logger;
  * <ul>
  *     <li>Random-depth nested contexts.
  *     <li>Restoration of 'previous' context state when closing.
- *     <li>Unwinding to the nearest un-closed context in case contexts get closed out-of-sequence.
+ *     <li>Unwinding to the nearest unclosed context, in case contexts get closed out-of-sequence.
  *     Closing out-of-sequence will not happen if all contexts are used in try-with-resources blocks,
  *     but unwinding provides consistent behaviour in case it does happen.
  * </ul>

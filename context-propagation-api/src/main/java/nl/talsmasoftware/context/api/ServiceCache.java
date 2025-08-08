@@ -30,19 +30,19 @@ import java.util.logging.Logger;
  * This is necessary because the ServiceLoader itself is not thread-safe due to its internal lazy iterator.
  *
  * <p>
- * Only intended for interal use.
+ * Only intended for internal use.
  */
 final class ServiceCache {
     private static final Logger LOGGER = Logger.getLogger(ServiceCache.class.getName());
 
     /**
-     * Internal concurrent map as cache.
+     * Internal concurrent map as a cache of found services by class.
      */
     @SuppressWarnings("rawtypes")
     private static final ConcurrentMap<Class, List> CACHE = new ConcurrentHashMap<>();
 
     /**
-     * Sometimes a single, fixed classloader may be necessary (e.g. #97)
+     * Sometimes a single, fixed classloader may be necessary (see issue #97)
      */
     @SuppressWarnings("java:S3077") // The classloader is out of our control, the volatile reference is what we need.
     private static volatile ClassLoader classLoaderOverride = null;
@@ -75,7 +75,7 @@ final class ServiceCache {
      *
      * <p>
      * This method is synchronized because ServiceLoader is not thread-safe.
-     * Fortunately this only gets called after a cache miss, so should not affect performance.
+     * Fortunately, this only gets called after a cache miss, so it should not really affect performance.
      *
      * <p>
      * The returned {@code List} will be {@linkplain Collections#unmodifiableList(List) unmodifiable}.

@@ -33,18 +33,23 @@ final class ContextSnapshotHolder implements Consumer<ContextSnapshot>, Supplier
     private volatile ContextSnapshot snapshot;
 
     /**
-     * Create a new snapshot holder initially containing either the provided snapshot,
-     * or takes a new snapshot as initial value.
+     * Create a new snapshot holder.
+     *
+     * <p>
+     * This holder initially contains the provided snapshot if non-{@code null}. Otherwise, a new snapshot is captured.
      *
      * @param snapshot The snapshot to hold initially.
      *                 Optional, if {@code null} the holder will capture a new snapshot.
+     * @see ContextSnapshot#capture()
      */
     ContextSnapshotHolder(ContextSnapshot snapshot) {
         this.snapshot = (snapshot == null ? ContextSnapshot.capture() : snapshot);
     }
 
     /**
-     * Returns the current snapshot, normally to activate when beginning a new completion stage.
+     * Returns the held snapshot.
+     *
+     * <p>Normally, this is used to reactivate the snapshot when starting a new completion stage.
      *
      * @return The held snapshot (must never be {@code null})
      */
@@ -54,10 +59,10 @@ final class ContextSnapshotHolder implements Consumer<ContextSnapshot>, Supplier
     }
 
     /**
-     * Accept a new snapshot (i.e. after a single stage is completed) to be propagated
+     * Accept a new snapshot (for instance, after a single stage is completed) to be propagated
      * into another completion stage.
      *
-     * @param snapshot The snapshot to hold (required, must not be {@code null})
+     * @param snapshot The new snapshot to hold (required, must not be {@code null})
      */
     @Override
     public void accept(ContextSnapshot snapshot) {

@@ -133,6 +133,9 @@ public class ContextScopeManager implements ScopeManager, ContextManager<Span> {
         return getClass().getSimpleName();
     }
 
+    /**
+     * Interface implementing both {@link Context} and opentracing {@link Scope}.
+     */
     public interface ContextScope extends Context, Scope {
     }
 
