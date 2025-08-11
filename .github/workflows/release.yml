@@ -64,8 +64,10 @@ jobs:
           name: Release ${{ env.VERSION }}
           draft: true
           files: |
-            **/target/*.jar
-            **/target/*.jar.asc
+            **/target/*-${{ env.VERSION }}.jar
+            **/target/*-${{ env.VERSION }}.jar.asc
+            target/*-javadoc.jar
+            target/*-javadoc.jar.asc
       - name: Set next snapshot version
         run: |
           read base minor suffix <<<$(echo "${VERSION}" | perl -pe 's/^(.*?)([0-9]+)([^0-9]*)$/\1 \2 \3/')
