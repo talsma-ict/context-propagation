@@ -103,7 +103,7 @@ public interface ContextSnapshot {
      * even if it is executed in a different thread.
      *
      * <p>
-     * The reactivation is closed after the call finished ensuring that all thread-local values are properly cleaned up.
+     * The reactivation is closed after the call finishes, ensuring that all thread-local values are properly cleaned up.
      *
      * @param callable The callable to be called with all context values from this snapshot.
      * @param <T>      The result type returned by the callable.
@@ -121,13 +121,13 @@ public interface ContextSnapshot {
      * Wrap a runnable in this context snapshot, reactivating it during the run.
      *
      * <p>
-     * This provides the code being ran with the thread-local values captured in this snapshot,
-     * even if it is executed in a different thread.
+     * This provides the code to run with the thread-local values captured in this snapshot,
+     * even if executed in a different thread.
      *
      * <p>
-     * The reactivation is closed after the run finished ensuring that all thread-local values are properly cleaned up.
+     * The reactivation is closed after the run finishes, ensuring that all thread-local values are properly cleaned up.
      *
-     * @param runnable The runnable to be ran with all context values from this snapshot.
+     * @param runnable The runnable to run with all context values from this snapshot.
      * @return The wrapped runnable.
      */
     default Runnable wrap(final Runnable runnable) {

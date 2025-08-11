@@ -66,7 +66,7 @@ class GrpcContextManagerTest {
     }
 
     @Test
-    void contextManagersArePropagatedWithGrpcContexg() {
+    void contextManagersArePropagatedWithGrpcContext() {
         CurrentLocaleHolder.set(DUTCH);
 
         assertThat(THREAD_POOL.submit(CurrentLocaleHolder::get))

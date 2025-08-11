@@ -25,8 +25,8 @@
  * Snapshot reactivations must be closed again to avoid leaking context.
  *
  * <p>
- * All context aware utility classes in this library are tested
- * to make sure they reactivate and close snapshots in a safe way.
+ * All context-aware utility classes in this library are tested
+ * to make sure they reactivate and close snapshots safely.
  *
  * <h2>{@linkplain nl.talsmasoftware.context.api.ContextManager}</h2>
  * <p>
