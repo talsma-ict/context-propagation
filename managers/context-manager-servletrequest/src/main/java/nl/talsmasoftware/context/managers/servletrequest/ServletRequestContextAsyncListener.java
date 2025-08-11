@@ -21,6 +21,8 @@ import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
 import javax.servlet.ServletRequest;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * An {@linkplain AsyncListener async listener} that creates servlet request contexts when requests
  * are started and clears them on completion.
@@ -28,7 +30,11 @@ import javax.servlet.ServletRequest;
  * @author Sjoerd Talsma
  */
 final class ServletRequestContextAsyncListener implements AsyncListener {
-    private static final ContextManager<ServletRequest> MANAGER = ServletRequestContextManager.provider();
+    private final ContextManager<ServletRequest> manager;
+
+    ServletRequestContextAsyncListener(ContextManager<ServletRequest> manager) {
+        this.manager = requireNonNull(manager, "Servlet request context manager is <null>.");
+    }
 
     /**
      * Registers itself for future updates and activates the supplied servlet request as the current servlet request
@@ -39,7 +45,7 @@ final class ServletRequestContextAsyncListener implements AsyncListener {
      */
     public void onStartAsync(AsyncEvent event) {
         event.getAsyncContext().addListener(this);
-        MANAGER.activate(event.getSuppliedRequest());
+        manager.activate(event.getSuppliedRequest());
     }
 
     /**
@@ -49,7 +55,7 @@ final class ServletRequestContextAsyncListener implements AsyncListener {
      * @param event the AsyncEvent indicating that an asynchronous operation has been completed
      */
     public void onComplete(AsyncEvent event) {
-        MANAGER.clear();
+        manager.clear();
     }
 
     /**
@@ -59,7 +65,7 @@ final class ServletRequestContextAsyncListener implements AsyncListener {
      * @param event the AsyncEvent indicating that an asynchronous operation has timed out
      */
     public void onTimeout(AsyncEvent event) {
-        MANAGER.clear();
+        manager.clear();
     }
 
     /**
@@ -69,6 +75,6 @@ final class ServletRequestContextAsyncListener implements AsyncListener {
      * @param event the AsyncEvent indicating that an asynchronous operation has failed to complete
      */
     public void onError(AsyncEvent event) {
-        MANAGER.clear();
+        manager.clear();
     }
 }

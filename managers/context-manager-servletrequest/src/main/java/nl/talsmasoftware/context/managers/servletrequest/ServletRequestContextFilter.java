@@ -37,7 +37,14 @@ import java.util.logging.Logger;
  */
 public class ServletRequestContextFilter implements Filter {
     private static final Logger LOGGER = Logger.getLogger(ServletRequestContextFilter.class.getName());
-    private static final ContextManager<ServletRequest> MANAGER = ServletRequestContextManager.provider();
+    private final ContextManager<ServletRequest> manager;
+
+    /**
+     * Creates the servlet request context filter.
+     */
+    public ServletRequestContextFilter() {
+        manager = ServletRequestContextManager.provider();
+    }
 
     /**
      * Called by the web container to indicate to a filter that it is being placed into service.
@@ -58,7 +65,7 @@ public class ServletRequestContextFilter implements Filter {
      *
      * <p>
      * For {@linkplain ServletRequest#isAsyncStarted() asynchronous} requests,
-     * an {@linkplain javax.servlet.AsyncListener AsyncListenr} is added taking care of the servlet context
+     * an {@linkplain javax.servlet.AsyncListener AsyncListener} is added taking care of the servlet context
      * in the asynchronous handling.
      *
      * @param request  the <code>ServletRequest</code> object contains the client's request
@@ -69,19 +76,16 @@ public class ServletRequestContextFilter implements Filter {
      */
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-        // Automatically becomes the new active context.
-        try (Context context = MANAGER.activate(request)) {
 
+        try (Context context = manager.activate(request)) {
             if (request.isAsyncStarted()) try {
-                request.getAsyncContext().addListener(new ServletRequestContextAsyncListener());
+                request.getAsyncContext().addListener(new ServletRequestContextAsyncListener(manager));
             } catch (IllegalStateException e) {
                 LOGGER.log(Level.FINE, e, () -> "Could not register ServletRequest asynchronous listener: " + e.getMessage());
             }
-
             chain.doFilter(request, response);
-
         } finally {
-            ServletRequestContext.clear(); // Make sure there are no requests returned to the HTTP thread pool.
+            manager.clear(); // Make sure there are no requests returned to the HTTP thread pool.
         }
     }
 

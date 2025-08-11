@@ -25,6 +25,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -46,13 +47,21 @@ class ServletRequestContextAsyncListenerTest {
         mockResponse = mock(ServletResponse.class);
         event = new AsyncEvent(mockContext, mockRequest, mockResponse);
 
-        subject = new ServletRequestContextAsyncListener();
+        subject = new ServletRequestContextAsyncListener(ServletRequestContextManager.provider());
     }
 
     @AfterEach
     void tearDown() {
         ServletRequestContext.clear();
         verifyNoMoreInteractions(mockContext, mockRequest, mockResponse);
+    }
+
+    @Test
+    void testConstructorWithNullManager() {
+        assertThatThrownBy(() -> new ServletRequestContextAsyncListener(null))
+                .isInstanceOf(NullPointerException.class).message()
+                .containsIgnoringCase("context manager")
+                .containsIgnoringCase("is <null>");
     }
 
     @Test

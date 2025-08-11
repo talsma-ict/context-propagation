@@ -42,6 +42,18 @@ public class OpentracingContextTimer implements ContextTimer {
     private static final String ENV_ENABLED = System.getenv(SYS_ENABLED.toUpperCase().replace('.', '_'));
     private static final String LOG_FIELD_THREAD = "context.thread";
 
+    /**
+     * Create the timer for opentracing context propagation.
+     *
+     * <p>
+     * Normally, it is not necessary to instantiate this timer yourself.
+     * Providing the {@code context-timer-opentracing} jar file on the classpath
+     * should automatically trigger metrics registration using the java ServiceLoader mechanism.
+     */
+    public OpentracingContextTimer() {
+        super();
+    }
+
     @Override
     public void update(Class<?> type, String method, long duration, TimeUnit unit, Throwable error) {
         if (GlobalTracer.isRegistered() && reportContextSwitchesFor(type)) {

@@ -26,6 +26,13 @@ import nl.talsmasoftware.context.managers.grpc.GrpcContextManager;
  */
 public class ContextStorageOverride extends Context.Storage {
     /**
+     * Create a new context storage override that delegates to the {@link GrpcContextManager}.
+     */
+    public ContextStorageOverride() {
+        super();
+    }
+
+    /**
      * Attach the gRPC context to the current thread using the {@link GrpcContextManager}.
      *
      * @param toAttach the context to be attached
