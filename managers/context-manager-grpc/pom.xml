@@ -37,7 +37,7 @@
         <project.moduleName>${project.groupId}.grpc</project.moduleName>
         <root.basedir>${project.parent.basedir}</root.basedir>
 
-        <grpc.version>1.74.0</grpc.version>
+        <grpc.version>1.75.0</grpc.version>
     </properties>
 
     <dependencies>
