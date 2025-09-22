@@ -67,6 +67,9 @@ class GrpcContextManagerTest {
 
     @Test
     void contextManagersArePropagatedWithGrpcContext() {
+        CurrentLocaleHolder.set(null);
+        Context contextWithNoLocale = Context.current();
+
         CurrentLocaleHolder.set(DUTCH);
 
         assertThat(THREAD_POOL.submit(CurrentLocaleHolder::get))
@@ -81,12 +84,15 @@ class GrpcContextManagerTest {
                 .asInstanceOf(OPTIONAL)
                 .contains(DUTCH);
 
-        assertThat(THREAD_POOL.submit(Context.ROOT.wrap(CurrentLocaleHolder::get)))
-                .as("Current Locale in plain thread")
+        assertThat(THREAD_POOL.submit(contextWithNoLocale.wrap(CurrentLocaleHolder::get)))
+                .as("Current Locale in thread with gRPC context with no locale set")
                 .succeedsWithin(1, TimeUnit.SECONDS)
                 .asInstanceOf(OPTIONAL)
                 .isEmpty();
 
+        assertThat(THREAD_POOL.submit(Context.ROOT.wrap(CurrentLocaleHolder::get)))
+                .as("Current Locale in plain thread")
+                .succeedsWithin(1, TimeUnit.SECONDS);
     }
 
 }
