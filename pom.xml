@@ -105,7 +105,7 @@
 
         <junit.version>5.13.4</junit.version>
         <logback.version>1.5.18</logback.version>
-        <mockito.version>5.19.0</mockito.version>
+        <mockito.version>5.20.0</mockito.version>
         <assertj.version>3.27.5</assertj.version>
 
         <umldoclet.version>2.2.1</umldoclet.version>
