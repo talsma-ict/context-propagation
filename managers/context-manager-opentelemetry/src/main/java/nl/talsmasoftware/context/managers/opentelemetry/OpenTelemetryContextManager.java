@@ -22,6 +22,7 @@ import nl.talsmasoftware.context.api.ContextSnapshot;
 
 import java.util.function.Function;
 
+import static io.opentelemetry.context.Context.root;
 import static nl.talsmasoftware.context.managers.opentelemetry.OpenTelemetryContextStorageWrapper.CAPTURE_LOCK;
 
 /**
@@ -43,7 +44,7 @@ import static nl.talsmasoftware.context.managers.opentelemetry.OpenTelemetryCont
  * </ul>
  *
  * <h2>Bridge function</h2>
- *
+ * <p>
  * Besides capturing the current Context, this module also {@linkplain ContextStorage#addWrapper(Function) adds}
  * an {@linkplain OpenTelemetryContextStorageWrapper} to the configured open telemetry {@linkplain ContextStorage}.<br>
  * This wrapper includes captured {@linkplain ContextSnapshot}s into each Context returned
@@ -127,7 +128,7 @@ public class OpenTelemetryContextManager implements ContextManager<io.openteleme
      */
     @Override
     public Context activate(final io.opentelemetry.context.Context value) {
-        return value.makeCurrent()::close;
+        return (value == null ? root() : value).makeCurrent()::close;
     }
 
     /**

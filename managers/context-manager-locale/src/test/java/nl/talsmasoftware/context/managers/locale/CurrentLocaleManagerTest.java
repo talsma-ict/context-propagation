@@ -58,6 +58,25 @@ class CurrentLocaleManagerTest {
     }
 
     @Test
+    void activateNull() {
+        try (Context context = MANAGER.activate(DUTCH)) {
+            assertThat(MANAGER.getActiveContextValue()).isEqualTo(DUTCH);
+
+            try (Context context2 = MANAGER.activate(null)) {
+                assertThat(MANAGER.getActiveContextValue()).isNull();
+
+                try (Context context3 = MANAGER.activate(ENGLISH)) {
+                    assertThat(MANAGER.getActiveContextValue()).isEqualTo(ENGLISH);
+                }
+
+                assertThat(MANAGER.getActiveContextValue()).isNull();
+            }
+
+            assertThat(MANAGER.getActiveContextValue()).isEqualTo(DUTCH);
+        }
+    }
+
+    @Test
     void testLocalePropagation() throws ExecutionException, InterruptedException {
         try (Context ignored = CurrentLocaleHolder.set(DUTCH)) {
             assertThat(MANAGER.getActiveContextValue()).isEqualTo(DUTCH);
