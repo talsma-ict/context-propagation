@@ -17,7 +17,6 @@ package nl.talsmasoftware.context.managers.grpc;
 
 import io.grpc.Context;
 import nl.talsmasoftware.context.api.ContextManager;
-import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.managers.locale.CurrentLocaleHolder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,73 +27,92 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.OPTIONAL;
 
 @Disabled("gRPC context manager must be refactored to properly support handling null.")
 class GrpcContextManagerTest {
     static final Context.Key<String> TEST_KEY = Context.key("test-key");
-    static final Locale DUTCH = Locale.of("nl", "NL");
+    //    static final Locale DUTCH = Locale.of("nl", "NL");
     static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
+
+    GrpcContextManager subject = GrpcContextManager.provider();
 
     @BeforeEach
     @AfterEach
     void clearAllContexts() {
+        subject.clear();
         ContextManager.clearAll();
     }
 
     @Test
-    void grpcContextIsPropagatedToBackgroundThread() {
-        String testValue = "test-" + UUID.randomUUID();
-        Context context = Context.current().withValue(TEST_KEY, testValue).attach();
-        try {
+    void testNullContext() {
+        try (var ignored = subject.activate(Context.ROOT.withValue(TEST_KEY, "test1"))) {
+            assertThat(subject.getActiveContextValue()).isNotNull();
+            assertThat(TEST_KEY.get()).isEqualTo("test1");
 
-            assertThat(THREAD_POOL.submit(() -> TEST_KEY.get()))
-                    .as("Test value from gRPC context in plain thread")
-                    .succeedsWithin(1, TimeUnit.SECONDS)
-                    .isNull();
+            try (var ignored2 = subject.activate(null)) {
+                assertThat(subject.getActiveContextValue()).isNull();
+                assertThat(TEST_KEY.get()).isNull();
 
-            ContextSnapshot snapshot = ContextSnapshot.capture();
-            assertThat(THREAD_POOL.submit(snapshot.wrap(() -> TEST_KEY.get())))
-                    .as("Test value from gRPC context in thread with snapshot")
-                    .succeedsWithin(1, TimeUnit.SECONDS)
-                    .isEqualTo(testValue);
+                try (var ignored3 = subject.activate(Context.ROOT.withValue(TEST_KEY, "test2"))) {
+                    assertThat(subject.getActiveContextValue()).isNotNull();
+                    assertThat(TEST_KEY.get()).isEqualTo("test2");
+                }
 
-        } finally {
-            context.detach(Context.current());
+                assertThat(subject.getActiveContextValue()).isNull();
+                assertThat(TEST_KEY.get()).isNull();
+            }
+
+            assertThat(subject.getActiveContextValue()).isNotNull();
+            assertThat(TEST_KEY.get()).isEqualTo("test1");
         }
     }
 
     @Test
-    void contextManagersArePropagatedWithGrpcContext() {
-        CurrentLocaleHolder.set(null);
-        Context contextWithNoLocale = Context.current();
+    void testSetGrpcContextValue() {
+        String testValue1 = "test-" + UUID.randomUUID();
+        String testValue2 = "test2-" + UUID.randomUUID();
+        assertThat(TEST_KEY.get()).isNull();
+        Context.current().withValue(TEST_KEY, testValue1).run(() -> {
+            assertThat(TEST_KEY.get()).isEqualTo(testValue1);
+            Context.current().withValue(TEST_KEY, testValue2).run(() -> {
+                assertThat(TEST_KEY.get()).isEqualTo(testValue2);
+            });
+            assertThat(TEST_KEY.get()).isEqualTo(testValue1);
+        });
+        assertThat(TEST_KEY.get()).isNull();
+    }
 
-        CurrentLocaleHolder.set(DUTCH);
+    @Test
+    void testActivateGrpcContext() {
+        // given
+        String testValue = "test-" + UUID.randomUUID();
+        Context randomContext = Context.current().withValue(TEST_KEY, testValue);
+        assertThat(TEST_KEY.get()).isNull();
 
-        assertThat(THREAD_POOL.submit(CurrentLocaleHolder::get))
-                .as("Current Locale in plain thread")
-                .succeedsWithin(1, TimeUnit.SECONDS)
-                .asInstanceOf(OPTIONAL)
-                .isEmpty();
+        // when
+        try (var ignored = subject.activate(randomContext)) {
+            // then
+            assertThat(TEST_KEY.get()).isEqualTo(testValue);
+        }
 
-        assertThat(THREAD_POOL.submit(Context.current().wrap(CurrentLocaleHolder::get)))
-                .as("Current Locale in thread with gRPC context")
-                .succeedsWithin(1, TimeUnit.SECONDS)
-                .asInstanceOf(OPTIONAL)
-                .contains(DUTCH);
+        assertThat(TEST_KEY.get()).isNull();
+    }
 
-        assertThat(THREAD_POOL.submit(contextWithNoLocale.wrap(CurrentLocaleHolder::get)))
-                .as("Current Locale in thread with gRPC context with no locale set")
-                .succeedsWithin(1, TimeUnit.SECONDS)
-                .asInstanceOf(OPTIONAL)
-                .isEmpty();
+    @Test
+    void grpcContextAutomaticallyPropagatesLocaleContext() {
+        // given
+        CurrentLocaleHolder.set(Locale.GERMANY);
+        Context capturedGrpcContext = Context.current();
+        CurrentLocaleHolder.set(Locale.FRANCE);
 
-        assertThat(THREAD_POOL.submit(Context.ROOT.wrap(CurrentLocaleHolder::get)))
-                .as("Current Locale in plain thread")
-                .succeedsWithin(1, TimeUnit.SECONDS);
+        assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(Locale.FRANCE);
+        capturedGrpcContext.run(() -> {
+            assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(Locale.GERMANY);
+        });
+
+        assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(Locale.FRANCE);
     }
 
 }
