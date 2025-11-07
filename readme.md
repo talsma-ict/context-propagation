@@ -120,7 +120,6 @@ out of the box by this context-propagation library:
 - [Log4j 2 Thread Context][log4j2 thread context propagation]
 - [Locale context][locale context]
 - [ServletRequest contexts][servletrequest propagation]
-- [OpenTracing Span contexts][opentracing span propagation]
 - .. _Yours?_
   Feel free to create an issue or pull-request if you know of
   a ThreadLocal context that should also be included in a context snapshot.
@@ -170,9 +169,6 @@ when you add any of the following modules to your classpath:
   Adds [Micrometer] Timers for context propagation.
 - [context-timer-opentelemetry](timers/context-timer-opentelemetry):
   Creates OpenTelemetry histogram meters for context propagation.
-- context-timer-opentracing:
-  Old module creating opentracing spans for context propagation.
-  Consider replacing by its successor, opentelemetry.
 
 ## New in version 2
 
@@ -214,7 +210,6 @@ and the structure of the repository.
   [locale context]: managers/context-manager-locale
   [log4j2 thread context propagation]: managers/context-manager-log4j2
   [opentelemetry context propagation]: managers/context-manager-opentelemetry
-  [opentracing span propagation]: managers/context-manager-opentracing
   [serviceloader]: https://docs.oracle.com/javase/8/docs/api/index.html?java/util/ServiceLoader.html
   [servletrequest propagation]: managers/context-manager-servletrequest
   [slf4j mdc propagation]: managers/context-manager-slf4j
