@@ -216,4 +216,22 @@ class ContextSnapshotTest {
         assertThat(snapshot.wrap(dummyManager::getActiveContextValue).call()).isEqualTo("Value 1");
         assertThat(dummyManager.getActiveContextValue()).isEqualTo("Value 2");
     }
+
+    @Test
+    void getCapturedValue() {
+        ContextSnapshot snapshot = ContextSnapshot.capture();
+        assertThat(snapshot.getCapturedValue(dummyManager)).isNull();
+
+        try (Context ignored = dummyManager.activate("Value 1")) {
+            snapshot = ContextSnapshot.capture();
+        }
+        assertThat(snapshot.getCapturedValue(dummyManager)).isEqualTo("Value 1");
+    }
+
+    @Test
+    void getCapturedValueManagerNull() {
+        ContextSnapshot snapshot = ContextSnapshot.capture();
+        assertThatThrownBy(() -> snapshot.getCapturedValue(null))
+                .hasMessageContaining("contains no captured value");
+    }
 }
