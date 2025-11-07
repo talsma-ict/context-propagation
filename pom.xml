@@ -108,7 +108,7 @@
         <mockito.version>5.20.0</mockito.version>
         <assertj.version>3.27.6</assertj.version>
 
-        <umldoclet.version>2.2.1</umldoclet.version>
+        <umldoclet.version>2.2.4</umldoclet.version>
     </properties>
 
     <build>
