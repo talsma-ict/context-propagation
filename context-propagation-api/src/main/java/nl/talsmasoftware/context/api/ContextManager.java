@@ -44,7 +44,8 @@ public interface ContextManager<T> {
      * The specified value is the <em>active</em> value for the current thread,
      * until the returned {@linkplain Context} is closed, or another value gets activated.
      *
-     * @param value The value to activate a new context for. The manager must accept {@code null} values.
+     * @param value The value to activate a new context for.
+     *              The manager must accept {@code null} values if {@link #getActiveContextValue()} can return null.
      * @return The new <em>active</em> context containing the specified value
      * which should be closed by the caller at the end of its lifecycle from the same thread.
      */
