@@ -43,7 +43,6 @@
         <module>managers/context-manager-locale</module>
         <module>managers/context-manager-log4j2</module>
         <module>managers/context-manager-opentelemetry</module>
-        <module>managers/context-manager-opentracing</module>
         <module>managers/context-manager-servletrequest</module>
         <module>managers/context-manager-slf4j</module>
         <module>managers/context-manager-spring-security</module>
@@ -51,7 +50,6 @@
         <module>timers/context-timer-metrics</module>
         <module>timers/context-timer-micrometer</module>
         <module>timers/context-timer-opentelemetry</module>
-        <module>timers/context-timer-opentracing</module>
     </modules>
 
     <licenses>
@@ -97,7 +95,6 @@
         <micrometer.version>1.16.0</micrometer.version>
         <metrics.version>4.2.37</metrics.version>
         <opentelemetry.version>1.55.0</opentelemetry.version>
-        <opentracing-api.version>0.33.0</opentracing-api.version>
         <spring-security.version>6.5.6</spring-security.version>
         <servlet-api.version>4.0.1</servlet-api.version>
         <slf4j.version>2.0.17</slf4j.version>
@@ -296,15 +293,6 @@
                             <location>${root.basedir}/.mvn/javadoc/opentelemetry-context</location>
                             <url>
                                 https://www.javadoc.io/page/io.opentelemetry/opentelemetry-context/${opentelemetry.version}
-                            </url>
-                        </offlineLink>
-                        <offlineLink>
-                            <location>${root.basedir}/.mvn/javadoc/opentracing-api</location>
-                            <url>https://javadoc.io/page/io.opentracing/opentracing-api/${opentracing-api.version}</url>
-                        </offlineLink>
-                        <offlineLink>
-                            <location>${root.basedir}/.mvn/javadoc/opentracing-util</location>
-                            <url>https://javadoc.io/page/io.opentracing/opentracing-util/${opentracing-api.version}
                             </url>
                         </offlineLink>
                         <offlineLink>

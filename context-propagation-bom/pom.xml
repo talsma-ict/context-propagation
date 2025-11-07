@@ -75,11 +75,6 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}.managers</groupId>
-                <artifactId>context-manager-opentracing</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}.managers</groupId>
                 <artifactId>context-manager-servletrequest</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -111,10 +106,21 @@
                 <artifactId>context-timer-opentelemetry</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
+            <!--
+                Support for the following modules was dropped.
+                Their versions are pinned to their latest-released versions.
+            -->
+
+            <dependency>
+                <groupId>${project.groupId}.managers</groupId>
+                <artifactId>context-manager-opentracing</artifactId>
+                <version>2.0.2</version>
+            </dependency>
             <dependency>
                 <groupId>${project.groupId}.timers</groupId>
                 <artifactId>context-timer-opentracing</artifactId>
-                <version>${project.version}</version>
+                <version>2.0.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
