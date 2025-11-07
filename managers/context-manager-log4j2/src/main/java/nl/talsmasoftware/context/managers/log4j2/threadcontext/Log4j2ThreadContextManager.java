@@ -67,6 +67,9 @@ public class Log4j2ThreadContextManager implements ContextManager<Log4j2ThreadCo
     @SuppressWarnings("java:S1874") // This is the singleton instance the constructor was deprecated for.
     private static final Log4j2ThreadContextManager INSTANCE = new Log4j2ThreadContextManager();
 
+    private static final Context NOOP_CONTEXT = () -> {
+    };
+
     /**
      * Returns the singleton instance of the {@code Log4j2ThreadContextManager}.
      * <p>
@@ -108,19 +111,19 @@ public class Log4j2ThreadContextManager implements ContextManager<Log4j2ThreadCo
      * The data of the context is applied on top of existing data (if any) only replacing
      * conflicting {@code ThreadContext} map entries but keeping all other existing data.
      *
-     * @param value non-{@code null} data for the {@code ThreadContext}
+     * @param value data for the {@code ThreadContext}. {@code null} is ignored.
      * @return The new <em>active</em> context containing the specified value
      * which should be closed by the caller at the end of its lifecycle from the same thread.
      */
     public Context activate(final Log4j2ThreadContextSnapshot value) {
-        if (value == null) {
-            throw new NullPointerException("value must not be null");
+        Context result = NOOP_CONTEXT;
+        if (value != null) {
+            // Capture current ThreadContext as 'previous' and make the given data the 'new current' ThreadContext
+            final Log4j2ThreadContextSnapshot previous = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
+            value.applyToCurrentThread(); // Add ThreadContext data on top of existing
+            result = new ManagedLog4j2ThreadContext(previous, value);
         }
-
-        // Capture current ThreadContext as 'previous' and make the given data the 'new current' ThreadContext
-        final Log4j2ThreadContextSnapshot previous = Log4j2ThreadContextSnapshot.captureFromCurrentThread();
-        value.applyToCurrentThread(); // Add ThreadContext data on top of existing
-        return new ManagedLog4j2ThreadContext(previous, value);
+        return result;
     }
 
     /**

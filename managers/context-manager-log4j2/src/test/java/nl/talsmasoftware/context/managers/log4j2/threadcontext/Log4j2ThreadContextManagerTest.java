@@ -33,7 +33,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit test for the {@link Log4j2ThreadContextManager}.
@@ -92,8 +91,7 @@ class Log4j2ThreadContextManagerTest {
     @Test
     void testActivate_null() {
         Log4j2ThreadContextManager manager = Log4j2ThreadContextManager.provider();
-        assertThatThrownBy(() -> manager.activate(null))
-                .isInstanceOfAny(NullPointerException.class, IllegalArgumentException.class);
+        assertThat(manager.activate(null)).isNotNull();
     }
 
     @Test
