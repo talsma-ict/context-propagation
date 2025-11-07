@@ -80,6 +80,17 @@ final class ContextSnapshotImpl implements ContextSnapshot {
     }
 
     @Override
+    @SuppressWarnings("unchecked") // Returned value was provided by ContextManager's getActiveContextValue().
+    public <T> T getCapturedValue(ContextManager<T> contextManager) {
+        int index = managers.indexOf(contextManager);
+        if (index < 0) {
+            throw new IllegalArgumentException("Context snapshot contains no captured value for " + contextManager
+                    + ". Please read the java.util.ServiceLoader documentation to register your context manager.");
+        }
+        return (T) values[index];
+    }
+
+    @Override
     public String toString() {
         return "ContextSnapshot{size=" + managers.size() + '}';
     }

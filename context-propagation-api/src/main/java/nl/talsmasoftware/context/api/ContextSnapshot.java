@@ -40,8 +40,7 @@ import java.util.concurrent.Callable;
  */
 public interface ContextSnapshot {
     /**
-     * Captures a snapshot of the current
-     * {@link ContextManager#getActiveContextValue() active context value}
+     * Captures a snapshot of the current {@link ContextManager#getActiveContextValue() active context value}
      * from <em>all known {@link ContextManager}</em> implementations.
      *
      * <p>
@@ -111,6 +110,7 @@ public interface ContextSnapshot {
      */
     default <T> Callable<T> wrap(final Callable<T> callable) {
         return () -> {
+            //noinspection unused
             try (Reactivation reactivation = this.reactivate()) {
                 return callable.call();
             }
@@ -132,10 +132,32 @@ public interface ContextSnapshot {
      */
     default Runnable wrap(final Runnable runnable) {
         return () -> {
+            //noinspection unused
             try (Reactivation reactivation = this.reactivate()) {
                 runnable.run();
             }
         };
     }
 
+    /**
+     * Gets the value from the specified {@link ContextManager} that was captured in this snapshot.
+     *
+     * <p>
+     * Conceptually, this method does the following:
+     * <pre>{@code
+     * return this.wrap(contextManager::getActiveContextValue).call();
+     * }</pre>
+     *
+     * <p>
+     * This is useful when you need to inspect or access a specific context value from a captured snapshot
+     * without manually managing the reactivation lifecycle.
+     *
+     * @param contextManager The context manager to retrieve the captured value for.
+     * @param <T>            The type of the context value.
+     * @return The captured context value for the specified context manager in this snapshot.
+     * @implNote For efficiency, the actual implementation just gets the single captured value
+     * without reactivating the entire snapshot.
+     * @since 2.0.3
+     */
+    <T> T getCapturedValue(ContextManager<T> contextManager);
 }
