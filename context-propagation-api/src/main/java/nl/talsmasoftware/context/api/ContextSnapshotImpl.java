@@ -80,7 +80,7 @@ final class ContextSnapshotImpl implements ContextSnapshot {
     }
 
     @Override
-    @SuppressWarnings("unchecked") // Returned value was provided by ContextManager's getActiveContextValue().
+    @SuppressWarnings("unchecked") // value should've been provided by ContextManager's own getActiveContextValue()
     public <T> T getCapturedValue(ContextManager<T> contextManager) {
         int index = managers.indexOf(contextManager);
         if (index < 0) {

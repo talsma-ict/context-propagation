@@ -140,7 +140,7 @@ public interface ContextSnapshot {
     }
 
     /**
-     * Gets the value from the specified {@link ContextManager} that was captured in this snapshot.
+     * Gets the captured value from the specified {@link ContextManager} in this snapshot.
      *
      * <p>
      * Conceptually, this method does the following:
@@ -155,8 +155,7 @@ public interface ContextSnapshot {
      * @param contextManager The context manager to retrieve the captured value for.
      * @param <T>            The type of the context value.
      * @return The captured context value for the specified context manager in this snapshot.
-     * @implNote For efficiency, the actual implementation just gets the single captured value
-     * without reactivating the entire snapshot.
+     * @implNote For efficiency, the single captured value is actually just returned without needing to reactivate the entire snapshot.
      * @since 2.0.3
      */
     <T> T getCapturedValue(ContextManager<T> contextManager);
