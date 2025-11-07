@@ -123,6 +123,7 @@ public class OpenTelemetryContextManager implements ContextManager<io.openteleme
      * Activate the specified opentelemetry context.
      *
      * @param value The value to make the current opentelemetry context.
+     *              If {@code null}, the root context is activated.
      * @return A context that will close the scope created by opentelemetry.
      * @see io.opentelemetry.context.Context#makeCurrent()
      */
