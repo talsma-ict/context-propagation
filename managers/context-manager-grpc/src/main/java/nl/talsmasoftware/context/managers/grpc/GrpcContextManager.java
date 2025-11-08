@@ -133,7 +133,7 @@ public class GrpcContextManager extends io.grpc.Context.Storage implements Conte
      */
     @Override
     public void detach(io.grpc.Context toDetach, io.grpc.Context toRestore) {
-        LOGGER.finest("--> gRPC detach(): Detaching gRPC context by restoring " + toRestore + ".");
+        LOGGER.finest(() -> "--> gRPC detach(): Detaching gRPC context by restoring " + toRestore + ".");
         Reactivation reactivation = toRestore == null ? null : GRPC_REACTIVATION_KEY.get(toRestore);
         if (reactivation != null) {
             LOGGER.finest(() -> "--> grpc detach(): Closing reactivation from toRestore: " + reactivation + ".");
@@ -142,7 +142,7 @@ public class GrpcContextManager extends io.grpc.Context.Storage implements Conte
             LOGGER.finest(() -> "--- gRPC detach(): Reactivation from toRestore closed: " + reactivation + ".");
         }
         STORAGE.set(rootOrDummyToNull(toRestore));
-        LOGGER.finest("<-- gRPC detach(): Detached gRPC context " + toDetach + " by restoring " + toRestore + ".");
+        LOGGER.finest(() -> "<-- gRPC detach(): Detached gRPC context " + toDetach + " by restoring " + toRestore + ".");
     }
 
     /**
@@ -200,7 +200,7 @@ public class GrpcContextManager extends io.grpc.Context.Storage implements Conte
             return () -> {
             };
         }
-        LOGGER.finest("--> activate(" + value + "): Attaching gRPC context " + value + " as current context.");
+        LOGGER.finest(() -> "--> activate(" + value + "): Attaching gRPC context " + value + " as current context.");
         final io.grpc.Context toRestore = doAttach(value);
         LOGGER.finest(() -> "<-- activate(" + value + "): Returning context that restores " + toRestore + ".");
         return () -> detach(value, toRestore);
