@@ -21,6 +21,7 @@ import nl.talsmasoftware.context.api.ContextManager;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.api.ContextSnapshot.Reactivation;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static io.grpc.Context.ROOT;
@@ -103,7 +104,7 @@ public class GrpcContextManager extends io.grpc.Context.Storage implements Conte
      * It <em>must</em> be restored in the same thread, which then closes the reactivated ContextSnapshot.
      *
      * @param toAttach the context to be attached
-     * @return The previous gRPC context to be restored in the corresponding detach call.
+     * @return The previous gRPC context to be restored in the corresponding 'detach' call.
      * @see #activate(io.grpc.Context)
      * @see #detach(io.grpc.Context, io.grpc.Context)
      */
@@ -133,7 +134,7 @@ public class GrpcContextManager extends io.grpc.Context.Storage implements Conte
      */
     @Override
     public void detach(io.grpc.Context toDetach, io.grpc.Context toRestore) {
-        LOGGER.finest(() -> "--> gRPC detach(): Detaching gRPC context by restoring " + toRestore + ".");
+        LOGGER.log(Level.FINEST, "--> gRPC detach(): Detaching gRPC context by restoring {0}.", toRestore);
         Reactivation reactivation = toRestore == null ? null : GRPC_REACTIVATION_KEY.get(toRestore);
         if (reactivation != null) {
             LOGGER.finest(() -> "--> grpc detach(): Closing reactivation from toRestore: " + reactivation + ".");
@@ -142,7 +143,7 @@ public class GrpcContextManager extends io.grpc.Context.Storage implements Conte
             LOGGER.finest(() -> "--- gRPC detach(): Reactivation from toRestore closed: " + reactivation + ".");
         }
         STORAGE.set(rootOrDummyToNull(toRestore));
-        LOGGER.finest(() -> "<-- gRPC detach(): Detached gRPC context " + toDetach + " by restoring " + toRestore + ".");
+        LOGGER.log(Level.FINEST, "<-- gRPC detach(): Detached gRPC context by restoring {0}.", toRestore);
     }
 
     /**
