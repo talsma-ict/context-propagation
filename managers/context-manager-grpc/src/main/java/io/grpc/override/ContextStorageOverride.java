@@ -25,6 +25,7 @@ import nl.talsmasoftware.context.managers.grpc.GrpcContextManager;
  * @since 2.0.0
  */
 public class ContextStorageOverride extends Context.Storage {
+
     /**
      * Create a new context storage override that delegates to the {@link GrpcContextManager}.
      */
