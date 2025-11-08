@@ -39,11 +39,13 @@ import static io.grpc.Context.key;
  */
 public class GrpcContextManager extends io.grpc.Context.Storage implements ContextManager<io.grpc.Context> {
     private static final GrpcContextManager INSTANCE = new GrpcContextManager();
+
     private static final Logger LOGGER = Logger.getLogger(GrpcContextManager.class.getName());
     private static final Key<ContextSnapshot> GRPC_SNAPSHOT_KEY = key("contextsnapshot-over-grpc");
     private static final Key<Reactivation> GRPC_REACTIVATION_KEY = key("contextsnapshot-reactivation");
-    private static final ThreadLocal<String> CAPTURING = new ThreadLocal<>();
+    private static final ThreadLocal<GrpcContextManager> CAPTURING = new ThreadLocal<>();
     private static final io.grpc.Context DUMMY = io.grpc.Context.ROOT.withValue(key("dummy"), "dummy");
+
     private static final ThreadLocal<io.grpc.Context> STORAGE = new ThreadLocal<>();
 
     /**
@@ -75,16 +77,20 @@ public class GrpcContextManager extends io.grpc.Context.Storage implements Conte
      */
     @Override
     public io.grpc.Context current() {
-        io.grpc.Context current = ROOT;
-        if (CAPTURING.get() == null) {
-            try {
-                CAPTURING.set("GRPC");
-                current = nullToRoot(STORAGE.get()).withValue(GRPC_SNAPSHOT_KEY, ContextSnapshot.capture());
-            } finally {
-                CAPTURING.remove();
-            }
+        if (CAPTURING.get() != null) {
+            LOGGER.finest("gRPC current(): Returning ROOT context because already capturing.");
+            return ROOT;
         }
-        return current;
+        try {
+            LOGGER.finest("--> gRPC current(): Capturing gRPC context.");
+            CAPTURING.set(this);
+            ContextSnapshot snapshot = ContextSnapshot.capture();
+            io.grpc.Context current = nullToRoot(STORAGE.get()).withValue(GRPC_SNAPSHOT_KEY, snapshot);
+            LOGGER.finest(() -> "<-- gRPC current(): Returning current gRPC context " + current + " with captured " + snapshot + ".");
+            return current;
+        } finally {
+            CAPTURING.remove();
+        }
     }
 
     /**
@@ -109,7 +115,7 @@ public class GrpcContextManager extends io.grpc.Context.Storage implements Conte
             toAttach = toAttach.withValue(GRPC_SNAPSHOT_KEY, null);
             toRestore = toRestore.withValue(GRPC_REACTIVATION_KEY, snapshot.reactivate());
         }
-        STORAGE.set(rootToNull(toAttach));
+        STORAGE.set(rootOrDummyToNull(toAttach));
         return toRestore;
     }
 
@@ -127,12 +133,16 @@ public class GrpcContextManager extends io.grpc.Context.Storage implements Conte
      */
     @Override
     public void detach(io.grpc.Context toDetach, io.grpc.Context toRestore) {
+        LOGGER.finest("--> gRPC detach(): Detaching gRPC context by restoring " + toRestore + ".");
         Reactivation reactivation = toRestore == null ? null : GRPC_REACTIVATION_KEY.get(toRestore);
         if (reactivation != null) {
+            LOGGER.finest(() -> "--> grpc detach(): Closing reactivation from toRestore: " + reactivation + ".");
             reactivation.close();
             toRestore = toRestore.withValue(GRPC_REACTIVATION_KEY, null);
+            LOGGER.finest(() -> "--- gRPC detach(): Reactivation from toRestore closed: " + reactivation + ".");
         }
-        STORAGE.set(rootToNull(toRestore));
+        STORAGE.set(rootOrDummyToNull(toRestore));
+        LOGGER.finest("<-- gRPC detach(): Detached gRPC context " + toDetach + " by restoring " + toRestore + ".");
     }
 
     /**
@@ -141,6 +151,7 @@ public class GrpcContextManager extends io.grpc.Context.Storage implements Conte
     @Override
     public void clear() {
         STORAGE.remove();
+        LOGGER.finest("<-> clear(): Cleared current gRPC context.");
     }
 
     /**
@@ -157,11 +168,15 @@ public class GrpcContextManager extends io.grpc.Context.Storage implements Conte
     @Override
     public io.grpc.Context getActiveContextValue() {
         if (CAPTURING.get() != null) {
+            LOGGER.finest("<-> getActiveContextValue(): Returning DUMMY context because already capturing.");
             return DUMMY;
         }
         try {
-            CAPTURING.set("SNAPSHOT");
-            return STORAGE.get();
+            LOGGER.finest("--> getActiveContextValue(): Capturing active context value.");
+            CAPTURING.set(this);
+            io.grpc.Context current = STORAGE.get();
+            LOGGER.finest(() -> "<-- getActiveContextValue() Returning current gRPC context " + current + " from storage.");
+            return current;
         } finally {
             CAPTURING.remove();
         }
@@ -181,10 +196,13 @@ public class GrpcContextManager extends io.grpc.Context.Storage implements Conte
     @Override
     public Context activate(io.grpc.Context value) {
         if (value == DUMMY) {
+            LOGGER.finest("<-> activate(DUMMY): Returning no-op context.");
             return () -> {
             };
         }
+        LOGGER.finest("--> activate(" + value + "): Attaching gRPC context " + value + " as current context.");
         final io.grpc.Context toRestore = doAttach(value);
+        LOGGER.finest(() -> "<-- activate(" + value + "): Returning context that restores " + toRestore + ".");
         return () -> detach(value, toRestore);
     }
 
@@ -192,7 +210,7 @@ public class GrpcContextManager extends io.grpc.Context.Storage implements Conte
         return context == null ? ROOT : context;
     }
 
-    private static io.grpc.Context rootToNull(io.grpc.Context context) {
-        return context == ROOT ? null : context;
+    private static io.grpc.Context rootOrDummyToNull(io.grpc.Context context) {
+        return context == ROOT || context == DUMMY ? null : context;
     }
 }

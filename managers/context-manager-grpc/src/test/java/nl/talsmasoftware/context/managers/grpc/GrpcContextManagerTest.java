@@ -19,24 +19,27 @@ import io.grpc.Context;
 import nl.talsmasoftware.context.api.ContextManager;
 import nl.talsmasoftware.context.managers.locale.CurrentLocaleHolder;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.Locale;
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.logging.LogManager;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Disabled("gRPC context manager must be refactored to properly support handling null.")
+//@Disabled("gRPC context manager must be refactored to properly support handling null.")
 class GrpcContextManagerTest {
     static final Context.Key<String> TEST_KEY = Context.key("test-key");
-    //    static final Locale DUTCH = Locale.of("nl", "NL");
-    static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
 
     GrpcContextManager subject = GrpcContextManager.provider();
+
+    @BeforeAll
+    static void setUpLogging() throws IOException {
+        LogManager.getLogManager().readConfiguration(GrpcContextManagerTest.class.getResourceAsStream("/logging.properties"));
+    }
 
     @BeforeEach
     @AfterEach
@@ -104,13 +107,11 @@ class GrpcContextManagerTest {
     void grpcContextAutomaticallyPropagatesLocaleContext() {
         // given
         CurrentLocaleHolder.set(Locale.GERMANY);
-        Context capturedGrpcContext = Context.current();
+        Context grpcContext = Context.current();
         CurrentLocaleHolder.set(Locale.FRANCE);
 
         assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(Locale.FRANCE);
-        capturedGrpcContext.run(() -> {
-            assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(Locale.GERMANY);
-        });
+        grpcContext.run(() -> assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(Locale.GERMANY));
 
         assertThat(CurrentLocaleHolder.getOrDefault()).isEqualTo(Locale.FRANCE);
     }
