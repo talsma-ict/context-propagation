@@ -24,13 +24,18 @@ A brief explanation of the core concepts from the api:
 
 ### ContextSnapshot
 
-Captures active ThreadLocal values from all detected [ContextManager](#contextmanager) implementations.
+Captures active ThreadLocal values from all detected [ContextManager](#contextmanager) implementations.  
+These values can be _reactivated_ in another thread.
 
-These values can be _reactivated_ in another thread.  
-Reactivated snapshots **must be closed** to avoid leaking context.
+- Calling `ContextSnapshot.capture()` will _capture_ all detected threadlocals to be propagated into a single snapshot.
+- Calling `reactivate()` on this snapshot will _reactivate_ these threadlocal values on the thread it gets called in.  
+  Reactivate returns a _Closeable_ that will undo the reactivation when closed.
+
+**Note:** Reactivated snapshots **must be closed** to avoid leaking context.
 
 All _context aware_ [utility classes](#utility-classes) in this library are tested
 to make sure they reactivate _and_ close snapshots in a safe way.
+The `ContextSnapshot.wrap` methods also guarantee closing reactivations.
 
 ### ContextManager
 
