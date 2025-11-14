@@ -259,7 +259,7 @@ final class ContextSnapshotImpl implements ContextSnapshot, Serializable {
 
     private static final class Serialized implements Serializable {
         private static final long serialVersionUID = 1L;
-        private final String[] contextManagerNames;
+        private final String[] managerNames;
         private final Object[] values;
 
         Serialized(List<ContextManager> managers, Object... values) {
@@ -269,14 +269,14 @@ final class ContextSnapshotImpl implements ContextSnapshot, Serializable {
                     toSerialize.put(managers.get(i).getClass().getName(), values[i]);
                 } // else log trace?
             }
-            this.contextManagerNames = toSerialize.keySet().toArray(new String[0]);
+            this.managerNames = toSerialize.keySet().toArray(new String[0]);
             this.values = toSerialize.values().toArray();
         }
 
         private Object readResolve() {
             Map<ContextManager, Object> deserialized = new LinkedHashMap<>(values.length);
             for (int i = 0; i < values.length; i++) {
-                ContextManager manager = findContextManager(i < contextManagerNames.length ? contextManagerNames[i] : null);
+                ContextManager manager = findContextManager(i < managerNames.length ? managerNames[i] : null);
                 if (manager != null) {
                     deserialized.put(manager, values[i]);
                 } // else log trace?
