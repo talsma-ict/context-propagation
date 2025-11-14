@@ -37,9 +37,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Sjoerd Talsma
- */
 class ContextSnapshotTest {
     DummyContextManager dummyManager = new DummyContextManager();
 
