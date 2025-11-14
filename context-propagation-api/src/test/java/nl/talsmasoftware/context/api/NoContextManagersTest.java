@@ -67,7 +67,7 @@ class NoContextManagersTest {
         ContextSnapshot.Reactivation reactivated = snapshot.reactivate();
         assertThat(reactivated).isNotNull();
         reactivated.close();
-        assertThat(SERVICE_CACHE).doesNotContainKey(ContextManager.class);
+        assertThat(SERVICE_CACHE).as("Service cache after failed capture").doesNotContainKey(ContextManager.class);
     }
 
     @Test
@@ -77,7 +77,7 @@ class NoContextManagersTest {
         ContextSnapshot result = assertDoesNotThrow(ContextSnapshot::capture);
 
         assertThat(result).isNotNull().hasToString("ContextSnapshot{size=0}");
-        assertThat(SERVICE_CACHE).doesNotContainKey(ContextManager.class);
+        assertThat(SERVICE_CACHE).as("Service cache after failed capture").doesNotContainKey(ContextManager.class);
     }
 
     @Test
