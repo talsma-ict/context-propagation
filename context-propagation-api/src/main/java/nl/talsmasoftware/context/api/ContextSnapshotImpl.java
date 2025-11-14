@@ -95,7 +95,7 @@ final class ContextSnapshotImpl implements ContextSnapshot {
             throw new IllegalArgumentException("Context snapshot contains no captured value for " + contextManager
                     + ". Please read the java.util.ServiceLoader documentation to register your context manager.");
         }
-        return (T) values[index];
+        return values[index] == NOOP_CONTEXT ? null : (T) values[index];
     }
 
     @Override

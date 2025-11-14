@@ -67,6 +67,16 @@ public class ThrowingContextManager implements ContextManager<String> {
     }
 
     @Override
+    public int hashCode() {
+        return ThrowingContextManager.class.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return other instanceof ThrowingContextManager;
+    }
+
+    @Override
     public String toString() {
         return getClass().getSimpleName();
     }

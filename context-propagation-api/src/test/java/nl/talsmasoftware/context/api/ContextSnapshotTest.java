@@ -234,4 +234,17 @@ class ContextSnapshotTest {
         assertThatThrownBy(() -> snapshot.getCapturedValue(null))
                 .hasMessageContaining("contains no captured value");
     }
+
+    @Test
+    void getCapturedValue_errorDuringCapture() {
+        ThrowingContextManager.onGet = new IllegalStateException("Error capturing value!");
+        ThrowingContextManager throwingManager = new ThrowingContextManager();
+
+        ContextSnapshot snapshot = assertDoesNotThrow(ContextSnapshot::capture);
+        assertThat(snapshot).isNotNull();
+
+        String result = assertDoesNotThrow(() -> snapshot.getCapturedValue(throwingManager));
+        assertThat(result).isNull();
+    }
+
 }
