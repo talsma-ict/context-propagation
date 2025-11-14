@@ -20,28 +20,29 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.api.parallel.Isolated;
 
-import java.io.File;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ConcurrentMap;
+import java.util.logging.Logger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+@Isolated("Service cache is manipulated during this test")
 class NoContextManagersTest {
-    private static final String SERVICE_LOCATION = "target/test-classes/META-INF/services/";
-    private static final File SERVICE_FILE = new File(SERVICE_LOCATION + ContextManager.class.getName());
-    private static final File TMP_SERVICE_FILE = new File(SERVICE_LOCATION + "tmp-ContextManager");
+    @SuppressWarnings("rawtypes")
+    private static final ConcurrentMap<Class, List> SERVICE_CACHE = ServiceCacheTestUtil.getInternalCacheMap();
 
     @BeforeEach
     void avoidContextManagersCache() {
-        ContextManager.useClassLoader(new ClassLoader(Thread.currentThread().getContextClassLoader()) {
-        });
-        assertThat(SERVICE_FILE.renameTo(TMP_SERVICE_FILE)).as("Service file moved").isTrue();
+        SERVICE_CACHE.put(ContextManager.class, Collections.emptyList());
     }
 
     @AfterEach
     void resetDefaultClassLoader() {
-        ContextManager.useClassLoader(null);
-        assertThat(TMP_SERVICE_FILE.renameTo(SERVICE_FILE)).as("Service file restored").isTrue();
+        SERVICE_CACHE.clear();
     }
 
     @Test
@@ -59,17 +60,28 @@ class NoContextManagersTest {
     }
 
     @Test
-    void testCreateSnapshot_withoutContextManagers() {
+    void testCaptureSnapshot_withoutContextManagers() {
         ContextSnapshot snapshot = ContextSnapshot.capture();
-        assertThat(snapshot).isNotNull();
+        assertThat(snapshot).isNotNull().hasToString("ContextSnapshot{size=0}");
 
         ContextSnapshot.Reactivation reactivated = snapshot.reactivate();
         assertThat(reactivated).isNotNull();
         reactivated.close();
+        assertThat(SERVICE_CACHE).doesNotContainKey(ContextManager.class);
     }
 
     @Test
-    void testClearManagedContexts_withoutContextManagers() {
+    void captureSnapshot_withDebugLogging() {
+        Logger.getLogger(ContextSnapshot.class.getName()).setLevel(java.util.logging.Level.FINEST);
+
+        ContextSnapshot result = assertDoesNotThrow(ContextSnapshot::capture);
+
+        assertThat(result).isNotNull().hasToString("ContextSnapshot{size=0}");
+        assertThat(SERVICE_CACHE).doesNotContainKey(ContextManager.class);
+    }
+
+    @Test
+    void testClearAllContextManagers_withoutContextManagers() {
         Executable executable = ContextManager::clearAll;
         assertDoesNotThrow(executable);
     }
