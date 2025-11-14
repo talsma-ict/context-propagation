@@ -36,7 +36,21 @@ final class ContextSnapshotImpl implements ContextSnapshot {
         final long start = System.nanoTime();
         RuntimeException error = null;
         try {
-            return new ContextSnapshotImpl();
+            final List<ContextManager> managers = ServiceCache.cached(ContextManager.class); // Cached list is immutable
+            final Object[] values = new Object[managers.size()];
+            for (int i = 0; i < values.length; i++) {
+                values[i] = getActiveContextValue(managers.get(i));
+            }
+            ContextSnapshotImpl snapshot = new ContextSnapshotImpl(managers, values);
+            if (managers.isEmpty()) {
+                ServiceCache.clear();
+                if (SNAPSHOT_LOGGER.isLoggable(Level.FINER)) {
+                    final Thread currentThread = Thread.currentThread();
+                    SNAPSHOT_LOGGER.finer(snapshot + " was captured but no context managers were found! Thread="
+                            + currentThread.getName() + ", ContextClassLoader=" + currentThread.getContextClassLoader());
+                }
+            }
+            return snapshot;
         } catch (RuntimeException e) {
             error = e;
             SNAPSHOT_LOGGER.log(Level.FINEST, e, () -> "Error capturing ContextSnapshot from " + Thread.currentThread().getName() + ": " + e.getMessage());
@@ -47,17 +61,9 @@ final class ContextSnapshotImpl implements ContextSnapshot {
         }
     }
 
-    private ContextSnapshotImpl() {
-        managers = ServiceCache.cached(ContextManager.class); // Cached list is immutable
-        values = new Object[managers.size()];
-        for (int i = 0; i < values.length; i++) {
-            values[i] = getActiveContextValue(managers.get(i));
-        }
-        if (managers.isEmpty() && SNAPSHOT_LOGGER.isLoggable(Level.FINER)) {
-            final Thread currentThread = Thread.currentThread();
-            SNAPSHOT_LOGGER.finer(this + " was created but no context managers were found! Thread="
-                    + currentThread.getName() + ", ContextClassLoader=" + currentThread.getContextClassLoader());
-        }
+    private ContextSnapshotImpl(List<ContextManager> managers, Object[] values) {
+        this.managers = managers;
+        this.values = values;
     }
 
     public Reactivation reactivate() {
