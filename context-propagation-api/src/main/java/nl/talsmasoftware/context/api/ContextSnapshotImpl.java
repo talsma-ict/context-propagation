@@ -69,7 +69,7 @@ final class ContextSnapshotImpl implements ContextSnapshot, Serializable {
         }
     }
 
-    ContextSnapshotImpl(List<ContextManager> managers, Object[] values) {
+    private ContextSnapshotImpl(List<ContextManager> managers, Object[] values) {
         this.managers = managers;
         this.values = values;
     }
