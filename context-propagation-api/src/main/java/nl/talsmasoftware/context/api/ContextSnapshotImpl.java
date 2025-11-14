@@ -46,7 +46,7 @@ final class ContextSnapshotImpl implements ContextSnapshot {
                 ServiceCache.clear();
                 if (SNAPSHOT_LOGGER.isLoggable(Level.FINER)) {
                     final Thread currentThread = Thread.currentThread();
-                    SNAPSHOT_LOGGER.finer(snapshot + " was created but no context managers were found! Thread="
+                    SNAPSHOT_LOGGER.finer(snapshot + " was captured but no context managers were found! Thread="
                             + currentThread.getName() + ", ContextClassLoader=" + currentThread.getContextClassLoader());
                 }
             }
