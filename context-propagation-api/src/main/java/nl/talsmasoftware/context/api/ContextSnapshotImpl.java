@@ -28,6 +28,8 @@ final class ContextSnapshotImpl implements ContextSnapshot {
     private static final Logger SNAPSHOT_LOGGER = Logger.getLogger(ContextSnapshot.class.getName());
     private static final Logger MANAGER_LOGGER = Logger.getLogger(ContextManager.class.getName());
     private static final Logger TIMER_LOGGER = Logger.getLogger(ContextTimer.class.getName());
+    private static final Context NOOP_CONTEXT = () -> {
+    };
 
     private final List<ContextManager> managers;
     private final Object[] values;
@@ -164,7 +166,7 @@ final class ContextSnapshotImpl implements ContextSnapshot {
         } catch (RuntimeException e) {
             SNAPSHOT_LOGGER.log(Level.WARNING, e, () -> "Error obtaining active context from " + manager + " (in thread " + Thread.currentThread().getName() + ").");
             error = e;
-            return null;
+            return NOOP_CONTEXT;
         } finally {
             timed(System.nanoTime() - start, manager.getClass(), "getActiveContextValue", error);
         }
@@ -199,6 +201,9 @@ final class ContextSnapshotImpl implements ContextSnapshot {
      */
     @SuppressWarnings("unchecked") // We get the snapshotValue from the manager itself.
     private static Context reactivate(ContextManager contextManager, Object snapshotValue) {
+        if (snapshotValue == NOOP_CONTEXT) { // This means there was an error during capture.
+            return NOOP_CONTEXT;
+        }
         long start = System.nanoTime();
         RuntimeException error = null;
         try {
