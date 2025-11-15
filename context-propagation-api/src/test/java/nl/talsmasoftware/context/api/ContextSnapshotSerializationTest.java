@@ -129,9 +129,8 @@ class ContextSnapshotSerializationTest {
 
     @SuppressWarnings("unchecked")
     static <T> T deserialize(byte[] bytes) {
-        try (ByteArrayInputStream in = new ByteArrayInputStream(bytes);
-             ObjectInputStream ois = new ObjectInputStream(in)) {
-            return (T) ois.readObject();
+        try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
+            return (T) in.readObject();
         } catch (IOException | ClassNotFoundException e) {
             throw new AssertionError("Unexpected exception while deserializing object.", e);
         }
