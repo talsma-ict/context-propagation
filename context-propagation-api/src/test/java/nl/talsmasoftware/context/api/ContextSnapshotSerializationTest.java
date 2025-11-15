@@ -118,9 +118,9 @@ class ContextSnapshotSerializationTest {
     }
 
     static byte[] serialize(Object snapshot) {
-        try {
-            ByteArrayOutputStream buf = new ByteArrayOutputStream();
-            new ObjectOutputStream(buf).writeObject(snapshot);
+        try (ByteArrayOutputStream buf = new ByteArrayOutputStream();
+             ObjectOutputStream out = new ObjectOutputStream(buf)) {
+            out.writeObject(snapshot);
             return buf.toByteArray();
         } catch (IOException e) {
             throw new AssertionError("Unexpected exception while serializing " + snapshot, e);
@@ -129,8 +129,9 @@ class ContextSnapshotSerializationTest {
 
     @SuppressWarnings("unchecked")
     static <T> T deserialize(byte[] bytes) {
-        try {
-            return (T) new ObjectInputStream(new ByteArrayInputStream(bytes)).readObject();
+        try (ByteArrayInputStream in = new ByteArrayInputStream(bytes);
+             ObjectInputStream ois = new ObjectInputStream(in)) {
+            return (T) ois.readObject();
         } catch (IOException | ClassNotFoundException e) {
             throw new AssertionError("Unexpected exception while deserializing object.", e);
         }
