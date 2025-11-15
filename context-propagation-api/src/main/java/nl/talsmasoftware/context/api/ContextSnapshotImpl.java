@@ -254,47 +254,46 @@ final class ContextSnapshotImpl implements ContextSnapshot, Serializable {
     }
 
     private Object writeReplace() {
-        return new Serialized(managers, values);
+        Map<String, Serializable> toSerialize = new LinkedHashMap<>(managers.size());
+        for (int i = 0; i < managers.size(); i++) {
+            ContextManager manager = managers.get(i);
+            Object value = values[i];
+            if (value == null || value instanceof Serializable) {
+                toSerialize.put(manager.getClass().getName(), (Serializable) value);
+            } else {
+                SNAPSHOT_LOGGER.finest(() -> String.format("Skipping value from %s because it is not Serializable: %s", manager, value));
+            }
+        }
+        return new Serialized(toSerialize.keySet().toArray(new String[0]), toSerialize.values().toArray(new Serializable[0]));
     }
 
     private static final class Serialized implements Serializable {
         private static final long serialVersionUID = 1L;
         private final String[] managerNames;
-        private final Object[] values;
+        private final Serializable[] values;
 
-        Serialized(List<ContextManager> managers, Object... values) {
-            Map<String, Object> toSerialize = new LinkedHashMap<>(managers.size());
-            for (int i = 0; i < managers.size(); i++) {
-                if (i < values.length && canSerialize(values[i])) {
-                    toSerialize.put(managers.get(i).getClass().getName(), values[i]);
-                } // else log trace?
-            }
-            this.managerNames = toSerialize.keySet().toArray(new String[0]);
-            this.values = toSerialize.values().toArray();
+        private Serialized(String[] managerNames, Serializable[] values) {
+            this.managerNames = managerNames;
+            this.values = values;
         }
 
         private Object readResolve() {
+            if (managerNames.length != values.length) {
+                throw new IllegalStateException("Serialized ContextSnapshot has mismatched number of context managers and values.");
+            }
             Map<ContextManager, Object> deserialized = new LinkedHashMap<>(values.length);
             for (int i = 0; i < values.length; i++) {
-                ContextManager manager = findContextManager(i < managerNames.length ? managerNames[i] : null);
+                String managerName = managerNames[i];
+                Serializable value = values[i];
+                ContextManager manager = ServiceCache.findContextManager(managerName);
                 if (manager != null) {
-                    deserialized.put(manager, values[i]);
-                } // else log trace?
-            }
-            return new ContextSnapshotImpl(unmodifiableList(new ArrayList<>(deserialized.keySet())), deserialized.values().toArray());
-        }
-
-        private static boolean canSerialize(Object value) {
-            return value == null || value instanceof Serializable;
-        }
-
-        private static ContextManager findContextManager(String contextManagerClassName) {
-            for (ContextManager<?> manager : ServiceCache.cached(ContextManager.class)) {
-                if (manager.getClass().getName().equals(contextManagerClassName)) {
-                    return manager;
+                    deserialized.put(manager, value);
+                } else {
+                    SNAPSHOT_LOGGER.finest(() -> String.format("Cannot deserialize snapshot value from context manager %s: %s. " +
+                            "The context manager does not seem to be available in this environment.", managerName, value));
                 }
             }
-            return null;
+            return new ContextSnapshotImpl(unmodifiableList(new ArrayList<>(deserialized.keySet())), deserialized.values().toArray());
         }
     }
 }

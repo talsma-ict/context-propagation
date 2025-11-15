@@ -16,27 +16,39 @@
 package nl.talsmasoftware.context.api;
 
 import nl.talsmasoftware.context.dummy.DummyContextManager;
+import nl.talsmasoftware.context.dummy.ThrowingContextManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Isolated;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.lang.reflect.Constructor;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentMap;
 
+import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+@Isolated("This test manipulates the service cache.")
 class ContextSnapshotSerializationTest {
     DummyContextManager dummyManager = new DummyContextManager();
+    ThrowingContextManager throwingManager = new ThrowingContextManager();
+    ConcurrentMap<Class, List> cache = ServiceCacheTestUtil.getInternalCacheMap();
 
     @BeforeEach
     @AfterEach
     void clear() {
         dummyManager.clear();
+        ServiceCache.clear();
     }
 
     @Test
@@ -61,7 +73,51 @@ class ContextSnapshotSerializationTest {
         }
     }
 
-    static byte[] serialize(ContextSnapshot snapshot) {
+    @Test
+    void nonSerializableContextValuesAreSkipped() {
+        String dummyValue = "Dummy-" + UUID.randomUUID();
+        Object nonSerializable = new Object();
+        dummyManager.activate(dummyValue);
+        throwingManager.activate(nonSerializable);
+        ContextSnapshot snapshot = ContextSnapshot.capture();
+        ContextManager.clearAll();
+
+        ContextSnapshot deserialized = assertDoesNotThrow(() -> deserialize(serialize(snapshot)));
+        try (ContextSnapshot.Reactivation ignored = deserialized.reactivate()) {
+            assertThat(dummyManager.getActiveContextValue()).isEqualTo(dummyValue);
+            assertThat(throwingManager.getActiveContextValue()).isNull();
+        }
+    }
+
+    @Test
+    void missingContextManagerOnDeserializationIsSkipped() {
+        String dummyValue = "Dummy-" + UUID.randomUUID();
+        dummyManager.activate(dummyValue);
+        byte[] snapshot = serialize(ContextSnapshot.capture());
+        ContextManager.clearAll();
+
+        cache.put(ContextManager.class, emptyList());
+        ContextSnapshot deserialized = assertDoesNotThrow(() -> deserialize(snapshot));
+        try (ContextSnapshot.Reactivation ignored = deserialized.reactivate()) {
+            assertThat(dummyManager.getActiveContextValue()).isNull();
+        }
+
+        assertThatThrownBy(() -> deserialized.getCapturedValue(dummyManager))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void deserializingCorruptedDataIsCaught() {
+        byte[] serialized = createSerialized(
+                new String[]{DummyContextManager.class.getName(), ThrowingContextManager.class.getName()},
+                new Serializable[]{"Single value!"});
+
+        assertThatThrownBy(() -> deserialize(serialized))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Serialized ContextSnapshot has mismatched number of context managers and values.");
+    }
+
+    static byte[] serialize(Object snapshot) {
         try {
             ByteArrayOutputStream buf = new ByteArrayOutputStream();
             new ObjectOutputStream(buf).writeObject(snapshot);
@@ -77,6 +133,17 @@ class ContextSnapshotSerializationTest {
             return (T) new ObjectInputStream(new ByteArrayInputStream(bytes)).readObject();
         } catch (IOException | ClassNotFoundException e) {
             throw new AssertionError("Unexpected exception while deserializing object.", e);
+        }
+    }
+
+    static byte[] createSerialized(String[] managerNames, Serializable[] values) {
+        try {
+            Constructor<?> constructor = Class.forName(ContextSnapshotImpl.class.getName() + "$Serialized")
+                    .getDeclaredConstructor(String[].class, Serializable[].class);
+            constructor.setAccessible(true);
+            return serialize(constructor.newInstance(managerNames, values));
+        } catch (ReflectiveOperationException e) {
+            throw new AssertionError("Unexpected exception while creating serialized object.", e);
         }
     }
 }

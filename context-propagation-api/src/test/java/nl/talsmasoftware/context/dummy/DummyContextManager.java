@@ -48,7 +48,7 @@ public class DummyContextManager implements ContextManager<String> {
 
     @Override
     public boolean equals(Object other) {
-        return other instanceof DummyContextManager;
+        return this == other || other instanceof DummyContextManager;
     }
 
     @Override

@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @author Sjoerd Talsma
  */
-public class ThrowingContextManager implements ContextManager<String> {
+public class ThrowingContextManager implements ContextManager<Object> {
     public static RuntimeException inConstructor = null, onActivate = null, onGet = null, onClose = null, onClear = null;
 
     public ThrowingContextManager() {
@@ -37,7 +37,7 @@ public class ThrowingContextManager implements ContextManager<String> {
     }
 
     @Override
-    public Context activate(String value) {
+    public Context activate(Object value) {
         if (onActivate != null) try {
             throw onActivate;
         } finally {
@@ -47,7 +47,7 @@ public class ThrowingContextManager implements ContextManager<String> {
     }
 
     @Override
-    public String getActiveContextValue() {
+    public Object getActiveContextValue() {
         if (onGet != null) try {
             throw onGet;
         } finally {
@@ -73,7 +73,7 @@ public class ThrowingContextManager implements ContextManager<String> {
 
     @Override
     public boolean equals(Object other) {
-        return other instanceof ThrowingContextManager;
+        return this == other || other instanceof ThrowingContextManager;
     }
 
     @Override
@@ -85,10 +85,10 @@ public class ThrowingContextManager implements ContextManager<String> {
         private static final ThreadLocal<Ctx> STORAGE = new ThreadLocal<>();
 
         private final Ctx parent;
-        private final String value;
+        private final Object value;
         private final AtomicBoolean closed;
 
-        private Ctx(String newValue) {
+        private Ctx(Object newValue) {
             parent = STORAGE.get();
             value = newValue;
             closed = new AtomicBoolean(false);
@@ -115,7 +115,7 @@ public class ThrowingContextManager implements ContextManager<String> {
             }
         }
 
-        private static String currentValue() {
+        private static Object currentValue() {
             Ctx current = STORAGE.get();
             return current != null ? current.value : null;
         }

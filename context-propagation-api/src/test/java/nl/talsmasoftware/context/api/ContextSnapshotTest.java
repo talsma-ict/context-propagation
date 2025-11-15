@@ -240,7 +240,7 @@ class ContextSnapshotTest {
         ContextSnapshot snapshot = assertDoesNotThrow(ContextSnapshot::capture);
         assertThat(snapshot).isNotNull();
 
-        String result = assertDoesNotThrow(() -> snapshot.getCapturedValue(throwingManager));
+        Object result = assertDoesNotThrow(() -> snapshot.getCapturedValue(throwingManager));
         assertThat(result).isNull();
     }
 
