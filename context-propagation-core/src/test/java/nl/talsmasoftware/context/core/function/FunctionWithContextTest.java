@@ -169,6 +169,19 @@ class FunctionWithContextTest {
                 .hasMessageContaining("after function <null>");
     }
 
+    @Test
+    void testEqualsHashCodeIncludesConsumer() {
+        FunctionWithContext<Object, Object> subject = new FunctionWithContext<>(snapshot, Function.identity());
+
+        assertThat(subject)
+                .hasSameHashCodeAs(new FunctionWithContext<>(snapshot, Function.identity()))
+                .isEqualTo(new FunctionWithContext<>(snapshot, Function.identity()))
+                .doesNotHaveSameHashCodeAs(new FunctionWithContext<>(snapshot, Function.identity(), s -> {}))
+                .isNotEqualTo(new FunctionWithContext<>(snapshot, Function.identity(), s -> {}))
+                .isNotEqualTo(new FunctionWithContext<>(ContextSnapshot.capture(), Function.identity()))
+                .isEqualTo(subject);
+    }
+
     static <T, R> Function<T, R> throwing(RuntimeException rte) {
         return input -> {
             throw rte;

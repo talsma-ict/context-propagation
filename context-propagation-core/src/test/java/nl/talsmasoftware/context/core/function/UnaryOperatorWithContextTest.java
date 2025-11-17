@@ -33,47 +33,44 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Sjoerd Talsma
- */
-public class UnaryOperatorWithContextTest {
+class UnaryOperatorWithContextTest {
 
-    private ContextSnapshot snapshot;
-    private Context context;
+    ContextSnapshot snapshot;
+    Context context;
 
     @BeforeEach
     @AfterEach
-    public void clearDummyContext() {
+    void clearDummyContext() {
         DummyContextManager.clearAllContexts();
     }
 
     @BeforeEach
     @SuppressWarnings("unchecked")
-    public void setUp() {
+    void setUp() {
         snapshot = mock(ContextSnapshot.class);
         context = mock(Context.class);
     }
 
     @AfterEach
-    public void verifyMocks() {
+    void verifyMocks() {
         verifyNoMoreInteractions(snapshot, context);
     }
 
     @Test
-    public void testApply() {
+    void testApply() {
         new UnaryOperatorWithContext<>(snapshot, input -> input).apply("input");
         verify(snapshot).reactivate();
     }
 
     @Test
-    public void testApplyWithoutSnapshot() {
+    void testApplyWithoutSnapshot() {
         assertThatThrownBy(() -> new UnaryOperatorWithContext<>(null, input -> input))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("No context snapshot provided");
     }
 
     @Test
-    public void testApplyWithoutSnapshotSupplier() {
+    void testApplyWithoutSnapshotSupplier() {
         assertThatThrownBy(() -> new UnaryOperatorWithContext<>((Supplier<ContextSnapshot>) null, input -> input, ctx -> {
         }))
                 .isInstanceOf(RuntimeException.class)
@@ -81,7 +78,7 @@ public class UnaryOperatorWithContextTest {
     }
 
     @Test
-    public void testApplyWithSnapshotConsumer() throws InterruptedException {
+    void testApplyWithSnapshotConsumer() throws InterruptedException {
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
         DummyContext.setCurrentValue("Old value");
 
@@ -90,7 +87,8 @@ public class UnaryOperatorWithContextTest {
                     DummyContext.setCurrentValue("New value");
                     return input;
                 },
-                snapshot -> snapshotHolder[0] = snapshot).apply("input"));
+                s -> snapshotHolder[0] = s)
+                .apply("input"));
         t.start();
         t.join();
 
@@ -104,7 +102,7 @@ public class UnaryOperatorWithContextTest {
     }
 
     @Test
-    public void testCloseReactivatedContextInCaseOfException() {
+    void testCloseReactivatedContextInCaseOfException() {
         ContextSnapshot.Reactivation reactivation = mock(ContextSnapshot.Reactivation.class);
         when(snapshot.reactivate()).thenReturn(reactivation);
         final RuntimeException expectedException = new RuntimeException("Whoops!");
@@ -116,7 +114,7 @@ public class UnaryOperatorWithContextTest {
         verify(reactivation).close();
     }
 
-    private static <T> UnaryOperator<T> throwing(RuntimeException rte) {
+    static <T> UnaryOperator<T> throwing(RuntimeException rte) {
         return input -> {
             throw rte;
         };

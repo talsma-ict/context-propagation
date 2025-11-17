@@ -43,7 +43,7 @@ class ServiceCacheTest {
     @Test
     void serviceCacheIsUtilityClass() throws ReflectiveOperationException {
         Constructor<ServiceCache> constructor = ServiceCache.class.getDeclaredConstructor();
-        assertThat(constructor.isAccessible()).isFalse();
+        assertThat(constructor.canAccess(null)).isFalse();
         constructor.setAccessible(true);
         assertThatThrownBy(constructor::newInstance)
                 .isInstanceOf(InvocationTargetException.class)

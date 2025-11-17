@@ -70,7 +70,7 @@ public class ThrowingContextManager implements ContextManager<String> {
         return getClass().getSimpleName();
     }
 
-    private final static class Ctx extends AbstractThreadLocalContext<String> {
+    private static final class Ctx extends AbstractThreadLocalContext<String> {
         private Ctx(String newValue) {
             super(newValue);
         }

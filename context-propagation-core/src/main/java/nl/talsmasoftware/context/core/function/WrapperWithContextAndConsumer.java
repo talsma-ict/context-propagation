@@ -18,6 +18,7 @@ package nl.talsmasoftware.context.core.function;
 import nl.talsmasoftware.context.api.ContextSnapshot;
 import nl.talsmasoftware.context.core.delegation.WrapperWithContext;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -84,5 +85,15 @@ abstract class WrapperWithContextAndConsumer<T> extends WrapperWithContext<T> {
             logger.log(Level.FINEST, "Captured context snapshot after delegation: {0}", resultSnapshot);
             contextSnapshotConsumer.accept(resultSnapshot);
         }
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 * super.hashCode() + Objects.hashCode(contextSnapshotConsumer);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return this == other || (super.equals(other) && Objects.equals(contextSnapshotConsumer, ((WrapperWithContextAndConsumer<?>) other).contextSnapshotConsumer));
     }
 }

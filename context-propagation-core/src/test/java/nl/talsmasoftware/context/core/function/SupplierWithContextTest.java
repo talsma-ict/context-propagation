@@ -35,44 +35,41 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-/**
- * @author Sjoerd Talsma
- */
-public class SupplierWithContextTest {
+class SupplierWithContextTest {
 
-    private ExecutorService unawareThreadpool;
-    private ContextSnapshot snapshot;
-    private Context context;
+    ExecutorService unawareThreadpool;
+    ContextSnapshot snapshot;
+    Context context;
 
     @BeforeEach
     @AfterEach
-    public void clearDummyContext() {
+    void clearDummyContext() {
         DummyContextManager.clearAllContexts();
     }
 
     @BeforeEach
     @SuppressWarnings("unchecked")
-    public void setUp() {
+    void setUp() {
         unawareThreadpool = Executors.newCachedThreadPool();
         snapshot = mock(ContextSnapshot.class);
         context = mock(Context.class);
     }
 
     @AfterEach
-    public void tearDown() throws InterruptedException {
+    void tearDown() throws InterruptedException {
         verifyNoMoreInteractions(snapshot, context);
         unawareThreadpool.shutdown();
         unawareThreadpool.awaitTermination(5, TimeUnit.SECONDS);
     }
 
     @Test
-    public void testGetNull() {
+    void testGetNull() {
         assertThat(new SupplierWithContext<>(snapshot, () -> null).get()).isNull();
         verify(snapshot).reactivate();
     }
 
     @Test
-    public void testGetWithSnapshotConsumer() throws ExecutionException, InterruptedException {
+    void testGetWithSnapshotConsumer() throws ExecutionException, InterruptedException {
         DummyContext.setCurrentValue("Old value");
         final ContextSnapshot[] snapshotHolder = new ContextSnapshot[1];
 
