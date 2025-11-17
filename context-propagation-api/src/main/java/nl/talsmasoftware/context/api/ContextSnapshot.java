@@ -36,6 +36,12 @@ import java.util.concurrent.Callable;
  * making sure the reactivation is properly closed again.
  *
  * @author Sjoerd Talsma
+ * @implNote Context snapshots are {@link java.io.Serializable Serializable} since version 2.0.4
+ * and will include all Serializable values (including {@code null}s) that were captured.
+ * Captured values that are not Serializable are skipped and therefore <strong>not</strong> present
+ * in the deserialized context snapshot.
+ * If, upon deserialization, a given context manager is no longer available,
+ * its captured value is also excluded from the deserialized snapshot.
  * @since 2.0.0
  */
 public interface ContextSnapshot {
