@@ -23,6 +23,7 @@ import org.assertj.core.api.StringAssert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.ThrowingSupplier;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -1282,7 +1283,7 @@ class ContextAwareCompletableFutureTest {
             });
 
             // verify
-            assertDoesNotThrow(() -> result.get());
+            assertDoesNotThrow(get(result));
         }
     }
 
@@ -1301,7 +1302,7 @@ class ContextAwareCompletableFutureTest {
             });
 
             // verify
-            assertDoesNotThrow(() -> result.get());
+            assertDoesNotThrow(get(result));
         }
     }
 
@@ -1320,7 +1321,7 @@ class ContextAwareCompletableFutureTest {
             }, contextUnawareThreadpool);
 
             // verify
-            assertDoesNotThrow(() -> result.get());
+            assertDoesNotThrow(get(result));
         }
     }
 
@@ -1336,7 +1337,7 @@ class ContextAwareCompletableFutureTest {
             Future<Void> result = future1.takeNewSnapshot(takeNewSnapshot).runAfterEither(future2, () -> assertContext("Parent"));
 
             // verify
-            assertDoesNotThrow(() -> result.get());
+            assertDoesNotThrow(get(result));
         }
     }
 
@@ -1352,7 +1353,7 @@ class ContextAwareCompletableFutureTest {
             Future<Void> result = future1.takeNewSnapshot(takeNewSnapshot).runAfterEitherAsync(future2, () -> assertContext("Parent"));
 
             // verify
-            assertDoesNotThrow(() -> result.get());
+            assertDoesNotThrow(get(result));
         }
     }
 
@@ -1368,7 +1369,7 @@ class ContextAwareCompletableFutureTest {
             Future<Void> result = future1.takeNewSnapshot(takeNewSnapshot).runAfterEitherAsync(future2, () -> assertContext("Parent"), contextUnawareThreadpool);
 
             // verify
-            assertDoesNotThrow(() -> result.get());
+            assertDoesNotThrow(get(result));
         }
     }
 
@@ -1575,5 +1576,9 @@ class ContextAwareCompletableFutureTest {
             Thread.currentThread().interrupt();
             throw new AssertionError("Interrupted waiting for latch.", ie);
         }
+    }
+
+    static <T> ThrowingSupplier<T> get(Future<T> future) {
+        return future::get;
     }
 }
