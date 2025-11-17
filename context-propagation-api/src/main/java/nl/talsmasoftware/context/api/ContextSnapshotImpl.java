@@ -15,24 +15,30 @@
  */
 package nl.talsmasoftware.context.api;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static java.util.Collections.unmodifiableList;
 
 @SuppressWarnings({
         "rawtypes",  // We deal with all context manager types here.
         "java:S3416" // As a 'hidden' class within the api, we apply log operations to the relevant interfaces.
 })
-final class ContextSnapshotImpl implements ContextSnapshot {
+final class ContextSnapshotImpl implements ContextSnapshot, Serializable {
     private static final Logger SNAPSHOT_LOGGER = Logger.getLogger(ContextSnapshot.class.getName());
     private static final Logger MANAGER_LOGGER = Logger.getLogger(ContextManager.class.getName());
     private static final Logger TIMER_LOGGER = Logger.getLogger(ContextTimer.class.getName());
     private static final Context NOOP_CONTEXT = () -> {
     };
 
-    private final List<ContextManager> managers;
-    private final Object[] values;
+    private final transient List<ContextManager> managers;
+    private final transient Object[] values;
 
     static ContextSnapshot capture() {
         final long start = System.nanoTime();
@@ -244,6 +250,50 @@ final class ContextSnapshotImpl implements ContextSnapshot {
         }
         if (TIMER_LOGGER.isLoggable(Level.FINEST)) {
             TIMER_LOGGER.log(Level.FINEST, "{0}.{1}: {2,number}ns", new Object[]{type.getName(), method, durationNanos});
+        }
+    }
+
+    private Object writeReplace() {
+        Map<String, Serializable> toSerialize = new LinkedHashMap<>(managers.size());
+        for (int i = 0; i < managers.size(); i++) {
+            ContextManager manager = managers.get(i);
+            Object value = values[i];
+            if (value == null || value instanceof Serializable) {
+                toSerialize.put(manager.getClass().getName(), (Serializable) value);
+            } else {
+                SNAPSHOT_LOGGER.finest(() -> String.format("Skipping value from %s because it is not Serializable: %s", manager, value));
+            }
+        }
+        return new Serialized(toSerialize.keySet().toArray(new String[0]), toSerialize.values().toArray(new Serializable[0]));
+    }
+
+    private static final class Serialized implements Serializable {
+        private static final long serialVersionUID = 1L;
+        private final String[] managerNames;
+        private final Serializable[] values;
+
+        private Serialized(String[] managerNames, Serializable[] values) {
+            this.managerNames = managerNames;
+            this.values = values;
+        }
+
+        private Object readResolve() {
+            if (managerNames.length != values.length) {
+                throw new IllegalStateException("Serialized ContextSnapshot has mismatched number of context managers and values.");
+            }
+            Map<ContextManager, Object> deserialized = new LinkedHashMap<>(values.length);
+            for (int i = 0; i < values.length; i++) {
+                String managerName = managerNames[i];
+                Serializable value = values[i];
+                ContextManager manager = ServiceCache.findContextManager(managerName);
+                if (manager != null) {
+                    deserialized.put(manager, value);
+                } else {
+                    SNAPSHOT_LOGGER.finest(() -> String.format("Cannot deserialize snapshot value from context manager %s: %s. " +
+                            "The context manager does not seem to be available in this environment.", managerName, value));
+                }
+            }
+            return new ContextSnapshotImpl(unmodifiableList(new ArrayList<>(deserialized.keySet())), deserialized.values().toArray());
         }
     }
 }

@@ -37,9 +37,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
-/**
- * @author Sjoerd Talsma
- */
 class ContextSnapshotTest {
     DummyContextManager dummyManager = new DummyContextManager();
 
@@ -243,7 +240,7 @@ class ContextSnapshotTest {
         ContextSnapshot snapshot = assertDoesNotThrow(ContextSnapshot::capture);
         assertThat(snapshot).isNotNull();
 
-        String result = assertDoesNotThrow(() -> snapshot.getCapturedValue(throwingManager));
+        Object result = assertDoesNotThrow(() -> snapshot.getCapturedValue(throwingManager));
         assertThat(result).isNull();
     }
 
