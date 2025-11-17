@@ -76,6 +76,7 @@ final class ServiceCache {
      * @param contextManagerClassName The context manager class name to find.
      * @return The found context manager, or {@code null} if none was found.
      */
+    @SuppressWarnings("rawtypes")
     static ContextManager findContextManager(String contextManagerClassName) {
         for (ContextManager<?> manager : ServiceCache.cached(ContextManager.class)) {
             if (manager.getClass().getName().equals(contextManagerClassName)) {
