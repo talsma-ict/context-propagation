@@ -84,8 +84,7 @@ public class SpringSecurityContextManager implements ContextManager<Authenticati
     }
 
     private static Authentication currentAuthentication() {
-        SecurityContext context = SecurityContextHolder.getContext();
-        return context != null ? context.getAuthentication() : null;
+        return SecurityContextHolder.getContext().getAuthentication();
     }
 
     /**
