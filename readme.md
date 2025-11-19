@@ -11,7 +11,7 @@
 Library to capture a snapshot of one or more `ThreadLocal` values and reactivate them in another thread.
 
 The library automatically detects supported `ThreadLocal` values to be captured.
-It uses a `ContextManager` Service Provider Interface (SPI) for this using the Java [ServiceLoader].
+It defines a `ContextManager` Service Provider Interface (SPI) that can be provided via the Java [ServiceLoader].
 
 The core module provides several [utility classes](#utility-classes) to safely capture a context snapshot
 in the calling thread and reactivating it in another thread and ensuring proper
