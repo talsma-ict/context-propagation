@@ -92,7 +92,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <micrometer.version>1.16.0</micrometer.version>
+        <micrometer.version>1.16.1</micrometer.version>
         <metrics.version>4.2.37</metrics.version>
         <opentelemetry.version>1.57.0</opentelemetry.version>
         <spring-security.version>7.0.0</spring-security.version>
