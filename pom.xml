@@ -95,7 +95,7 @@
         <micrometer.version>1.16.1</micrometer.version>
         <metrics.version>4.2.37</metrics.version>
         <opentelemetry.version>1.57.0</opentelemetry.version>
-        <spring-security.version>7.0.0</spring-security.version>
+        <spring-security.version>7.0.2</spring-security.version>
         <servlet-api.version>4.0.1</servlet-api.version>
         <slf4j.version>2.0.17</slf4j.version>
         <log4j2.version>2.25.2</log4j2.version>
