@@ -101,7 +101,7 @@
         <log4j2.version>2.26.1</log4j2.version>
 
         <junit.version>6.1.1</junit.version>
-        <logback.version>1.5.37</logback.version>
+        <logback.version>1.5.38</logback.version>
         <mockito.version>5.23.0</mockito.version>
         <assertj.version>3.27.7</assertj.version>
 
