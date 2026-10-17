@@ -69,7 +69,7 @@
         <developer>
             <id>sjoerd</id>
             <name>Sjoerd Talsma</name>
-            <email>sjoerd@talsma-ict.nl</email>
+            <email>sjoerdtalsma@users.noreply.github.com</email>
             <url>https://github.com/sjoerdtalsma</url>
         </developer>
     </developers>
@@ -105,7 +105,7 @@
         <mockito.version>5.24.0</mockito.version>
         <assertj.version>3.27.7</assertj.version>
 
-        <umldoclet.version>2.2.4</umldoclet.version>
+        <umldoclet.version>2.3.2</umldoclet.version>
     </properties>
 
     <build>
@@ -159,8 +159,7 @@
                         -Xshare:off
                     </argLine>
                     <systemPropertyVariables>
-                        <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties
-                        </java.util.logging.config.file>
+                        <java.util.logging.config.file>${project.build.testOutputDirectory}/logging.properties</java.util.logging.config.file>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -370,6 +369,11 @@
                     <version>3.2.8</version>
                 </plugin>
                 <plugin>
+                    <groupId>org.sonatype.central</groupId>
+                    <artifactId>central-publishing-maven-plugin</artifactId>
+                    <version>0.12.0</version>
+                </plugin>
+                <plugin>
                     <groupId>com.mycila</groupId>
                     <artifactId>license-maven-plugin</artifactId>
                     <version>5.1.2</version>
@@ -380,11 +384,6 @@
                             <version>5.1.2</version>
                         </dependency>
                     </dependencies>
-                </plugin>
-                <plugin>
-                    <groupId>org.sonatype.central</groupId>
-                    <artifactId>central-publishing-maven-plugin</artifactId>
-                    <version>0.11.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -454,9 +453,8 @@
 
     <repositories>
         <repository>
-            <id>snapshots</id>
-            <name>OSS Sonatype Snapshot Repository</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>central-snapshots</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -516,7 +514,6 @@
                         <configuration>
                             <publishingServerId>central</publishingServerId>
                             <autoPublish>true</autoPublish>
-                            <!--<waitUntil>published</waitUntil>-->
                         </configuration>
                     </plugin>
                 </plugins>
@@ -568,10 +565,11 @@
                         <artifactId>license-maven-plugin</artifactId>
                         <executions>
                             <execution>
+                                <id>check-license</id>
+                                <phase>compile</phase>
                                 <goals>
                                     <goal>check</goal>
                                 </goals>
-                                <phase>compile</phase>
                             </execution>
                         </executions>
                         <configuration>
@@ -606,4 +604,5 @@
             </build>
         </profile>
     </profiles>
+
 </project>
